@@ -36,7 +36,36 @@ class UsuarioController extends Controller
         Usuario::create($data);
 
         return redirect()
-            ->route('usuarios.registroUsuario')
-            ->with('success', 'Usuario registrado correctamente.');
+            ->route('usuarios.inicioSesion') // Redirigir a la página de inicio de sesión
+            ->with('success', 'Usuario registrado correctamente. Ahoora puedes iniciar sesión. ');
     }
+        public function inicioSesion()
+    {
+        return view('usuarios.inicioSesion'); // Vista del formulario de login
+    }
+
+    public function autenticar(Request $request)
+    {
+        $request->validate([
+            'correo' => 'required|email',
+            'contrasena' => 'required|string',
+        ]);
+
+        $usuario = Usuario::where('correo', $request->correo)->first();
+
+        if ($usuario && Hash::check($request->contrasena, $usuario->contrasena)) {
+            // Iniciar sesión
+            session(['usuario_id' => $usuario->id, 'usuario_nombre' => $usuario->primer_nombre]);
+            return redirect()->route('dashboard')->with('success', '¡Bienvenido, ' . $usuario->primer_nombre . '!');
+        } else {
+            return back()->withErrors(['correo' => 'Correo o contraseña incorrectos'])->withInput();
+        }
+    }
+
+    public function cerrarSesion()
+    {
+        session()->flush(); // Limpiar la sesión
+        return redirect()->route('usuarios.inicioSesion')->with('success', 'Sesión cerrada correctamente.');
+    }
+
 }
