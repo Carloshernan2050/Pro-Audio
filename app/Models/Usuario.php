@@ -10,20 +10,17 @@ class Usuario extends Model
     use HasFactory;
 
     protected $table = 'personas';
-    public $timestamps = false; 
 
     protected $fillable = [
-    'primer_nombre',
-    'segundo_nombre',
-    'primer_apellido',
-    'segundo_apellido',
-    'correo',
-    'telefono',
-    'direccion',
-    'fecha_registro',
-    'estado'
+        'primer_nombre',
+        'segundo_nombre',
+        'primer_apellido',
+        'segundo_apellido',
+        'correo',
+        'telefono',
+        'direccion',
+        'contrasena',
+        'fecha_registro',
+        'estado'
     ];
-
-
 }
-

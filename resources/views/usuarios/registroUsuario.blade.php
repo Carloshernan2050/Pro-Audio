@@ -1,19 +1,17 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Usuario</title>
+    <title>Registro de Usuario</title>
 </head>
 <body>
-    <h1>Registrar Usuario</h1>
+    <h1>Registro de Usuario</h1>
 
-    <!-- Mostrar mensajes de éxito -->
+    {{-- Mensaje de éxito --}}
     @if(session('success'))
         <p style="color: green;">{{ session('success') }}</p>
     @endif
 
-    <!-- Mostrar errores de validación -->
+    {{-- Mostrar errores de validación --}}
     @if ($errors->any())
         <div style="color: red;">
             <ul>
@@ -26,17 +24,16 @@
 
     <form action="{{ route('usuarios.store') }}" method="POST">
         @csrf
-
-        <label>Primer nombre:</label>
+        <label>Primer Nombre:</label>
         <input type="text" name="primer_nombre" value="{{ old('primer_nombre') }}" required><br>
 
-        <label>Segundo nombre:</label>
+        <label>Segundo Nombre:</label>
         <input type="text" name="segundo_nombre" value="{{ old('segundo_nombre') }}"><br>
 
-        <label>Primer apellido:</label>
+        <label>Primer Apellido:</label>
         <input type="text" name="primer_apellido" value="{{ old('primer_apellido') }}" required><br>
 
-        <label>Segundo apellido:</label>
+        <label>Segundo Apellido:</label>
         <input type="text" name="segundo_apellido" value="{{ old('segundo_apellido') }}"><br>
 
         <label>Correo:</label>
@@ -48,7 +45,17 @@
         <label>Dirección:</label>
         <input type="text" name="direccion" value="{{ old('direccion') }}"><br>
 
-        <button type="submit">Guardar</button>
+        <div>
+            <label>Contraseña:</label>
+            <input type="password" name="contrasena" required>
+        </div>
+
+        <div>
+            <label>Confirmar contraseña:</label>
+            <input type="password" name="contrasena_confirmation" required>
+        </div>
+
+        <button type="submit">Registrar</button>
     </form>
 </body>
 </html>

@@ -20,9 +20,12 @@ return new class extends Migration
             $table->string('correo', 150);
             $table->string('telefono', 20);
             $table->string('direccion', 200)->nullable();
+            $table->string('contrasena');
             $table->dateTime('fecha_registro');
             $table->boolean('estado');
+            $table->timestamps(); // <--- Esto agrega created_at y updated_at
         });
+
     }
 
     /**
