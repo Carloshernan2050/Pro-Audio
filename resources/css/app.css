@@ -1,11 +1,134 @@
-@import 'tailwindcss';
+/* resources/css/app.css */
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+body {
+    margin: 0;
+    font-family: sans-serif;
+    overflow-x: hidden; /* Esto evita la barra de desplazamiento horizontal */
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+.background-registro {
+    background-color: #000;
+    /* La ruta de la imagen es más segura sin /public */
+    background-image: url('/public/images/img_principal.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: right center;
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    /* Centramos el contenido por defecto para que sea visible en cualquier pantalla */
+    justify-content: center;
+    align-items: center;
+}
+
+.form-container {
+    background-color: #e91c1c;
+    padding: 30px; /* Reducimos el padding para pantallas más pequeñas */
+    width: 90%; /* Usamos un ancho relativo para que se adapte a móviles */
+    max-width: 600px; /* Definimos un ancho máximo para que no se vea muy grande en el escritorio */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    box-shadow: 5px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Usamos un media query para ajustar el diseño en pantallas más grandes */
+@media (min-width: 768px) {
+    .background-registro {
+        justify-content: flex-start; /* Vuelve a la alineación a la izquierda */
+    }
+    .form-container {
+        width: 50vw;
+        padding: 50px;
+        align-items: center;
+    }
+}
+
+.titulo-formulario {
+    font-size: 2.5rem; /* Ajustamos el tamaño de la fuente para que quepa en móviles */
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.grupo-flex {
+    display: flex;
+    flex-direction: column; /* Mostramos los campos en columna en pantallas pequeñas */
+    gap: 15px; /* Reducimos el espacio entre los campos */
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .grupo-flex {
+        flex-direction: row; /* Volvemos a la fila en pantallas grandes */
+        gap: 28px;
+    }
+}
+
+.input-grupo {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.input-grupo label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-grupo input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+}
+
+.boton-registro {
+    background-color: black;
+    color: white;
+    font-weight: bold;
+    padding: 15px 36px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.boton-registro:hover {
+    background-color: #333;
+}
+
+.enlace-login {
+    color: white;
+    text-decoration: none;
+    margin-top: 20px;
+}
+
+.enlace-login:hover {
+    text-decoration: underline;
+}
+
+.mensaje-exito {
+    color: rgb(255, 255, 255);
+    text-align: center;
+}
+
+.errores-validacion {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.errores-validacion ul {
+    list-style-type: none;
+    padding: 0;
 }
