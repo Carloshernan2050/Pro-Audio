@@ -37,7 +37,7 @@ class UsuarioController extends Controller
 
         return redirect()
             ->route('usuarios.inicioSesion') // Redirigir a la página de inicio de sesión
-            ->with('success', 'Usuario registrado correctamente. Ahoora puedes iniciar sesión. ');
+            ->with('success', 'Usuario registrado correctamente. Ahora puedes iniciar sesión. ');
     }
         public function inicioSesion()
     {
