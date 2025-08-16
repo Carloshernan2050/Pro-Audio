@@ -68,3 +68,5 @@ Route::get('/usuarios/ajustes', function () {
 Route::get('/usuarios/chatbot', function () {
     return view('usuarios.chatbot');
 })->name('usuarios.chatbot');
+
+Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
