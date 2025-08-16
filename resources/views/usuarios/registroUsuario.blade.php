@@ -56,6 +56,7 @@
         </div>
 
         <button type="submit">Registrar</button>
+        <a href="{{ route('usuarios.inicioSesion') }}" class="btn btn-primary">Iniciar Sesión</a>
     </form>
 </body>
 </html>
