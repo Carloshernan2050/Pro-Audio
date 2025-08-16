@@ -68,4 +68,17 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.inicioSesion')->with('success', 'Sesión cerrada correctamente.');
     }
 
+    public function perfil()
+{
+    // Obtiene el ID guardado en la sesión al iniciar sesión
+    $usuarioId = session('usuario_id');
+
+    // Busca al usuario
+    $usuario = Usuario::find($usuarioId);
+
+    // Envía los datos a la vista
+    return view('usuarios.perfil', compact('usuario'));
+}
+
+
 }
