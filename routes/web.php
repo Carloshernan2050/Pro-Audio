@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\ServiciosController;
 
 // Página principal -> redirige a registro
 Route::get('/', function () {
@@ -70,3 +71,7 @@ Route::get('/usuarios/chatbot', function () {
 })->name('usuarios.chatbot');
 
 Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
+
+
+
+Route::resource('servicios', ServiciosController::class);
