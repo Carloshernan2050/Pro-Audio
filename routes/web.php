@@ -28,3 +28,43 @@ Route::get('/dashboard', function () {
         'usuario_nombre' => session('usuario_nombre')
     ]);
 })->name('dashboard');
+
+//dashboard
+Route::get('/usuarios/dashboard', function () {
+    return redirect()->route('dashboard');
+})->name('usuarios.dashboard');
+
+// Perfil
+Route::get('/usuarios/perfil', function () {
+    return view('usuarios.perfil');
+})->name('usuarios.perfil');
+
+// Sonido
+Route::get('/usuarios/sonido', function () {
+    return view('usuarios.sonido');
+})->name('usuarios.sonido');
+
+// Perifoneo
+Route::get('/usuarios/perifoneo', function () {
+    return view('usuarios.perifoneo');
+})->name('usuarios.perifoneo');
+
+// Eventos
+Route::get('/usuarios/evento', function () {
+    return view('usuarios.evento');
+})->name('usuarios.evento');
+
+// Calendario
+Route::get('/usuarios/calendario', function () {
+    return view('usuarios.calendario');
+})->name('usuarios.calendario');
+
+// Ajustes
+Route::get('/usuarios/ajustes', function () {
+    return view('usuarios.ajustes');
+})->name('usuarios.ajustes');
+
+// Chatbot
+Route::get('/usuarios/chatbot', function () {
+    return view('usuarios.chatbot');
+})->name('usuarios.chatbot');

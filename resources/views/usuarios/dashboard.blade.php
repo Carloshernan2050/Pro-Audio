@@ -22,14 +22,14 @@
         <!-- SIDEBAR IZQUIERDO -->
         <div class="col-md-3 col-lg-2 sidebar p-3">
             <h5 class="mb-4">Menú</h5>
-            <a href="#" class="btn btn-outline-primary w-100">Inicio</a>
-            <a href="#" class="btn btn-outline-primary w-100">Perfil</a>
-            <a href="#" class="btn btn-outline-primary w-100">Sonido</a>
-            <a href="#" class="btn btn-outline-primary w-100">Perifoneo</a>
-            <a href="#" class="btn btn-outline-primary w-100">Eventos</a>
-            <a href="#" class="btn btn-outline-primary w-100">Calendario</a>
-            <a href="#" class="btn btn-outline-primary w-100">Ajustes</a>
-            <a href="#" class="btn btn-outline-primary w-100">Chatbot</a>
+            <a href="{{ route('usuarios.dashboard') }}" class="btn btn-outline-primary w-100">Inicio</a>
+            <a href="{{ route('usuarios.perfil') }}" class="btn btn-outline-primary w-100">Perfil</a>
+            <a href="{{ route('usuarios.sonido') }}" class="btn btn-outline-primary w-100">Sonido</a>
+            <a href="{{ route('usuarios.perifoneo') }}" class="btn btn-outline-primary w-100">Perifoneo</a>
+            <a href="{{ route('usuarios.evento') }}" class="btn btn-outline-primary w-100">Eventos</a>
+            <a href="{{ route('usuarios.calendario') }}" class="btn btn-outline-primary w-100">Calendario</a>
+            <a href="{{ route('usuarios.ajustes') }}" class="btn btn-outline-primary w-100">Ajustes</a>
+            <a href="{{ route('usuarios.chatbot') }}" class="btn btn-outline-primary w-100">Chatbot</a>
         </div>
         
         <!-- CONTENIDO PRINCIPAL -->
