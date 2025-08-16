@@ -40,19 +40,19 @@ Route::get('/usuarios/perfil', function () {
 })->name('usuarios.perfil');
 
 // Sonido
-Route::get('/usuarios/sonido', function () {
-    return view('usuarios.sonido');
-})->name('usuarios.sonido');
+Route::get('/usuarios/animacion', function () {
+    return view('usuarios.animacion');
+})->name('usuarios.animacion');
 
 // Perifoneo
-Route::get('/usuarios/perifoneo', function () {
-    return view('usuarios.perifoneo');
-})->name('usuarios.perifoneo');
+Route::get('/usuarios/publicidad', function () {
+    return view('usuarios.publicidad');
+})->name('usuarios.publicidad');
 
 // Eventos
-Route::get('/usuarios/evento', function () {
-    return view('usuarios.evento');
-})->name('usuarios.evento');
+Route::get('/usuarios/alquiler', function () {
+    return view('usuarios.alquiler');
+})->name('usuarios.alquiler');
 
 // Calendario
 Route::get('/usuarios/calendario', function () {
