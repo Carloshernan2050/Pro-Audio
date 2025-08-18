@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('inventario', function (Blueprint $table) {
             $table->id();
+            $table->string('descripcion', 100);
             $table->integer('cantidad_disponible');
             $table->dateTime('fecha_actualizacion');
         });

@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +13,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Crear o actualizar usuario por defecto (no se duplica)
+        User::updateOrCreate(
+            ['email' => 'test@example.com'], // condición
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('12345678'),
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Llamada a otros seeders en orden correcto
+        $this->call([
+            RolesSeeder::class,
+            PersonasSeeder::class,
+            UsuariosSeeder::class,
+
+            ServiciosSeeder::class,
+            SubserviciosSeeder::class,   // ojo: corregido nombre
+
+            InventarioSeeder::class,
+            MovimientosInventarioSeeder::class,
+
+            IngresoSeeder::class,
+            CotizacionSeeder::class,
+            CalendarioSeeder::class,
+            HistorialSeeder::class,
+            
         ]);
     }
 }
