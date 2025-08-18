@@ -73,5 +73,17 @@ Route::get('/usuarios/chatbot', function () {
 Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
 
 
-
 Route::resource('servicios', ServiciosController::class);
+
+use App\Http\Controllers\CalendarioController;
+
+// Mostrar calendario usando el controlador
+Route::get('/usuarios/calendario', [CalendarioController::class,'index'])->name('usuarios.calendario');
+
+// CRUD del calendario
+Route::post('/calendario', [CalendarioController::class,'store'])->name('calendario.store');
+Route::put('/calendario/{id}', [CalendarioController::class,'update'])->name('calendario.update');
+Route::delete('/calendario/{id}', [CalendarioController::class,'destroy'])->name('calendario.destroy');
+
+
+
