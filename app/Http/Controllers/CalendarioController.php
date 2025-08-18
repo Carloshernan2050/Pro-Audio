@@ -11,11 +11,15 @@ class CalendarioController extends Controller
    public function index()
 {
     $registros   = Calendario::all();    
-    $inventarios = DB::table('inventario')->get();
+    $inventarios = DB::table('inventario')->get()->keyBy('id'); // Trae todos los inventarios y los indexa por id
 
     $eventos = [];
-    foreach ($registros as $r){
-        $nombre = DB::table('inventario')->where('id',$r->movimientos_inventario_id)->value('nombre');
+    foreach ($registros as $r) {
+        // Obtener el nombre de inventario desde el array indexado
+        $nombre = $inventarios->has($r->movimientos_inventario_id) 
+                    ? $inventarios[$r->movimientos_inventario_id]->descripcion 
+                    : 'Sin inventario';
+
         $eventos[] = [
             'title'       => $nombre,
             'start'       => $r->fecha_inicio,
@@ -24,10 +28,9 @@ class CalendarioController extends Controller
         ];
     }
 
-    // MUY IMPORTANTE enviar las 3 variables
     return view('usuarios.calendario', compact('registros','inventarios','eventos'));
-
 }
+
 
 
 

@@ -33,7 +33,7 @@
         <tbody>
         @foreach($registros as $r)
             <tr>
-                <td>{{ DB::table('inventario')->where('id',$r->movimientos_inventario_id)->value('nombre') }}</td>
+                <td>{{ DB::table('inventario')->where('id',$r->movimientos_inventario_id)->value('descripcion') }}</td>
                 <td>{{ $r->fecha_inicio }}</td>
                 <td>{{ $r->fecha_fin }}</td>
                 <td>{{ $r->descripcion_evento }}</td>
@@ -61,7 +61,7 @@
                     <select name="movimientos_inventario_id" class="form-control" required>
                         <option value="">Seleccione</option>
                         @foreach($inventarios as $inv)
-                            <option value="{{ $inv->id }}">{{ $inv->nombre }}</option>
+                            <option value="{{ $inv->id }}">{{ $inv->descripcion }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -108,4 +108,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
