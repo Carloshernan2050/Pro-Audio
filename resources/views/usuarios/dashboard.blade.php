@@ -1,55 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <style>
-        /* Estilo opcional para el sidebar lateral */
-        .sidebar {
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            border-right: 1px solid #ddd;
-        }
-        .sidebar a {
-            margin-bottom: 10px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO AUDIO - Dashboard</title>
+    {{-- Llamada al archivo CSS principal usando Vite --}}
+    @vite('resources/css/app.css')
+
+    {{-- Enlace a la librería de Font Awesome para los íconos --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWpU6lJ9Xl3QO4K8y9Rk5vLqB34+Jk81f7qFk43Qk5p8G4eGk3k9Vb/qH6r/jB5sD5k6w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- SIDEBAR IZQUIERDO -->
-        <div class="col-md-3 col-lg-2 sidebar p-3">
-            <h5 class="mb-4">Menú</h5>
-            <a href="{{ route('usuarios.perfil') }}" class="btn btn-outline-primary w-100">Perfil</a>
-            <a href="{{ route('usuarios.dashboard') }}" class="btn btn-outline-primary w-100">Inicio</a>
-            <a href="{{ route('usuarios.animacion') }}" class="btn btn-outline-primary w-100">Animación</a>
-            <a href="{{ route('usuarios.publicidad') }}" class="btn btn-outline-primary w-100">Publicidad</a>
-            <a href="{{ route('usuarios.alquiler') }}" class="btn btn-outline-primary w-100">Alquiler</a>
-            <a href="{{ route('usuarios.calendario') }}" class="btn btn-outline-primary w-100">Calendario</a>
-            <a href="{{ route('usuarios.ajustes') }}" class="btn btn-outline-primary w-100">Ajustes</a>
-            <a href="{{ route('usuarios.chatbot') }}" class="btn btn-outline-primary w-100">Chatbot</a>
-        </div>
-        
-        <!-- CONTENIDO PRINCIPAL -->
-        <div class="col-md-9 col-lg-10 p-5">
-            <h2>Bienvenido, {{ $usuario_nombre }}</h2>
+    {{-- Contenedor principal del dashboard con la imagen de fondo --}}
+    <div class="dashboard-container">
+        {{-- Barra superior --}}
+        <header class="top-bar">
+            <h1>PRO AUDIO</h1>
+            <form class="search-form" action="#" method="GET">
+                <input type="text" name="buscar" class="search-input" placeholder="Buscar...">
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+        </header>
 
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
+        {{-- Barra lateral izquierda --}}
+        <aside class="sidebar">
+            <h5 class="menu-title">Menú</h5>
+            <a href="{{ route('usuarios.perfil') }}" class="sidebar-btn"><i class="fas fa-user-circle"></i> Perfil</a>
+            <a href="{{ route('usuarios.dashboard') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
+            <a href="{{ route('usuarios.animacion') }}" class="sidebar-btn"><i class="fas fa-laugh-beam"></i> Animación</a>
+            <a href="{{ route('usuarios.publicidad') }}" class="sidebar-btn"><i class="fas fa-bullhorn"></i> Publicidad</a>
+            <a href="{{ route('usuarios.alquiler') }}" class="sidebar-btn"><i class="fas fa-box"></i> Alquiler</a>
+            <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
+            <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
+            <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
+        </aside>
 
-            @if(session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
+        {{-- Contenido principal del dashboard --}}
+        <main class="main-content">
+            <h2 class="welcome-title">¡Bienvenido, {{ $usuario_nombre }}!</h2>
+            <p class="welcome-text">¡Tu solución en sonido, iluminación y eventos!</p>
 
-            <p>Este es tu panel de control.</p>
+            <section class="empresa-presentacion">
+                <div class="presentacion-bloque-media">
+                    <img src="/images/carro.jpg" alt="Imagen del carro" class="presentacion-img-grande">
+                </div>
 
-            <!-- Botón de cerrar sesión -->
-            <a href="{{ route('usuarios.cerrarSesion') }}" class="btn btn-danger">Cerrar Sesión</a>
-        </div>
+                <div class="presentacion-bloque-texto">
+                    <h2>Sobre Nosotros</h2>
+                    <p>
+                        Somos PRO AUDIO, una empresa dedicada a transformar tus ideas en eventos inolvidables. Con más de 10 años de experiencia, nos hemos consolidado como líderes en el mercado, ofreciendo soluciones de alta calidad en sonido, iluminación y video.
+                    </p>
+                    <h3>Nuestra Misión</h3>
+                    <p>
+                        Ser la empresa de referencia en el sector de eventos a nivel nacional, reconocida por la innovación, la calidad y el compromiso social.
+                    </p>
+                </div>
+
+                <div class="presentacion-bloque-media">
+                    <img src="/images/consola.jpg" alt="Imagen pequeña" class="presentacion-img-pequena">
+                </div>
+
+                <div class="presentacion-bloque-media">
+                    <video class="presentacion-video" controls>
+                        <source src="/videos/evento_v.mp4" type="video/mp4">
+                        Tu navegador no soporta el video.
+                    </video>
+                </div>
+
+    
+                    <div class="presentacion-bloque-texto">
+                        <h3>Nuestros Valores</h3>
+                        <ul>
+                            <li>Innovación:** Estamos siempre a la vanguardia tecnológica.</li>
+                            <li>Calidad:** Solo ofrecemos productos y servicios de primera.</li>
+                            <li>Compromiso:** Nuestra dedicación a cada proyecto es total.</li>
+                            <li>Responsabilidad Social:** Contribuimos al desarrollo de la comunidad.</li>
+                            <li>Excelencia:** Buscamos la perfección en cada detalle.</li>
+                        </ul>
+                    </div>
+            </section>
+        </main>
     </div>
-</div>
 </body>
 </html>

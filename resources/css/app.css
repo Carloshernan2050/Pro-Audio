@@ -1,14 +1,20 @@
 /* resources/css/app.css */
 
+/* ======================================= */
+/* --- Estilos Generales y del Body ---    */
+/* ======================================= */
 body {
     margin: 0;
     font-family: sans-serif;
-    overflow-x: hidden; /* Esto evita la barra de desplazamiento horizontal */
+    overflow-x: hidden;
+    background-color: #000;
 }
 
+/* ======================================= */
+/* --- Estilos de Registro (Original) ---  */
+/* ======================================= */
 .background-registro {
     background-color: #000;
-    /* La ruta de la imagen es más segura sin /public */
     background-image: url('/public/images/img_principal.jpg');
     background-size: cover;
     background-repeat: no-repeat;
@@ -16,16 +22,15 @@ body {
     min-height: 100vh;
     width: 100vw;
     display: flex;
-    /* Centramos el contenido por defecto para que sea visible en cualquier pantalla */
     justify-content: center;
     align-items: center;
 }
 
 .form-container {
     background-color: #e91c1c;
-    padding: 30px; /* Reducimos el padding para pantallas más pequeñas */
-    width: 90%; /* Usamos un ancho relativo para que se adapte a móviles */
-    max-width: 600px; /* Definimos un ancho máximo para que no se vea muy grande en el escritorio */
+    padding: 30px;
+    width: 90%;
+    max-width: 600px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -35,10 +40,9 @@ body {
     box-shadow: 5px 0 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Usamos un media query para ajustar el diseño en pantallas más grandes */
 @media (min-width: 768px) {
     .background-registro {
-        justify-content: flex-start; /* Vuelve a la alineación a la izquierda */
+        justify-content: flex-start;
     }
     .form-container {
         width: 50vw;
@@ -48,7 +52,7 @@ body {
 }
 
 .titulo-formulario {
-    font-size: 2.5rem; /* Ajustamos el tamaño de la fuente para que quepa en móviles */
+    font-size: 2.5rem;
     font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
@@ -56,14 +60,14 @@ body {
 
 .grupo-flex {
     display: flex;
-    flex-direction: column; /* Mostramos los campos en columna en pantallas pequeñas */
-    gap: 15px; /* Reducimos el espacio entre los campos */
+    flex-direction: column;
+    gap: 15px;
     width: 100%;
 }
 
 @media (min-width: 768px) {
     .grupo-flex {
-        flex-direction: row; /* Volvemos a la fila en pantallas grandes */
+        flex-direction: row;
         gap: 28px;
     }
 }
@@ -116,13 +120,9 @@ body {
     text-decoration: underline;
 }
 
-.mensaje-exito {
-    color: rgb(255, 255, 255);
-    text-align: center;
-}
-
-.errores-validacion {
+.mensaje-exito, .errores-validacion {
     color: white;
+    text-align: center;
     background-color: rgba(0, 0, 0, 0.5);
     padding: 10px;
     margin-bottom: 15px;
@@ -131,4 +131,693 @@ body {
 .errores-validacion ul {
     list-style-type: none;
     padding: 0;
+}
+
+
+/* ======================================= */
+/* --- Estilos para el Dashboard (Final) --- */
+/* ======================================= */
+
+.dashboard-container {
+    background-image: url('/public/images/dashboard.png');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "sidebar content";
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: 120px 1fr;
+}
+
+.top-bar {
+    grid-area: header;
+    background-color: #e91c1c;
+    color: white;
+    padding: 40px 30px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.top-bar h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    max-width: 700px;
+    gap: 24px;
+}
+
+.search-input {
+    padding: 10px 16px;
+    border-radius: 20px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    width: 100%;
+}
+
+.search-btn {
+    background: white;
+    color: #e91c1c;
+    border: none;
+    border-radius: 50%;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+}
+
+.search-btn:hover {
+    background: #fff3f3;
+}
+
+.sidebar {
+    grid-area: sidebar;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+}
+
+.menu-title {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.sidebar-btn {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.sidebar-btn:hover {
+    background-color: #e91c1c;
+    color: #fff;
+    box-shadow: 0 0 15px 2px #e91c1c;
+    border-color: #fff;
+}
+
+.main-content {
+    grid-area: content;
+    padding: 20px;
+    min-height: calc(100vh - 120px);
+    color: white;
+    text-align: center;
+    padding-top: 40px;
+    overflow-y: auto; /* Permite desplazamiento si el contenido es muy largo */
+}
+
+.welcome-title {
+    color: white;
+}
+
+.welcome-text {
+    color: white;
+}
+
+/* Estilos para la sección de presentación de la empresa */
+.empresa-presentacion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    margin: 40px auto;
+    max-width: 900px;
+}
+
+.presentacion-bloque-media {
+    width: 100%;
+    max-width: 600px;
+}
+
+.presentacion-img-grande {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+}
+
+.presentacion-img-pequena {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.presentacion-video {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.presentacion-bloque-texto {
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
+    color: white;
+}
+
+/* Regla para asegurar que todo el texto dentro del main-content sea blanco */
+.main-content h1, .main-content h2, .main-content h3, .main-content p, .main-content ul, .main-content li {
+    color: white;
+}
+
+
+/* ======================================= */
+/* --- Media Queries (para móviles) ---    */
+/* ======================================= */
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-areas:
+            "header"
+            "content";
+        grid-template-columns: 1fr;
+        grid-template-rows: 80px 1fr;
+    }
+    
+    .sidebar {
+        display: none; /* Oculta la barra lateral en móviles */
+    }
+
+    .top-bar {
+        padding: 20px 15px;
+    }
+
+    .search-form {
+        max-width: none;
+    }
+
+    .main-content {
+        padding-top: 20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .empresa-presentacion {
+        gap: 32px;
+    }
+}
+
+.sidebar-btn i {
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+/* resources/css/app.css */
+
+/* ... (mantén todos los estilos anteriores aquí) ... */
+
+/* ======================================= */
+/* --- Estilos para la página de Animación --- */
+/* ======================================= */
+
+.page-title {
+    color: #e91c1c;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.page-subtitle {
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+}
+
+.productos-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Crea una cuadrícula flexible y responsive */
+    gap: 32px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.producto-item {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3); /* Sombra roja para resaltar */
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Alinea el nombre en la parte inferior */
+    min-height: 300px; /* Asegura un tamaño mínimo para todos los elementos */
+}
+
+.producto-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 20px rgba(233, 28, 28, 0.6);
+}
+
+.producto-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que la imagen cubra todo el espacio sin distorsionarse */
+}
+
+.producto-nombre {
+    background-color: rgba(233, 28, 28, 0.85); /* Fondo rojo para el nombre */
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 15px;
+    margin: 0;
+    width: 100%;
+    position: relative;
+    text-align: center; /* Centra el texto horizontalmente */
+    overflow: hidden; /* Oculta cualquier texto que se salga del contenedor */
+    text-overflow: ellipsis; /* Añade puntos suspensivos (...) al texto que se corta */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+}
+
+/* Media Query para móviles */
+@media (max-width: 768px) {
+    .productos-galeria {
+        gap: 20px;
+        padding: 10px;
+    }
+
+    .producto-item {
+        min-height: 250px;
+    }
+
+    .producto-nombre {
+        padding: 12px;
+        font-size: 1rem;
+    }
+}
+
+/* resources/css/app.css */
+
+/* ... (mantén todos los estilos anteriores aquí) ... */
+
+/* ======================================= */
+/* --- Estilos para la página de Detalle de Servicio --- */
+/* ======================================= */
+
+.servicio-detalle-container {
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    max-width: 1200px;
+    margin: 40px auto;
+    color: white;
+}
+
+.detalle-principal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+.detalle-imagen-principal {
+    flex: 1 1 500px;
+}
+
+.imagen-grande {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
+}
+
+.detalle-info {
+    flex: 1 1 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.detalle-info h2 {
+    font-size: 2.8rem;
+    color: #e91c1c;
+    margin-bottom: 10px;
+}
+
+.precio-estimado {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.descripcion-servicio {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.caracteristicas-titulo {
+    font-size: 1.4rem;
+    color: #e91c1c;
+    margin-bottom: 10px;
+}
+
+.caracteristicas-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.caracteristicas-lista li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.caracteristicas-lista i {
+    color: #e91c1c;
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.btn-cotizar {
+    background-color: #e91c1c;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    margin-top: 20px;
+}
+
+.btn-cotizar:hover {
+    background-color: #ff3333;
+}
+
+.galeria-relacionada {
+    margin-top: 50px;
+}
+
+.galeria-relacionada h3 {
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.imagen-relacionada {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.imagen-relacionada:hover {
+    transform: scale(1.05);
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .detalle-principal {
+        flex-direction: column;
+    }
+
+    .detalle-info h2 {
+        font-size: 2rem;
+    }
+
+    .galeria-relacionada h3 {
+        font-size: 1.8rem;
+    }
+}
+
+/* Estilos para el contenedor de perfil, se integra con el dashboard-container */
+.profile-container {
+    background-color: rgba(0, 0, 0, 0.4); /* Fondo semi-transparente, similar a la barra lateral */
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3); /* Sombra roja para resaltar */
+    max-width: 600px;
+    margin: 40px auto; /* Centra el contenedor y le da un margen superior */
+    color: white;
+    text-align: left; /* Alineación del texto dentro de la tarjeta */
+}
+
+.profile-details p {
+    font-size: 1.125rem;
+    margin-bottom: 15px;
+}
+
+.profile-details strong {
+    color: #e91c1c; /* Color rojo de la marca para las etiquetas */
+    font-weight: bold;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 15px 36px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-secondary:hover {
+    background-color: #e91c1c;
+    color: #fff;
+    box-shadow: 0 0 15px 2px #e91c1c;
+    border-color: #fff;
+}
+
+/* Estilos específicos para la página de ajustes */
+
+/* Contenedor principal de la tabla y botones */
+.button-container {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.table-container {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
+    padding: 20px;
+    overflow-x: auto; /* Permite el scroll horizontal en móviles */
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+th {
+    background-color: #e91c1c;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Redondeo de las esquinas de la tabla */
+thead tr:first-child th:first-child {
+    border-top-left-radius: 12px;
+}
+thead tr:first-child th:last-child {
+    border-top-right-radius: 12px;
+}
+tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 12px;
+}
+tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 12px;
+}
+
+tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.no-services {
+    text-align: center;
+    font-style: italic;
+    color: #bbb;
+}
+
+/* Estilos de botones */
+.btn-primary {
+    background-color: #e91c1c;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #ff3333;
+    box-shadow: 0 0 15px 2px #ff3333;
+}
+
+.btn-action {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-action.edit {
+    background-color: #4a5568;
+    color: white;
+}
+
+.btn-action.delete {
+    background-color: #c53030;
+    color: white;
+}
+
+.btn-action.edit:hover {
+    background-color: #636b77;
+}
+
+.btn-action.delete:hover {
+    background-color: #e53e3e;
+}
+
+/* Estilos del modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #1a202c;
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 20px rgba(233, 28, 28, 0.5);
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.close-btn {
+    color: #e91c1c;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #4a5568;
+    border-radius: 8px;
+    background-color: #2d3748;
+    color: white;
+}
+
+.btn-submit {
+    background-color: #e91c1c;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.btn-submit:hover {
+    background-color: #ff3333;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.alert.success {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+.alert.error {
+    background-color: #f44336; /* Red */
+    color: white;
 }
