@@ -77,7 +77,7 @@
                     <tbody>
                         @forelse ($servicios as $servicio)
                             <tr>
-                                <td>{{ $servicio->id }}</td>
+                                <td>{{ $loop->iteration }}</td> {{-- Número consecutivo limpio --}}
                                 <td>{{ $servicio->nombre_servicio }}</td>
                                 <td class="actions-cell">
                                     <button onclick="openModal('edit', {{ $servicio->id }}, '{{ $servicio->nombre_servicio }}')" class="btn-action edit">

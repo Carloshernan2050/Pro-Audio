@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ServiciosController;
+use App\Http\Controllers\AjustesController;
 
 // Página principal -> redirige a registro
 Route::get('/', function () {
@@ -64,6 +65,10 @@ Route::get('/usuarios/calendario', function () {
 Route::get('/usuarios/ajustes', function () {
     return view('usuarios.ajustes');
 })->name('usuarios.ajustes');
+
+// Ajustes
+Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])
+    ->name('usuarios.ajustes');
 
 // Chatbot
 Route::get('/usuarios/chatbot', function () {
