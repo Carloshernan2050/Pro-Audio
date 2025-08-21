@@ -8,33 +8,31 @@ use Illuminate\Support\Facades\DB;
 
 class CalendarioController extends Controller
 {
-   public function index()
-{
-    $registros   = Calendario::all();    
-    $inventarios = DB::table('inventario')->get()->keyBy('id'); // Trae todos los inventarios y los indexa por id
+    // Mostrar el calendario
+    public function inicio()
+    {
+        $registros   = Calendario::all();    
+        $inventarios = DB::table('inventario')->get()->keyBy('id'); 
 
-    $eventos = [];
-    foreach ($registros as $r) {
-        // Obtener el nombre de inventario desde el array indexado
-        $nombre = $inventarios->has($r->movimientos_inventario_id) 
-                    ? $inventarios[$r->movimientos_inventario_id]->descripcion 
-                    : 'Sin inventario';
+        $eventos = [];
+        foreach ($registros as $r) {
+            $nombre = $inventarios->has($r->movimientos_inventario_id) 
+                        ? $inventarios[$r->movimientos_inventario_id]->descripcion 
+                        : 'Sin inventario';
 
-        $eventos[] = [
-            'title'       => $nombre,
-            'start'       => $r->fecha_inicio,
-            'end'         => $r->fecha_fin,
-            'description' => $r->descripcion_evento
-        ];
+            $eventos[] = [
+                'title'       => $nombre,
+                'start'       => $r->fecha_inicio,
+                'end'         => $r->fecha_fin,
+                'description' => $r->descripcion_evento
+            ];
+        }
+
+        return view('usuarios.calendario', compact('registros','inventarios','eventos'));
     }
 
-    return view('usuarios.calendario', compact('registros','inventarios','eventos'));
-}
-
-
-
-
-    public function store(Request $request)
+    // Guardar nuevo evento
+    public function guardar(Request $request)
     {
         $request->validate([
             'movimientos_inventario_id' => 'required',
@@ -56,7 +54,8 @@ class CalendarioController extends Controller
         return back()->with('ok','Alquiler registrado');
     }
 
-    public function update(Request $request, $id)
+    // Actualizar evento existente
+    public function actualizar(Request $request, $id)
     {
         $request->validate([
             'movimientos_inventario_id' => 'required',
@@ -72,13 +71,13 @@ class CalendarioController extends Controller
             'descripcion_evento'        => $request->descripcion_evento,
         ]);
 
-        return redirect()->route('calendario.index')->with('ok','Actualizado correctamente');
-
+        return redirect()->route('calendario.inicio')->with('ok','Evento actualizado correctamente');
     }
 
-    public function destroy($id)
+    // Eliminar evento
+    public function eliminar($id)
     {
         Calendario::findOrFail($id)->delete();
-        return back()->with('ok','Eliminado');
+        return back()->with('ok','Evento eliminado');
     }
 }

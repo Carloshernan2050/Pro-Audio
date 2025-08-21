@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ServiciosController;
+use App\Http\Controllers\CalendarioController; 
+
 
 // Página principal -> redirige a registro
 Route::get('/', function () {
@@ -55,11 +57,6 @@ Route::get('/usuarios/alquiler', function () {
     return view('usuarios.alquiler');
 })->name('usuarios.alquiler');
 
-// Calendario
-Route::get('/usuarios/calendario', function () {
-    return view('usuarios.calendario');
-})->name('usuarios.calendario');
-
 // Ajustes
 Route::get('/usuarios/ajustes', function () {
     return view('usuarios.ajustes');
@@ -75,15 +72,18 @@ Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perf
 
 Route::resource('servicios', ServiciosController::class);
 
-use App\Http\Controllers\CalendarioController;
+// Rutas del calendario
+Route::controller(CalendarioController::class)->group(function () {
+    // Vista principal del calendario
+    Route::get('/calendario', 'inicio')->name('calendario.inicio');
+    
+    // CRUD del calendario
+    Route::post('/calendario', 'guardar')->name('calendario.guardar');
+    Route::put('/calendario/{id}', 'actualizar')->name('calendario.actualizar');
+    Route::delete('/calendario/{id}', 'eliminar')->name('calendario.eliminar');
+});
 
-// Mostrar calendario usando el controlador
-Route::get('/usuarios/calendario', [CalendarioController::class,'index'])->name('usuarios.calendario');
 
-// CRUD del calendario
-Route::post('/calendario', [CalendarioController::class,'store'])->name('calendario.store');
-Route::put('/calendario/{id}', [CalendarioController::class,'update'])->name('calendario.update');
-Route::delete('/calendario/{id}', [CalendarioController::class,'destroy'])->name('calendario.destroy');
 
 
 

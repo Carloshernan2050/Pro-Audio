@@ -10,6 +10,7 @@ class Calendario extends Model
     use HasFactory;
 
     protected $table = 'calendario';
+    public $timestamps = false;
 
     protected $fillable = [
         'personas_id',
