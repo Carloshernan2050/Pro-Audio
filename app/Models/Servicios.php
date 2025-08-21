@@ -11,9 +11,9 @@ class Servicios extends Model
 
     protected $table = 'servicios';
 
+    public $timestamps = false; // 👈 Desactiva created_at y updated_at
+
     protected $fillable = [
         'nombre_servicio'
     ];
-
-    
 }

@@ -13,7 +13,7 @@ class ServiciosController extends Controller
     public function index()
     {
         $servicios = Servicios::all();
-        return view('servicios.index', compact('servicios'));
+        return view('usuarios.ajustes', compact('servicios'));
     }
 
     /**
@@ -35,7 +35,7 @@ class ServiciosController extends Controller
 
         Servicios::create($request->only('nombre_servicio'));
 
-        return redirect()->route('servicios.index')->with('success', 'Servicio creado correctamente.');
+        return redirect()->route('usuarios.ajustes')->with('success', 'Servicio creado correctamente.');
     }
 
     /**
@@ -68,7 +68,7 @@ class ServiciosController extends Controller
         $servicio = Servicios::findOrFail($id);
         $servicio->update($request->only('nombre_servicio'));
 
-        return redirect()->route('servicios.index')->with('success', 'Servicio actualizado correctamente.');
+        return redirect()->route('usuarios.ajustes')->with('success', 'Servicio actualizado correctamente.');
     }
 
     /**
@@ -79,6 +79,6 @@ class ServiciosController extends Controller
         $servicio = Servicios::findOrFail($id);
         $servicio->delete();
 
-        return redirect()->route('servicios.index')->with('success', 'Servicio eliminado correctamente.');
+        return redirect()->route('usuarios.ajustes')->with('success', 'Servicio eliminado correctamente.');
     }
 }

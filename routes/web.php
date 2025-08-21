@@ -6,6 +6,8 @@ use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\CalendarioController; 
 
 
+use App\Http\Controllers\AjustesController;
+
 // Página principal -> redirige a registro
 Route::get('/', function () {
     return redirect()->route('usuarios.registroUsuario');
@@ -61,6 +63,10 @@ Route::get('/usuarios/alquiler', function () {
 Route::get('/usuarios/ajustes', function () {
     return view('usuarios.ajustes');
 })->name('usuarios.ajustes');
+
+// Ajustes
+Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])
+    ->name('usuarios.ajustes');
 
 // Chatbot
 Route::get('/usuarios/chatbot', function () {
