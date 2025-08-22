@@ -18,7 +18,7 @@ Route::get('/usuarios/inicioSesion', [UsuarioController::class, 'inicioSesion'])
 Route::post('/usuarios/autenticar', [UsuarioController::class, 'autenticar'])->name('usuarios.autenticar');
 
 // Cerrar sesión
-Route::get('/usuarios/cerrarSesion', [UsuarioController::class, 'cerrarSesion'])->name('usuarios.cerrarSesion');
+Route::post('/usuarios/cerrarSesion', [UsuarioController::class, 'cerrarSesion'])->name('usuarios.cerrarSesion');
 
 // Dashboard protegido
 Route::get('/dashboard', function () {

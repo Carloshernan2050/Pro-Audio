@@ -35,71 +35,65 @@
             <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
         </aside>
 
-        {{-- Contenido principal de la página de animación --}}
-        <main class="main-content">
-            <h2 class="page-title">Servicios de Animación</h2>
-            <p class="page-subtitle">Explora nuestras opciones creativas para que tu evento sea único y lleno de diversión.</p>
+       <main class="main-content">
+            <h2 class="page-title">Animación de Eventos</h2>
+            <p class="page-subtitle">Personal capacitado y sistemas de última generación para crear el ambiente perfecto en tu evento.</p>
+            
+            <section class="productos-servicio">
+                <div class="productos-grid">
+                    {{-- Item de producto 1 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/dj.jpg" alt="DJ Profesional" class="producto-imagen">
+                        <h4 class="producto-nombre">DJ Profesional</h4>
+                    </div>
 
-            {{-- Galería de productos de animación --}}
-            <section class="productos-galeria">
-                {{-- Item de producto 1 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/maestro_ceremonias.jpg" alt="Maestro de Ceremonias" class="producto-imagen">
-                    <h4 class="producto-nombre">Maestro de Ceremonias (Aprox. $150.000 COP)</h4>
-                </div>
+                    {{-- Item de producto 2 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/animador_eventos.jpg" alt="Animador de eventos" class="producto-imagen">
+                        <h4 class="producto-nombre">Animador de Eventos</h4>
+                    </div>
 
-                {{-- Item de producto 2 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/dj_profesional.jpg" alt="DJ Profesional" class="producto-imagen">
-                    <h4 class="producto-nombre">DJ Profesional (Aprox. $200.000 COP)</h4>
-                </div>
+                    {{-- Item de producto 3 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/mago_eventos.jpg" alt="Mago para eventos" class="producto-imagen">
+                        <h4 class="producto-nombre">Mago para Eventos</h4>
+                    </div>
+                    
+                    {{-- Item de producto 4 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/iluminacion_evento.jpg" alt="Iluminación de Eventos" class="producto-imagen">
+                        <h4 class="producto-nombre">Iluminación de Eventos</h4>
+                    </div>
+                    
+                    {{-- Item de producto 5 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/concierto.jpg" alt="Animación de Conciertos" class="producto-imagen">
+                        <h4 class="producto-nombre">Animación de Conciertos</h4>
+                    </div>
 
-                {{-- Item de producto 3 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/fiesta_corporativa.jpg" alt="Animación para Fiestas Corporativas" class="producto-imagen">
-                    <h4 class="producto-nombre">Animación Corporativa (Aprox. $250.000 COP)</h4>
-                </div>
-                
-                {{-- Item de producto 4 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/lanzamiento_productos.jpg" alt="Lanzamiento de Productos" class="producto-imagen">
-                    <h4 class="producto-nombre">Lanzamiento de Productos (Aprox. $300.000 COP)</h4>
-                </div>
-                
-                {{-- Item de producto 5 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/eventos_sociales.jpg" alt="Animador de Eventos Sociales" class="producto-imagen">
-                    <h4 class="producto-nombre">Eventos Sociales y Privados (Aprox. $180.000 COP)</h4>
-                </div>
+                    {{-- Item de producto 6 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/coordinador_eventos.jpg" alt="Coordinador de Eventos" class="producto-imagen">
+                        <h4 class="producto-nombre">Coordinador de Eventos</h4>
+                    </div>
 
-                {{-- Item de producto 6 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/concierto_iluminacion.jpg" alt="Animación en Conciertos" class="producto-imagen">
-                    <h4 class="producto-nombre">Animación de Conciertos (Aprox. $400.000 COP)</h4>
-                </div>
+                    {{-- Item de producto 7 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/presentador_evento.jpg" alt="Presentador de Eventos" class="producto-imagen">
+                        <h4 class="producto-nombre">Presentador de Eventos</h4>
+                    </div>
 
-                {{-- Item de producto 7 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/coordinador_eventos.jpg" alt="Coordinador de Eventos" class="producto-imagen">
-                    <h4 class="producto-nombre">Coordinador de Eventos (Aprox. $220.000 COP)</h4>
-                </div>
+                    {{-- Item de producto 8 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/efectos_especiales.jpg" alt="Efectos Especiales para Eventos" class="producto-imagen">
+                        <h4 class="producto-nombre">Efectos Especiales</h4>
+                    </div>
 
-                {{-- Item de producto 8 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/presentador_evento.jpg" alt="Presentador de Eventos" class="producto-imagen">
-                    <h4 class="producto-nombre">Presentador de Eventos (Aprox. $170.000 COP)</h4>
-                </div>
-
-                {{-- Item de producto 9 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/efectos_especiales.jpg" alt="Efectos Especiales para Eventos" class="producto-imagen">
-                    <h4 class="producto-nombre">Efectos Especiales (Aprox. $280.000 COP)</h4>
-                </div>
-
-                {{-- Item de producto 10 --}}
-                <div class="producto-item">
-                    <img src="/images/animacion/audiovisual.jpg" alt="Producción Audiovisual" class="producto-imagen">
-                    <h4 class="producto-nombre">Producción Audiovisual (Aprox. $350.000 COP)</h4>
+                    {{-- Item de producto 9 --}}
+                    <div class="producto-item">
+                        <img src="/images/animacion/audiovisual.jpg" alt="Producción Audiovisual" class="producto-imagen">
+                        <h4 class="producto-nombre">Producción Audiovisual</h4>
+                    </div>
                 </div>
             </section>
         </main>
