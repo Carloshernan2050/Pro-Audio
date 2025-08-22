@@ -35,7 +35,7 @@ class CalendarioController extends Controller
     public function guardar(Request $request)
     {
         $request->validate([
-            'movimientos_inventario_id' => 'required',
+            'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
             'fecha_inicio'              => 'required|date',
             'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
             'descripcion_evento'        => 'required'
@@ -58,7 +58,7 @@ class CalendarioController extends Controller
     public function actualizar(Request $request, $id)
     {
         $request->validate([
-            'movimientos_inventario_id' => 'required',
+            'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
             'fecha_inicio'              => 'required|date',
             'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
             'descripcion_evento'        => 'required'
@@ -71,7 +71,7 @@ class CalendarioController extends Controller
             'descripcion_evento'        => $request->descripcion_evento,
         ]);
 
-        return redirect()->route('calendario.inicio')->with('ok','Evento actualizado correctamente');
+        return redirect()->route('usuarios.calendario')->with('ok','Evento actualizado correctamente');
     }
 
     // Eliminar evento

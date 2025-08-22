@@ -81,7 +81,7 @@ Route::resource('servicios', ServiciosController::class);
 // Rutas del calendario
 Route::controller(CalendarioController::class)->group(function () {
     // Vista principal del calendario
-    Route::get('/calendario', 'inicio')->name('calendario.inicio');
+    Route::get('/calendario', 'inicio')->name('usuarios.calendario');
     
     // CRUD del calendario
     Route::post('/calendario', 'guardar')->name('calendario.guardar');
