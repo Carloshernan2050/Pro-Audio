@@ -57,9 +57,21 @@
                 @else
                     <p class="text-gray-300">No se encontró información del usuario.</p>
                 @endif
-                <a href="{{ route('usuarios.dashboard') }}" class="btn-secondary mt-3 inline-block">
-                    <i class="fas fa-arrow-left"></i> Volver al panel
-                </a>
+                {{-- Botón para volver al panel --}}
+                    <a href="{{ route('usuarios.dashboard') }}" class="btn-secondary inline-block">
+                        <i class="fas fa-arrow-left"></i> Volver al panel
+                    </a>
+                {{-- Contenedor flexible para los botones --}}
+                <div class="flex items-center justify-center sm:justify-start gap-4 mt-3">
+                    {{-- Botón para cerrar sesión --}}
+                    <form action="{{ route('usuarios.cerrarSesion') }}" method="POST">
+                        {{-- Token CSRF para seguridad --}}
+                        @csrf
+                        <button type="submit" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
             </div>
         </main>
     </div>

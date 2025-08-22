@@ -18,7 +18,9 @@
             <h1>PRO AUDIO</h1>
             <form class="search-form" action="#" method="GET">
                 <input type="text" name="buscar" class="search-input" placeholder="Buscar...">
-                <button type="submit" class="search-btn">🔍</button>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
             </form>
         </header>
 
@@ -35,59 +37,60 @@
             <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
         </aside>
 
-        {{-- Contenido principal de la página de alquiler --}}
+        {{-- Contenido principal --}}
         <main class="main-content">
-            <h2 class="page-title">Servicios de Alquiler y Equipos</h2>
-            <p class="page-subtitle">Todo el equipo de audio y video que necesitas para tus eventos, disponible para alquiler.</p>
+            <h2 class="page-title">Alquiler de Equipo de Sonido</h2>
+            <p class="page-subtitle">Equipos profesionales de alta calidad para tus eventos. Disponibles por día.</p>
+            
+            <section class="productos-servicio">
+                <div class="productos-grid">
+                    {{-- Item de producto 1 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/bafle_autoamplificado.jpg" alt="Bafle Autoamplificado" class="producto-imagen">
+                        <h4 class="producto-nombre">Bafle Autoamplificado</h4>
+                    </div>
 
-            {{-- Galería de productos de alquiler --}}
-            <section class="productos-galeria">
-                {{-- Item de producto 1 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/parlante_activo.jpg" alt="Parlante Activo" class="producto-imagen">
-                    <h4 class="producto-nombre">Parlante Activo (Aprox. $50.000 COP/día)</h4>
-                </div>
+                    {{-- Item de producto 2 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/luces_audioritmicas.jpg" alt="Luces Audiorítmicas" class="producto-imagen">
+                        <h4 class="producto-nombre">Luces Audiorítmicas</h4>
+                    </div>
 
-                {{-- Item de producto 2 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/microfono_inalambrico.jpg" alt="Micrófono Inalámbrico" class="producto-imagen">
-                    <h4 class="producto-nombre">Micrófono Inalámbrico (Aprox. $30.000 COP/día)</h4>
-                </div>
+                    {{-- Item de producto 3 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/microfono_inalambrico.jpg" alt="Micrófono Inalámbrico" class="producto-imagen">
+                        <h4 class="producto-nombre">Micrófono Inalámbrico</h4>
+                    </div>
+                    
+                    {{-- Item de producto 4 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/maquina_humo.jpg" alt="Máquina de Humo" class="producto-imagen">
+                        <h4 class="producto-nombre">Máquina de Humo</h4>
+                    </div>
+                    
+                    {{-- Item de producto 5 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/proyector.jpg" alt="Proyector y Telón" class="producto-imagen">
+                        <h4 class="producto-nombre">Proyector y Telón</h4>
+                    </div>
 
-                {{-- Item de producto 3 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/iluminacion_led.jpg" alt="Iluminación LED" class="producto-imagen">
-                    <h4 class="producto-nombre">Iluminación LED (Aprox. $45.000 COP/día)</h4>
-                </div>
-                
-                {{-- Item de producto 4 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/maquina_humo.jpg" alt="Máquina de Humo" class="producto-imagen">
-                    <h4 class="producto-nombre">Máquina de Humo (Aprox. $60.000 COP/día)</h4>
-                </div>
-                
-                {{-- Item de producto 5 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/proyector.jpg" alt="Proyector y Telón" class="producto-imagen">
-                    <h4 class="producto-nombre">Proyector y Telón (Aprox. $80.000 COP/día)</h4>
-                </div>
+                    {{-- Item de producto 6 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/cabina_dj.jpg" alt="Cabina para DJ" class="producto-imagen">
+                        <h4 class="producto-nombre">Cabina para DJ</h4>
+                    </div>
 
-                {{-- Item de producto 6 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/cabina_dj.jpg" alt="Cabina para DJ" class="producto-imagen">
-                    <h4 class="producto-nombre">Cabina para DJ (Aprox. $70.000 COP/día)</h4>
-                </div>
+                    {{-- Item de producto 7 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/consola_mezclas.jpg" alt="Consola de Mezclas" class="producto-imagen">
+                        <h4 class="producto-nombre">Consola de Mezclas</h4>
+                    </div>
 
-                {{-- Item de producto 7 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/consola_mezclas.jpg" alt="Consola de Mezclas" class="producto-imagen">
-                    <h4 class="producto-nombre">Consola de Mezclas (Aprox. $90.000 COP/día)</h4>
-                </div>
-
-                {{-- Item de producto 8 --}}
-                <div class="producto-item">
-                    <img src="/images/alquiler/tripode_parlante.jpg" alt="Trípode para Parlante" class="producto-imagen">
-                    <h4 class="producto-nombre">Trípode para Parlante (Aprox. $15.000 COP/día)</h4>
+                    {{-- Item de producto 8 --}}
+                    <div class="producto-item">
+                        <img src="/images/alquiler/tripode_parlante.jpg" alt="Trípode para Parlante" class="producto-imagen">
+                        <h4 class="producto-nombre">Trípode para Parlante</h4>
+                    </div>
                 </div>
             </section>
         </main>

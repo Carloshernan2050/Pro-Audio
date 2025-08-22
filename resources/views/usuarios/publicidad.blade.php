@@ -35,59 +35,54 @@
             <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
         </aside>
 
-        {{-- Contenido principal de la página de publicidad --}}
+         {{-- Contenido principal --}}
         <main class="main-content">
-            <h2 class="page-title">Servicios de Publicidad</h2>
-            <p class="page-subtitle">Impulsa tu marca y tus eventos con nuestras soluciones de audio y perifoneo profesional.</p>
+            <h2 class="page-title">Publicidad Sonora</h2>
+            <p class="page-subtitle">Creamos audio que captura la atención y refuerza el mensaje de tu marca.</p>
 
-            {{-- Galería de productos de publicidad --}}
-            <section class="productos-galeria">
-                {{-- Item de producto 1 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/perifoneo.jpg" alt="Perifoneo Móvil" class="producto-imagen">
-                    <h4 class="producto-nombre">Perifoneo Móvil (Aprox. $100.000 COP/día)</h4>
-                </div>
+            <section class="productos-servicio">
+                <div class="productos-grid">
+                    {{-- Item de producto 1 --}}
+                    <div class="producto-item">
+                        <img src="/images/publicidad/spot_radial.jpg" alt="Spot Radial" class="producto-imagen">
+                        <h4 class="producto-nombre">Spot Radial</h4>
+                    </div>
 
-                {{-- Item de producto 2 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/spot_publicitario.jpg" alt="Creación de Spot Publicitario" class="producto-imagen">
-                    <h4 class="producto-nombre">Creación de Spot (Aprox. $50.000 COP)</h4>
-                </div>
+                    {{-- Item de producto 2 --}}
+                    <div class="producto-item">
+                        <img src="/images/publicidad/cuñas.jpg" alt="Cuñas Publicitarias" class="producto-imagen">
+                        <h4 class="producto-nombre">Cuñas Publicitarias</h4>
+                    </div>
 
-                {{-- Item de producto 3 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/circuito_publicitario.jpg" alt="Circuito Publicitario" class="producto-imagen">
-                    <h4 class="producto-nombre">Circuito Publicitario (Aprox. $200.000 COP/semana)</h4>
-                </div>
-                
-                {{-- Item de producto 4 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/jingles_musicales.jpg" alt="Jingles Musicales" class="producto-imagen">
-                    <h4 class="producto-nombre">Producción de Jingles (Aprox. $80.000 COP)</h4>
-                </div>
-                
-                {{-- Item de producto 5 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/locucion_comercial.jpg" alt="Locución Comercial" class="producto-imagen">
-                    <h4 class="producto-nombre">Locución Comercial (Aprox. $40.000 COP/min)</h4>
-                </div>
+                    {{-- Item de producto 3 --}}
+                    <div class="producto-item">
+                        <img src="/images/publicidad/jingles.jpg" alt="Jingles" class="producto-imagen">
+                        <h4 class="producto-nombre">Producción de Jingles</h4>
+                    </div>
+                    
+                    {{-- Item de producto 4 --}}
+                    <div class="producto-item">
+                        <img src="/images/publicidad/locucion_comercial.jpg" alt="Locución Comercial" class="producto-imagen">
+                        <h4 class="producto-nombre">Locución Comercial</h4>
+                    </div>
+                    
+                    {{-- Item de producto 5 --}}
+                    <div class="producto-item">
+                        <img src="/images/publicidad/megaeventos.jpg" alt="Publicidad para Megaeventos" class="producto-imagen">
+                        <h4 class="producto-nombre">Publicidad en Megaeventos</h4>
+                    </div>
 
-                {{-- Item de producto 6 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/megaeventos.jpg" alt="Publicidad para Megaeventos" class="producto-imagen">
-                    <h4 class="producto-nombre">Publicidad en Megaeventos (Precio a convenir)</h4>
-                </div>
+                    {{-- Item de producto 6 --}}
+                    <div class="producto-item">
+                        <img src="/images/publicidad/voicemail.jpg" alt="Publicidad para Buzón de Voz" class="producto-imagen">
+                        <h4 class="producto-nombre">Voz para Buzón de Voz</h4>
+                    </div>
 
-                {{-- Item de producto 7 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/voicemail.jpg" alt="Publicidad para Buzón de Voz" class="producto-imagen">
-                    <h4 class="producto-nombre">Voz para Buzón de Voz (Aprox. $30.000 COP)</h4>
-                </div>
-
-                {{-- Item de producto 8 --}}
-                <div class="producto-item">
-                    <img src="/images/publicidad/sonido_corporativo.jpg" alt="Sonido Corporativo" class="producto-imagen">
-                    <h4 class="producto-nombre">Sonido Corporativo (Aprox. $150.000 COP)</h4>
+                    {{-- Item de producto 7 --}}
+                    <div class="producto-item">
+                        <img src="/images/publicidad/sonido_corporativo.jpg" alt="Sonido Corporativo" class="producto-imagen">
+                        <h4 class="producto-nombre">Sonido Corporativo</h4>
+                    </div>
                 </div>
             </section>
         </main>
