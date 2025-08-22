@@ -1,14 +1,21 @@
-/* resources/css/app.css */
+/* ======================================= */
+/* --- Importación de Fuentes ---          */
+/* ======================================= */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 /* ======================================= */
-/* --- Estilos Generales y del Body ---    */
+/* --- Estilos Generales del Body y HTML --- */
 /* ======================================= */
-body {
+html, body {
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
-    overflow-x: hidden;
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden; /* Evita el scroll horizontal no deseado */
     background-color: #000;
+}
+
+body {
     background-image: url('/public/images/dashboard.png');
     background-size: cover;
     background-position: center center;
@@ -16,17 +23,10 @@ body {
     background-attachment: fixed;
 }
 
-
-h1, h2, h3, .page-title, .titulo-formulario {
-    font-family: 'Montserrat', sans-serif;
-}
-
-html, body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-    overflow-x: hidden;
-    background-color: #000;
+/* Mejora la visualización de fuentes para que se vean más nítidas */
+h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ======================================= */
@@ -152,19 +152,18 @@ html, body {
     padding: 0;
 }
 
-
 /* ======================================= */
-/* --- Estilos para el Dashboard  --- */
+/* --- Estilos para el Dashboard ---       */
 /* ======================================= */
 
 .dashboard-container {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Esto es clave para centrar el contenido horizontalmente */
+    align-items: center;
     min-height: 100vh;
     width: 100%;
-    padding-top: 70px; 
-    background-color: rgba(0, 0, 0, 0.7); 
+    padding-top: 70px;
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
 .top-bar {
@@ -204,8 +203,8 @@ html, body {
     font-size: 1rem;
     outline: none;
     width: 100%;
-    border: 2px solid #ffffff; 
-    background-color: #000; /* Fondo negro */
+    border: 2px solid #ffffff;
+    background-color: #000;
     color: white;
 }
 
@@ -235,7 +234,7 @@ html, body {
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     z-index: 999;
     position: fixed;
-    top: 60px; /* Ajusta este valor si tu top-bar tiene otro alto */
+    top: 60px;
     left: 0;
     height: 100vh;
     z-index: 999;
@@ -256,7 +255,7 @@ html, body {
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
-    margin-bottom: 15px; 
+    margin-bottom: 15px;
 }
 
 .sidebar-btn:hover {
@@ -273,25 +272,19 @@ html, body {
     color: white;
     text-align: center;
     padding-top: 40px;
-    overflow-y: auto; /* Permite desplazamiento si el contenido es muy largo */
-    padding-top: 60px; /* Ajusta este valor si la barra superior tiene otra altura */
-    padding-left: 250px; 
+    overflow-y: auto;
+    padding-top: 60px;
+    padding-left: 250px;
     max-width: 1200px;
     margin: 0 auto;
     flex-grow: 1;
     box-sizing: border-box;
-
 }
 
-.welcome-title {
+.welcome-title, .welcome-text {
     color: white;
 }
 
-.welcome-text {
-    color: white;
-}
-
-/* Estilos para la sección de presentación de la empresa */
 .empresa-presentacion {
     display: flex;
     flex-direction: column;
@@ -336,11 +329,9 @@ html, body {
     color: white;
 }
 
-/* Regla para asegurar que todo el texto dentro del main-content sea blanco */
 .main-content h1, .main-content h2, .main-content h3, .main-content p, .main-content ul, .main-content li {
     color: white;
 }
-
 
 /* ======================================= */
 /* --- Media Queries (para móviles) ---    */
@@ -353,9 +344,9 @@ html, body {
         grid-template-columns: 1fr;
         grid-template-rows: 80px 1fr;
     }
-    
+
     .sidebar {
-        display: none; /* Oculta la barra lateral en móviles */
+        display: none;
     }
 
     .top-bar {
@@ -382,12 +373,9 @@ html, body {
     margin-right: 10px;
 }
 
-
-
 /* ======================================= */
 /* --- Estilos para la página de Animación --- */
 /* ======================================= */
-
 .page-title {
     color: #e91c1c;
     font-size: 2.5rem;
@@ -404,7 +392,7 @@ html, body {
 
 .productos-galeria {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Crea una cuadrícula flexible y responsive */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 32px;
     padding: 20px;
     max-width: 1200px;
@@ -415,13 +403,13 @@ html, body {
     background-color: rgba(0, 0, 0, 0.4);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3); /* Sombra roja para resaltar */
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
     text-align: center;
     transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Alinea el nombre en la parte inferior */
-    min-height: 300px; /* Asegura un tamaño mínimo para todos los elementos */
+    justify-content: flex-end;
+    min-height: 300px;
 }
 
 .producto-item:hover {
@@ -432,11 +420,11 @@ html, body {
 .producto-imagen {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Asegura que la imagen cubra todo el espacio sin distorsionarse */
+    object-fit: cover;
 }
 
 .producto-nombre {
-    background-color: rgba(233, 28, 28, 0.85); /* Fondo rojo para el nombre */
+    background-color: rgba(233, 28, 28, 0.85);
     color: white;
     font-size: 1.1rem;
     font-weight: bold;
@@ -444,10 +432,10 @@ html, body {
     margin: 0;
     width: 100%;
     position: relative;
-    text-align: center; /* Centra el texto horizontalmente */
-    overflow: hidden; /* Oculta cualquier texto que se salga del contenedor */
-    text-overflow: ellipsis; /* Añade puntos suspensivos (...) al texto que se corta */
-    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Media Query para móviles */
@@ -467,12 +455,9 @@ html, body {
     }
 }
 
-
-
 /* ======================================= */
 /* --- Estilos para la página de Detalle de Servicio --- */
 /* ======================================= */
-
 .servicio-detalle-container {
     background-color: rgba(0, 0, 0, 0.4);
     padding: 30px;
@@ -617,14 +602,14 @@ html, body {
 
 /* Estilos para el contenedor de perfil, se integra con el dashboard-container */
 .profile-container {
-    background-color: rgba(0, 0, 0, 0.4); /* Fondo semi-transparente, similar a la barra lateral */
+    background-color: rgba(0, 0, 0, 0.4);
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3); /* Sombra roja para resaltar */
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
     max-width: 600px;
-    margin: 40px auto; /* Centra el contenedor y le da un margen superior */
+    margin: 40px auto;
     color: white;
-    text-align: left; /* Alineación del texto dentro de la tarjeta */
+    text-align: left;
 }
 
 .profile-details p {
@@ -633,7 +618,7 @@ html, body {
 }
 
 .profile-details strong {
-    color: #e91c1c; /* Color rojo de la marca para las etiquetas */
+    color: #e91c1c;
     font-weight: bold;
 }
 
@@ -671,7 +656,7 @@ html, body {
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
     padding: 20px;
-    overflow-x: auto; /* Permite el scroll horizontal en móviles */
+    overflow-x: auto;
 }
 
 table {
@@ -847,157 +832,157 @@ tr:nth-child(even) {
 }
 
 .alert.success {
-    background-color: #4CAF50; /* Green */
+    background-color: #4CAF50;
     color: white;
 }
 
 .alert.error {
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
     color: white;
 }
 
+/* ======================================= */
+/* --- Estilos para la sección de Carrusel --- */
+/* ======================================= */
+.carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 40px auto;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    aspect-ratio: 16/9;
+}
 
-        .carousel-container {
-            position: relative;
-            width: 100%;
-            max-width: 900px; /* Ancho máximo del carrusel */
-            margin: 40px auto;
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            aspect-ratio: 16/9; /* Mantiene una relación de aspecto consistente */
-        }
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    animation: fadeIn 1s ease-in-out;
+}
 
-        .carousel-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none; /* Oculta todas las diapositivas por defecto */
-            animation: fadeIn 1s ease-in-out;
-        }
+.carousel-slide.active {
+    display: block;
+}
 
-        .carousel-slide.active {
-            display: block; /* Muestra la diapositiva activa */
-        }
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-        .carousel-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Asegura que la imagen cubra el contenedor */
-        }
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(233, 28, 28, 0.7);
+    color: white;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    z-index: 99;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
 
-        /* Botones de navegación (Flechas) */
-        .carousel-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(233, 28, 28, 0.7);
-            color: white;
-            border: none;
-            padding: 15px;
-            cursor: pointer;
-            z-index: 99;
-            border-radius: 50%;
-            transition: background-color 0.3s;
-        }
+.carousel-btn:hover {
+    background-color: #e91c1c;
+}
 
-        .carousel-btn:hover {
-            background-color: #e91c1c;
-        }
+.prev-btn {
+    left: 20px;
+}
 
-        .prev-btn {
-            left: 20px;
-        }
+.next-btn {
+    right: 20px;
+}
 
-        .next-btn {
-            right: 20px;
-        }
+.carousel-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
 
-        /* Puntos de navegación (Dots) */
-        .carousel-dots {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 100;
-        }
+.dot {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
 
-        .dot {
-            width: 12px;
-            height: 12px;
-            background-color: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+.dot.active {
+    background-color: #e91c1c;
+}
 
-        .dot.active {
-            background-color: #e91c1c;
-        }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* Estilos para la nueva sección de servicios de sonido */
-        .productos-sonido {
-            margin-top: 40px;
-        }
-        
-        .productos-sonido h3 {
-            color: white;
-            text-align: center;
-            font-family: 'Montserrat', sans-serif;
-            margin-bottom: 20px;
-            font-size: 2rem;
-            text-shadow: 0 0 10px rgba(233, 28, 28, 0.7);
-        }
+/* ======================================= */
+/* --- Estilos para la sección de Sonido --- */
+/* ======================================= */
+.productos-sonido {
+    margin-top: 40px;
+}
 
-        .productos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            justify-content: center;
-        }
+.productos-sonido h3 {
+    color: white;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    text-shadow: 0 0 10px rgba(233, 28, 28, 0.7);
+}
 
-        .producto-item {
-            background-color: rgba(26, 32, 44, 0.9);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-            text-align: center;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            cursor: pointer;
-        }
+.productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    justify-content: center;
+}
 
-        .producto-item:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 30px rgba(233, 28, 28, 0.6);
-        }
+.producto-item {
+    background-color: rgba(26, 32, 44, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    cursor: pointer;
+}
 
-        .producto-imagen {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
+.producto-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 30px rgba(233, 28, 28, 0.6);
+}
 
-        .producto-nombre {
-            color: #fff;
-            padding: 15px 10px;
-            font-family: 'Roboto', sans-serif;
-            font-size: 1.1rem;
-        }
+.producto-imagen {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
 
+.producto-nombre {
+    color: #fff;
+    padding: 15px 10px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.1rem;
+}
 
-        /* ======================================= */
+/* ======================================= */
 /* --- Estilos para la sección de Presentación --- */
 /* ======================================= */
-
 .presentacion-container {
     padding: 40px;
 }
@@ -1098,4 +1083,302 @@ tr:nth-child(even) {
     transform: translateY(-2px);
 }
 
+/* ======================================= */
+/* --- Estilos para la sección de Calendario --- */
+/* ======================================= */
 
+/* Contenedor principal para la sección de calendario */
+.calendar-section {
+    padding: 20px;
+    background-color: rgba(30, 30, 30, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+/* Estilo para el encabezado de la página */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Título de la página */
+.calendar-title {
+    font-weight: 600;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos de la tabla de registros */
+.table-container {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar-table th, .calendar-table td {
+    padding: 12px;
+    border: 1px solid #444;
+    color: #fff;
+    font-weight: 500;
+}
+
+.calendar-table thead th {
+    background-color: #444;
+    color: #fff;
+    font-weight: 600;
+}
+
+.calendar-table tbody tr:hover {
+    background-color: #333;
+}
+
+/* Botones de acción dentro de la tabla */
+.calendar-btn-action {
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: background-color 0.3s ease;
+}
+
+.calendar-btn-action.edit {
+    background-color: #dc3545; /* Botón "Editar" en rojo */
+    color: #fff;
+}
+
+.calendar-btn-action.delete {
+    background-color: #c0392b; /* Botón "Eliminar" en rojo oscuro */
+    color: #fff;
+}
+
+/* ======================================= */
+/* --- Estilos para los Modales del Calendario --- */
+/* ======================================= */
+.modal {
+    /* Solución al problema de superposición */
+    z-index: 1060 !important;
+}
+
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+.calendar-modal .modal-content {
+    background-color: #222;
+    color: #fff;
+    border: 1px solid #444;
+}
+
+.calendar-modal .modal-header {
+    border-bottom: 1px solid #444;
+}
+
+.calendar-modal .modal-footer {
+    border-top: 1px solid #444;
+}
+
+.calendar-modal .form-label {
+    color: #fff;
+}
+
+.calendar-modal .form-control {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.calendar-modal .form-control::placeholder {
+    color: #aaa;
+}
+
+.calendar-modal .modal-title {
+    font-weight: 600;
+}
+
+/* ======================================= */
+/* --- Estilos para FullCalendar ---     */
+/* ======================================= */
+
+/* Asegura que todos los elementos de texto en el calendario sean blancos */
+.fc-theme-standard a,
+.fc-theme-standard h2,
+.fc-theme-standard h3,
+.fc-theme-standard .fc-button-primary {
+    color: #fff !important;
+}
+
+/* Estilos para los nombres de los días (ej. 'Lun', 'Mar') */
+.fc-col-header-cell {
+    color: #fff !important;
+    background-color: transparent !important;
+}
+
+/* Estilos para los números de los días del calendario */
+.fc-daygrid-day-number {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* Cambia el color del día actual (Today) a un rojo semitransparente */
+.fc-day-today .fc-daygrid-day-frame {
+    background-color: rgba(233, 28, 28, 0.4) !important;
+    border-radius: 8px;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    color: #fff !important;
+    font-weight: 700;
+}
+
+/* ======================================= */
+/* --- Estilos para el Chatbot --- */
+/* ======================================= */
+
+/* Nuevo contenedor para la página completa */
+.page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Ocupa la altura completa de la vista */
+    padding: 20px;
+    box-sizing: border-box; /* Asegura que el padding no cause scroll */
+}
+
+/* Contenedor principal del chat */
+.chatbot-container {
+    background-color: #000;
+    border: 2px solid #e91c1c;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    max-width: 900px;
+    height: 100%; /* Permite que el chat crezca en altura */
+    min-height: 500px; /* Altura mínima para que no se vea tan pequeño */
+    margin: 0; /* Elimina los márgenes fijos */
+    overflow: hidden;
+    padding: 10px;
+}
+
+/* Encabezado con el nombre de usuario y el ícono */
+.chat-header {
+    border: 2px solid #e91c1c;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.chat-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-icon {
+    color: #fff;
+    font-size: 2rem;
+}
+
+.chat-username {
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+/* Contenedor de mensajes para permitir el scroll */
+.messages-container {
+    flex-grow: 1; /* Esto hace que el contenedor se estire y ocupe el espacio sobrante */
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Estilo para los íconos de perfil en los mensajes */
+.chat-avatar {
+    color: #fff;
+    font-size: 2rem;
+}
+
+/* Contenedor de cada mensaje para alinear el avatar y la burbuja */
+.message-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.message-wrapper.incoming {
+    align-self: flex-start;
+}
+
+.message-wrapper.outgoing {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+/* Estilo para las burbujas de mensaje */
+.message-bubble {
+    background-color: #fff;
+    color: #000;
+    padding: 12px 18px;
+    border-radius: 20px;
+    max-width: 70%;
+    word-wrap: break-word;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Contenedor de la barra de entrada de texto */
+.input-container {
+    display: flex;
+    align-items: center;
+    border: 2px solid #e91c1c;
+    border-radius: 8px;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+/* Campo de entrada de texto */
+.chat-input {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    color: #fff;
+    font-size: 1rem;
+}
+
+/* Placeholder del input */
+.chat-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Botón de enviar */
+.send-btn {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+
+.send-btn:hover {
+    color: #e91c1c;
+}

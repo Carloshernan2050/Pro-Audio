@@ -18,7 +18,9 @@
             <h1>PRO AUDIO</h1>
             <form class="search-form" action="#" method="GET">
                 <input type="text" name="buscar" class="search-input" placeholder="Buscar...">
-                <button type="submit" class="search-btn">🔍</button>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
             </form>
         </header>
 
