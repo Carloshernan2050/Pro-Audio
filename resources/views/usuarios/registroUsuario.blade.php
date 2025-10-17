@@ -10,6 +10,7 @@
 
     <div class="background-registro">
         <div class="form-container">
+            <a href="{{ route('inicio') }}" class="boton-cerrar">✖</a>
             <h2 class="titulo-formulario">Crear una cuenta nueva</h2>
             
             @if(session('success'))
@@ -79,7 +80,7 @@
                     {{-- Este campo debe llamarse "contrasena_confirmation" para que la regla "confirmed" funcione --}}
                     <input type="password" name="contrasena_confirmation" required>
                 </div>
-
+                
                 <button type="submit" class="boton-registro">REGISTRARSE</button>
             </form>
 

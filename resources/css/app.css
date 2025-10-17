@@ -1382,3 +1382,23 @@ tr:nth-child(even) {
 .send-btn:hover {
     color: #e91c1c;
 }
+
+.form-container {
+    position: relative;
+}
+
+.boton-cerrar {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    font-size: 22px;
+    color: #000000;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+    cursor: pointer;
+}
+
+.boton-cerrar:hover {
+    color: rgb(255, 255, 255); /* rojo elegante al pasar el mouse */
+}

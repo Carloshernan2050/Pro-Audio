@@ -46,33 +46,40 @@
             <p class="page-subtitle">Aquí puedes ver y gestionar tu información personal.</p>
 
             <div class="profile-container">
-                @if($usuario)
+                @if(session()->has('usuario_id') && $usuario)
                     <div class="profile-details">
                         <p><strong>Nombre completo:</strong>
                             {{ $usuario->primer_nombre ?? '' }}
                             {{ $usuario->segundo_nombre ?? '' }}
                             {{ $usuario->primer_apellido ?? '' }}
-                            {{ $usuario->segundo_apellido ?? '' }}</p>
-
+                            {{ $usuario->segundo_apellido ?? '' }}
+                        </p>
                         <p><strong>Correo electrónico:</strong> {{ $usuario->correo ?? '' }}</p>
                     </div>
                 @else
-                    <p class="text-gray-300">No se encontró información del usuario.</p>
+                    <p class="text-gray-300">Debes iniciar sesión para ver tu perfil.</p>
                 @endif
+
                 {{-- Botón para volver al panel --}}
                     <a href="{{ route('usuarios.dashboard') }}" class="btn-secondary inline-block">
                         <i class="fas fa-arrow-left"></i> Volver al panel
                     </a>
                 {{-- Contenedor flexible para los botones --}}
                 <div class="flex items-center justify-center sm:justify-start gap-4 mt-3">
-                    {{-- Botón para cerrar sesión --}}
-                    <form action="{{ route('usuarios.cerrarSesion') }}" method="POST">
-                        {{-- Token CSRF para seguridad --}}
-                        @csrf
-                        <button type="submit" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                        </button>
-                    </form>
+                    @if(session()->has('usuario_id'))
+                        {{-- Botón para cerrar sesión --}}
+                        <form action="{{ route('usuarios.cerrarSesion') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn-logout">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </button>
+                        </form>
+                    @else
+                        {{-- Botón para iniciar sesión --}}
+                        <br><a href="{{ route('usuarios.inicioSesion') }}" class="btn-logout">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    @endif
                 </div>
             </div>
         </main>

@@ -1,0 +1,638 @@
+/* ======================================= */
+/* --- Estilos para la Estructura del Dashboard (dashboard.css) --- */
+/* ======================================= */
+
+/* Reset e Integración de Fondo del Body */
+body {
+    background-image: url('/public/images/dashboard.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: #000; /* Fondo de seguridad */
+}
+
+/* Contenedor principal con Overlay */
+.dashboard-container {
+    display: grid;
+    /* Define 3 áreas principales: Cabecera, Sidebar, Contenido */
+    grid-template-areas:
+        "header header"
+        "sidebar content";
+    /* Columnas: Ancho fijo para el sidebar, el resto para el contenido */
+    grid-template-columns: 240px 1fr;
+    /* Filas: Usamos auto para que el header se ajuste a su padding */
+    grid-template-rows: auto 1fr; 
+    min-height: 100vh;
+    width: 100%;
+    /* Overlay semi-transparente sobre la imagen de fondo */
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white; /* Color de texto base */
+}
+
+/* ------------------------------------- */
+/* --- Barra Superior (Header) - ESTILO DESEADO APLICADO --- */
+/* ------------------------------------- */
+.top-bar {
+    grid-area: header;
+    background-color: #e91c1c; /* Rojo principal de la marca */
+    color: rgb(255, 255, 255); /* Color de texto base */
+    padding: 40px 30px; /* AUMENTA LA ALTURA Y ESPACIO (ESTILO DESEADO) */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra (ESTILO DESEADO) */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.top-bar h1 {
+    margin: 0;
+    font-size: 2.5rem; /* Tamaño de fuente más grande (ESTILO DESEADO) */
+    font-weight: bold; 
+    letter-spacing: 1px;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    flex-grow: 1; 
+    max-width: 600px;
+    gap: 24px; /* Espacio entre input y botón (ESTILO DESEADO) */
+}
+
+.search-input {
+    padding: 10px 16px; /* Padding ajustado (ESTILO DESEADO) */
+    border-radius: 20px;
+    font-size: 1rem;
+    outline: none;
+    width: 100%;
+    border: 2px solid #ffffff; /* Borde blanco (ESTILO DESEADO) */
+    background-color: #000;
+    color: white;
+    transition: all 0.3s;
+}
+
+.search-input:focus {
+    border-color: #e91c1c; 
+    box-shadow: 0 0 5px #e91c1c;
+}
+
+.search-btn {
+    background: rgb(0, 0, 0); /* Fondo negro (ESTILO DESEADO) */
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    padding: 8px 12px;
+    border: 2px solid blanchedalmond; /* Borde específico (ESTILO DESEADO) */
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+}
+
+.search-btn:hover {
+    background: #fff3f3; /* Hover blanco (ESTILO DESEADO) */
+}
+
+/* ------------------------------------- */
+/* --- Barra Lateral (Sidebar) - ESTILO DESEADO APLICADO --- */
+/* ------------------------------------- */
+.sidebar {
+    grid-area: sidebar;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente oscuro (ESTILO DESEADO) */
+    padding: 20px; /* Padding ajustado (ESTILO DESEADO) */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacio ajustado (ESTILO DESEADO) */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Sombra (ESTILO DESEADO) */
+    position: fixed;
+    top: 120px; /* AJUSTE CRÍTICO: El nuevo header es más alto, el sidebar debe empezar más abajo. */
+    left: 0;
+    bottom: 0; /* Ocupa el resto de la altura */
+    width: 240px; 
+    z-index: 999;
+    overflow-y: auto;
+    border-right: none; /* Quitamos borde derecho para ser más fieles al estilo simple */
+}
+
+.menu-title {
+    color: white; /* Color blanco (ESTILO DESEADO) */
+    font-weight: bold; /* Peso de fuente (ESTILO DESEADO) */
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-left: 0; /* Ajuste el margin para el padding del sidebar */
+}
+
+.sidebar-btn {
+    display: flex; /* Necesario para que el ícono y el texto se vean juntos */
+    align-items: center; 
+    gap: 15px; 
+
+    background-color: transparent; /* ESTILO DESEADO */
+    color: white; /* ESTILO DESEADO */
+    border: 1px solid white; /* ESTILO DESEADO */
+    padding: 10px 20px; /* Padding (ESTILO DESEADO) */
+    text-decoration: none;
+    border-radius: 5px; /* Bordes redondeados (ESTILO DESEADO) */
+    transition: all 0.3s;
+    margin-bottom: 15px; /* Margen inferior (ESTILO DESEADO) */
+}
+
+.sidebar-btn:hover {
+    background-color: #e91c1c; /* ESTILO DESEADO */
+    color: #fff;
+    box-shadow: 0 0 15px 2px #e91c1c; /* ESTILO DESEADO */
+    border-color: #fff;
+}
+
+.sidebar-btn i {
+    font-size: 1.1rem;
+}
+
+/* ------------------------------------- */
+/* --- Contenido Principal (Main Content) --- */
+/* ------------------------------------- */
+.main-content {
+    grid-area: content;
+    padding: 40px;
+    padding-top: 130px; /* AJUSTE CRÍTICO: Espacio para el header más alto (~120px) */
+    color: white;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.welcome-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #e91c1c;
+    text-align: center;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.welcome-text {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    color: #ccc;
+    text-align: center;
+}
+
+/* ======================================= */
+/* --- Diseño de Contenido en Dos Columnas (Main Content Grid) --- */
+/* ... (Se mantienen todos los estilos del content-grid, cards, stats, y process) ... */
+/* ======================================= */
+
+.content-grid {
+    display: grid;
+    /* Dos columnas: una flexible (1fr) y una para destacados (320px) */
+    grid-template-columns: 1fr 320px;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.primary-section {
+    grid-column: 1 / 2; /* Ocupa la primera columna */
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Espacio entre las tarjetas */
+}
+
+.secondary-section {
+    grid-column: 2 / 3; /* Ocupa la segunda columna (destacados) */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Estilo Base para las Tarjetas de Contenido */
+.content-card {
+    background-color: rgba(255, 255, 255, 0.08); /* Fondo semi-transparente claro */
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(233, 28, 28, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.content-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(233, 28, 28, 0.4);
+}
+
+.content-card h3 {
+    color: #e91c1c;
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    border-bottom: 2px solid rgba(233, 28, 28, 0.3);
+    padding-bottom: 10px;
+    font-weight: 700;
+}
+
+.content-card p {
+    color: #ddd;
+    line-height: 1.6;
+}
+
+/* ------------------------------------- */
+/* --- Estilos de Presentación (Empresa/Misión/Valores) --- */
+/* ------------------------------------- */
+
+/* Imagen Destacada (Carro) */
+.featured-image-container {
+    margin-bottom: 0;
+}
+.featured-image-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+.featured-image-container img:hover {
+    transform: scale(1.01);
+}
+
+/* Bloque Misión (dentro de Card) */
+.presentacion-bloque {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.presentacion-bloque.row {
+    flex-direction: row;
+}
+
+.presentacion-bloque-media {
+    flex-shrink: 0;
+    max-width: 150px;
+}
+
+.presentacion-img-pequena {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Bloque Valores (dentro de Card) */
+.values-card ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 20px;
+}
+
+.values-card li {
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 25px;
+    color: #ccc;
+}
+
+.values-card li strong {
+    color: #e91c1c;
+}
+
+.values-card li::before {
+    content: '▶';
+    color: #e91c1c;
+    position: absolute;
+    left: 0;
+    font-size: 1rem;
+}
+
+.video-destacado {
+    margin-top: 30px;
+}
+
+.presentacion-video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* ------------------------------------- */
+/* --- Estilos para Métricas Clave (KPIs) --- */
+/* ------------------------------------- */
+
+.stats-card h3 {
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-item {
+    background-color: rgba(233, 28, 28, 0.1); /* Fondo sutil de la marca */
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid rgba(233, 28, 28, 0.3);
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #e91c1c; /* Rojo de la marca */
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #ccc;
+    font-weight: 500;
+}
+
+
+/* ------------------------------------- */
+/* --- Estilos para la Sección "Cómo Trabajamos" --- */
+/* ------------------------------------- */
+
+.process-steps-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.process-step {
+    flex-basis: 33%;
+    text-align: center;
+    position: relative;
+}
+
+.process-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -25px;
+    top: 50px;
+    font-size: 2rem;
+    color: rgba(233, 28, 28, 0.5);
+}
+
+.step-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    background-color: #e91c1c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.process-step h4 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.process-step p {
+    font-size: 0.9rem;
+    color: #ddd;
+    line-height: 1.5;
+}
+
+
+/* ------------------------------------- */
+/* --- Estilos para Botón de Acción Principal (CTA) --- */
+/* ------------------------------------- */
+
+.btn-primary-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 15px 20px;
+    border-radius: 10px;
+    background-color: #e91c1c; /* Rojo de la marca */
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary-action:hover {
+    background-color: #c91717;
+    transform: translateY(-2px);
+}
+
+
+/* ------------------------------------- */
+/* --- Estilos del Carrusel (MANTENIDO) --- */
+/* ------------------------------------- */
+.carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 40px auto;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    aspect-ratio: 16/9;
+}
+
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.carousel-slide.active {
+    display: block;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(233, 28, 28, 0.7);
+    color: white;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    z-index: 99;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.carousel-btn:hover {
+    background-color: #e91c1c;
+}
+
+.prev-btn {
+    left: 20px;
+}
+
+.next-btn {
+    right: 20px;
+}
+
+.carousel-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.dot.active {
+    background-color: #e91c1c;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+/* ------------------------------------- */
+/* --- Media Queries (Responsividad) --- */
+/* ------------------------------------- */
+
+@media (max-width: 1024px) {
+    /* Ajuste para tablets */
+    .dashboard-container {
+        grid-template-columns: 200px 1fr; /* Sidebar más estrecho */
+    }
+
+    .sidebar {
+        width: 200px;
+        top: 120px; /* Mantener la alineación ajustada */
+    }
+
+    .main-content {
+        padding: 20px;
+        padding-top: 130px; /* Mantener la alineación ajustada */
+    }
+}
+
+@media (max-width: 992px) {
+    /* El Grid de contenido se apila a una sola columna */
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .primary-section, .secondary-section {
+        grid-column: 1 / 2;
+    }
+
+    /* La Misión se apila verticalmente */
+    .presentacion-bloque.row {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .presentacion-bloque-media {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ajuste para móviles */
+    .dashboard-container {
+        /* Se elimina el sidebar, el contenido ocupa toda la columna */
+        grid-template-areas:
+            "header"
+            "content";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr; /* El header se ajusta automáticamente (auto) */
+        padding-top: 0; /* No se necesita padding en el contenedor */
+    }
+
+    .top-bar {
+        height: auto;
+        padding: 10px 15px; /* Padding más pequeño (ESTILO DESEADO MOBILE) */
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .top-bar h1 {
+        font-size: 1.8rem; /* Fuente más pequeña para mobile (ESTILO DESEADO MOBILE) */
+    }
+
+    .search-form {
+        display: none; /* Ocultar la barra de búsqueda en móviles para simplificar */
+    }
+
+    .sidebar {
+        display: none; /* Ocultar el sidebar en móvil */
+    }
+
+    .main-content {
+        padding: 20px 15px; /* Padding reducido */
+        padding-top: 20px; /* Ya que la barra superior ahora es más pequeña y se ajusta automáticamente */
+    }
+
+    .welcome-title {
+        font-size: 1.8rem;
+    }
+
+    /* Proceso de Trabajo: se apila verticalmente */
+    .process-steps-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+    .process-step {
+        margin-bottom: 30px;
+    }
+    .process-step:not(:last-child)::after {
+        content: '↓'; /* Flecha hacia abajo en móvil */
+        right: auto;
+        bottom: -20px;
+        top: auto;
+    }
+}

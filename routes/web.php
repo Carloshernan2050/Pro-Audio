@@ -10,8 +10,8 @@ use App\Http\Controllers\AjustesController;
 
 // Página principal -> redirige a registro
 Route::get('/', function () {
-    return redirect()->route('usuarios.registroUsuario');
-});
+    return view('usuarios.dashboard');
+})->name('inicio');
 
 // Registro
 Route::get('/usuarios/crear', [UsuarioController::class, 'registro'])->name('usuarios.registroUsuario');

@@ -11,6 +11,7 @@
 
     <div class="background-registro">
         <div class="form-container">
+            <a href="{{ route('inicio') }}" class="boton-cerrar">✖</a>
             <h2 class="titulo-formulario">Iniciar Sesión</h2>
 
             @if(session('success'))
