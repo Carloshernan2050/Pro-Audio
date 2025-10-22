@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\CalendarioController; 
-
+use App\Http\Controllers\ServiciosViewController;
+use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\MovimientosInventarioController;
 
 use App\Http\Controllers\AjustesController;
 
@@ -45,19 +47,13 @@ Route::get('/usuarios/perfil', function () {
 })->name('usuarios.perfil');
 
 // Sonido
-Route::get('/usuarios/animacion', function () {
-    return view('usuarios.animacion');
-})->name('usuarios.animacion');
+Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])->name('usuarios.animacion');
 
 // Perifoneo
-Route::get('/usuarios/publicidad', function () {
-    return view('usuarios.publicidad');
-})->name('usuarios.publicidad');
+Route::get('/usuarios/publicidad', [ServiciosViewController::class, 'publicidad'])->name('usuarios.publicidad');
 
 // Eventos
-Route::get('/usuarios/alquiler', function () {
-    return view('usuarios.alquiler');
-})->name('usuarios.alquiler');
+Route::get('/usuarios/alquiler', [ServiciosViewController::class, 'alquiler'])->name('usuarios.alquiler');
 
 // Ajustes
 Route::get('/usuarios/ajustes', function () {
@@ -77,6 +73,10 @@ Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perf
 
 
 Route::resource('servicios', ServiciosController::class);
+
+// Rutas para inventario y movimientos
+Route::resource('inventario', InventarioController::class);
+Route::resource('movimientos', MovimientosInventarioController::class);
 
 // Rutas del calendario
 Route::controller(CalendarioController::class)->group(function () {

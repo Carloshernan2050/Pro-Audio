@@ -12,29 +12,36 @@ class InventarioSeeder extends Seeder
     {
         DB::table('inventario')->insert([
             [
-                'descripcion'         => 'Cámara fotográfica profesional',
-                'cantidad_disponible'=> 5,
-                'fecha_actualizacion'=> Carbon::now(),
+                'descripcion' => 'Cámara fotográfica profesional',
+                'stock' => 5,
             ],
             [
-                'descripcion'         => 'Micrófono inalámbrico',
-                'cantidad_disponible'=> 12,
-                'fecha_actualizacion'=> Carbon::now(),
+                'descripcion' => 'Micrófono inalámbrico',
+                'stock' => 12,
             ],
             [
-                'descripcion'         => 'Luces LED para estudio',
-                'cantidad_disponible'=> 20,
-                'fecha_actualizacion'=> Carbon::now(),
+                'descripcion' => 'Luces LED para estudio',
+                'stock' => 20,
             ],
             [
-                'descripcion'         => 'Sillas plegables',
-                'cantidad_disponible'=> 50,
-                'fecha_actualizacion'=> Carbon::now(),
+                'descripcion' => 'Sillas plegables',
+                'stock' => 50,
             ],
             [
-                'descripcion'         => 'Proyector HD',
-                'cantidad_disponible'=> 3,
-                'fecha_actualizacion'=> Carbon::now(),
+                'descripcion' => 'Proyector HD',
+                'stock' => 3,
+            ],
+            [
+                'descripcion' => 'Consola de mezclas',
+                'stock' => 8,
+            ],
+            [
+                'descripcion' => 'Bafles autoamplificados',
+                'stock' => 15,
+            ],
+            [
+                'descripcion' => 'Cables de audio',
+                'stock' => 100,
             ],
         ]);
     }

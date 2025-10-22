@@ -43,59 +43,22 @@
             
             <section class="productos-servicio">
                 <div class="productos-grid">
-                    {{-- Item de producto 1 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/dj.jpg" alt="DJ Profesional" class="producto-imagen">
-                        <h4 class="producto-nombre">DJ Profesional</h4>
-                    </div>
-
-                    {{-- Item de producto 2 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/animador_eventos.jpg" alt="Animador de eventos" class="producto-imagen">
-                        <h4 class="producto-nombre">Animador de Eventos</h4>
-                    </div>
-
-                    {{-- Item de producto 3 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/mago_eventos.jpg" alt="Mago para eventos" class="producto-imagen">
-                        <h4 class="producto-nombre">Mago para Eventos</h4>
-                    </div>
-                    
-                    {{-- Item de producto 4 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/iluminacion_evento.jpg" alt="Iluminación de Eventos" class="producto-imagen">
-                        <h4 class="producto-nombre">Iluminación de Eventos</h4>
-                    </div>
-                    
-                    {{-- Item de producto 5 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/concierto.jpg" alt="Animación de Conciertos" class="producto-imagen">
-                        <h4 class="producto-nombre">Animación de Conciertos</h4>
-                    </div>
-
-                    {{-- Item de producto 6 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/coordinador_eventos.jpg" alt="Coordinador de Eventos" class="producto-imagen">
-                        <h4 class="producto-nombre">Coordinador de Eventos</h4>
-                    </div>
-
-                    {{-- Item de producto 7 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/presentador_evento.jpg" alt="Presentador de Eventos" class="producto-imagen">
-                        <h4 class="producto-nombre">Presentador de Eventos</h4>
-                    </div>
-
-                    {{-- Item de producto 8 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/efectos_especiales.jpg" alt="Efectos Especiales para Eventos" class="producto-imagen">
-                        <h4 class="producto-nombre">Efectos Especiales</h4>
-                    </div>
-
-                    {{-- Item de producto 9 --}}
-                    <div class="producto-item">
-                        <img src="/images/animacion/audiovisual.jpg" alt="Producción Audiovisual" class="producto-imagen">
-                        <h4 class="producto-nombre">Producción Audiovisual</h4>
-                    </div>
+                    @forelse($subServicios as $subServicio)
+                        <div class="producto-item">
+                            <img src="/images/animacion/{{ strtolower(str_replace(' ', '_', $subServicio->nombre)) }}.jpg" 
+                                 alt="{{ $subServicio->nombre }}" 
+                                 class="producto-imagen"
+                                 onerror="this.src='/images/default.jpg'">
+                            <h4 class="producto-nombre">{{ $subServicio->nombre }}</h4>
+                            @if($subServicio->descripcion)
+                                <p class="producto-descripcion">{{ $subServicio->descripcion }}</p>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="no-services">
+                            <p>No hay sub-servicios disponibles para animación en este momento.</p>
+                        </div>
+                    @endforelse
                 </div>
             </section>
         </main>

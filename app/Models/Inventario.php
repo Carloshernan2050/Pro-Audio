@@ -5,21 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Servicios extends Model
+class Inventario extends Model
 {
     use HasFactory;
 
-    protected $table = 'servicios';
+    protected $table = 'inventario';
 
     public $timestamps = false; // 👈 Desactiva created_at y updated_at
 
     protected $fillable = [
-        'nombre_servicio'
+        'descripcion',
+        'stock'
     ];
 
-    // Relación con SubServicios
-    public function subServicios()
+    // Relación con movimientos de inventario
+    public function movimientos()
     {
-        return $this->hasMany(SubServicios::class, 'servicios_id');
+        return $this->hasMany(MovimientosInventario::class, 'inventario_id');
     }
 }

@@ -44,47 +44,22 @@
 
             <section class="productos-servicio">
                 <div class="productos-grid">
-                    {{-- Item de producto 1 --}}
-                    <div class="producto-item">
-                        <img src="/images/publicidad/spot_radial.jpg" alt="Spot Radial" class="producto-imagen">
-                        <h4 class="producto-nombre">Spot Radial</h4>
-                    </div>
-
-                    {{-- Item de producto 2 --}}
-                    <div class="producto-item">
-                        <img src="/images/publicidad/cuñas.jpg" alt="Cuñas Publicitarias" class="producto-imagen">
-                        <h4 class="producto-nombre">Cuñas Publicitarias</h4>
-                    </div>
-
-                    {{-- Item de producto 3 --}}
-                    <div class="producto-item">
-                        <img src="/images/publicidad/jingles.jpg" alt="Jingles" class="producto-imagen">
-                        <h4 class="producto-nombre">Producción de Jingles</h4>
-                    </div>
-                    
-                    {{-- Item de producto 4 --}}
-                    <div class="producto-item">
-                        <img src="/images/publicidad/locucion_comercial.jpg" alt="Locución Comercial" class="producto-imagen">
-                        <h4 class="producto-nombre">Locución Comercial</h4>
-                    </div>
-                    
-                    {{-- Item de producto 5 --}}
-                    <div class="producto-item">
-                        <img src="/images/publicidad/megaeventos.jpg" alt="Publicidad para Megaeventos" class="producto-imagen">
-                        <h4 class="producto-nombre">Publicidad en Megaeventos</h4>
-                    </div>
-
-                    {{-- Item de producto 6 --}}
-                    <div class="producto-item">
-                        <img src="/images/publicidad/voicemail.jpg" alt="Publicidad para Buzón de Voz" class="producto-imagen">
-                        <h4 class="producto-nombre">Voz para Buzón de Voz</h4>
-                    </div>
-
-                    {{-- Item de producto 7 --}}
-                    <div class="producto-item">
-                        <img src="/images/publicidad/sonido_corporativo.jpg" alt="Sonido Corporativo" class="producto-imagen">
-                        <h4 class="producto-nombre">Sonido Corporativo</h4>
-                    </div>
+                    @forelse($subServicios as $subServicio)
+                        <div class="producto-item">
+                            <img src="/images/publicidad/{{ strtolower(str_replace(' ', '_', $subServicio->nombre)) }}.jpg" 
+                                 alt="{{ $subServicio->nombre }}" 
+                                 class="producto-imagen"
+                                 onerror="this.src='/images/default.jpg'">
+                            <h4 class="producto-nombre">{{ $subServicio->nombre }}</h4>
+                            @if($subServicio->descripcion)
+                                <p class="producto-descripcion">{{ $subServicio->descripcion }}</p>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="no-services">
+                            <p>No hay sub-servicios disponibles para publicidad en este momento.</p>
+                        </div>
+                    @endforelse
                 </div>
             </section>
         </main>

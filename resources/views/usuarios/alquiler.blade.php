@@ -44,53 +44,22 @@
             
             <section class="productos-servicio">
                 <div class="productos-grid">
-                    {{-- Item de producto 1 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/bafle_autoamplificado.jpg" alt="Bafle Autoamplificado" class="producto-imagen">
-                        <h4 class="producto-nombre">Bafle Autoamplificado</h4>
-                    </div>
-
-                    {{-- Item de producto 2 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/luces_audioritmicas.jpg" alt="Luces Audiorítmicas" class="producto-imagen">
-                        <h4 class="producto-nombre">Luces Audiorítmicas</h4>
-                    </div>
-
-                    {{-- Item de producto 3 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/microfono_inalambrico.jpg" alt="Micrófono Inalámbrico" class="producto-imagen">
-                        <h4 class="producto-nombre">Micrófono Inalámbrico</h4>
-                    </div>
-                    
-                    {{-- Item de producto 4 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/maquina_humo.jpg" alt="Máquina de Humo" class="producto-imagen">
-                        <h4 class="producto-nombre">Máquina de Humo</h4>
-                    </div>
-                    
-                    {{-- Item de producto 5 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/proyector.jpg" alt="Proyector y Telón" class="producto-imagen">
-                        <h4 class="producto-nombre">Proyector y Telón</h4>
-                    </div>
-
-                    {{-- Item de producto 6 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/cabina_dj.jpg" alt="Cabina para DJ" class="producto-imagen">
-                        <h4 class="producto-nombre">Cabina para DJ</h4>
-                    </div>
-
-                    {{-- Item de producto 7 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/consola_mezclas.jpg" alt="Consola de Mezclas" class="producto-imagen">
-                        <h4 class="producto-nombre">Consola de Mezclas</h4>
-                    </div>
-
-                    {{-- Item de producto 8 --}}
-                    <div class="producto-item">
-                        <img src="/images/alquiler/tripode_parlante.jpg" alt="Trípode para Parlante" class="producto-imagen">
-                        <h4 class="producto-nombre">Trípode para Parlante</h4>
-                    </div>
+                    @forelse($subServicios as $subServicio)
+                        <div class="producto-item">
+                            <img src="/images/alquiler/{{ strtolower(str_replace(' ', '_', $subServicio->nombre)) }}.jpg" 
+                                 alt="{{ $subServicio->nombre }}" 
+                                 class="producto-imagen"
+                                 onerror="this.src='/images/default.jpg'">
+                            <h4 class="producto-nombre">{{ $subServicio->nombre }}</h4>
+                            @if($subServicio->descripcion)
+                                <p class="producto-descripcion">{{ $subServicio->descripcion }}</p>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="no-services">
+                            <p>No hay sub-servicios disponibles para alquiler en este momento.</p>
+                        </div>
+                    @endforelse
                 </div>
             </section>
         </main>
