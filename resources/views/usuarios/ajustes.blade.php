@@ -475,13 +475,26 @@
         // Funciones de eliminación
         function deleteInventario(id) {
             if (confirm('¿Estás seguro de que deseas eliminar este item?')) {
-                fetch(`{{ url('inventario') }}/${id}`, {
-                    method: 'DELETE',
+                const url = `{{ url('inventario') }}/${id}`;
+                const formData = new FormData();
+                formData.append('_method', 'DELETE');
+
+                fetch(url, {
+                    method: 'POST', // usar POST y spoofear _method para compatibilidad con form-data
+                    body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    const ct = response.headers.get('content-type') || '';
+                    if (!response.ok) {
+                        if (ct.includes('application/json')) return response.json().then(err => Promise.reject(err));
+                        return response.text().then(text => Promise.reject({ message: text }));
+                    }
+                    return ct.includes('application/json') ? response.json() : {};
+                })
                 .then(data => {
                     if (data.success) {
                         showAlert(data.success);
@@ -497,13 +510,26 @@
 
         function deleteMovimiento(id) {
             if (confirm('¿Estás seguro de que deseas eliminar este movimiento?')) {
-                fetch(`{{ url('movimientos') }}/${id}`, {
-                    method: 'DELETE',
+                const url = `{{ url('movimientos') }}/${id}`;
+                const formData = new FormData();
+                formData.append('_method', 'DELETE');
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    const ct = response.headers.get('content-type') || '';
+                    if (!response.ok) {
+                        if (ct.includes('application/json')) return response.json().then(err => Promise.reject(err));
+                        return response.text().then(text => Promise.reject({ message: text }));
+                    }
+                    return ct.includes('application/json') ? response.json() : {};
+                })
                 .then(data => {
                     if (data.success) {
                         showAlert(data.success);
@@ -537,13 +563,20 @@
             if (inventarioForm) {
                 inventarioForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(this);
                     const url = this.action;
-                    const method = document.getElementById('inventarioFormMethod').value;
-                    
+                    const methodValue = document.getElementById('inventarioFormMethod').value;
+                    // usar POST y spoofear si el método es PUT/DELETE (compatibilidad con multipart)
+                    const fetchMethod = (methodValue === 'PUT' || methodValue === 'DELETE') ? 'POST' : methodValue;
+
+                    // si no existe _method en formData, añadirlo (por si acaso)
+                    if ((methodValue === 'PUT' || methodValue === 'DELETE') && !formData.has('_method')) {
+                        formData.append('_method', methodValue);
+                    }
+
                     fetch(url, {
-                        method: method,
+                        method: fetchMethod,
                         body: formData,
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -572,10 +605,17 @@
                     
                     const formData = new FormData(this);
                     const url = this.action;
-                    const method = document.getElementById('movimientoFormMethod').value;
-                    
+                    const methodValue = document.getElementById('movimientoFormMethod').value;
+                    // usar POST y spoofear si el método es PUT/DELETE (compatibilidad con multipart)
+                    const fetchMethod = (methodValue === 'PUT' || methodValue === 'DELETE') ? 'POST' : methodValue;
+
+                    // si no existe _method en formData, añadirlo (por si acaso)
+                    if ((methodValue === 'PUT' || methodValue === 'DELETE') && !formData.has('_method')) {
+                        formData.append('_method', methodValue);
+                    }
+
                     fetch(url, {
-                        method: method,
+                        method: fetchMethod,
                         body: formData,
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
