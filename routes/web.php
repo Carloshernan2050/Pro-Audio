@@ -3,14 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ServiciosController;
-use App\Http\Controllers\CalendarioController; 
+use App\Http\Controllers\CalendarioController;
 use App\Http\Controllers\ServiciosViewController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\MovimientosInventarioController;
-
 use App\Http\Controllers\AjustesController;
+use App\Http\Controllers\ChatbotController;
 
-// Página principal -> redirige a registro
+// Página principal -> redirige al dashboard
 Route::get('/', function () {
     return view('usuarios.dashboard');
 })->name('inicio');
@@ -36,42 +36,27 @@ Route::get('/dashboard', function () {
     ]);
 })->name('dashboard');
 
-//dashboard
+// Redirección a dashboard
 Route::get('/usuarios/dashboard', function () {
     return redirect()->route('dashboard');
 })->name('usuarios.dashboard');
 
 // Perfil
-Route::get('/usuarios/perfil', function () {
-    return view('usuarios.perfil');
-})->name('usuarios.perfil');
+Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
 
-// Sonido
+// Servicios (secciones del sitio)
 Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])->name('usuarios.animacion');
-
-// Perifoneo
 Route::get('/usuarios/publicidad', [ServiciosViewController::class, 'publicidad'])->name('usuarios.publicidad');
-
-// Eventos
 Route::get('/usuarios/alquiler', [ServiciosViewController::class, 'alquiler'])->name('usuarios.alquiler');
 
 // Ajustes
-Route::get('/usuarios/ajustes', function () {
-    return view('usuarios.ajustes');
-})->name('usuarios.ajustes');
-
-// Ajustes
-Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])
-    ->name('usuarios.ajustes');
+Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])->name('usuarios.ajustes');
 
 // Chatbot
-Route::get('/usuarios/chatbot', function () {
-    return view('usuarios.chatbot');
-})->name('usuarios.chatbot');
+Route::get('/usuarios/chatbot', [ChatbotController::class, 'index'])->name('usuarios.chatbot');
+Route::post('/chat/enviar', [ChatbotController::class, 'enviar'])->name('chat.enviar');
 
-Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
-
-
+// CRUD de servicios
 Route::resource('servicios', ServiciosController::class);
 
 // Rutas para inventario y movimientos
@@ -80,16 +65,8 @@ Route::resource('movimientos', MovimientosInventarioController::class);
 
 // Rutas del calendario
 Route::controller(CalendarioController::class)->group(function () {
-    // Vista principal del calendario
     Route::get('/calendario', 'inicio')->name('usuarios.calendario');
-    
-    // CRUD del calendario
     Route::post('/calendario', 'guardar')->name('calendario.guardar');
     Route::put('/calendario/{id}', 'actualizar')->name('calendario.actualizar');
     Route::delete('/calendario/{id}', 'eliminar')->name('calendario.eliminar');
 });
-
-
-
-
-

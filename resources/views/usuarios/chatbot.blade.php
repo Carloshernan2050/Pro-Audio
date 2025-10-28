@@ -34,65 +34,111 @@
             <a href="{{ route('usuarios.alquiler') }}" class="sidebar-btn"><i class="fas fa-box"></i> Alquiler</a>
             <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
             <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
-            <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
+            <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn active"><i class="fas fa-robot"></i> Chatbot</a>
         </aside>
 
-    <div class="page-container">
         {{-- Contenedor principal del chat --}}
-        <div class="chatbot-container">
-            
-            {{-- Encabezado del chat (perfil de usuario) --}}
-            <div class="chat-header">
-                <div class="chat-profile">
-                    <i class="fas fa-user-circle chat-icon"></i>
-                    <span class="chat-username">Chat</span>
-                </div>
-            </div>
-
-            {{-- Contenedor de mensajes --}}
-            <div class="messages-container">
+        <div class="page-container">
+            <div class="chatbot-container">
                 
-                {{-- Mensaje entrante (del bot) --}}
-                <div class="message-wrapper incoming">
-                    <i class="fas fa-user-circle chat-avatar"></i>
-                    <div class="message-bubble">Hola, ¿en qué puedo ayudarte?</div>
+                {{-- Encabezado del chat --}}
+                <div class="chat-header">
+                    <div class="chat-profile">
+                        <i class="fas fa-user-circle chat-icon"></i>
+                        <span class="chat-username">Chat</span>
+                    </div>
                 </div>
 
-                {{-- Mensaje saliente (del usuario) --}}
-                <div class="message-wrapper outgoing">
-                    <div class="message-bubble">Quisiera saber sobre los servicios.</div>
-                    <i class="fas fa-user-circle chat-avatar"></i>
-                </div>
+                {{-- Contenedor dinámico de mensajes --}}
+                <div id="messages-container" class="messages-container"></div>
 
-                {{-- Otro mensaje entrante --}}
-                <div class="message-wrapper incoming">
+                {{-- Entrada del chat --}}
+                <div class="input-container">
                     <i class="fas fa-user-circle chat-avatar"></i>
-                    <div class="message-bubble">Claro. Tenemos servicios de alquiler de equipos de sonido, luces y animación.</div>
+                    <input type="text" id="mensaje" class="chat-input" placeholder="Escribe tu mensaje...">
+                    <button id="send-btn" class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
-
-                {{-- Otro mensaje saliente --}}
-                <div class="message-wrapper outgoing">
-                    <div class="message-bubble">¿Y sobre los precios?</div>
-                    <i class="fas fa-user-circle chat-avatar"></i>
-                </div>
-
-                {{-- Otro mensaje entrante --}}
-                <div class="message-wrapper incoming">
-                    <i class="fas fa-user-circle chat-avatar"></i>
-                    <div class="message-bubble">El precio depende del paquete y la duración del evento. ¿Tienes un evento en mente?</div>
-                </div>
-                
-            </div>
-
-            {{-- Contenedor de entrada de texto --}}
-            <div class="input-container">
-                <i class="fas fa-user-circle chat-avatar"></i>
-                <input type="text" class="chat-input" placeholder="Escribe tu mensaje...">
-                <button class="send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
             </div>
         </div>
     </div>
+
+    {{-- Script para manejar el envío del chat --}}
+    <script>
+    document.getElementById('send-btn').addEventListener('click', enviarMensaje);
+    document.getElementById('mensaje').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') enviarMensaje();
+    });
+
+    async function enviarMensaje() {
+        const input = document.getElementById('mensaje');
+        const mensaje = input.value.trim();
+        const contenedor = document.getElementById('messages-container');
+
+        if (!mensaje) return;
+
+        // Mostrar mensaje del usuario
+        contenedor.innerHTML += `
+            <div class="message-wrapper outgoing">
+                <div class="message-bubble">${mensaje}</div>
+                <i class="fas fa-user-circle chat-avatar"></i>
+            </div>
+        `;
+        input.value = '';
+        contenedor.scrollTop = contenedor.scrollHeight;
+
+        // Mostrar indicador de "escribiendo..."
+        const typing = document.createElement('div');
+        typing.classList.add('message-wrapper', 'incoming');
+        typing.innerHTML = `
+            <i class="fas fa-robot chat-avatar"></i>
+            <div class="message-bubble">Escribiendo...</div>
+        `;
+        contenedor.appendChild(typing);
+        contenedor.scrollTop = contenedor.scrollHeight;
+
+        try {
+            const response = await fetch("{{ route('chat.enviar') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ mensaje })
+            });
+
+            const data = await response.json();
+            typing.remove();
+
+            if (data.respuesta) {
+                contenedor.innerHTML += `
+                    <div class="message-wrapper incoming">
+                        <i class="fas fa-robot chat-avatar"></i>
+                        <div class="message-bubble">${data.respuesta}</div>
+                    </div>
+                `;
+            } else {
+                contenedor.innerHTML += `
+                    <div class="message-wrapper incoming">
+                        <i class="fas fa-robot chat-avatar"></i>
+                        <div class="message-bubble text-red-500">Error: ${data.error}</div>
+                    </div>
+                `;
+            }
+
+        } catch (error) {
+            typing.remove();
+            contenedor.innerHTML += `
+                <div class="message-wrapper incoming">
+                    <i class="fas fa-robot chat-avatar"></i>
+                    <div class="message-bubble text-red-500">Error al conectar con el servidor.</div>
+                </div>
+            `;
+        }
+
+        contenedor.scrollTop = contenedor.scrollHeight;
+    }
+    </script>
 </body>
 </html>
