@@ -11,29 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
+        // 1. Agregar la columna role_id a la tabla 'users'
+        Schema::table('users', function (Blueprint $table) {
+            // Utilizamos foreignId para crear el campo y la clave foránea en una línea.
+            // Por defecto, será NULLABLE para manejar usuarios invitados/sin rol definido inicialmente.
+            $table->foreignId('role_id')
+                  ->nullable()
+                  ->after('password') // Colocamos después del campo 'password'
+                  ->constrained('roles') // Asume que tu tabla se llama 'roles'
+                  ->onDelete('set null'); // Si se elimina un rol, el usuario se queda sin rol (null)
         });
     }
 
@@ -42,8 +28,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
+        Schema::table('users', function (Blueprint $table) {
+            // Para revertir la migración, primero eliminamos la clave foránea
+            $table->dropForeign(['role_id']);
+            // Luego eliminamos la columna
+            $table->dropColumn('role_id');
+        });
     }
 };
