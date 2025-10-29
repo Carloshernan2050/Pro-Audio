@@ -56,6 +56,9 @@ class UsuarioController extends Controller
         if ($usuario && Hash::check($request->contrasena, $usuario->contrasena)) {
             // Iniciar sesión
             session(['usuario_id' => $usuario->id, 'usuario_nombre' => $usuario->primer_nombre]);
+            if (session('pending_admin')) {
+                return redirect()->route('admin.key.form');
+            }
             return redirect()->route('dashboard')->with('success', '¡Bienvenido, ' . $usuario->primer_nombre . '!');
         } else {
             return back()->withErrors(['correo' => 'Correo o contraseña incorrectos'])->withInput();

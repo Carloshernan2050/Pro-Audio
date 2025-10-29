@@ -31,13 +31,19 @@
         <aside class="sidebar">
             <h5 class="menu-title">Menú</h5>
             <a href="{{ route('usuarios.perfil') }}" class="sidebar-btn"><i class="fas fa-user-circle"></i> Perfil</a>
-            <a href="{{ route('usuarios.dashboard') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
+            <a href="{{ route('inicio') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
             <a href="{{ route('usuarios.animacion') }}" class="sidebar-btn"><i class="fas fa-laugh-beam"></i> Animación</a>
             <a href="{{ route('usuarios.publicidad') }}" class="sidebar-btn"><i class="fas fa-bullhorn"></i> Publicidad</a>
             <a href="{{ route('usuarios.alquiler') }}" class="sidebar-btn"><i class="fas fa-box"></i> Alquiler</a>
+            @if(session('role') !== 'Invitado')
             <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
+            @endif
+            @if(session('role') === 'Administrador')
             <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
+            @endif
+            @if(session('role') !== 'Invitado')
             <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
+            @endif
         </aside>
 
         {{-- Contenido principal de la página de perfil (estilizado en app.css) --}}
@@ -61,7 +67,7 @@
                 @endif
 
                 {{-- Botón para volver al panel --}}
-                    <a href="{{ route('usuarios.dashboard') }}" class="btn-secondary inline-block">
+                    <a href="{{ route('inicio') }}" class="btn-secondary inline-block">
                         <i class="fas fa-arrow-left"></i> Volver al panel
                     </a>
                 {{-- Contenedor flexible para los botones --}}
@@ -75,10 +81,14 @@
                             </button>
                         </form>
                     @else
-                        {{-- Botón para iniciar sesión --}}
-                        <br><a href="{{ route('usuarios.inicioSesion') }}" class="btn-logout">
-                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                        </a>
+                        {{-- Invitado: Acceder como Cliente (redirige a registro y fija rol Cliente) --}}
+                        <form action="{{ route('role.set') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="role" value="Cliente">
+                            <button type="submit" class="btn-logout">
+                                <i class="fas fa-user-plus"></i> Acceder como Cliente
+                            </button>
+                        </form>
                     @endif
                 </div>
             </div>

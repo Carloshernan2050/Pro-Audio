@@ -25,12 +25,19 @@
                 {{-- ENCABEZADO --}}
                 <div class="calendar-header">
                     <h2 class="calendar-title">Calendario de Alquileres</h2>
+                    @if(session('role') === 'Administrador')
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrear">Nuevo alquiler</button>
+                    @endif
                 </div>
 
                 {{-- CALENDARIO --}}
                 <div id="calendar" class="mb-4"></div>
 
+                <div class="mb-3">
+                    <a href="{{ route('inicio') }}" class="btn btn-secondary">Volver al inicio</a>
+                </div>
+
+                @if(session('role') === 'Administrador')
                 {{-- TABLA DE REGISTROS --}}
                 <div class="table-container">
                     <h4 class="text-light">Listado de registros</h4>
@@ -41,7 +48,9 @@
                                 <th>Inicio</th>
                                 <th>Fin</th>
                                 <th>Descripción</th>
+                                @if(session('role') === 'Administrador')
                                 <th>Acciones</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -51,21 +60,20 @@
                                 <td>{{ $r->fecha_inicio }}</td>
                                 <td>{{ $r->fecha_fin }}</td>
                                 <td>{{ $r->descripcion_evento }}</td>
+                                @if(session('role') === 'Administrador')
                                 <td>
-                                    {{-- Botón Editar --}}
                                     <button class="btn calendar-btn-action edit" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $r->id }}">
                                         Editar
                                     </button>
-
-                                    {{-- Botón Eliminar --}}
                                     <form action="{{ route('calendario.eliminar',$r->id) }}" method="POST" class="d-inline">
                                         @csrf @method('DELETE')
                                         <button class="btn calendar-btn-action delete" onclick="return confirm('¿Eliminar?')">Eliminar</button>
                                     </form>
                                 </td>
+                                @endif
                             </tr>
 
-                            {{-- MODAL EDITAR --}}
+                            @if(session('role') === 'Administrador')
                             <div class="modal fade calendar-modal" id="modalEditar{{ $r->id }}">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -114,13 +122,16 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+                @endif
             </div>
         </div>
 
+        @if(session('role') === 'Administrador')
         {{-- MODAL CREAR --}}
         <div class="modal fade calendar-modal" id="modalCrear" tabindex="-1">
             <div class="modal-dialog">
@@ -160,6 +171,7 @@
                 </form>
             </div>
         </div>
+        @endif
 
         {{-- FULLCALENDAR SCRIPT --}}
         <script>

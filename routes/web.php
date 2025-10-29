@@ -9,11 +9,19 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\MovimientosInventarioController;
 use App\Http\Controllers\AjustesController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\RoleController;
 
-// Página principal -> redirige al dashboard
-Route::get('/', function () {
+// Landing de selección de rol
+Route::get('/', [RoleController::class, 'select'])->name('role.select');
+Route::post('/set-role', [RoleController::class, 'set'])->name('role.set');
+Route::post('/clear-role', [RoleController::class, 'clear'])->name('role.clear');
+Route::get('/admin/key', [RoleController::class, 'adminKeyForm'])->name('admin.key.form');
+Route::post('/admin/key', [RoleController::class, 'adminKeyVerify'])->name('admin.key.verify');
+
+// Inicio principal (dashboard de la app)
+Route::get('/inicio', function () {
     return view('usuarios.dashboard');
-})->name('inicio');
+})->name('inicio')->middleware('role:Administrador,Cliente,Invitado');
 
 // Registro
 Route::get('/usuarios/crear', [UsuarioController::class, 'registro'])->name('usuarios.registroUsuario');
@@ -45,28 +53,30 @@ Route::get('/usuarios/dashboard', function () {
 Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
 
 // Servicios (secciones del sitio)
-Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])->name('usuarios.animacion');
-Route::get('/usuarios/publicidad', [ServiciosViewController::class, 'publicidad'])->name('usuarios.publicidad');
-Route::get('/usuarios/alquiler', [ServiciosViewController::class, 'alquiler'])->name('usuarios.alquiler');
+Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])->name('usuarios.animacion')->middleware('role:Administrador,Cliente,Invitado');
+Route::get('/usuarios/publicidad', [ServiciosViewController::class, 'publicidad'])->name('usuarios.publicidad')->middleware('role:Administrador,Cliente,Invitado');
+Route::get('/usuarios/alquiler', [ServiciosViewController::class, 'alquiler'])->name('usuarios.alquiler')->middleware('role:Administrador,Cliente,Invitado');
 
 // Ajustes
-Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])->name('usuarios.ajustes');
+Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])->name('usuarios.ajustes')->middleware('role:Administrador');
 
 // Chatbot
-Route::get('/usuarios/chatbot', [ChatbotController::class, 'index'])->name('usuarios.chatbot');
+Route::get('/usuarios/chatbot', [ChatbotController::class, 'index'])->name('usuarios.chatbot')->middleware('role:Administrador,Cliente');
 Route::post('/chat/enviar', [ChatbotController::class, 'enviar'])->name('chat.enviar');
 
 // CRUD de servicios
-Route::resource('servicios', ServiciosController::class);
+Route::resource('servicios', ServiciosController::class)->middleware('role:Administrador');
 
 // Rutas para inventario y movimientos
-Route::resource('inventario', InventarioController::class);
-Route::resource('movimientos', MovimientosInventarioController::class);
+Route::resource('inventario', InventarioController::class)->middleware('role:Administrador');
+Route::resource('movimientos', MovimientosInventarioController::class)->middleware('role:Administrador');
 
 // Rutas del calendario
 Route::controller(CalendarioController::class)->group(function () {
-    Route::get('/calendario', 'inicio')->name('usuarios.calendario');
-    Route::post('/calendario', 'guardar')->name('calendario.guardar');
-    Route::put('/calendario/{id}', 'actualizar')->name('calendario.actualizar');
-    Route::delete('/calendario/{id}', 'eliminar')->name('calendario.eliminar');
+    // Ver calendario: Admin y Cliente
+    Route::get('/calendario', 'inicio')->name('usuarios.calendario')->middleware('role:Administrador,Cliente');
+    // Mutaciones del calendario: solo Admin
+    Route::post('/calendario', 'guardar')->name('calendario.guardar')->middleware('role:Administrador');
+    Route::put('/calendario/{id}', 'actualizar')->name('calendario.actualizar')->middleware('role:Administrador');
+    Route::delete('/calendario/{id}', 'eliminar')->name('calendario.eliminar')->middleware('role:Administrador');
 });
