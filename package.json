@@ -4,7 +4,9 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "serve": "php artisan serve",
+        "dev:all": "concurrently -n VITE,PHP -c green,cyan \"npm:dev\" \"php artisan serve\""
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

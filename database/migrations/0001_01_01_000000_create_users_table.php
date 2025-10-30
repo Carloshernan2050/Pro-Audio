@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Agregar la columna role_id a la tabla 'users'
-        Schema::table('users', function (Blueprint $table) {
-            // Utilizamos foreignId para crear el campo y la clave foránea en una línea.
-            // Por defecto, será NULLABLE para manejar usuarios invitados/sin rol definido inicialmente.
-            $table->foreignId('role_id')
-                  ->nullable()
-                  ->after('password') // Colocamos después del campo 'password'
-                  ->constrained('roles') // Asume que tu tabla se llama 'roles'
-                  ->onDelete('set null'); // Si se elimina un rol, el usuario se queda sin rol (null)
+        // Crear tabla users completa (incluye role_id pero sin FK para no depender del orden)
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->unsignedBigInteger('role_id')->nullable(); // FK opcional, se puede agregar en migración posterior
+            $table->timestamps();
         });
     }
 
@@ -28,11 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            // Para revertir la migración, primero eliminamos la clave foránea
-            $table->dropForeign(['role_id']);
-            // Luego eliminamos la columna
-            $table->dropColumn('role_id');
-        });
+        Schema::dropIfExists('users');
     }
 };

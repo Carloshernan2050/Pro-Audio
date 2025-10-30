@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('servicios_id')->constrained('servicios');
             $table->string('nombre', 100);
             $table->text('descripcion');
+            $table->decimal('precio', 10, 2)->default(0);
         });
 
     }

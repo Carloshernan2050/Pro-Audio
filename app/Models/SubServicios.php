@@ -16,7 +16,8 @@ class SubServicios extends Model
     protected $fillable = [
         'servicios_id',
         'nombre',
-        'descripcion'
+        'descripcion',
+        'precio'
     ];
 
     // Relación con el modelo Servicios
