@@ -10,6 +10,7 @@ use App\Http\Controllers\MovimientosInventarioController;
 use App\Http\Controllers\AjustesController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\BusquedaController;
 
 // Landing de selección de rol
 Route::get('/', [RoleController::class, 'select'])->name('role.select');
@@ -51,6 +52,9 @@ Route::get('/usuarios/dashboard', function () {
 
 // Perfil
 Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
+
+// Búsqueda de servicios
+Route::get('/buscar', [BusquedaController::class, 'buscar'])->name('buscar')->middleware('role:Administrador,Cliente,Invitado');
 
 // Servicios (secciones del sitio)
 Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])->name('usuarios.animacion')->middleware('role:Administrador,Cliente,Invitado');

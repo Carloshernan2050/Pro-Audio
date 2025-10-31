@@ -21,8 +21,8 @@
         {{-- Barra superior (Header) --}}
         <header class="top-bar">
             <h1>PRO AUDIO</h1>
-            <form class="search-form" action="#" method="GET">
-                <input type="text" name="buscar" class="search-input" placeholder="Buscar...">
+            <form class="search-form" action="{{ route('buscar') }}" method="GET">
+                <input type="text" name="buscar" class="search-input" placeholder="Buscar servicios..." value="{{ request('buscar') ?? '' }}">
                 <button type="submit" class="search-btn">
                     {{-- Icono de la lupa --}}
                     <i class="fas fa-search"></i> 

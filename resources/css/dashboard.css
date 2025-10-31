@@ -63,15 +63,15 @@ body {
     display: flex;
     align-items: center;
     flex: 1;
-    max-width: 500px;
+    max-width: 600px;
     gap: 10px;
     min-width: 200px;
 }
 
 .search-input {
-    padding: 10px 16px; /* Padding ajustado (ESTILO DESEADO) */
+    padding: 14px 20px; /* Padding aumentado para hacer la barra más grande */
     border-radius: 20px;
-    font-size: 1rem;
+    font-size: 1.15rem;
     outline: none;
     width: 100%;
     border: 2px solid #ffffff; /* Borde blanco (ESTILO DESEADO) */

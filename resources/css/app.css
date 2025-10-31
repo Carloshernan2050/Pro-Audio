@@ -196,15 +196,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     display: flex;
     align-items: center;
     flex: 1;
-    max-width: 500px;
+    max-width: 600px;
     gap: 10px;
     min-width: 200px;
 }
 
 .search-input {
-    padding: 10px 16px;
+    padding: 14px 20px;
     border-radius: 20px;
-    font-size: 1rem;
+    font-size: 1.15rem;
     outline: none;
     width: 100%;
     border: 2px solid #ffffff;
