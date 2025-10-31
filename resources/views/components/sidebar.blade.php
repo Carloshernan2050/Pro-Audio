@@ -31,7 +31,6 @@
 
 <aside class="sidebar">
     <h5 class="menu-title">Menú</h5>
-    <a href="{{ route('usuarios.perfil') }}" class="sidebar-btn"><i class="fas fa-user-circle"></i> Perfil</a>
     <a href="{{ route('inicio') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
     
     {{-- Servicios predefinidos --}}

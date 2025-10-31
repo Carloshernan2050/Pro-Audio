@@ -189,30 +189,46 @@
             const data = await response.json();
             typing.remove();
 
-            if (data.respuesta) {
-                contenedor.innerHTML += `
-                    <div class="message-wrapper incoming">
-                        <i class="fas fa-robot chat-avatar"></i>
-                        <div class="message-bubble">${data.respuesta}</div>
-                    </div>
-                `;
-                if (Number.isInteger(data.days) && data.days > 0) {
-                    window.currentDays = data.days;
+            try {
+                if (data && data.respuesta !== undefined && data.respuesta !== null) {
+                    const safeRespuesta = (typeof data.respuesta === 'string') 
+                        ? data.respuesta 
+                        : (() => { try { return JSON.stringify(data.respuesta); } catch(_) { return String(data.respuesta); } })();
+                    contenedor.innerHTML += `
+                        <div class="message-wrapper incoming">
+                            <i class="fas fa-robot chat-avatar"></i>
+                            <div class="message-bubble">${safeRespuesta}</div>
+                        </div>
+                    `;
+                    if (Array.isArray(data.tokenHints) && data.tokenHints.length && typeof data.originalMensaje === 'string') {
+                        try { renderTokenCorrection(data.originalMensaje, data.tokenHints[0].token, data.tokenHints[0].sugerencias); } catch (e) { console.error('renderTokenCorrection error', e); }
+                    } else if (data.sugerencias) { renderSuggestions(data.sugerencias); }
+                    if (Number.isInteger(data.days) && data.days > 0) {
+                        window.currentDays = data.days;
+                    } else {
+                        window.currentDays = 1;
+                    }
+                    if (Array.isArray(data.optionGroups) && data.optionGroups.length) {
+                        try { renderOptionGroups(data.optionGroups, data.seleccionesPrevias || []); } catch (e) { console.error('renderOptionGroups error', e); }
+                    }
+                    if (Array.isArray(data.actions) && data.actions.length) {
+                        try { renderActions(data.actions); } catch (e) { console.error('renderActions error', e); }
+                    }
+                    saveChatState();
                 } else {
-                    window.currentDays = 1;
+                    contenedor.innerHTML += `
+                        <div class="message-wrapper incoming">
+                            <i class="fas fa-robot chat-avatar"></i>
+                            <div class="message-bubble text-red-500">Error: ${data && data.error ? data.error : 'Respuesta inválida'}</div>
+                        </div>
+                    `;
+                    saveChatState();
                 }
-                if (Array.isArray(data.optionGroups) && data.optionGroups.length) {
-                    renderOptionGroups(data.optionGroups, data.seleccionesPrevias || []);
-                }
-                if (Array.isArray(data.actions) && data.actions.length) {
-                    renderActions(data.actions);
-                }
-                saveChatState();
-            } else {
+            } catch (_) {
                 contenedor.innerHTML += `
                     <div class="message-wrapper incoming">
                         <i class="fas fa-robot chat-avatar"></i>
-                        <div class="message-bubble text-red-500">Error: ${data.error}</div>
+                        <div class="message-bubble text-red-500">Ocurrió un error mostrando la respuesta.</div>
                     </div>
                 `;
                 saveChatState();
@@ -230,6 +246,66 @@
         }
 
         contenedor.scrollTop = contenedor.scrollHeight;
+    }
+
+    // Renderizar sugerencias (top-level)
+    function renderSuggestions(sugerencias) {
+        const contenedor = document.getElementById('messages-container');
+        const wrap = document.createElement('div');
+        wrap.classList.add('message-wrapper', 'incoming');
+        const avatar = document.createElement('i');
+        avatar.classList.add('fas','fa-robot','chat-avatar');
+        const bubble = document.createElement('div');
+        bubble.classList.add('message-bubble');
+
+        try {
+            let list = [];
+            if (Array.isArray(sugerencias)) {
+                list = sugerencias;
+            } else if (typeof sugerencias === 'string') {
+                list = [sugerencias];
+            } else if (sugerencias && typeof sugerencias === 'object') {
+                list = Object.values(sugerencias).slice(0, 5);
+            }
+            if (!Array.isArray(list) || list.length === 0) {
+                list = ['alquiler','animacion','publicidad','luces','dj','audio'];
+            }
+
+            list.forEach((s) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.suggest = String(s);
+                btn.className = 'send-btn';
+                btn.style.marginRight = '8px';
+                btn.style.marginTop = '6px';
+                btn.style.backgroundColor = '#fff';
+                btn.style.color = '#000';
+                btn.style.border = '1px solid #000';
+                btn.textContent = String(s);
+                bubble.appendChild(btn);
+            });
+            // Botón para mostrar lista nuevamente (refrescar)
+            const again = document.createElement('button');
+            again.type = 'button';
+            again.id = 'show-list-again';
+            again.className = 'send-btn';
+            again.style.marginLeft = '8px';
+            again.style.marginTop = '10px';
+            again.style.backgroundColor = '#000';
+            again.style.color = '#fff';
+            again.style.border = '1px solid #000';
+            again.textContent = 'Mostrar lista nuevamente';
+            bubble.appendChild(again);
+        } catch (e) {
+            console.error('renderSuggestions error', e);
+            bubble.textContent = 'No pude mostrar sugerencias.';
+        }
+
+        wrap.appendChild(avatar);
+        wrap.appendChild(bubble);
+        contenedor.appendChild(wrap);
+        contenedor.scrollTop = contenedor.scrollHeight;
+        saveChatState();
     }
 
     function renderOptionGroups(groups, seleccionesPrevias = []) {
@@ -278,6 +354,65 @@
         saveChatState();
     }
 
+    // Render subrayando el token y ofreciendo reemplazos
+    function renderTokenCorrection(originalMensaje, token, sugerencias) {
+        const contenedor = document.getElementById('messages-container');
+        const wrap = document.createElement('div');
+        wrap.classList.add('message-wrapper', 'incoming');
+        const avatar = document.createElement('i');
+        avatar.classList.add('fas','fa-robot','chat-avatar');
+        const bubble = document.createElement('div');
+        bubble.classList.add('message-bubble');
+
+        const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        let highlighted = originalMensaje;
+        try {
+            const re = new RegExp(esc(token), 'i');
+            highlighted = originalMensaje.replace(re, (m) => `<span style="text-decoration: underline; text-decoration-color: #ef4444; text-decoration-thickness: 2px;">${m}</span>`);
+        } catch (_) {}
+
+        const header = document.createElement('div');
+        header.innerHTML = `No entendí la palabra "<strong>${token}</strong>" en tu mensaje:<br>${highlighted}<br><small>Tal vez quisiste decir:</small>`;
+        bubble.appendChild(header);
+
+        let list = [];
+        if (Array.isArray(sugerencias)) list = sugerencias; else if (typeof sugerencias === 'string') list = [sugerencias];
+        if (!list.length) list = ['alquiler','animacion','publicidad','luces','dj','audio'];
+        list.slice(0, 6).forEach((s) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.replaceToken = token;
+            btn.dataset.replaceWith = String(s);
+            btn.dataset.originalMensaje = originalMensaje;
+            btn.className = 'send-btn';
+            btn.style.marginRight = '8px';
+            btn.style.marginTop = '6px';
+            btn.style.backgroundColor = '#fff';
+            btn.style.color = '#000';
+            btn.style.border = '1px solid #000';
+            btn.textContent = String(s);
+            bubble.appendChild(btn);
+        });
+        // Botón para mostrar lista nuevamente (refrescar)
+        const again = document.createElement('button');
+        again.type = 'button';
+        again.id = 'show-list-again';
+        again.className = 'send-btn';
+        again.style.marginLeft = '8px';
+        again.style.marginTop = '10px';
+        again.style.backgroundColor = '#000';
+        again.style.color = '#fff';
+        again.style.border = '1px solid #000';
+        again.textContent = 'Mostrar lista nuevamente';
+        bubble.appendChild(again);
+
+        wrap.appendChild(avatar);
+        wrap.appendChild(bubble);
+        contenedor.appendChild(wrap);
+        contenedor.scrollTop = contenedor.scrollHeight;
+        saveChatState();
+    }
+
     function renderActions(actions) {
         const contenedor = document.getElementById('messages-container');
         const wrap = document.createElement('div');
@@ -285,9 +420,10 @@
         wrap.innerHTML = `
             <i class="fas fa-robot chat-avatar"></i>
             <div class="message-bubble">
-                ${actions.map(a => `
-                    <button type="button" data-action-id="${a.id}" class="send-btn" style="margin-right:8px;margin-top:6px; background-color: #000; color: #fff; border: 1px solid #000;">${a.label}</button>
-                `).join('')}
+                ${actions.map(a => {
+                    const meta = a.meta ? ` data-meta='${JSON.stringify(a.meta).replace(/'/g, "&apos;")}'` : '';
+                    return `<button type="button" data-action-id="${a.id}"${meta} class="send-btn" style="margin-right:8px;margin-top:6px; background-color: #000; color: #fff; border: 1px solid #000;">${a.label}</button>`;
+                }).join('')}
             </div>
         `;
         contenedor.appendChild(wrap);
@@ -347,8 +483,47 @@
             contenedor.scrollTop = contenedor.scrollHeight;
         }
 
+        // (renderSuggestions se define a nivel superior)
+
         if (el.matches('button[data-action-id]')) {
             const id = el.getAttribute('data-action-id');
+            if (id === 'confirm_intent') {
+                let meta = el.getAttribute('data-meta');
+                try { meta = meta ? JSON.parse(meta.replace(/&apos;/g, "'")) : {}; } catch(_) { meta = {}; }
+                const payload = { confirm_intencion: true };
+                if (meta && Array.isArray(meta.intenciones)) payload.intenciones = meta.intenciones;
+                if (meta && Number.isInteger(meta.dias)) payload.dias = meta.dias;
+                const typing = document.createElement('div');
+                typing.classList.add('message-wrapper','incoming');
+                typing.innerHTML = `<i class="fas fa-robot chat-avatar"></i><div class="message-bubble">Cargando opciones...</div>`;
+                contenedor.appendChild(typing);
+                try {
+                    const res = await fetch("{{ route('chat.enviar') }}", { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify(payload) });
+                    const data = await res.json();
+                    typing.remove();
+                    if (data && data.respuesta) {
+                        contenedor.innerHTML += `<div class="message-wrapper incoming"><i class=\"fas fa-robot chat-avatar\"></i><div class=\"message-bubble\">${data.respuesta}</div></div>`;
+                        if (Array.isArray(data.optionGroups)) renderOptionGroups(data.optionGroups, data.seleccionesPrevias || []);
+                        if (Array.isArray(data.actions)) renderActions(data.actions);
+                        if (Number.isInteger(data.days) && data.days > 0) window.currentDays = data.days;
+                        saveChatState();
+                    }
+                } catch(_) { typing.remove(); }
+                return;
+            }
+            if (id === 'reject_intent') {
+                const typing = document.createElement('div');
+                typing.classList.add('message-wrapper','incoming');
+                typing.innerHTML = `<i class="fas fa-robot chat-avatar"></i><div class="message-bubble">Mostrando catálogo...</div>`;
+                contenedor.appendChild(typing);
+                try {
+                    const res = await fetch("{{ route('chat.enviar') }}", { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ mensaje: '' }) });
+                    const data = await res.json();
+                    typing.remove();
+                    if (data && Array.isArray(data.optionGroups)) renderOptionGroups(data.optionGroups, data.seleccionesPrevias || []);
+                } catch(_) { typing.remove(); }
+                return;
+            }
             if (id === 'add_more') {
                 const typing = document.createElement('div');
                 typing.classList.add('message-wrapper', 'incoming');
@@ -534,7 +709,7 @@
                     contenedor.innerHTML += `
                         <div class="message-wrapper incoming">
                             <i class="fas fa-robot chat-avatar"></i>
-                            <div class="message-bubble">Gracias por tu interés. Contacta con un trabajador mediante este correo <strong>ejemplo@gmail.com</strong>.</div>
+                            <div class="message-bubble">Gracias por tu interés. Contacta con un trabajador en <a href="https://w.app/zlxp23" target="_blank" rel="noopener noreferrer">https://w.app/zlxp23</a>.</div>
                         </div>
                     `;
                     contenedor.scrollTop = contenedor.scrollHeight;
@@ -585,6 +760,159 @@
                     });
                 }
             }
+        }
+
+        // Refrescar chat y mostrar lista nuevamente
+        if (el.id === 'show-list-again') {
+            // limpiar estado y mostrar catálogo
+            clearChatState();
+            const contenedor = document.getElementById('messages-container');
+            contenedor.innerHTML += `
+                <div class="message-wrapper incoming">
+                    <i class="fas fa-robot chat-avatar"></i>
+                    <div class="message-bubble">Cargando catálogo...</div>
+                </div>
+            `;
+            saveChatState();
+            try {
+                const response = await fetch("{{ route('chat.enviar') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                    body: JSON.stringify({ mensaje: "" })
+                });
+                const data = await response.json();
+                if (data && Array.isArray(data.optionGroups)) {
+                    renderOptionGroups(data.optionGroups, data.seleccionesPrevias || []);
+                }
+                saveChatState();
+            } catch (_) {
+                contenedor.innerHTML += `
+                    <div class="message-wrapper incoming">
+                        <i class="fas fa-robot chat-avatar"></i>
+                        <div class="message-bubble text-red-500">No se pudo cargar el catálogo.</div>
+                    </div>
+                `;
+                saveChatState();
+            }
+            contenedor.scrollTop = contenedor.scrollHeight;
+        }
+
+        if (el.matches('button[data-suggest]')) {
+            const sugerencia = el.getAttribute('data-suggest');
+            if (!sugerencia) return;
+            // Mostrar como si el usuario hubiera escrito la sugerencia
+            const contenedor = document.getElementById('messages-container');
+            contenedor.innerHTML += `
+                <div class="message-wrapper outgoing">
+                    <div class="message-bubble">${sugerencia}</div>
+                    <i class="fas fa-user-circle chat-avatar"></i>
+                </div>
+            `;
+            saveChatState();
+            // Enviar mensaje con la sugerencia
+            const typing = document.createElement('div');
+            typing.classList.add('message-wrapper', 'incoming');
+            typing.innerHTML = `
+                <i class="fas fa-robot chat-avatar"></i>
+                <div class="message-bubble">Escribiendo...</div>
+            `;
+            contenedor.appendChild(typing);
+            contenedor.scrollTop = contenedor.scrollHeight;
+            try {
+                const response = await fetch("{{ route('chat.enviar') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                    body: JSON.stringify({ mensaje: sugerencia, sugerencia_aplicada: true })
+                });
+                const data = await response.json();
+                typing.remove();
+                if (data.respuesta) {
+                    contenedor.innerHTML += `
+                        <div class="message-wrapper incoming">
+                            <i class="fas fa-robot chat-avatar"></i>
+                            <div class="message-bubble">${data.respuesta}</div>
+                        </div>
+                    `;
+                    if (Array.isArray(data.optionGroups)) { renderOptionGroups(data.optionGroups, data.seleccionesPrevias || []); }
+                    if (Array.isArray(data.actions)) { renderActions(data.actions); }
+                    if (Array.isArray(data.sugerencias) && data.sugerencias.length) { renderSuggestions(data.sugerencias); }
+                    if (Number.isInteger(data.days) && data.days > 0) { window.currentDays = data.days; }
+                    saveChatState();
+                }
+            } catch (_) {
+                typing.remove();
+                contenedor.innerHTML += `
+                    <div class="message-wrapper incoming">
+                        <i class="fas fa-robot chat-avatar"></i>
+                        <div class="message-bubble text-red-500">Error al conectar con el servidor.</div>
+                    </div>
+                `;
+                saveChatState();
+            }
+            contenedor.scrollTop = contenedor.scrollHeight;
+        }
+
+        if (el.matches('button[data-replace-token]')) {
+            const token = el.getAttribute('data-replace-token');
+            const rep = el.getAttribute('data-replace-with');
+            const original = el.getAttribute('data-original-mensaje');
+            if (!token || !rep || !original) return;
+            // Reemplazar SOLO la primera coincidencia con límites de palabra
+            const re = new RegExp('(^|\\b)'+token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')+'(\\b|$)', 'i');
+            const corrected = original.replace(re, (m, p1, p2) => `${p1}${rep}${p2}`);
+
+            // Mostrar como mensaje del usuario
+            const contenedor = document.getElementById('messages-container');
+            contenedor.innerHTML += `
+                <div class="message-wrapper outgoing">
+                    <div class="message-bubble">${corrected}</div>
+                    <i class="fas fa-user-circle chat-avatar"></i>
+                </div>
+            `;
+            saveChatState();
+
+            const typing = document.createElement('div');
+            typing.classList.add('message-wrapper', 'incoming');
+            typing.innerHTML = `
+                <i class="fas fa-robot chat-avatar"></i>
+                <div class="message-bubble">Escribiendo...</div>
+            `;
+            contenedor.appendChild(typing);
+            contenedor.scrollTop = contenedor.scrollHeight;
+            try {
+                const response = await fetch("{{ route('chat.enviar') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                    body: JSON.stringify({ mensaje: corrected, sugerencia_aplicada: true })
+                });
+                const data = await response.json();
+                typing.remove();
+                if (data && data.respuesta) {
+                    contenedor.innerHTML += `
+                        <div class="message-wrapper incoming">
+                            <i class="fas fa-robot chat-avatar"></i>
+                            <div class="message-bubble">${data.respuesta}</div>
+                        </div>
+                    `;
+                    if (Array.isArray(data.optionGroups)) { renderOptionGroups(data.optionGroups, data.seleccionesPrevias || []); }
+                    if (Array.isArray(data.actions)) { renderActions(data.actions); }
+                    if (Array.isArray(data.tokenHints) && data.tokenHints.length && typeof data.originalMensaje === 'string') {
+                        renderTokenCorrection(data.originalMensaje, data.tokenHints[0].token, data.tokenHints[0].sugerencias);
+                    } else if (data.sugerencias) { renderSuggestions(data.sugerencias); }
+                    if (Number.isInteger(data.days) && data.days > 0) { window.currentDays = data.days; }
+                    saveChatState();
+                }
+            } catch (_) {
+                typing.remove();
+                contenedor.innerHTML += `
+                    <div class="message-wrapper incoming">
+                        <i class="fas fa-robot chat-avatar"></i>
+                        <div class="message-bubble text-red-500">Error al conectar con el servidor.</div>
+                    </div>
+                `;
+                saveChatState();
+            }
+            contenedor.scrollTop = contenedor.scrollHeight;
         }
     });
     </script>
