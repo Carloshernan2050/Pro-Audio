@@ -320,7 +320,7 @@
         if (el.id === 'confirmar-opciones') {
             const bubble = el.closest('.message-bubble');
             const seleccion = Array.from(bubble.querySelectorAll('input[name="subservicio"]:checked')).map(i => Number(i.value));
-            if (!seleccion.length) { alert('Selecciona al menos un sub-servicio.'); return; }
+            if (!seleccion.length) { alert('Por favor, selecciona al menos un sub-servicio.'); return; }
             const typing = document.createElement('div');
             typing.classList.add('message-wrapper', 'incoming');
             typing.innerHTML = `

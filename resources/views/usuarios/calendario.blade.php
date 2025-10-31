@@ -67,7 +67,7 @@
                                     </button>
                                     <form action="{{ route('calendario.eliminar',$r->id) }}" method="POST" class="d-inline">
                                         @csrf @method('DELETE')
-                                        <button class="btn calendar-btn-action delete" onclick="return confirm('¿Eliminar?')">Eliminar</button>
+                                        <button class="btn calendar-btn-action delete" onclick="return confirm('¿Estás seguro de que deseas eliminar este registro?')">Eliminar</button>
                                     </form>
                                 </td>
                                 @endif

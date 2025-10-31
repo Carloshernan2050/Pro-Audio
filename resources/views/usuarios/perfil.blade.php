@@ -55,18 +55,23 @@
             <p class="page-subtitle">Aquí puedes ver y gestionar tu información personal.</p>
 
             <div class="profile-container">
-                @if(session()->has('usuario_id') && $usuario)
+                @if(session()->has('usuario_id') && $usuario && (session('role') === 'Cliente' || session('role') === 'Administrador'))
                     <div class="profile-details">
-                        <p><strong>Nombre completo:</strong>
-                            {{ $usuario->primer_nombre ?? '' }}
-                            {{ $usuario->segundo_nombre ?? '' }}
-                            {{ $usuario->primer_apellido ?? '' }}
-                            {{ $usuario->segundo_apellido ?? '' }}
+                        <p><strong>Nombres:</strong> 
+                            {{ ucfirst(strtolower($usuario->primer_nombre ?? '')) }}
+                            {{ $usuario->segundo_nombre ? ucfirst(strtolower($usuario->segundo_nombre)) : '' }}
                         </p>
-                        <p><strong>Correo electrónico:</strong> {{ $usuario->correo ?? '' }}</p>
+                        <p><strong>Apellidos:</strong> 
+                            {{ ucfirst(strtolower($usuario->primer_apellido ?? '')) }}
+                            {{ $usuario->segundo_apellido ? ucfirst(strtolower($usuario->segundo_apellido)) : '' }}
+                        </p>
+                        <p><strong>Correo:</strong> {{ $usuario->correo ?? 'No registrado' }}</p>
+                        <p><strong>Teléfono:</strong> {{ $usuario->telefono ?? 'No registrado' }}</p>
                     </div>
-                @else
+                @elseif(!session()->has('usuario_id'))
                     <p class="text-gray-300">Debes iniciar sesión para ver tu perfil.</p>
+                @else
+                    <p class="text-gray-300">No tienes permisos para ver esta información.</p>
                 @endif
 
                 {{-- Botón para volver al panel --}}

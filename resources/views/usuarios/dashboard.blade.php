@@ -56,7 +56,7 @@
 
         {{-- Contenido principal del dashboard --}}
         <main class="main-content">
-            <h2 class="welcome-title">¡Bienvenido, {{ session('usuario_nombre', 'Invitado') }}!</h2>
+            <h2 class="welcome-title">¡Bienvenido, {{ session('usuario_nombre') ? ucfirst(strtolower(session('usuario_nombre'))) : 'Invitado' }}!</h2>
             <p class="welcome-text">¡Tu solución profesional en sonido, iluminación y eventos!</p>
             
             {{-- Sección del carrusel de fotos (MANTENIDO TAL CUAL) --}}

@@ -24,6 +24,9 @@ class UsuarioController extends Controller
             'telefono'          => 'nullable|string|max:20',
             'direccion'         => 'nullable|string|max:255',
             'contrasena'        => 'required|string|min:8|confirmed',
+        ], [
+            'contrasena.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'contrasena.confirmed' => 'La confirmación de contraseña no coincide.',
         ]);
 
         $data = $request->all();
@@ -55,11 +58,12 @@ class UsuarioController extends Controller
 
         if ($usuario && Hash::check($request->contrasena, $usuario->contrasena)) {
             // Iniciar sesión
-            session(['usuario_id' => $usuario->id, 'usuario_nombre' => $usuario->primer_nombre]);
+            $nombreCapitalizado = ucfirst(strtolower($usuario->primer_nombre));
+            session(['usuario_id' => $usuario->id, 'usuario_nombre' => $nombreCapitalizado]);
             if (session('pending_admin')) {
                 return redirect()->route('admin.key.form');
             }
-            return redirect()->route('dashboard')->with('success', '¡Bienvenido, ' . $usuario->primer_nombre . '!');
+            return redirect()->route('dashboard')->with('success', '¡Bienvenido, ' . $nombreCapitalizado . '!');
         } else {
             return back()->withErrors(['correo' => 'Correo o contraseña incorrectos'])->withInput();
         }

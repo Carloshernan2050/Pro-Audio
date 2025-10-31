@@ -510,7 +510,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('Error al eliminar el item', 'error');
+                    showAlert('Error al eliminar el elemento', 'error');
                 });
             }
         }
