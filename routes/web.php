@@ -11,6 +11,7 @@ use App\Http\Controllers\AjustesController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\BusquedaController;
+use App\Http\Controllers\SubServiciosController;
 
 // Landing de selección de rol
 Route::get('/', [RoleController::class, 'select'])->name('role.select');
@@ -61,6 +62,9 @@ Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])
 Route::get('/usuarios/publicidad', [ServiciosViewController::class, 'publicidad'])->name('usuarios.publicidad')->middleware('role:Administrador,Cliente,Invitado');
 Route::get('/usuarios/alquiler', [ServiciosViewController::class, 'alquiler'])->name('usuarios.alquiler')->middleware('role:Administrador,Cliente,Invitado');
 
+// Ruta dinámica para servicios creados por el usuario
+Route::get('/usuarios/servicio/{slug}', [ServiciosViewController::class, 'servicioPorSlug'])->name('usuarios.servicio')->middleware('role:Administrador,Cliente,Invitado');
+
 // Ajustes
 Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])->name('usuarios.ajustes')->middleware('role:Administrador');
 
@@ -70,6 +74,9 @@ Route::post('/chat/enviar', [ChatbotController::class, 'enviar'])->name('chat.en
 
 // CRUD de servicios
 Route::resource('servicios', ServiciosController::class)->middleware('role:Administrador');
+
+// CRUD de subservicios
+Route::resource('subservicios', SubServiciosController::class)->middleware('role:Administrador');
 
 // Rutas para inventario y movimientos
 Route::resource('inventario', InventarioController::class)->middleware('role:Administrador');

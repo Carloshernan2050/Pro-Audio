@@ -272,7 +272,32 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     top: 84px;
     left: 0;
     height: calc(100vh - 84px);
-    z-index: 999;
+    width: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Estilos de scrollbar para Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(233, 28, 28, 0.6) rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos personalizados para la barra de desplazamiento del sidebar (Chrome, Safari, Edge) */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(233, 28, 28, 0.6);
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(233, 28, 28, 0.9);
 }
 
 .menu-title {

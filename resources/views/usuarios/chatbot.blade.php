@@ -29,22 +29,7 @@
         </header>
 
         {{-- Barra lateral izquierda --}}
-        <aside class="sidebar">
-            <h5 class="menu-title">Menú</h5>
-            <a href="{{ route('inicio') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
-            <a href="{{ route('usuarios.animacion') }}" class="sidebar-btn"><i class="fas fa-laugh-beam"></i> Animación</a>
-            <a href="{{ route('usuarios.publicidad') }}" class="sidebar-btn"><i class="fas fa-bullhorn"></i> Publicidad</a>
-            <a href="{{ route('usuarios.alquiler') }}" class="sidebar-btn"><i class="fas fa-box"></i> Alquiler</a>
-            @if(session('role') !== 'Invitado')
-            <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
-            @endif
-            @if(session('role') === 'Administrador')
-            <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
-            @endif
-            @if(session('role') !== 'Invitado')
-            <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn active"><i class="fas fa-robot"></i> Chatbot</a>
-            @endif
-        </aside>
+        @include('components.sidebar')
 
         {{-- Contenedor principal del chat --}}
         <div class="page-container">

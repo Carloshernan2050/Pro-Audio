@@ -33,20 +33,7 @@
         </header>
 
         {{-- Barra lateral izquierda --}}
-        <aside class="sidebar">
-            <h5 class="menu-title">Menú</h5>
-            <a href="{{ route('usuarios.dashboard') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
-            <a href="{{ route('usuarios.animacion') }}" class="sidebar-btn"><i class="fas fa-laugh-beam"></i> Animación</a>
-            <a href="{{ route('usuarios.publicidad') }}" class="sidebar-btn"><i class="fas fa-bullhorn"></i> Publicidad</a>
-            <a href="{{ route('usuarios.alquiler') }}" class="sidebar-btn"><i class="fas fa-box"></i> Alquiler</a>
-            @if(session('role') !== 'Invitado')
-            <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
-            @endif
-            @if(session('role') === 'Administrador')
-            <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
-            @endif
-            <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
-        </aside>
+        @include('components.sidebar')
 
         {{-- Contenido principal --}}
         <main class="main-content">
@@ -56,6 +43,12 @@
             {{-- Mensajes de estado (éxito o error) --}}
             @if(session('success'))
                 <div class="alert success">{{ session('success') }}</div>
+            @endif
+            @if(session('warning'))
+                <div class="alert warning" style="background-color: #ffa500; color: #fff;">{{ session('warning') }}</div>
+            @endif
+            @if(session('error'))
+                <div class="alert error">{{ session('error') }}</div>
             @endif
             @if($errors->any())
                 <div class="alert error">
@@ -72,11 +65,17 @@
                 <button onclick="showTab('servicios')" class="btn-tab active" id="btn-servicios">
                     <i class="fas fa-cogs"></i> Servicios
                 </button>
+                <a href="{{ route('subservicios.index') }}" class="btn-tab" style="text-decoration: none; display: inline-block;">
+                    <i class="fas fa-list-alt"></i> Subservicios
+                </a>
                 <button onclick="showTab('inventario')" class="btn-tab" id="btn-inventario">
                     <i class="fas fa-boxes"></i> Inventario
                 </button>
                 <button onclick="showTab('movimientos')" class="btn-tab" id="btn-movimientos">
                     <i class="fas fa-exchange-alt"></i> Movimientos
+                </button>
+                <button onclick="showTab('historial')" class="btn-tab" id="btn-historial">
+                    <i class="fas fa-history"></i> Historial
                 </button>
             </div>
 
@@ -100,12 +99,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($servicios as $servicio)
+                            @php
+                                $serviciosList = isset($servicios) ? $servicios : collect([]);
+                            @endphp
+                            @forelse ($serviciosList as $servicio)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td> {{-- Número consecutivo limpio --}}
                                     <td>{{ $servicio->nombre_servicio }}</td>
                                     <td class="actions-cell">
-                                        <button onclick="openModal('edit', {{ $servicio->id }}, '{{ addslashes($servicio->nombre_servicio) }}')" class="btn-action edit">
+                                        <button onclick="openModal('edit', {{ $servicio->id }}, '{{ addslashes($servicio->nombre_servicio) }}', '{{ addslashes($servicio->descripcion ?? '') }}')" class="btn-action edit">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
                                         <form action="{{ route('servicios.destroy', $servicio->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este servicio?');">
@@ -179,6 +181,59 @@
                 </div>
             </div>
 
+            {{-- Tab de Historial de Cotizaciones --}}
+            <div id="tab-historial" class="tab-content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha y Hora</th>
+                                <th>Cliente</th>
+                                <th>Subservicio</th>
+                                <th>Servicio</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $cotizacionesList = isset($cotizaciones) ? $cotizaciones : collect([]);
+                            @endphp
+                            @forelse ($cotizacionesList as $cotizacion)
+                                <tr>
+                                    <td>{{ $cotizacion->id }}</td>
+                                    <td>
+                                        {{ $cotizacion->fecha_cotizacion ? $cotizacion->fecha_cotizacion->format('d/m/Y H:i:s') : 'N/A' }}
+                                    </td>
+                                    <td>
+                                        @if($cotizacion->persona)
+                                            {{ $cotizacion->persona->primer_nombre }} {{ $cotizacion->persona->primer_apellido }}
+                                            <br>
+                                            <small style="color: #999;">{{ $cotizacion->persona->correo ?? '' }}</small>
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                    <td>{{ $cotizacion->subServicio->nombre ?? 'N/A' }}</td>
+                                    <td>
+                                        @if($cotizacion->subServicio && $cotizacion->subServicio->servicio)
+                                            {{ $cotizacion->subServicio->servicio->nombre_servicio }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                    <td>${{ number_format($cotizacion->monto ?? 0, 0, ',', '.') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="no-services">No hay cotizaciones en el historial.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             {{-- Modal para crear y editar servicios --}}
             <div id="serviceModal" class="modal">
                 <div class="modal-content">
@@ -192,6 +247,10 @@
                         <div class="form-group">
                             <label for="nombre_servicio">Nombre del Servicio:</label>
                             <input type="text" id="nombre_servicio" name="nombre_servicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="descripcion">Descripción:</label>
+                            <textarea id="descripcion" name="descripcion" rows="3" placeholder="Descripción del servicio (opcional)"></textarea>
                         </div>
                         <button type="submit" class="btn-submit">Guardar</button>
                     </form>
@@ -291,20 +350,23 @@
         const serviceForm = document.getElementById('serviceForm');
         const formMethod = document.getElementById('formMethod');
         const nombreInput = document.getElementById('nombre_servicio');
+        const descripcionInput = document.getElementById('descripcion');
 
-        function openModal(mode, id = null, nombre = '') {
+        function openModal(mode, id = null, nombre = '', descripcion = '') {
             if (mode === 'create') {
                 modalTitle.textContent = 'Crear Nuevo Servicio';
                 serviceForm.action = "{{ route('servicios.store') }}";
                 formMethod.name = '_method';
                 formMethod.value = 'POST';
                 nombreInput.value = '';
+                descripcionInput.value = '';
             } else if (mode === 'edit') {
                 modalTitle.textContent = 'Editar Servicio';
                 serviceForm.action = `{{ url('servicios') }}/${id}`;
                 formMethod.name = '_method';
                 formMethod.value = 'PUT';
                 nombreInput.value = nombre;
+                descripcionInput.value = descripcion || '';
             }
             serviceModal.style.display = 'flex';
         }

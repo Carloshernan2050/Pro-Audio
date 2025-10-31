@@ -39,4 +39,31 @@ class ServiciosViewController extends Controller
         
         return view('usuarios.publicidad', compact('subServicios'));
     }
+
+    /**
+     * Mostrar página dinámica de servicio por slug
+     */
+    public function servicioPorSlug($slug)
+    {
+        // Buscar servicio por nombre normalizado
+        $servicios = Servicios::all();
+        $servicio = $servicios->first(function ($s) use ($slug) {
+            return \Illuminate\Support\Str::slug($s->nombre_servicio, '_') === $slug;
+        });
+
+        if (!$servicio) {
+            abort(404, 'Servicio no encontrado');
+        }
+
+        $subServicios = $servicio->subServicios;
+        $nombreVista = \Illuminate\Support\Str::slug($servicio->nombre_servicio, '_');
+        
+        // Verificar si existe la vista
+        $rutaVista = resource_path("views/usuarios/{$nombreVista}.blade.php");
+        if (!file_exists($rutaVista)) {
+            abort(404, 'Vista del servicio no encontrada');
+        }
+
+        return view("usuarios.{$nombreVista}", compact('subServicios', 'servicio'));
+    }
 }

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Servicios;
 use App\Models\SubServicios;
+use App\Models\Cotizacion;
 
 class ChatbotController extends Controller
 {
@@ -38,12 +40,41 @@ class ChatbotController extends Controller
 
         // Manejar finalización de cotización
         if ($request->has('terminar_cotizacion') && $request->input('terminar_cotizacion') === true) {
+            // Obtener datos antes de limpiar la sesión
+            $selecciones = (array) session('chat.selecciones', []);
+            $dias = (int) session('chat.days', 1);
+            $personasId = session('usuario_id'); // ID del usuario autenticado
+            
+            // Guardar cotizaciones en la base de datos si hay selecciones y el usuario está autenticado
+            if (!empty($selecciones) && $personasId) {
+                try {
+                    $items = SubServicios::whereIn('id', $selecciones)->get(['id', 'precio']);
+                    $fechaCotizacion = now();
+                    
+                    foreach ($items as $item) {
+                        // Calcular monto considerando los días
+                        $monto = (float) $item->precio * $dias;
+                        
+                        Cotizacion::create([
+                            'personas_id' => $personasId,
+                            'sub_servicios_id' => $item->id,
+                            'monto' => $monto,
+                            'fecha_cotizacion' => $fechaCotizacion,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    // Log del error pero no fallar la respuesta
+                    Log::error('Error al guardar cotización: ' . $e->getMessage());
+                }
+            }
+            
             // Limpiar toda la sesión de chat
             session()->forget('chat.selecciones');
             session()->forget('chat.intenciones');
             session()->forget('chat.days');
+            
             return response()->json([
-                'respuesta' => 'Gracias por tu interés. Contacta con un trabajador mediante este correo <strong>ejemplo@gmail.com</strong>.',
+                'respuesta' => 'Gracias por tu interés. Contacta con un trabajador mediante este correo <strong>ejemplo@gmail.com</strong>. Tu cotización ha sido guardada.',
                 'limpiar_chat' => true,
                 'selecciones' => [],
                 'total' => 0,
