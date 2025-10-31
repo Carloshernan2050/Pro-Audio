@@ -11,9 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('inventario', function (Blueprint $table) {
-            $table->dropColumn(['cantidad_disponible', 'fecha_actualizacion']);
-        });
+        if (Schema::hasTable('inventario')) {
+            Schema::table('inventario', function (Blueprint $table) {
+                // Drop only if columns exist
+                if (Schema::hasColumn('inventario', 'cantidad_disponible')) {
+                    $table->dropColumn('cantidad_disponible');
+                }
+                if (Schema::hasColumn('inventario', 'fecha_actualizacion')) {
+                    $table->dropColumn('fecha_actualizacion');
+                }
+            });
+        }
     }
 
     /**
@@ -21,9 +29,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('inventario', function (Blueprint $table) {
-            $table->integer('cantidad_disponible');
-            $table->dateTime('fecha_actualizacion');
-        });
+        if (Schema::hasTable('inventario')) {
+            Schema::table('inventario', function (Blueprint $table) {
+                if (!Schema::hasColumn('inventario', 'cantidad_disponible')) {
+                    $table->integer('cantidad_disponible');
+                }
+                if (!Schema::hasColumn('inventario', 'fecha_actualizacion')) {
+                    $table->dateTime('fecha_actualizacion')->nullable();
+                }
+            });
+        }
     }
 };

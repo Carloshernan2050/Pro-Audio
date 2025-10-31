@@ -1,0 +1,254 @@
+/* ======================================= */
+/* --- Estilos para Calendario --- */
+/* ======================================= */
+
+:root {
+	--color-primary: #e91c1c;
+	--color-primary-dark: #c81616;
+	--color-bg-dark: #000;
+	--color-white: #fff;
+	--color-text-light: #ccc;
+	--color-border: rgba(255, 255, 255, 0.15);
+}
+
+.calendario-wrapper {
+	display: flex;
+	gap: 25px;
+	padding: 25px;
+	min-height: calc(100vh - 120px);
+}
+
+.calendario-main-content {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.calendario-sidebar {
+	flex: 0 0 420px;
+	background: linear-gradient(135deg, rgba(233,28,28,.92) 0%, rgba(200,20,20,.92) 100%);
+	border-radius: 12px;
+	box-shadow: 0 4px 15px rgba(233, 28, 28, 0.45);
+	display: flex;
+	flex-direction: column;
+	max-height: calc(100vh - 140px);
+	overflow: hidden;
+}
+
+.calendar-section {
+	padding: 25px;
+	background-color: rgba(30, 30, 30, 0.8);
+	border-radius: 12px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	color: #fff;
+	width: 100%;
+}
+
+.calendar-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 2px solid var(--color-border);
+}
+
+.calendar-title {
+	font-weight: 600;
+	color: #fff;
+	font-size: 1.9rem;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.btn-crear-alquiler {
+	background-color: var(--color-primary);
+	border: 2px solid var(--color-primary);
+	color: var(--color-white);
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-weight: 600;
+	font-size: 0.9rem;
+	transition: all 0.3s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.btn-crear-alquiler:hover {
+	background-color: var(--color-primary-dark);
+	box-shadow: 0 0 15px 2px var(--color-primary);
+	transform: translateY(-2px);
+}
+
+.calendar-container {
+	background-color: rgba(0, 0, 0, 0.3);
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 20px;
+	width: 100%;
+}
+
+/* Sidebar */
+.sidebar-header { padding: 20px; border-bottom: 2px solid var(--color-border); background: rgba(233,28,28,.7); }
+.sidebar-title { font-size: 1.2rem; font-weight: 600; color: #fff; margin: 0; }
+.sidebar-content { flex: 1; overflow-y: auto; padding: 15px; }
+.table-wrapper {
+	overflow: auto;
+	max-height: calc(100vh - 280px);
+	background: #ffffff; /* blanco sólido para el contenedor interno */
+	border: 1px solid rgba(0,0,0,.08);
+	border-radius: 12px;
+	backdrop-filter: none;
+}
+.calendar-table-sidebar { width: 100%; border-collapse: collapse; font-size: 0.9rem; background: #fff; }
+.calendar-table-sidebar thead th { color: #fff; }
+.calendar-table-sidebar tbody td {
+	padding: 10px;
+	border-bottom: 1px solid rgba(0,0,0,.06);
+	color: #333; /* texto oscuro sobre blanco */
+	background: #fff; /* filas blancas */
+}
+.descripcion-text { color: #555; }
+.acciones-buttons { display: flex; gap: 8px; align-items: center; }
+.btn-action { width: 32px; height: 32px; border: none; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all .3s; font-size: .9rem; }
+.btn-edit { background: rgba(233,28,28,.3); color: #fff; border: 1px solid rgba(233,28,28,.5); }
+.btn-delete { background: rgba(244,67,54,.3); color: #fff; border: 1px solid rgba(244,67,54,.5); }
+
+/* Modal crear: caja y búsqueda */
+.alquiler-box { border: 1px solid var(--color-border); border-radius: 10px; padding: 12px; background: rgba(0,0,0,.4); }
+.sugerencias-dropdown { position: absolute; top: 42px; left: 0; right: 0; background: rgba(0,0,0,.95); border: 1px solid rgba(255,255,255,.2); border-radius: 8px; max-height: 240px; overflow: auto; display: none; z-index: 1055; }
+.sugerencias-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,.08); }
+.sugerencias-item:hover { background: rgba(233,28,28,.15); }
+.seleccionados-lista .item-row { display: flex; gap: 10px; align-items: center; border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 10px; background: rgba(0,0,0,.4); }
+.item-titulo { flex: 1 1 auto; }
+.field-hint { display: block; margin-top: 6px; opacity: .85; }
+.field-error { color: #ff6b6b; font-size: .85rem; margin-top: 4px; }
+.badge-count { display: inline-flex; align-items: center; gap: 6px; background: rgba(233,28,28,.15); color: #fff; border: 1px solid rgba(233,28,28,.4); border-radius: 999px; padding: 4px 10px; font-size: .85rem; }
+
+/* Toasts */
+.toast-container { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
+.toast-item { min-width: 240px; max-width: 360px; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--color-border); background: rgba(0,0,0,.9); color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+.toast-item.success { border-color: #2e7d32; }
+.toast-item.error { border-color: #c62828; }
+
+/* FullCalendar tweaks */
+.fc-col-header-cell { color: #fff !important; background: var(--color-primary) !important; }
+.fc-daygrid-day-number { color: #fff !important; font-weight: 600; font-size: .9rem; }
+.fc-day-today .fc-daygrid-day-frame { background: rgba(233,28,28,.4) !important; border-radius: 8px; }
+
+/* Botón Volver: igual estilo que "Nuevo alquiler" y 1cm a la derecha */
+.btn-volver {
+	background-color: var(--color-primary);
+	border: 2px solid var(--color-primary);
+	color: var(--color-white);
+	padding: 8px 16px;
+	border-radius: 10px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.9rem;
+	transition: all 0.3s ease;
+	margin-left: 1cm; /* desplazar hacia la derecha */
+}
+
+.btn-volver:hover {
+	background-color: var(--color-primary-dark);
+	box-shadow: 0 0 15px 2px var(--color-primary);
+	transform: translateY(-2px);
+}
+
+.btn-volver:active { transform: translateY(0); }
+.btn-volver:focus { outline: none; box-shadow: 0 0 0 3px rgba(233,28,28,.35); }
+
+/* Sidebar: volver a fondo oscuro original */
+.calendario-sidebar {
+	flex: 0 0 420px;
+	background-color: rgba(30, 30, 30, 0.9);
+	border-radius: 12px;
+	box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
+	display: flex;
+	flex-direction: column;
+	max-height: calc(100vh - 140px);
+	overflow: hidden;
+}
+
+/* Asegurar contraste dentro del sidebar */
+.calendario-sidebar .sidebar-content,
+.calendario-sidebar .calendar-table-sidebar tbody td,
+.calendario-sidebar .descripcion-text { color: #fff; }
+.calendario-sidebar .calendar-table-sidebar tbody td { background: rgba(0,0,0,.15); border-bottom: 1px solid rgba(255,255,255,.2); }
+
+/* Título de Calendario más grande */
+.calendar-title { font-size: 1.9rem; }
+
+/* FullCalendar: título (ej. Octubre 2025) en negrita */
+.fc .fc-toolbar-title { font-weight: 800; color: #fff; }
+
+/* Scrollbar rojo (sidebar y dropdowns) */
+.calendario-sidebar .sidebar-content,
+.sugerencias-dropdown,
+.table-wrapper,
+.seleccionados-lista {
+	scrollbar-width: thin; /* Firefox */
+	scrollbar-color: var(--color-primary) transparent; /* Firefox */
+}
+
+/* WebKit scrollbars */
+.calendario-sidebar .sidebar-content::-webkit-scrollbar,
+.sugerencias-dropdown::-webkit-scrollbar,
+.table-wrapper::-webkit-scrollbar,
+.seleccionados-lista::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+.calendario-sidebar .sidebar-content::-webkit-scrollbar-track,
+.sugerencias-dropdown::-webkit-scrollbar-track,
+.table-wrapper::-webkit-scrollbar-track,
+.seleccionados-lista::-webkit-scrollbar-track {
+	background: transparent;
+	border-radius: 10px;
+}
+.calendario-sidebar .sidebar-content::-webkit-scrollbar-thumb,
+.sugerencias-dropdown::-webkit-scrollbar-thumb,
+.table-wrapper::-webkit-scrollbar-thumb,
+.seleccionados-lista::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
+	border-radius: 10px;
+	border: 2px solid rgba(0,0,0,.2);
+}
+.calendario-sidebar .sidebar-content::-webkit-scrollbar-thumb:hover,
+.sugerencias-dropdown::-webkit-scrollbar-thumb:hover,
+.table-wrapper::-webkit-scrollbar-thumb:hover,
+.seleccionados-lista::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(180deg, var(--color-primary-dark), #a21212);
+}
+
+/* === Overrides: Fondo del sidebar blanco translúcido (no la tabla) === */
+.calendario-sidebar {
+	background: rgba(255,255,255,.12);
+	border: 1px solid rgba(255,255,255,.25);
+	backdrop-filter: blur(2px);
+}
+
+/* Volver la tabla a estilo oscuro dentro del contenedor blanco translúcido */
+.table-wrapper { background: transparent; border: none; backdrop-filter: none; }
+.calendar-table-sidebar { background: transparent; }
+.calendar-table-sidebar tbody td { background: rgba(0,0,0,.4); color: var(--color-text-light); border-bottom: 1px solid var(--color-border); }
+
+/* Encabezado del sidebar con el mismo rojo del botón "Nuevo alquiler" */
+.sidebar-header {
+	padding: 20px;
+	border-bottom: 2px solid rgba(255,255,255,.15);
+	background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+}
+
+.sidebar-title { color: #fff; }
+
+@media (max-width: 1024px) {
+	.calendario-wrapper { flex-direction: column; }
+	.calendario-sidebar { flex: 0 0 auto; width: 100%; max-height: 600px; }
+}

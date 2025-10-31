@@ -25,6 +25,34 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Algunas tablas (de spatie/permission u otras) pueden referenciar roles
+        if (Schema::hasTable('model_has_roles')) {
+            try {
+                Schema::table('model_has_roles', function (Blueprint $table) {
+                    if (Schema::hasColumn('model_has_roles', 'role_id')) {
+                        // El nombre de la FK puede variar; intentar drop por columna
+                        $table->dropForeign(['role_id']);
+                    }
+                });
+            } catch (\Throwable $e) {
+                // ignorar si no existe la FK
+            }
+            Schema::dropIfExists('model_has_roles');
+        }
+
+        if (Schema::hasTable('role_has_permissions')) {
+            try {
+                Schema::table('role_has_permissions', function (Blueprint $table) {
+                    if (Schema::hasColumn('role_has_permissions', 'role_id')) {
+                        $table->dropForeign(['role_id']);
+                    }
+                });
+            } catch (\Throwable $e) {
+            }
+            // no siempre se elimina esta tabla aquí, pero si existe la quitamos para poder soltar roles
+            Schema::dropIfExists('role_has_permissions');
+        }
+
         Schema::dropIfExists('roles');
     }
 };
