@@ -37,10 +37,10 @@ body {
     grid-area: header;
     background-color: #e91c1c; /* Rojo principal de la marca */
     color: rgb(255, 255, 255); /* Color de texto base */
-    padding: 40px 30px; /* AUMENTA LA ALTURA Y ESPACIO (ESTILO DESEADO) */
+    padding: 20px 30px; /* Ajustado para mejor distribución */
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra (ESTILO DESEADO) */
     position: fixed;
     top: 0;
@@ -48,21 +48,24 @@ body {
     right: 0;
     width: 100%;
     z-index: 1000;
+    box-sizing: border-box;
 }
 
 .top-bar h1 {
     margin: 0;
-    font-size: 2.5rem; /* Tamaño de fuente más grande (ESTILO DESEADO) */
-    font-weight: bold; 
-    letter-spacing: 1px;
+    font-size: 2rem; /* Tamaño ajustado */
+    font-weight: bold;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .search-form {
     display: flex;
     align-items: center;
-    flex-grow: 1; 
-    max-width: 600px;
-    gap: 24px; /* Espacio entre input y botón (ESTILO DESEADO) */
+    flex: 1;
+    max-width: 500px;
+    gap: 10px;
+    min-width: 200px;
 }
 
 .search-input {
@@ -98,6 +101,37 @@ body {
     background: #fff3f3; /* Hover blanco (ESTILO DESEADO) */
 }
 
+.profile-btn-header {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 10px;
+    border-radius: 50%;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.profile-btn-header:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.5);
+}
+
+.profile-btn-header i {
+    font-size: 1.3rem;
+}
+
+.profile-btn-header span {
+    display: none;
+}
+
 /* ------------------------------------- */
 /* --- Barra Lateral (Sidebar) - ESTILO DESEADO APLICADO --- */
 /* ------------------------------------- */
@@ -110,9 +144,9 @@ body {
     gap: 10px; /* Espacio ajustado (ESTILO DESEADO) */
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Sombra (ESTILO DESEADO) */
     position: fixed;
-    top: 120px; /* AJUSTE CRÍTICO: El nuevo header es más alto, el sidebar debe empezar más abajo. */
+    top: 84px; /* Ajustado para el nuevo header */
     left: 0;
-    bottom: 0; /* Ocupa el resto de la altura */
+    height: calc(100vh - 84px);
     width: 240px; 
     z-index: 999;
     overflow-y: auto;
@@ -161,7 +195,8 @@ body {
 .main-content {
     grid-area: content;
     padding: 40px;
-    padding-top: 130px; /* AJUSTE CRÍTICO: Espacio para el header más alto (~120px) */
+    padding-top: 100px; /* Ajustado para el nuevo header */
+    padding-left: 280px; /* Espacio para el sidebar */
     color: white;
     max-width: 1400px;
     width: 100%;
@@ -547,12 +582,13 @@ body {
 
     .sidebar {
         width: 200px;
-        top: 120px; /* Mantener la alineación ajustada */
+        top: 84px; /* Ajustado para el nuevo header */
     }
 
     .main-content {
         padding: 20px;
-        padding-top: 130px; /* Mantener la alineación ajustada */
+        padding-top: 100px; /* Ajustado para el nuevo header */
+        padding-left: 240px; /* Espacio para el sidebar */
     }
 }
 
@@ -594,10 +630,8 @@ body {
     .top-bar {
         height: auto;
         padding: 10px 15px; /* Padding más pequeño (ESTILO DESEADO MOBILE) */
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        gap: 5px;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
     .top-bar h1 {
@@ -605,7 +639,21 @@ body {
     }
 
     .search-form {
-        display: none; /* Ocultar la barra de búsqueda en móviles para simplificar */
+        max-width: none;
+        flex: 1;
+        min-width: 150px;
+        margin-right: 10px;
+    }
+
+    .profile-btn-header {
+        padding: 8px;
+        width: 40px;
+        height: 40px;
+        margin-left: auto;
+    }
+
+    .profile-btn-header i {
+        font-size: 1.1rem;
     }
 
     .sidebar {

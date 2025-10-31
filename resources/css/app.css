@@ -162,7 +162,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    padding-top: 70px;
+    padding-top: 84px;
     background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -170,10 +170,10 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     grid-area: header;
     background-color: #e91c1c;
     color: rgb(255, 255, 255);
-    padding: 40px 30px;
+    padding: 20px 30px;
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     position: fixed;
     top: 0;
@@ -181,20 +181,24 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     right: 0;
     width: 100%;
     z-index: 1000;
+    box-sizing: border-box;
 }
 
 .top-bar h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: bold;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .search-form {
     display: flex;
     align-items: center;
-    flex-grow: 1;
-    max-width: 600px;
-    gap: 24px;
+    flex: 1;
+    max-width: 500px;
+    gap: 10px;
+    min-width: 200px;
 }
 
 .search-input {
@@ -224,6 +228,37 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     background: #fff3f3;
 }
 
+.profile-btn-header {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 10px;
+    border-radius: 50%;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.profile-btn-header:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.5);
+}
+
+.profile-btn-header i {
+    font-size: 1.3rem;
+}
+
+.profile-btn-header span {
+    display: none;
+}
+
 .sidebar {
     grid-area: sidebar;
     background-color: rgba(0, 0, 0, 0.5);
@@ -234,9 +269,9 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     z-index: 999;
     position: fixed;
-    top: 60px;
+    top: 84px;
     left: 0;
-    height: 100vh;
+    height: calc(100vh - 84px);
     z-index: 999;
 }
 
@@ -351,10 +386,26 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
     .top-bar {
         padding: 20px 15px;
+        gap: 15px;
+        flex-wrap: wrap;
     }
 
     .search-form {
         max-width: none;
+        flex: 1;
+        min-width: 150px;
+        margin-right: 10px;
+    }
+
+    .profile-btn-header {
+        padding: 10px;
+        width: 42px;
+        height: 42px;
+        margin-left: auto;
+    }
+
+    .profile-btn-header i {
+        font-size: 1.2rem;
     }
 
     .main-content {

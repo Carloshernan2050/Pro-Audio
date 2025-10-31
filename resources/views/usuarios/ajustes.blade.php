@@ -26,12 +26,15 @@
                     <i class="fas fa-search"></i>
                 </button>
             </form>
+            <a href="{{ route('usuarios.perfil') }}" class="profile-btn-header" title="Perfil">
+                <i class="fas fa-user-circle"></i>
+                <span>Perfil</span>
+            </a>
         </header>
 
         {{-- Barra lateral izquierda --}}
         <aside class="sidebar">
             <h5 class="menu-title">Menú</h5>
-            <a href="{{ route('usuarios.perfil') }}" class="sidebar-btn"><i class="fas fa-user-circle"></i> Perfil</a>
             <a href="{{ route('usuarios.dashboard') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
             <a href="{{ route('usuarios.animacion') }}" class="sidebar-btn"><i class="fas fa-laugh-beam"></i> Animación</a>
             <a href="{{ route('usuarios.publicidad') }}" class="sidebar-btn"><i class="fas fa-bullhorn"></i> Publicidad</a>

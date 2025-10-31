@@ -15,7 +15,7 @@
     @vite('resources/js/app.js')
 
     {{-- Enlace a la librería de Font Awesome para los íconos --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWpU6lJ9Xl3QO4K8y9Rk5vLqB34+Jk81f7qFk43Qk5p8G4eGk3k9Vb/qH6r/jB5sD5k6w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     {{-- Contenedor principal del dashboard con la imagen de fondo --}}
@@ -29,12 +29,15 @@
                     <i class="fas fa-search"></i>
                 </button>
             </form>
+            <a href="{{ route('usuarios.perfil') }}" class="profile-btn-header" title="Perfil">
+                <i class="fas fa-user-circle"></i>
+                <span>Perfil</span>
+            </a>
         </header>
 
         {{-- Barra lateral izquierda (estilizada en app.css) --}}
         <aside class="sidebar">
             <h5 class="menu-title">Menú</h5>
-            <a href="{{ route('usuarios.perfil') }}" class="sidebar-btn"><i class="fas fa-user-circle"></i> Perfil</a>
             <a href="{{ route('inicio') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
             <a href="{{ route('usuarios.animacion') }}" class="sidebar-btn"><i class="fas fa-laugh-beam"></i> Animación</a>
             <a href="{{ route('usuarios.publicidad') }}" class="sidebar-btn"><i class="fas fa-bullhorn"></i> Publicidad</a>
