@@ -13,7 +13,14 @@
             <p class="page-subtitle">Aquí puedes ver y gestionar tu información personal.</p>
 
             <div class="profile-container">
-                @if(session()->has('usuario_id') && $usuario && (session('role') === 'Cliente' || session('role') === 'Administrador' || in_array('Superadmin', (array)session('roles'))))
+                @if(session()->has('usuario_id') && $usuario && (
+                    session('role') === 'Cliente' ||
+                    session('role') === 'Administrador' ||
+                    session('role') === 'Admin' ||
+                    session('role') === 'Usuario' ||
+                    in_array('Superadmin', (array)session('roles')) ||
+                    in_array('Usuario', (array)session('roles'))
+                ))
                     <div class="profile-details">
                         <p><strong>Nombres:</strong> 
                             {{ ucfirst(strtolower($usuario->primer_nombre ?? '')) }}
