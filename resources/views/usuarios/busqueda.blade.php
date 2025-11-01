@@ -37,7 +37,7 @@
                         @foreach($items as $item)
                             @php
                                 $nombre = is_object($item) ? $item->nombre : $item['nombre'];
-                                $precio = is_object($item) ? $item->precio : $item['precio'];
+                                $precio = null; // ocultar precio en resultados de búsqueda
                                 $descripcion = is_object($item) && isset($item->descripcion) ? $item->descripcion : (isset($item['descripcion']) ? $item['descripcion'] : null);
                                 $imagenPath = strtolower(str_replace(' ', '_', $nombre));
                                 $servicioPath = strtolower(str_replace(' ', '_', $servicioNombre));
@@ -48,11 +48,7 @@
                                      class="producto-imagen"
                                      onerror="this.src='/images/default.jpg'">
                                 <h4 class="producto-nombre">{{ $nombre }}</h4>
-                                @if($precio)
-                                    <p style="color: #2563eb; font-weight: bold; font-size: 1.1em; margin: 8px 0;">
-                                        ${{ number_format($precio, 0, ',', '.') }}
-                                    </p>
-                                @endif
+                                {{-- Precio oculto en la búsqueda --}}
                                 @if($descripcion)
                                     <p class="producto-descripcion">{{ $descripcion }}</p>
                                 @endif

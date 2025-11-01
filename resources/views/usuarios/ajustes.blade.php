@@ -37,9 +37,9 @@
                 <button onclick="showTab('servicios')" class="btn-tab active" id="btn-servicios">
                     <i class="fas fa-cogs"></i> Servicios
                 </button>
-                <a href="{{ route('subservicios.index') }}" class="btn-tab" style="text-decoration: none; display: inline-block;">
+                <button onclick="showTab('subservicios')" class="btn-tab" id="btn-subservicios">
                     <i class="fas fa-list-alt"></i> Subservicios
-                </a>
+                </button>
                 <button onclick="showTab('inventario')" class="btn-tab" id="btn-inventario">
                     <i class="fas fa-boxes"></i> Inventario
                 </button>
@@ -94,6 +94,44 @@
                             @empty
                                 <tr>
                                     <td colspan="3" class="no-services">No hay servicios registrados.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Tab de Subservicios dentro de Ajustes (sin navegar) --}}
+            <div id="tab-subservicios" class="tab-content">
+                <div class="button-container">
+                    <button onclick="openSubservicioModal('create')" class="btn-primary">
+                        <i class="fas fa-plus-circle"></i> Agregar Nuevo Subservicio
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Servicio</th>
+                                <th>Descripción</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $subServiciosList = isset($subServicios) ? $subServicios : collect([]); @endphp
+                            @forelse ($subServiciosList as $sub)
+                                <tr>
+                                    <td>{{ $sub->id }}</td>
+                                    <td>{{ $sub->nombre }}</td>
+                                    <td>{{ $sub->servicio->nombre_servicio ?? 'N/A' }}</td>
+                                    <td>{{ \Illuminate\Support\Str::limit($sub->descripcion ?? '', 50) }}</td>
+                                    <td>${{ number_format($sub->precio ?? 0, 0, ',', '.') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="no-services">No hay subservicios registrados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -352,6 +390,9 @@
         }
 
         // Funciones para inventario
+        function openSubservicioModal(mode, id = null, nombre = '', descripcion = '', precio = 0, servicios_id = '') {
+            window.location.href = '{{ route('subservicios.index') }}';
+        }
         function openInventarioModal(mode, id = null, descripcion = '', stock = '') {
             const inventarioModalTitle = document.getElementById('inventarioModalTitle');
             const inventarioForm = document.getElementById('inventarioForm');
@@ -600,6 +641,8 @@
                 closeMovimientoModal();
             }
         }
+
+        
         
         // Manejadores de eventos para formularios
         document.addEventListener('DOMContentLoaded', function() {

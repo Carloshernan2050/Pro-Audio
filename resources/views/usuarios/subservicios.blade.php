@@ -18,10 +18,10 @@
 <body>
     <div class="dashboard-container">
         @include('components.topbar')
-
+        
         {{-- Barra lateral izquierda --}}
         @include('components.sidebar')
-
+        
         {{-- Contenido principal --}}
         <main class="main-content">
             <h2 class="page-title">Gestión de Subservicios</h2>
