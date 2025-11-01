@@ -51,6 +51,8 @@
                 </button>
             </div>
 
+            <div id="page-meta" data-initial-tab="{{ $activeTab ?? 'servicios' }}" style="display:none;"></div>
+
             {{-- Tab de Servicios --}}
             <div id="tab-servicios" class="tab-content active">
                 {{-- Botón para abrir el modal de creación --}}
@@ -193,60 +195,145 @@
 
             {{-- Tab de Historial de Cotizaciones --}}
             <div id="tab-historial" class="tab-content">
-                <div class="button-container" style="margin-bottom: 12px;">
-                    <a href="{{ route('usuarios.ajustes.historial.pdf') }}" class="btn-primary">
+                <div class="button-container" style="margin-bottom: 12px; gap: 8px; display: flex; align-items: center;">
+                    <a href="{{ route('usuarios.ajustes.historial.pdf', ['group_by' => $groupBy ?? null]) }}" class="btn-primary">
                         <i class="fas fa-file-pdf"></i> Descargar PDF
                     </a>
+                    <form method="GET" action="{{ route('usuarios.ajustes') }}" style="display:flex; align-items:center; gap:6px;">
+                        <input type="hidden" name="tab" value="historial">
+                        <label for="group_by" style="font-size: 14px; color:#333;">Agrupar por:</label>
+                        <select id="group_by" name="group_by" onchange="this.form.submit()" style="padding:6px;">
+                            <option value="" {{ empty($groupBy) ? 'selected' : '' }}>Sin agrupación</option>
+                            <option value="consulta" {{ ($groupBy ?? '') === 'consulta' ? 'selected' : '' }}>Consulta</option>
+                            <option value="dia" {{ ($groupBy ?? '') === 'dia' ? 'selected' : '' }}>Día</option>
+                        </select>
+                    </form>
                 </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Fecha y Hora</th>
-                                <th>Cliente</th>
-                                <th>Subservicio</th>
-                                <th>Servicio</th>
-                                <th>Monto</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                                $cotizacionesList = isset($cotizaciones) ? $cotizaciones : collect([]);
-                            @endphp
-                            @forelse ($cotizacionesList as $cotizacion)
+
+                @php
+                    $cotizacionesList = isset($cotizaciones) ? $cotizaciones : collect([]);
+                    $groupedData = isset($groupedCotizaciones) ? $groupedCotizaciones : null;
+                @endphp
+
+                @if(empty($groupBy))
+                    <div class="table-container">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td>{{ $cotizacion->id }}</td>
-                                    <td>
-                                        {{ $cotizacion->fecha_cotizacion ? $cotizacion->fecha_cotizacion->format('d/m/Y H:i:s') : 'N/A' }}
-                                    </td>
-                                    <td>
-                                        @if($cotizacion->persona)
-                                            {{ $cotizacion->persona->primer_nombre }} {{ $cotizacion->persona->primer_apellido }}
-                                            <br>
-                                            <small style="color: #999;">{{ $cotizacion->persona->correo ?? '' }}</small>
-                                        @else
-                                            N/A
-                                        @endif
-                                    </td>
-                                    <td>{{ $cotizacion->subServicio->nombre ?? 'N/A' }}</td>
-                                    <td>
-                                        @if($cotizacion->subServicio && $cotizacion->subServicio->servicio)
-                                            {{ $cotizacion->subServicio->servicio->nombre_servicio }}
-                                        @else
-                                            N/A
-                                        @endif
-                                    </td>
-                                    <td>${{ number_format($cotizacion->monto ?? 0, 0, ',', '.') }}</td>
+                                    <th>ID</th>
+                                    <th>Fecha y Hora</th>
+                                    <th>Cliente</th>
+                                    <th>Subservicio</th>
+                                    <th>Servicio</th>
+                                    <th>Monto</th>
                                 </tr>
-                            @empty
+                            </thead>
+                            <tbody>
+                                @forelse ($cotizacionesList as $cotizacion)
+                                    <tr>
+                                        <td>{{ $cotizacion->id }}</td>
+                                        <td>{{ $cotizacion->fecha_cotizacion ? $cotizacion->fecha_cotizacion->format('d/m/Y H:i:s') : 'N/A' }}</td>
+                                        <td>
+                                            @if($cotizacion->persona)
+                                                {{ $cotizacion->persona->primer_nombre }} {{ $cotizacion->persona->primer_apellido }}
+                                                <br>
+                                                <small style="color: #999;">{{ $cotizacion->persona->correo ?? '' }}</small>
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td>{{ $cotizacion->subServicio->nombre ?? 'N/A' }}</td>
+                                        <td>{{ optional(optional($cotizacion->subServicio)->servicio)->nombre_servicio ?? 'N/A' }}</td>
+                                        <td>${{ number_format($cotizacion->monto ?? 0, 0, ',', '.') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="no-services">No hay cotizaciones en el historial.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                @elseif(($groupBy ?? '') === 'dia')
+                    <div class="table-container">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td colspan="6" class="no-services">No hay cotizaciones en el historial.</td>
+                                    <th style="width: 25%;">Día</th>
+                                    <th style="width: 25%;">Total del día</th>
+                                    <th style="width: 50%;">Cantidad de cotizaciones</th>
                                 </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                @forelse($groupedData as $day => $data)
+                                    <tr class="group-header">
+                                        <td colspan="3">{{ \Carbon\Carbon::parse($day)->format('d/m/Y') }} — Total: ${{ number_format($data['total'] ?? 0, 0, ',', '.') }} ({{ $data['count'] }} items)</td>
+                                    </tr>
+                                    @foreach($data['items'] as $cotizacion)
+                                        <tr>
+                                            <td>{{ $cotizacion->fecha_cotizacion?->format('d/m/Y H:i') }}</td>
+                                            <td>
+                                                @if($cotizacion->persona)
+                                                    {{ $cotizacion->persona->primer_nombre }} {{ $cotizacion->persona->primer_apellido }}
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            <td>${{ number_format($cotizacion->monto ?? 0, 0, ',', '.') }} — {{ $cotizacion->subServicio->nombre ?? 'N/A' }} / {{ optional(optional($cotizacion->subServicio)->servicio)->nombre_servicio ?? 'N/A' }}</td>
+                                        </tr>
+                                    @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="no-services">No hay cotizaciones en el historial.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                @elseif(($groupBy ?? '') === 'consulta')
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">Consulta</th>
+                                    <th style="width: 30%;">Cliente</th>
+                                    <th style="width: 30%;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($groupedData as $key => $data)
+                                    <tr class="group-header">
+                                        <td colspan="3">{{ optional($data['timestamp'])->format('d/m/Y H:i:s') }} — {{ $data['count'] }} items</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <ul class="ul-compact">
+                                                @foreach($data['items'] as $cotizacion)
+                                                    <li>
+                                                        {{ $cotizacion->subServicio->nombre ?? 'N/A' }} ({{ optional(optional($cotizacion->subServicio)->servicio)->nombre_servicio ?? 'N/A' }}) — ${{ number_format($cotizacion->monto ?? 0, 0, ',', '.') }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            @if($data['persona'])
+                                                {{ $data['persona']->primer_nombre }} {{ $data['persona']->primer_apellido }}
+                                                <br><small style="color:#999;">{{ $data['persona']->correo ?? '' }}</small>
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td>${{ number_format($data['total'] ?? 0, 0, ',', '.') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="no-services">No hay cotizaciones en el historial.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </div>
 
             {{-- Modal para crear y editar servicios --}}
@@ -358,6 +445,13 @@
                 loadInventarioOptions();
             }
         }
+
+        // Activar pestaña según el servidor (si hay agrupación, ir a historial)
+        document.addEventListener('DOMContentLoaded', function() {
+            const metaEl = document.getElementById('page-meta');
+            const initialTab = metaEl ? metaEl.getAttribute('data-initial-tab') : 'servicios';
+            showTab(initialTab);
+        });
 
         // Funciones para servicios (existentes)
         const modalTitle = document.getElementById('modalTitle');

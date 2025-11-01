@@ -272,6 +272,45 @@
     align-items: center;
 }
 
+/* Historial: controles y agrupaciones */
+.button-container label[for="group_by"] {
+    color: #e91c1c;
+}
+
+.button-container select#group_by {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #e91c1c;
+    background-color: #2d3748;
+    color: white;
+    font-size: 14px;
+}
+
+.button-container select#group_by:focus {
+    outline: none;
+    border-color: #e91c1c;
+    box-shadow: 0 0 0 2px rgba(233, 28, 28, 0.25);
+}
+
+tr.group-header td,
+tr.group-header th {
+    background-color: #e91c1c;
+    color: #fff;
+    font-weight: 600;
+    border-top: 1px solid #e91c1c;
+    border-bottom: 1px solid #e91c1c;
+}
+
+.ul-compact {
+    list-style: disc inside;
+    margin: 0;
+    padding-left: 0;
+}
+
+.ul-compact li {
+    margin: 2px 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .modal-content {
