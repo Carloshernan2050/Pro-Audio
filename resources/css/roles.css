@@ -13,6 +13,13 @@
 
 .roles-title { color: var(--color-text); margin-bottom: 12px; display: flex; gap: 10px; align-items: center; }
 
+.roles-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.roles-actions { display: flex; align-items: center; gap: 10px; }
+.btn-back { background: transparent; color: #fff; border: 1px solid var(--color-border); padding: 8px 14px; border-radius: 8px; text-decoration: none; display: inline-flex; gap: 8px; align-items: center; transition: all .2s ease; }
+.btn-back:hover { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,.15); transform: translateY(-1px); }
+
+.roles-hint { color: var(--color-muted); margin-bottom: 12px; font-size: .95rem; }
+
 .roles-card { background: rgba(0,0,0,.45); padding: 16px; border-radius: 12px; border: 1px solid var(--color-border); }
 
 .roles-scroll { overflow: auto; max-height: 70vh; }
@@ -20,10 +27,12 @@
 .roles-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; color: var(--color-text); }
 .roles-table thead th { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; padding: 12px 10px; text-align: left; position: sticky; top: 0; z-index: 1; }
 .roles-table tbody td { padding: 10px; border-bottom: 1px solid var(--color-border); color: var(--color-text); }
+.roles-table tbody tr:nth-child(even) { background: rgba(255,255,255,.03); }
+.roles-table tbody tr:hover { background: rgba(233,28,28,.07); }
 
 .roles-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: rgba(233,28,28,.15); border: 1px solid rgba(233,28,28,.4); color: #fff; font-size: .9rem; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: rgba(233,28,28,.12); border: 1px solid rgba(233,28,28,.4); color: #fff; font-size: .9rem; }
 .chip input { transform: translateY(1px); }
 
 .btn-guardar { background: var(--color-primary); border: 2px solid var(--color-primary); color: #fff; padding: 8px 14px; border-radius: 8px; font-weight: 700; transition: all .2s ease; }

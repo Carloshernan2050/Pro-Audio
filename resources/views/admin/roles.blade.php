@@ -9,7 +9,13 @@
 </head>
 <body>
 <div class="dashboard-container roles-page" style="padding:20px;">
-    <h2 class="roles-title"><i class="fas fa-user-shield"></i> Gestión de Roles</h2>
+    <div class="roles-header">
+        <h2 class="roles-title"><i class="fas fa-user-shield"></i> Gestión de Roles</h2>
+        <div class="roles-actions">
+            <a href="{{ route('inicio') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+        </div>
+    </div>
+    <p class="roles-hint">Roles permitidos: <strong>Superadmin</strong>, <strong>Admin</strong>, <strong>Usuario</strong>, <strong>Invitado</strong>.</p>
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -36,14 +42,17 @@
                             <form method="POST" action="{{ route('admin.roles.update') }}" class="roles-form">
                                 @csrf
                                 <input type="hidden" name="persona_id" value="{{ $u->id }}">
+                                @php $permitidos = ['Superadmin','Admin','Usuario','Invitado']; @endphp
                                 @foreach($roles as $r)
-                                    @php
-                                        $has = collect(explode(',', (string)$u->roles))->filter()->contains($r->name);
-                                    @endphp
-                                    <label class="chip">
-                                        <input type="checkbox" name="roles[]" value="{{ $r->id }}" {{ $has ? 'checked' : '' }}>
-                                        {{ $r->name }}
-                                    </label>
+                                    @if(in_array($r->name, $permitidos, true))
+                                        @php
+                                            $has = collect(explode(',', (string)$u->roles))->filter()->contains($r->name);
+                                        @endphp
+                                        <label class="chip">
+                                            <input type="checkbox" name="roles[]" value="{{ $r->id }}" {{ $has ? 'checked' : '' }}>
+                                            {{ $r->name }}
+                                        </label>
+                                    @endif
                                 @endforeach
                                 <button type="submit" class="btn-guardar"><i class="fas fa-save"></i> Guardar</button>
                             </form>

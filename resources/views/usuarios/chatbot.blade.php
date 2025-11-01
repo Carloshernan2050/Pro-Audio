@@ -7,40 +7,34 @@
 
     {{-- Enlace a tu archivo CSS principal --}}
     @vite('resources/css/app.css')
+    {{-- Estilos específicos SOLO para la vista del chatbot --}}
+    @vite('resources/css/chatbot.css')
 
     {{-- Importación de íconos de Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        @include('components.topbar')
-
-        {{-- Barra lateral izquierda --}}
-        @include('components.sidebar')
-
-        {{-- Contenedor principal del chat --}}
-        <div class="page-container">
-            <div class="chatbot-container">
-                
-                {{-- Encabezado del chat --}}
-                <div class="chat-header">
-                    <div class="chat-profile">
-                        <i class="fas fa-user-circle chat-icon"></i>
-                        <span class="chat-username">Chat</span>
-                    </div>
+    {{-- Contenido puro del chat, sin topbar ni sidebar, ideal para iframe/widget --}}
+    <div class="page-container">
+        <div class="chatbot-container">
+            {{-- Encabezado del chat (puedes quitarlo si deseas solo el área de mensajes) --}}
+            <div class="chat-header">
+                <div class="chat-profile">
+                    <i class="fas fa-user-circle chat-icon"></i>
+                    <span class="chat-username">Chat</span>
                 </div>
+            </div>
 
-                {{-- Contenedor dinámico de mensajes --}}
-                <div id="messages-container" class="messages-container"></div>
+            {{-- Contenedor dinámico de mensajes --}}
+            <div id="messages-container" class="messages-container"></div>
 
-                {{-- Entrada del chat --}}
-                <div class="input-container">
-                    <i class="fas fa-user-circle chat-avatar"></i>
-                    <input type="text" id="mensaje" class="chat-input" placeholder="Escribe tu mensaje...">
-                    <button id="send-btn" class="send-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
+            {{-- Entrada del chat --}}
+            <div class="input-container">
+                <i class="fas fa-user-circle chat-avatar"></i>
+                <input type="text" id="mensaje" class="chat-input" placeholder="Escribe tu mensaje...">
+                <button id="send-btn" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>

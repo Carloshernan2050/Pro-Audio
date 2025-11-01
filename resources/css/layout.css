@@ -1,0 +1,25 @@
+/*
+  CSS del layout compartido (fondo, topbar, sidebar, contenedor principal).
+  Mantén aquí únicamente los estilos comunes a las vistas con esta plantilla.
+*/
+
+/* Ejemplos mínimos/seguros (puedes ajustar o mover desde otros archivos con calma) */
+.dashboard-container {
+	min-height: 100vh;
+	display: grid;
+	grid-template-columns: 260px 1fr;
+	grid-template-rows: auto 1fr;
+	grid-template-areas:
+		"topbar topbar"
+		"sidebar main";
+}
+
+.top-bar { grid-area: topbar; }
+.sidebar { grid-area: sidebar; }
+.main-content { grid-area: main; }
+
+/* Asegura espaciados básicos del contenido */
+.main-content {
+	padding: 20px;
+}
+

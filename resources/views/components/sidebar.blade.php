@@ -72,8 +72,6 @@
         @endif
     @endif
 
-    @if($noInvitado)
-    <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
-    @endif
+    {{-- Chatbot movido a botón flotante global; se elimina del menú lateral --}}
 </aside>
 

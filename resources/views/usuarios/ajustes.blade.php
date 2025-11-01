@@ -1,27 +1,12 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>PRO AUDIO - Ajustes de Servicios</title>
-    
-    {{-- Llamada al archivo CSS principal usando Vite --}}
-    @vite('resources/css/app.css')
+@extends('layouts.app')
 
-    {{-- Enlace a Font Awesome para los íconos --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWpU6lJ9Xl3QO4K8y9Rk5vLqB34+Jk81f7qFk43Qk5p8G4eGk3k9Vb/qH6r/jB5sD5k6w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    {{-- Enlace al nuevo archivo de estilos para los ajustes --}}
+@section('title', 'Ajustes de Servicios')
+
+@push('styles')
     <link rel="stylesheet" href="{{ asset('css/ajustes.css') }}">
-</head>
-<body>
-    <div class="dashboard-container">
-        @include('components.topbar')
+@endpush
 
-        {{-- Barra lateral izquierda --}}
-        @include('components.sidebar')
-
+@section('content')
         {{-- Contenido principal --}}
         <main class="main-content">
             <h2 class="page-title">Ajustes de Servicios</h2>
@@ -301,7 +286,6 @@
             </div>
 
         </main>
-    </div>
 
     <script>
         // Variables globales
@@ -696,11 +680,10 @@
         });
         
     </script>
-    
+
     @if ($errors->any() && old('id'))
         <script>
             openModal('edit', {{ old('id') }}, '{{ old('nombre_servicio') }}');
         </script>
     @endif
-</body>
-</html>
+@endsection

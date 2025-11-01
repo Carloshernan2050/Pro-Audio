@@ -23,6 +23,11 @@
 <body>
     {{-- Contenedor principal --}}
     <div class="dashboard-container">
+        @php
+            $rolesSesion = session('roles') ?? [session('role')];
+            $rolesSesion = is_array($rolesSesion) ? $rolesSesion : [$rolesSesion];
+            $esAdmin = in_array('Administrador', $rolesSesion, true) || in_array('Admin', $rolesSesion, true) || in_array('Superadmin', $rolesSesion, true);
+        @endphp
         {{-- Contenedor del calendario con sidebar --}}
         <div class="calendario-wrapper">
             {{-- Contenido principal: Calendario --}}
@@ -33,7 +38,7 @@
                         <h2 class="calendar-title">
                             <i class="fas fa-calendar-alt"></i> Calendario de Alquileres
                         </h2>
-                        @if(session('role') === 'Administrador')
+                        @if($esAdmin)
                         <button class="btn btn-crear-alquiler" data-bs-toggle="modal" data-bs-target="#modalCrear">
                             <i class="fas fa-plus"></i> Nuevo alquiler
                         </button>
@@ -64,7 +69,7 @@
             </div>
 
             {{-- SIDEBAR: Listado de registros --}}
-            @if(session('role') === 'Administrador')
+            @if($esAdmin)
             <aside class="calendario-sidebar">
                 <div class="sidebar-header">
                     <h3 class="sidebar-title">
@@ -221,7 +226,7 @@
             @endif
         </div>
 
-        @if(session('role') === 'Administrador')
+        @if($esAdmin)
         {{-- MODAL CREAR --}}
         <div class="modal fade calendar-modal" id="modalCrear" tabindex="-1">
             <div class="modal-dialog">
@@ -309,6 +314,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 var calendarEl = document.getElementById('calendar');
                 var eventos = @json($eventos);
+                var isAdmin = @json($esAdmin);
 
                 // Construir set de días reservados (YYYY-MM-DD) solo por fecha de inicio
                 function ymd(dateObj) {
@@ -342,20 +348,21 @@
                             arg.el.classList.add('day-reserved');
                         }
                     },
-                    headerToolbar: {
+                    headerToolbar: isAdmin ? {
                         left: 'prev,next today',
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    } : {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: ''
                     },
                     eventClick: function(info) {
+                        if (!isAdmin) return; // Usuarios no interactúan con eventos
                         var descripcion = info.event.extendedProps.description || 'Sin descripción';
                         var inicio = new Date(info.event.start).toLocaleString('es-ES');
                         var fin = info.event.end ? new Date(info.event.end).toLocaleString('es-ES') : 'Sin fecha de fin';
-                        
-                        alert("Producto: " + info.event.title + 
-                              "\nDescripción: " + descripcion +
-                              "\nFecha de inicio: " + inicio +
-                              "\nFecha de fin: " + fin);
+                        alert("Producto: " + info.event.title + "\nDescripción: " + descripcion + "\nFecha de inicio: " + inicio + "\nFecha de fin: " + fin);
                     },
                     buttonText: {
                         today: 'Hoy',

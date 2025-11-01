@@ -8,6 +8,20 @@ use Illuminate\Support\Facades\DB;
 
 class CalendarioController extends Controller
 {
+    private function isAdminLike(): bool
+    {
+        $roles = session('roles') ?? [session('role')];
+        if (!is_array($roles)) { $roles = [$roles]; }
+        $roles = array_map(function($r){ return is_string($r) ? strtolower($r) : $r; }, $roles);
+        return in_array('administrador', $roles, true) || in_array('admin', $roles, true) || in_array('superadmin', $roles, true);
+    }
+
+    private function ensureAdminLike(): void
+    {
+        if (!$this->isAdminLike()) {
+            abort(403, 'No autorizado');
+        }
+    }
     // Mostrar el calendario
     public function inicio()
     {
@@ -34,6 +48,7 @@ class CalendarioController extends Controller
     // Guardar nuevo evento
     public function guardar(Request $request)
     {
+        $this->ensureAdminLike();
         $request->validate([
             'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
             'fecha_inicio'              => 'required|date',
@@ -57,6 +72,7 @@ class CalendarioController extends Controller
     // Actualizar evento existente
     public function actualizar(Request $request, $id)
     {
+        $this->ensureAdminLike();
         $request->validate([
             'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
             'fecha_inicio'              => 'required|date',
@@ -77,6 +93,13 @@ class CalendarioController extends Controller
     // Eliminar evento
     public function eliminar($id)
     {
+        $this->ensureAdminLike();
+        // Borrar dependencias en historial para evitar error de clave foránea
+        try {
+            DB::table('historial')->where('calendario_id', $id)->delete();
+        } catch (\Throwable $e) {
+            // continuar; si no existe la tabla/columna, se ignora silenciosamente
+        }
         Calendario::findOrFail($id)->delete();
         return back()->with('ok','Evento eliminado');
     }

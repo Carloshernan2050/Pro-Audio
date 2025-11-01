@@ -162,7 +162,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    padding-top: 84px;
+    padding-top: calc(128px + 0.5cm);
     background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -170,18 +170,22 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     grid-area: header;
     background-color: #e91c1c;
     color: rgb(255, 255, 255);
-    padding: 20px 30px;
+    padding: 42px 30px;
     display: flex;
     align-items: center;
     gap: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
+    top: 0.5cm !important;
+    left: 0.5cm !important;
+    right: 0.5cm !important;
+    width: auto !important;
+    margin-left: 0;
+    margin-right: 0;
     z-index: 1000;
     box-sizing: border-box;
+    border-radius: 14px;
+    overflow: hidden; /* asegura que el contenido respete el radio */
     justify-content: space-between; /* tamaño y distribución original */
 }
 
@@ -202,7 +206,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 /* Estilo del logo en la top bar */
 .brand-logo img{
-    height: 38px; /* tamaño original del logo en la barra */
+    height: 48px; /* ajusta acorde al incremento de la barra */
     width: auto;
     display: block;
 }
@@ -210,12 +214,13 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 .search-form {
     display: flex;
     align-items: center;
-    flex: 1;
-    max-width: 600px;
+    flex: 0 1 720px; /* ancho objetivo centrado */
+    max-width: 720px;
     width: 100%;
     gap: 10px;
     min-width: 200px;
-    /* sin márgenes auto para mantener proporciones originales */
+    margin-left: auto;
+    margin-right: auto; /* centra la barra entre logo y perfil */
 }
 
 /* (se restauran tamaños originales sin restricciones extra) */
@@ -288,15 +293,16 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     z-index: 999;
     position: fixed;
-    top: 84px;
+    top: calc(128px + 0.5cm);
     left: 0;
-    height: calc(100vh - 84px);
+    height: calc(100vh - (128px + 0.5cm));
     width: 240px;
     overflow-y: auto;
     overflow-x: hidden;
     /* Estilos de scrollbar para Firefox */
     scrollbar-width: thin;
     scrollbar-color: rgba(233, 28, 28, 0.6) rgba(0, 0, 0, 0.3);
+    padding-bottom: 32px; /* deja espacio con el borde inferior */
 }
 
 /* Estilos personalizados para la barra de desplazamiento del sidebar (Chrome, Safari, Edge) */
@@ -323,18 +329,29 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     color: white;
     font-weight: bold;
     margin-bottom: 10px;
+    margin-top: 35px; /* baja el título 20px */
+    width: 160px; /* mismo ancho que .sidebar-btn */
+    margin-left: auto;
+    margin-right: auto; /* centra el bloque */
+    text-align: left; /* mantiene el texto alineado a la izquierda dentro del bloque */
+    padding-left: 16px; /* ajuste extra hacia la derecha */
+    font-size: 1.2rem; /* tamaño consistente en todas las vistas */
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .sidebar-btn {
     background-color: transparent;
     color: white;
     border: 1px solid white;
-    padding: 10px;
+    padding: 8px 12px;
     text-align: center;
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
     margin-bottom: 15px;
+    width: 160px; /* más estrecho */
+    align-self: center; /* centra dentro del sidebar */
 }
 
 .sidebar-btn:hover {
@@ -352,8 +369,8 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     text-align: center;
     padding-top: 40px;
     overflow-y: auto;
-    padding-top: 60px;
-    padding-left: 250px;
+    padding-top: 48px; /* altura coherente con la nueva top-bar */
+    padding-left: 220px; /* acerca el contenido hacia la izquierda */
     max-width: 1200px;
     margin: 0 auto;
     flex-grow: 1;
@@ -1497,3 +1514,109 @@ tr:nth-child(even) {
 .boton-cerrar:hover {
     color: rgb(255, 255, 255); /* rojo elegante al pasar el mouse */
 }
+
+/* Botón flotante global del Chatbot */
+.chatbot-fab {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #e91c1c;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    z-index: 1200; /* por encima de sidebar/topbar */
+    text-decoration: none;
+    border: 2px solid rgba(255,255,255,0.8);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.chatbot-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+    background-color: #ff3333;
+}
+
+.chatbot-fab i { font-size: 1.5rem; }
+
+/* Widget flotante del chatbot */
+.chatbot-widget {
+    position: fixed;
+    right: 22px;
+    bottom: 86px; /* deja espacio para la FAB */
+    width: 420px;
+    height: 600px;
+    background: #0b0b0b;
+    border: 2px solid #e91c1c;
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    overflow: hidden;
+    z-index: 1201;
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.chatbot-widget.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Estado expandido (casi pantalla completa) */
+.chatbot-widget.is-expanded {
+    width: min(calc(100vw - 44px), 1000px);
+    height: min(calc(100vh - 120px), 820px);
+    right: 22px;
+    bottom: 86px;
+}
+
+.chatbot-widget__body { height: 100%; }
+.chatbot-iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #000;
+}
+
+/* Barra de control y agarre para arrastrar (minimalista) */
+.chatbot-widget__drag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 16px; /* pequeña, no parece cabecera visual */
+    cursor: move;
+    z-index: 2;
+    background: linear-gradient(to right, rgba(233,28,28,0.2), rgba(233,28,28,0.05));
+}
+
+.chatbot-widget__controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    z-index: 3;
+}
+
+.chatbot-ctrl {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.6);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.chatbot-ctrl:hover { background: rgba(0,0,0,0.75); }

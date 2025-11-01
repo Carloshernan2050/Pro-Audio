@@ -1,0 +1,23 @@
+/* Estilos específicos para la vista de perfil */
+
+/* Centra el bloque de perfil dentro del contenido principal */
+.profile-container {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 820px; /* ancho legible y centrado */
+}
+
+/* Empuja todo el contenido principal más a la izquierda (sin solapar el sidebar de 240px) */
+.main-content {
+	margin-left: 0;
+	margin-right: 0;
+	max-width: 1200px; /* centra como el resto de vistas */
+	margin: 0 auto; /* centrado horizontal */
+	padding-left: -240px; /* más centrado respecto al sidebar */
+}
+
+/* Opcional: reduce un poco el ancho para que no quede centrado por max-width del padre */
+@media (min-width: 768px) {
+	/* mantiene centrado en pantallas medianas/grandes */
+}
+

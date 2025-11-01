@@ -218,13 +218,13 @@ body {
 /* ------------------------------------- */
 .main-content {
     grid-area: content;
-    padding: 40px;
-    padding-top: 100px; /* Ajustado para el nuevo header */
-    padding-left: 280px; /* Espacio para el sidebar */
+    padding: 32px 24px; /* padding horizontal uniforme */
+    padding-top: 18px; /* ajuste fino: menos espacio arriba */
+    margin-left: 238px; /* corre un poco más a la izquierda */
     color: white;
-    max-width: 1400px;
-    width: 100%;
-    margin: 0 auto;
+    max-width: none; /* ocupar el ancho disponible */
+    width: auto;
+    margin: 0; /* evita centrado que lo empujaba a la derecha */
     box-sizing: border-box;
     overflow-x: hidden;
 }
@@ -252,10 +252,11 @@ body {
 
 .content-grid {
     display: grid;
-    /* Dos columnas: una flexible (1fr) y una para destacados (320px) */
     grid-template-columns: 1fr 320px;
-    gap: 30px;
-    margin-top: 30px;
+    gap: 28px;
+    margin: 24px auto 0;
+    max-width: 1100px;
+    padding: 0 8px;
 }
 
 .primary-section {

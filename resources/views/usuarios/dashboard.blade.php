@@ -1,31 +1,16 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO AUDIO - Dashboard</title>
-    {{-- Enlace a la fuente de Google Fonts --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
-    {{-- Llamada a los archivos CSS y JS de Vite --}}
-    @vite('resources/css/app.css')
-    @vite('resources/css/dashboard.css') {{-- ¡Archivo CSS con los estilos de la distribución! --}}
+@extends('layouts.app')
+
+@section('title', 'Dashboard')
+
+@push('styles')
+    @vite('resources/css/dashboard.css')
+@endpush
+
+@push('scripts')
     @vite('resources/js/app.js')
+@endpush
 
-    {{-- Enlace a la librería de Font Awesome para los íconos --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
-<body>
-    {{-- Contenedor principal del dashboard con la imagen de fondo --}}
-    <div class="dashboard-container">
-        @include('components.topbar')
-
-        {{-- Barra lateral izquierda (estilizada en app.css) --}}
-        @include('components.sidebar')
-
-
+@section('content')
         {{-- Contenido principal del dashboard --}}
         <main class="main-content">
             <h2 class="welcome-title">¡Bienvenido, {{ session('usuario_nombre') ? ucfirst(strtolower(session('usuario_nombre'))) : 'Invitado' }}!</h2>
@@ -173,6 +158,4 @@
 
             </div> {{-- Fin de .content-grid --}}
         </main>
-    </div>
-</body>
-</html>
+@endsection
