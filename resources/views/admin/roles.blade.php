@@ -9,18 +9,15 @@
 </head>
 <body>
 <div class="dashboard-container roles-page" style="padding:20px;">
+    <a href="{{ route('inicio') }}" class="btn-back btn-back-fixed"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
     <div class="roles-header">
         <h2 class="roles-title"><i class="fas fa-user-shield"></i> Gestión de Roles</h2>
-        <div class="roles-actions">
-            <a href="{{ route('inicio') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
-        </div>
     </div>
     <div class="roles-toolbar">
         <div class="roles-legend">
             <span class="legend-pill superadmin">Superadmin</span>
             <span class="legend-pill admin">Admin</span>
             <span class="legend-pill usuario">Usuario</span>
-            <span class="legend-pill invitado">Invitado</span>
         </div>
         <div class="roles-search">
             <i class="fas fa-search"></i>
@@ -51,10 +48,10 @@
                         <td>{{ $u->primer_nombre }} {{ $u->primer_apellido }}</td>
                         <td>{{ $u->correo }}</td>
                         <td>
-                            <form method="POST" action="{{ route('admin.roles.update') }}" class="roles-form">
+                            <form id="rolesForm{{ $u->id }}" method="POST" action="{{ route('admin.roles.update') }}" class="roles-form">
                                 @csrf
                                 <input type="hidden" name="persona_id" value="{{ $u->id }}">
-                                @php $permitidos = ['Superadmin','Admin','Usuario','Invitado']; @endphp
+                                @php $permitidos = ['Superadmin','Admin','Usuario']; @endphp
                                 @foreach($roles as $r)
                                     @if(in_array($r->name, $permitidos, true))
                                         @php
@@ -66,11 +63,12 @@
                                         </label>
                                     @endif
                                 @endforeach
-                                <button type="submit" class="btn-guardar"><i class="fas fa-save"></i> Guardar</button>
-                                <span class="save-hint" aria-live="polite"></span>
                             </form>
                         </td>
-                        <td></td>
+                        <td>
+                            <button type="submit" class="btn-guardar" form="rolesForm{{ $u->id }}"><i class="fas fa-save"></i> Guardar</button>
+                            <span class="save-hint" aria-live="polite"></span>
+                        </td>
                     </tr>
                 @endforeach
                 </tbody>

@@ -23,6 +23,18 @@ body {
     background-attachment: fixed;
 }
 
+/* Máscara superior para evitar ver contenido entre la barra y el borde de pantalla */
+.top-gap-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0.5cm; /* igual al margen superior de .top-bar */
+    background: #000; /* mismo fondo del layout */
+    z-index: 999; /* por debajo de .top-bar (1000) y por encima del contenido */
+    pointer-events: none;
+}
+
 /* Mejora la visualización de fuentes para que se vean más nítidas */
 h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     -webkit-font-smoothing: antialiased;
