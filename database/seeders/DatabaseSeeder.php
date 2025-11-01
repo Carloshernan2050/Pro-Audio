@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SpatieRolesSeeder::class,   // roles en spatie/permission
             RolesSeeder::class,         // tabla roles previa (si la sigues usando)
+            EnsureSuperadminSeeder::class, // garantiza un usuario Superadmin
             PersonasSeeder::class,
             UsuariosSeeder::class,
 
