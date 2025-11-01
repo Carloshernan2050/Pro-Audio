@@ -155,6 +155,11 @@
 
             {{-- Tab de Historial de Cotizaciones --}}
             <div id="tab-historial" class="tab-content">
+                <div class="button-container" style="margin-bottom: 12px;">
+                    <a href="{{ route('usuarios.ajustes.historial.pdf') }}" class="btn-primary">
+                        <i class="fas fa-file-pdf"></i> Descargar PDF
+                    </a>
+                </div>
                 <div class="table-container">
                     <table>
                         <thead>

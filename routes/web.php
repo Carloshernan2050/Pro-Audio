@@ -13,6 +13,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\BusquedaController;
 use App\Http\Controllers\SubServiciosController;
 use App\Http\Controllers\RoleAdminController;
+use App\Http\Controllers\HistorialController;
 
 // Inicio directo al dashboard (middleware pondrá Invitado por defecto)
 Route::get('/', function(){ return redirect()->route('inicio'); });
@@ -64,6 +65,7 @@ Route::get('/usuarios/servicio/{slug}', [ServiciosViewController::class, 'servic
 
 // Ajustes (solo Admin y Superadmin)
 Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])->name('usuarios.ajustes')->middleware('role:Superadmin,Admin');
+Route::get('/usuarios/ajustes/historial/pdf', [AjustesController::class, 'exportHistorialPdf'])->name('usuarios.ajustes.historial.pdf')->middleware('role:Superadmin,Admin');
 
 // Chatbot
 Route::get('/usuarios/chatbot', [ChatbotController::class, 'index'])->name('usuarios.chatbot')->middleware('role:Superadmin,Admin,Usuario');
@@ -92,3 +94,7 @@ Route::controller(CalendarioController::class)->group(function () {
 // Gestión de Roles (solo Superadmin)
 Route::get('/admin/roles', [RoleAdminController::class, 'index'])->name('admin.roles.index')->middleware('role:Superadmin');
 Route::post('/admin/roles', [RoleAdminController::class, 'update'])->name('admin.roles.update')->middleware('role:Superadmin');
+
+// Historial
+Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index')->middleware('role:Superadmin,Admin,Usuario');
+Route::get('/historial/pdf', [HistorialController::class, 'exportPdf'])->name('historial.pdf')->middleware('role:Superadmin,Admin,Usuario');

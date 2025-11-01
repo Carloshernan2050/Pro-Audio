@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Servicios;
 use App\Models\Cotizacion;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AjustesController extends Controller
 {
@@ -17,5 +18,19 @@ class AjustesController extends Controller
             ->get();
         
         return view('usuarios.ajustes', compact('servicios', 'cotizaciones'));
+    }
+
+    public function exportHistorialPdf()
+    {
+        $cotizaciones = Cotizacion::with(['persona', 'subServicio.servicio'])
+            ->orderBy('fecha_cotizacion', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('usuarios.ajustes_historial_pdf', [
+            'cotizaciones' => $cotizaciones,
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('historial_cotizaciones.pdf');
     }
 }
