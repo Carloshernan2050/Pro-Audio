@@ -55,9 +55,9 @@
                     </div>
 
                     <div class="content-card about-us">
-                        <h3>Sobre Nosotros: Más de 10 Años de Experiencia</h3>
+                        <h3>Sobre Nosotros: Más de 15 Años de Experiencia</h3>
                         <p>
-                            Somos **PRO AUDIO**, una empresa dedicada a transformar tus ideas en eventos inolvidables. Con más de 10 años de experiencia, nos hemos consolidado como líderes en el mercado, ofreciendo soluciones de alta calidad en sonido, iluminación y video. Nuestro compromiso es la excelencia en cada detalle.
+                            Somos PRO AUDIO, una empresa dedicada a transformar tus ideas en eventos inolvidables. Con más de 10 años de experiencia, nos hemos consolidado como líderes en el mercado, ofreciendo soluciones de alta calidad en sonido, iluminación y video. Nuestro compromiso es la excelencia en cada detalle.
                         </p>
                     </div>
 
@@ -108,7 +108,7 @@
                         <h3><i class="fas fa-chart-line"></i> Nuestra Trayectoria</h3>
                         <div class="stats-grid">
                             <div class="stat-item">
-                                <span class="stat-number">10+</span>
+                                <span class="stat-number">15+</span>
                                 <span class="stat-label">Años de Experiencia</span>
                             </div>
                             <div class="stat-item">
@@ -148,8 +148,8 @@
                     {{-- Bloque de Llamada a la Acción (CTA) para Contacto --}}
                     <div class="content-card cta-quote">
                         <h3>¿Tienes un nuevo proyecto?</h3>
-                        <p>¡Inicia el proceso de contacto para tu evento de manera rápida y sencilla!</p>
-                        <a href="{{ route('inicio') }}" class="btn-primary-action">
+                        <p>¡Inicia el proceso de cotización para tu evento de manera rápida y sencilla!</p>
+                        <a href="#" class="btn-primary-action" data-open-chatbot>
                             <i class="fas fa-pen-nib"></i> Iniciar Contacto
                         </a>
                     </div>

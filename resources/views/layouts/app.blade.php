@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
+    {{-- Máscara fija para cubrir el espacio superior (0.5cm) y evitar que se vea contenido al hacer scroll --}}
+    <div class="top-gap-mask" aria-hidden="true"></div>
     {{-- Contenedor principal del dashboard con la imagen de fondo --}}
     <div class="dashboard-container">
         
@@ -55,6 +57,9 @@
     {{-- Stack opcional para scripts por-vista --}}
     @stack('scripts')
     <script>
+    // Estado de autenticación básico para controles del chatbot
+    window.APP_IS_GUEST = @json(!session()->has('usuario_id') || in_array('Invitado', (array)session('roles')));
+    window.LOGIN_URL = @json(route('usuarios.inicioSesion'));
     (function(){
         const fab = document.querySelector('.chatbot-fab');
         const widget = document.getElementById('chatbot-widget');
@@ -62,15 +67,29 @@
         const btnExpand = document.getElementById('chatbot-expand');
         const btnHide = document.getElementById('chatbot-hide');
         if (fab && widget) {
-            const toggle = () => {
-                const open = widget.classList.toggle('is-open');
+            const toggle = (force) => {
+                const open = typeof force === 'boolean' ? force : !widget.classList.contains('is-open');
+                widget.classList.toggle('is-open', open);
                 widget.setAttribute('aria-hidden', open ? 'false' : 'true');
             };
-            fab.addEventListener('click', function(e){ e.preventDefault(); toggle(); });
+            fab.addEventListener('click', function(e){
+                e.preventDefault();
+                if (window.APP_IS_GUEST) { window.location.href = window.LOGIN_URL; return; }
+                toggle();
+            });
+            // Abrir desde cualquier botón/enlace con data-open-chatbot
+            document.querySelectorAll('[data-open-chatbot]').forEach(function(el){
+                el.addEventListener('click', function(ev){
+                    ev.preventDefault();
+                    if (window.APP_IS_GUEST) { window.location.href = window.LOGIN_URL; return; }
+                    toggle(true);
+                });
+            });
             window.addEventListener('keydown', function(e){ if (e.key === 'Escape') { widget.classList.remove('is-open'); widget.setAttribute('aria-hidden','true'); } });
 
             // Expandir / reducir
             if (btnExpand) btnExpand.addEventListener('click', function(){
+                if (window.APP_IS_GUEST) { window.location.href = window.LOGIN_URL; return; }
                 widget.classList.toggle('is-expanded');
             });
             if (btnHide) btnHide.addEventListener('click', function(){

@@ -25,24 +25,35 @@ class CalendarioController extends Controller
     // Mostrar el calendario
     public function inicio()
     {
-        $registros   = Calendario::all();    
-        $inventarios = DB::table('inventario')->get()->keyBy('id'); 
+        $registros   = Calendario::all();
+        // Cargar movimientos e inventarios para resolver correctamente la relación
+        $movimientos = DB::table('movimientos_inventario')->get()->keyBy('id');
+        $inventarios = DB::table('inventario')->get()->keyBy('id');
 
         $eventos = [];
         foreach ($registros as $r) {
-            $nombre = $inventarios->has($r->movimientos_inventario_id) 
-                        ? $inventarios[$r->movimientos_inventario_id]->descripcion 
-                        : 'Sin inventario';
+            $mov = $movimientos->get($r->movimientos_inventario_id);
+            $invId = $mov->inventario_id ?? null;
+            $nombre = ($invId && isset($inventarios[$invId]))
+                ? ($inventarios[$invId]->descripcion ?? 'Sin producto')
+                : 'Sin producto';
 
             $eventos[] = [
                 'title'       => $nombre,
                 'start'       => $r->fecha_inicio,
                 'end'         => $r->fecha_fin,
-                'description' => $r->descripcion_evento
+                'description' => trim(($r->cantidad ? ('Cantidad solicitada: '.$r->cantidad.'. ') : '').($r->descripcion_evento ?? '')),
+                'movId'       => $r->movimientos_inventario_id,
+                'inventarioId'=> $invId,
             ];
         }
 
-        return view('usuarios.calendario', compact('registros','inventarios','eventos'));
+        return view('usuarios.calendario', [
+            'registros'   => $registros,
+            'inventarios' => $inventarios,
+            'movimientos' => $movimientos->values(), // para la vista (no keyBy)
+            'eventos'     => $eventos,
+        ]);
     }
 
     // Guardar nuevo evento

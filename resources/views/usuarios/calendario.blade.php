@@ -32,6 +32,9 @@
         <div class="calendario-wrapper">
             {{-- Contenido principal: Calendario --}}
             <div class="calendario-main-content">
+                <a href="{{ route('inicio') }}" class="btn btn-volver btn-volver-page-fixed" title="Volver al inicio">
+                    <i class="fas fa-arrow-left"></i> Volver al inicio
+                </a>
                 <div class="calendar-section">
                     {{-- ENCABEZADO --}}
                     <div class="calendar-header">
@@ -60,11 +63,7 @@
                     {{-- CALENDARIO --}}
                     <div id="calendar" class="calendar-container"></div>
 
-                    <div class="mb-3 mt-4">
-                        <a href="{{ route('inicio') }}" class="btn btn-volver">
-                            <i class="fas fa-arrow-left"></i> Volver al inicio
-                        </a>
-                    </div>
+                    
                 </div>
             </div>
 
@@ -729,6 +728,19 @@
                         sugerencias.style.display = 'none';
                     }
                 });
+                // Ocultar al perder foco, al hacer scroll global, o al cerrar el modal
+                bindOnce(inputBuscar, 'blur', 'search-blur', function(){
+                    if (sugerencias) sugerencias.style.display = 'none';
+                });
+                bindOnce(document, 'scroll', 'doc-scroll-hide-sug', function(){
+                    if (sugerencias) sugerencias.style.display = 'none';
+                });
+                const modalCrearEl = document.getElementById('modalCrear');
+                if (modalCrearEl) {
+                    modalCrearEl.addEventListener('hidden.bs.modal', function(){
+                        if (sugerencias) sugerencias.style.display = 'none';
+                    });
+                }
 
                 function actualizarBadge() {
                     const total = contSeleccionados ? contSeleccionados.querySelectorAll('input[type="hidden"][name^="items"]').length : 0;
