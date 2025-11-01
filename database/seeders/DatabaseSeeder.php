@@ -24,7 +24,8 @@ class DatabaseSeeder extends Seeder
 
         // Llamada a otros seeders en orden correcto
         $this->call([
-            RolesSeeder::class,
+            SpatieRolesSeeder::class,   // roles en spatie/permission
+            RolesSeeder::class,         // tabla roles previa (si la sigues usando)
             PersonasSeeder::class,
             UsuariosSeeder::class,
 

@@ -27,6 +27,11 @@
     
     // Icono por defecto para servicios nuevos
     $iconoDefault = 'fa-tag';
+
+    $rolesSesion = session('roles') ?? [session('role')];
+    $rolesSesion = is_array($rolesSesion) ? $rolesSesion : [$rolesSesion];
+    $esSuperadmin = in_array('Superadmin', $rolesSesion, true);
+    $noInvitado = !in_array('Invitado', $rolesSesion, true);
 @endphp
 
 <aside class="sidebar">
@@ -55,13 +60,19 @@
         </a>
     @endforeach
     
-    @if(session('role') !== 'Invitado')
+    @if($noInvitado)
     <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
     @endif
-    @if(session('role') === 'Administrador')
+
+    {{-- Ajustes: Admin o Superadmin --}}
+    @if($esSuperadmin || in_array('Admin', $rolesSesion, true) || in_array('Administrador', $rolesSesion, true))
     <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
+        @if($esSuperadmin)
+        <a href="{{ route('admin.roles.index') }}" class="sidebar-btn"><i class="fas fa-user-shield"></i> Control de roles</a>
+        @endif
     @endif
-    @if(session('role') !== 'Invitado')
+
+    @if($noInvitado)
     <a href="{{ route('usuarios.chatbot') }}" class="sidebar-btn"><i class="fas fa-robot"></i> Chatbot</a>
     @endif
 </aside>

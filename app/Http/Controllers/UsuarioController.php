@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UsuarioController extends Controller
@@ -36,7 +37,20 @@ class UsuarioController extends Controller
         // Guardar contraseña hasheada en la columna 'contrasena'
         $data['contrasena'] = Hash::make($request->contrasena);
 
-        Usuario::create($data);
+        $persona = Usuario::create($data);
+
+        // Asignar rol por defecto "Usuario"
+        try {
+            $rolId = DB::table('roles')->where('name', 'Usuario')->value('id');
+            if (!$rolId) {
+                $rolId = DB::table('roles')->where('nombre_rol', 'Usuario')->value('id');
+            }
+            if ($rolId) {
+                DB::table('personas_roles')->insert(['personas_id' => $persona->id, 'roles_id' => $rolId]);
+            }
+        } catch (\Throwable $e) {
+            // continuar sin romper el flujo
+        }
 
         return redirect()
             ->route('usuarios.inicioSesion') // Redirigir a la página de inicio de sesión
@@ -60,9 +74,25 @@ class UsuarioController extends Controller
             // Iniciar sesión
             $nombreCapitalizado = ucfirst(strtolower($usuario->primer_nombre));
             session(['usuario_id' => $usuario->id, 'usuario_nombre' => $nombreCapitalizado]);
+
+            // Cargar roles desde BD (puede haber múltiples) con alias seguro
+            $rows = DB::table('personas_roles as pr')
+                ->join('roles as r', 'r.id', '=', 'pr.roles_id')
+                ->where('pr.personas_id', $usuario->id)
+                ->selectRaw('COALESCE(r.name, r.nombre_rol) as role_name')
+                ->pluck('role_name');
+
+            $roles = $rows->map(fn($v) => (string)$v)->unique()->values()->all();
+
+            if (empty($roles)) {
+                $roles = ['Usuario'];
+            }
+            session(['roles' => $roles, 'role' => $roles[0] ?? 'Usuario']);
+
             if (session('pending_admin')) {
                 return redirect()->route('admin.key.form');
             }
+            // Siempre dirigir al dashboard; Superadmin verá el botón extra
             return redirect()->route('dashboard')->with('success', '¡Bienvenido, ' . $nombreCapitalizado . '!');
         } else {
             return back()->withErrors(['correo' => 'Correo o contraseña incorrectos'])->withInput();

@@ -16,20 +16,7 @@
 <body>
     {{-- Contenedor principal del dashboard con la imagen de fondo --}}
     <div class="dashboard-container">
-        {{-- Barra superior (estilizada en app.css) --}}
-        <header class="top-bar">
-            <h1>PRO AUDIO</h1>
-            <form class="search-form" action="{{ route('buscar') }}" method="GET">
-                <input type="text" name="buscar" class="search-input" placeholder="Buscar servicios..." value="{{ request('buscar') ?? '' }}">
-                <button type="submit" class="search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </form>
-            <a href="{{ route('usuarios.perfil') }}" class="profile-btn-header" title="Perfil">
-                <i class="fas fa-user-circle"></i>
-                <span>Perfil</span>
-            </a>
-        </header>
+        @include('components.topbar')
 
         {{-- Barra lateral izquierda (estilizada en app.css) --}}
         @include('components.sidebar')
@@ -40,7 +27,7 @@
             <p class="page-subtitle">Aquí puedes ver y gestionar tu información personal.</p>
 
             <div class="profile-container">
-                @if(session()->has('usuario_id') && $usuario && (session('role') === 'Cliente' || session('role') === 'Administrador'))
+                @if(session()->has('usuario_id') && $usuario && (session('role') === 'Cliente' || session('role') === 'Administrador' || in_array('Superadmin', (array)session('roles'))))
                     <div class="profile-details">
                         <p><strong>Nombres:</strong> 
                             {{ ucfirst(strtolower($usuario->primer_nombre ?? '')) }}
@@ -60,11 +47,11 @@
                 @endif
 
                 {{-- Botón para volver al panel --}}
-                    <a href="{{ route('inicio') }}" class="btn-secondary inline-block">
+                    <a href="{{ route('inicio') }}" class="btn-secondary inline-block" style="margin-top: 18px;">
                         <i class="fas fa-arrow-left"></i> Volver al panel
                     </a>
                 {{-- Contenedor flexible para los botones --}}
-                <div class="flex items-center justify-center sm:justify-start gap-4 mt-3">
+                <div class="flex items-center justify-center sm:justify-start gap-4 mt-5" style="margin-top: 26px;">
                     @if(session()->has('usuario_id'))
                         {{-- Botón para cerrar sesión --}}
                         <form action="{{ route('usuarios.cerrarSesion') }}" method="POST">
@@ -74,14 +61,9 @@
                             </button>
                         </form>
                     @else
-                        {{-- Invitado: Acceder como Cliente (redirige a registro y fija rol Cliente) --}}
-                        <form action="{{ route('role.set') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="role" value="Cliente">
-                            <button type="submit" class="btn-logout">
-                                <i class="fas fa-user-plus"></i> Acceder como Cliente
-                            </button>
-                        </form>
+                        {{-- Invitado: botones a iniciar sesión y registrarse --}}
+                        <a href="{{ route('usuarios.inicioSesion') }}" class="btn-logout"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
+                        <a href="{{ route('usuarios.registroUsuario') }}" class="btn-logout"><i class="fas fa-user-plus"></i> Registrarse</a>
                     @endif
                 </div>
             </div>

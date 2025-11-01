@@ -13,20 +13,7 @@
 <body>
     {{-- Contenedor principal del dashboard con la imagen de fondo --}}
     <div class="dashboard-container">
-        {{-- Barra superior --}}
-        <header class="top-bar">
-            <h1>PRO AUDIO</h1>
-            <form class="search-form" action="{{ route('buscar') }}" method="GET">
-                <input type="text" name="buscar" class="search-input" placeholder="Buscar servicios..." value="{{ request('buscar') ?? '' }}">
-                <button type="submit" class="search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </form>
-            <a href="{{ route('usuarios.perfil') }}" class="profile-btn-header" title="Perfil">
-                <i class="fas fa-user-circle"></i>
-                <span>Perfil</span>
-            </a>
-        </header>
+        @include('components.topbar')
 
         {{-- Barra lateral izquierda --}}
         @include('components.sidebar')

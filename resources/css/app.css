@@ -182,6 +182,14 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     width: 100%;
     z-index: 1000;
     box-sizing: border-box;
+    justify-content: space-between; /* tamaño y distribución original */
+}
+
+/* Limitar ancho visual del contenido de la top-bar */
+.top-bar > h1,
+.top-bar > form,
+.top-bar > a.profile-btn-header {
+    flex: 0 0 auto;
 }
 
 .top-bar h1 {
@@ -192,14 +200,25 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     white-space: nowrap;
 }
 
+/* Estilo del logo en la top bar */
+.brand-logo img{
+    height: 38px; /* tamaño original del logo en la barra */
+    width: auto;
+    display: block;
+}
+
 .search-form {
     display: flex;
     align-items: center;
     flex: 1;
     max-width: 600px;
+    width: 100%;
     gap: 10px;
     min-width: 200px;
+    /* sin márgenes auto para mantener proporciones originales */
 }
+
+/* (se restauran tamaños originales sin restricciones extra) */
 
 .search-input {
     padding: 14px 20px;
@@ -231,7 +250,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 .profile-btn-header {
     background-color: transparent;
     color: white;
-    border: 2px solid white;
+    border: 2px solid white; /* estilo original */
     padding: 10px;
     border-radius: 50%;
     text-decoration: none;
@@ -242,7 +261,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     height: 44px;
     transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
     flex-shrink: 0;
-    margin-left: auto;
+    margin-left: auto; /* vuelve a alinearse a la derecha */
 }
 
 .profile-btn-header:hover {
@@ -252,7 +271,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 }
 
 .profile-btn-header i {
-    font-size: 1.3rem;
+    font-size: 1.3rem; /* tamaño original del icono */
 }
 
 .profile-btn-header span {
