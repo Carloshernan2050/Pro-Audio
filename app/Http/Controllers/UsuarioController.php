@@ -6,6 +6,7 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
 {
@@ -117,5 +118,49 @@ class UsuarioController extends Controller
     return view('usuarios.perfil', compact('usuario'));
 }
 
+    public function updatePhoto(Request $request)
+    {
+        $usuarioId = session('usuario_id');
+        
+        if (!$usuarioId) {
+            return response()->json(['success' => false, 'message' => 'Debes iniciar sesión'], 401);
+        }
+        
+        // Verificar si es Invitado
+        $roles = (array)session('roles');
+        if (in_array('Invitado', $roles)) {
+            return response()->json(['success' => false, 'message' => 'Los usuarios invitados no pueden subir foto de perfil'], 403);
+        }
+        
+        $request->validate([
+            'foto_perfil' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB máximo
+        ]);
+        
+        $usuario = Usuario::find($usuarioId);
+        
+        if (!$usuario) {
+            return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 404);
+        }
+        
+        // Eliminar foto anterior si existe
+        if ($usuario->foto_perfil && Storage::disk('public')->exists('perfiles/' . $usuario->foto_perfil)) {
+            Storage::disk('public')->delete('perfiles/' . $usuario->foto_perfil);
+        }
+        
+        // Guardar nueva foto
+        $file = $request->file('foto_perfil');
+        $filename = 'perfil_' . $usuarioId . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('perfiles', $filename, 'public');
+        
+        // Actualizar en la base de datos
+        $usuario->foto_perfil = $filename;
+        $usuario->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto de perfil actualizada correctamente',
+            'foto_url' => asset('storage/perfiles/' . $filename)
+        ]);
+    }
 
 }

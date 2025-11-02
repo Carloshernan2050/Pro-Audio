@@ -51,6 +51,7 @@ Route::get('/usuarios/dashboard', function () {
 
 // Perfil
 Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
+Route::post('/perfil/photo', [UsuarioController::class, 'updatePhoto'])->name('usuarios.updatePhoto')->middleware('role:Superadmin,Admin,Usuario');
 
 // Búsqueda de servicios
 Route::get('/buscar', [BusquedaController::class, 'buscar'])->name('buscar')->middleware('role:Superadmin,Admin,Usuario,Invitado');

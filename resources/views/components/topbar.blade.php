@@ -8,7 +8,29 @@
             <i class="fas fa-search"></i>
         </button>
     </form>
-    <a href="{{ route('usuarios.perfil') }}" class="profile-btn-header" title="Perfil">
-        <i class="fas fa-user" style="font-size:2rem;"></i>
-    </a>
+    <button onclick="openProfileModal()" class="profile-btn-header" title="Perfil" style="background:none; border:none; cursor:pointer; padding:0;">
+        @php
+            $usuarioId = session('usuario_id');
+            $usuario = $usuarioId ? \App\Models\Usuario::find($usuarioId) : null;
+            $fotoPerfil = null;
+            if ($usuario && $usuario->foto_perfil) {
+                $path = storage_path('app/public/perfiles/' . $usuario->foto_perfil);
+                if (file_exists($path)) {
+                    $fotoPerfil = asset('storage/perfiles/' . $usuario->foto_perfil);
+                }
+            }
+            $iniciales = $usuario ? strtoupper(substr($usuario->primer_nombre ?? 'U', 0, 1) . substr($usuario->primer_apellido ?? 'S', 0, 1)) : null;
+        @endphp
+        @if($fotoPerfil)
+            <img src="{{ $fotoPerfil }}" alt="Perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e91c1c;">
+        @elseif($usuario && $iniciales)
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, #e91c1c 0%, #c81a1a 100%); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:16px; border:2px solid #e91c1c;">
+                {{ $iniciales }}
+            </div>
+        @else
+            <div style="width:40px; height:40px; border-radius:50%; background:#000000; display:flex; align-items:center; justify-content:center; color:white; font-size:18px; border:2px solid #e91c1c;">
+                <i class="fas fa-user"></i>
+            </div>
+        @endif
+    </button>
 </header>

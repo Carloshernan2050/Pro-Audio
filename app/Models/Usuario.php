@@ -24,6 +24,7 @@ class Usuario extends Model
         'direccion',
         'contrasena',
         'fecha_registro',
-        'estado'
+        'estado',
+        'foto_perfil'
     ];
 }

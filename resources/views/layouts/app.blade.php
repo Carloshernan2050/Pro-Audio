@@ -54,6 +54,432 @@
         </div>
         <iframe src="{{ route('usuarios.chatbot') }}" title="Chatbot" loading="lazy" class="chatbot-iframe"></iframe>
     </div>
+    {{-- Modal de Perfil Compacto --}}
+    <div id="profileModal" class="profile-modal" style="display:none;">
+        <div class="profile-modal-content">
+            <div class="profile-modal-header">
+                <span class="profile-modal-title">PRO-AUDIO</span>
+                <button onclick="closeProfileModal()" class="profile-modal-close" style="background:none; border:none; color:#666; font-size:18px; cursor:pointer;">&times;</button>
+            </div>
+            <div class="profile-modal-body">
+                @php
+                    $usuarioId = session('usuario_id');
+                    $usuario = $usuarioId ? \App\Models\Usuario::find($usuarioId) : null;
+                    $roles = (array)session('roles');
+                    $isInvitado = in_array('Invitado', $roles) || !session()->has('usuario_id');
+                    $fotoPerfil = null;
+                    if ($usuario && $usuario->foto_perfil) {
+                        $path = storage_path('app/public/perfiles/' . $usuario->foto_perfil);
+                        if (file_exists($path)) {
+                            $fotoPerfil = asset('storage/perfiles/' . $usuario->foto_perfil);
+                        }
+                    }
+                    $iniciales = $usuario ? strtoupper(substr($usuario->primer_nombre ?? 'U', 0, 1) . substr($usuario->primer_apellido ?? 'S', 0, 1)) : null;
+                @endphp
+                
+                <div class="profile-info-section">
+                    <div class="profile-avatar-container">
+                        @if($fotoPerfil)
+                            <img src="{{ $fotoPerfil }}" alt="Foto de perfil" class="profile-avatar-img" id="profileAvatarImg" onclick="openImageEnlargementModal('{{ $fotoPerfil }}')" style="cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        @elseif($usuario && $iniciales)
+                            <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder" style="background:linear-gradient(135deg, #e91c1c 0%, #c81a1a 100%); cursor:default;">
+                                {{ $iniciales }}
+                            </div>
+                        @else
+                            <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder" style="background:#000000; cursor:default; font-size:24px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        @endif
+                        @if(!$isInvitado)
+                            <label for="profilePhotoInput" class="profile-photo-upload-btn" title="Cambiar foto">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                            <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="uploadProfilePhoto(this)">
+                        @endif
+                    </div>
+                    
+                    <div class="profile-user-info">
+                        <h3 class="profile-user-name">{{ $usuario ? ($usuario->primer_nombre . ' ' . $usuario->primer_apellido) : 'Usuario' }}</h3>
+                        <p class="profile-user-email">{{ $usuario ? ($usuario->correo ?? 'No disponible') : 'No disponible' }}</p>
+                    </div>
+                    
+                    <a href="{{ route('usuarios.perfil') }}" class="profile-link-item" style="text-decoration:none; color:inherit;">
+                        <span>Consultar cuenta</span>
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                
+                <div class="profile-footer">
+                    @if(session()->has('usuario_id'))
+                        <form action="{{ route('usuarios.cerrarSesion') }}" method="POST" style="margin:0; width:100%;">
+                            @csrf
+                            <button type="submit" class="profile-logout-btn" style="width:100%; padding:12px; background:#e91c1c; color:white; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:500;">
+                                Cerrar sesión
+                            </button>
+                        </form>
+                    @else
+                        <div style="display:flex; gap:8px; width:100%;">
+                            <a href="{{ route('usuarios.inicioSesion') }}" class="profile-logout-btn" style="flex:1; padding:12px; background:#e91c1c; color:white; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:500; text-align:center; text-decoration:none;">Iniciar sesión</a>
+                            <a href="{{ route('usuarios.registroUsuario') }}" class="profile-logout-btn" style="flex:1; padding:12px; background:#e91c1c; color:white; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:500; text-align:center; text-decoration:none;">Registrarse</a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 70px 20px 20px;
+            box-sizing: border-box;
+        }
+        
+        .profile-modal-content {
+            background: #000000;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 380px;
+            max-height: calc(100vh - 90px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .profile-modal-header {
+            padding: 20px 24px;
+            border-bottom: 2px solid #e91c1c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000000;
+        }
+        
+        .profile-modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #e91c1c;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 2px rgba(233, 28, 28, 0.2);
+        }
+        
+        .profile-modal-close {
+            font-size: 24px;
+            color: #ffffff;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        
+        .profile-modal-close:hover {
+            color: #e91c1c;
+        }
+        
+        .profile-modal-body {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .profile-info-section {
+            padding: 24px 20px;
+            background: #000000;
+            color: #ffffff;
+        }
+        
+        .profile-avatar-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        
+        .profile-avatar-img,
+        .profile-avatar-placeholder {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .profile-photo-upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            background: #e91c1c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            border: 2px solid white;
+            font-size: 12px;
+        }
+        
+        .profile-photo-upload-btn:hover {
+            background: #ff3333;
+        }
+        
+        .profile-user-info {
+            margin-bottom: 16px;
+        }
+        
+        .profile-user-name {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .profile-user-email {
+            margin: 0;
+            font-size: 13px;
+            color: #cccccc;
+        }
+        
+        .profile-link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .profile-link-item:hover {
+            color: #e91c1c;
+        }
+        
+        .profile-link-item i {
+            font-size: 12px;
+            color: #cccccc;
+        }
+        
+        .profile-menu-section {
+            padding: 0;
+        }
+        
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .profile-menu-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .profile-menu-item i:first-child {
+            margin-right: 12px;
+            color: #666;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .profile-menu-item span {
+            flex: 1;
+        }
+        
+        .profile-menu-item i:last-child {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .profile-footer {
+            padding: 20px;
+            border-top: 1px solid #333333;
+            background: #000000;
+        }
+        
+        /* Modal de ampliación de imagen */
+        .image-enlargement-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10001;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .image-enlargement-modal.active {
+            display: flex;
+        }
+        
+        .image-enlargement-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-enlargement-content img {
+            max-width: 500px;
+            max-height: 500px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        
+        .image-enlargement-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: #ffffff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        
+        .image-enlargement-close:hover {
+            background: #e91c1c;
+            color: white;
+            transform: scale(1.1);
+        }
+    </style>
+
+    {{-- Modal de ampliación de imagen de perfil --}}
+    <div id="imageEnlargementModal" class="image-enlargement-modal" onclick="closeImageEnlargementModal()">
+        <div class="image-enlargement-content" onclick="event.stopPropagation()">
+            <button class="image-enlargement-close" onclick="closeImageEnlargementModal()">&times;</button>
+            <img id="enlargedProfileImage" src="" alt="Foto de perfil ampliada">
+        </div>
+    </div>
+
+    <script>
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+        
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+        
+        function openImageEnlargementModal(imageUrl) {
+            const modal = document.getElementById('imageEnlargementModal');
+            const img = document.getElementById('enlargedProfileImage');
+            img.src = imageUrl;
+            modal.classList.add('active');
+        }
+        
+        function closeImageEnlargementModal() {
+            const modal = document.getElementById('imageEnlargementModal');
+            modal.classList.remove('active');
+        }
+        
+        function uploadProfilePhoto(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor, selecciona una imagen válida.');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('La imagen no debe ser mayor a 5MB.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('foto_perfil', file);
+            formData.append('_token', '{{ csrf_token() }}');
+            
+            fetch('{{ route("usuarios.updatePhoto") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const img = document.getElementById('profileAvatarImg');
+                    const placeholder = document.getElementById('profileAvatarPlaceholder');
+                    if (img) {
+                        img.src = data.foto_url + '?t=' + Date.now();
+                        img.style.display = 'block';
+                        if (placeholder) placeholder.style.display = 'none';
+                    } else if (placeholder) {
+                        placeholder.innerHTML = '<img src="' + data.foto_url + '?t=' + Date.now() + '" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">';
+                    }
+                    // Actualizar también el avatar del header
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error al subir la foto.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al subir la foto. Por favor, intenta nuevamente.');
+            });
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('profileModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProfileModal();
+            }
+        });
+        
+        // Cerrar con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeProfileModal();
+            }
+        });
+    </script>
+
     {{-- Stack opcional para scripts por-vista --}}
     @stack('scripts')
     <script>
