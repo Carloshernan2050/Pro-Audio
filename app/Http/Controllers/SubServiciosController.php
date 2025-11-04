@@ -45,14 +45,14 @@ class SubServiciosController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'servicios_id' => 'required|exists:servicios,id',
-            'nombre' => 'required|string|max:100',
-            'descripcion' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
-        ]);
-
         try {
+            $request->validate([
+                'servicios_id' => 'required|exists:servicios,id',
+                'nombre' => 'required|string|max:100',
+                'descripcion' => 'nullable|string',
+                'precio' => 'required|numeric|min:0',
+            ]);
+
             SubServicios::create([
                 'servicios_id' => $request->servicios_id,
                 'nombre' => $request->nombre,
@@ -60,9 +60,23 @@ class SubServiciosController extends Controller
                 'precio' => $request->precio,
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => 'Subservicio creado exitosamente.']);
+            }
+
             return redirect()->route('subservicios.index')
                 ->with('success', 'Subservicio creado exitosamente.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['errors' => $e->errors(), 'error' => 'Error de validación'], 422);
+            }
+            return redirect()->route('subservicios.index')
+                ->withErrors($e->errors())
+                ->withInput();
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'Error al crear el subservicio: ' . $e->getMessage()], 422);
+            }
             return redirect()->route('subservicios.index')
                 ->with('error', 'Error al crear el subservicio: ' . $e->getMessage());
         }
@@ -93,16 +107,16 @@ class SubServiciosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $subServicio = SubServicios::findOrFail($id);
-        
-        $request->validate([
-            'servicios_id' => 'required|exists:servicios,id',
-            'nombre' => 'required|string|max:100',
-            'descripcion' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
-        ]);
-
         try {
+            $subServicio = SubServicios::findOrFail($id);
+            
+            $request->validate([
+                'servicios_id' => 'required|exists:servicios,id',
+                'nombre' => 'required|string|max:100',
+                'descripcion' => 'nullable|string',
+                'precio' => 'required|numeric|min:0',
+            ]);
+
             $subServicio->update([
                 'servicios_id' => $request->servicios_id,
                 'nombre' => $request->nombre,
@@ -110,9 +124,23 @@ class SubServiciosController extends Controller
                 'precio' => $request->precio,
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => 'Subservicio actualizado exitosamente.']);
+            }
+
             return redirect()->route('subservicios.index')
                 ->with('success', 'Subservicio actualizado exitosamente.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['errors' => $e->errors(), 'error' => 'Error de validación'], 422);
+            }
+            return redirect()->route('subservicios.index')
+                ->withErrors($e->errors())
+                ->withInput();
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'Error al actualizar el subservicio: ' . $e->getMessage()], 422);
+            }
             return redirect()->route('subservicios.index')
                 ->with('error', 'Error al actualizar el subservicio: ' . $e->getMessage());
         }
@@ -124,12 +152,21 @@ class SubServiciosController extends Controller
     public function destroy($id)
     {
         try {
+            $request = request();
             $subServicio = SubServicios::findOrFail($id);
             $subServicio->delete();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => 'Subservicio eliminado exitosamente.']);
+            }
 
             return redirect()->route('subservicios.index')
                 ->with('success', 'Subservicio eliminado exitosamente.');
         } catch (\Exception $e) {
+            $request = request();
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'Error al eliminar el subservicio: ' . $e->getMessage()], 422);
+            }
             return redirect()->route('subservicios.index')
                 ->with('error', 'Error al eliminar el subservicio: ' . $e->getMessage());
         }

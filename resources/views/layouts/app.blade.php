@@ -421,12 +421,12 @@
             
             const file = input.files[0];
             if (!file.type.startsWith('image/')) {
-                alert('Por favor, selecciona una imagen válida.');
+                customAlert('Por favor, selecciona una imagen válida.');
                 return;
             }
             
             if (file.size > 5 * 1024 * 1024) {
-                alert('La imagen no debe ser mayor a 5MB.');
+                customAlert('La imagen no debe ser mayor a 5MB.');
                 return;
             }
             
@@ -456,12 +456,12 @@
                     // Actualizar también el avatar del header
                     location.reload();
                 } else {
-                    alert(data.message || 'Error al subir la foto.');
+                    customAlert(data.message || 'Error al subir la foto.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al subir la foto. Por favor, intenta nuevamente.');
+                customAlert('Error al subir la foto. Por favor, intenta nuevamente.');
             });
         }
         
@@ -478,6 +478,244 @@
                 closeProfileModal();
             }
         });
+    </script>
+
+    {{-- Modal de Confirmación Personalizado --}}
+    <div id="customConfirmModal" class="custom-modal" style="display: none;">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 class="custom-modal-title">PRO AUDIO</h3>
+            </div>
+            <div class="custom-modal-body">
+                <p id="customConfirmMessage"></p>
+            </div>
+            <div class="custom-modal-footer">
+                <button id="customConfirmAccept" class="custom-btn-accept">Aceptar</button>
+                <button id="customConfirmCancel" class="custom-btn-cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de Alerta Personalizado --}}
+    <div id="customAlertModal" class="custom-modal" style="display: none;">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 class="custom-modal-title">PRO AUDIO</h3>
+            </div>
+            <div class="custom-modal-body">
+                <p id="customAlertMessage"></p>
+            </div>
+            <div class="custom-modal-footer">
+                <button id="customAlertOk" class="custom-btn-accept">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modales personalizados para confirmación y alertas */
+        .custom-modal {
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .custom-modal-content {
+            background-color: #2d2d2d;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .custom-modal-header {
+            background-color: #1a1a1a;
+            padding: 20px 24px;
+            border-bottom: 2px solid #e91c1c;
+        }
+
+        .custom-modal-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #e91c1c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .custom-modal-body {
+            padding: 24px;
+            color: #ffffff;
+            font-size: 15px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .custom-modal-body p {
+            margin: 0;
+        }
+
+        .custom-modal-footer {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background-color: #1a1a1a;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-btn-accept {
+            background-color: #e91c1c;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .custom-btn-accept:hover {
+            background-color: #ff3333;
+            box-shadow: 0 4px 12px rgba(233, 28, 28, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .custom-btn-cancel {
+            background-color: #2d2d2d;
+            color: white;
+            border: 1px solid #6c757d;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .custom-btn-cancel:hover {
+            background-color: #3d3d3d;
+            border-color: #8c959d;
+            transform: translateY(-1px);
+        }
+    </style>
+
+    <script>
+        // Sistema de alertas y confirmaciones personalizadas
+        window.customAlert = function(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlertModal');
+                const messageEl = document.getElementById('customAlertMessage');
+                const okBtn = document.getElementById('customAlertOk');
+                
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                
+                const closeModal = () => {
+                    modal.style.display = 'none';
+                    resolve();
+                };
+                
+                okBtn.onclick = closeModal;
+                
+                // Cerrar al hacer clic fuera del modal
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+                
+                // Cerrar con Escape
+                const escapeHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', escapeHandler);
+                    }
+                };
+                document.addEventListener('keydown', escapeHandler);
+            });
+        };
+
+        window.customConfirm = function(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const messageEl = document.getElementById('customConfirmMessage');
+                const acceptBtn = document.getElementById('customConfirmAccept');
+                const cancelBtn = document.getElementById('customConfirmCancel');
+                
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                
+                const closeModal = () => {
+                    modal.style.display = 'none';
+                };
+                
+                acceptBtn.onclick = () => {
+                    closeModal();
+                    resolve(true);
+                };
+                
+                cancelBtn.onclick = () => {
+                    closeModal();
+                    resolve(false);
+                };
+                
+                // Cerrar al hacer clic fuera del modal
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                        resolve(false);
+                    }
+                });
+                
+                // Cerrar con Escape
+                const escapeHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        resolve(false);
+                        document.removeEventListener('keydown', escapeHandler);
+                    }
+                };
+                document.addEventListener('keydown', escapeHandler);
+            });
+        };
+
+        // Reemplazar confirm y alert nativos globalmente (solo en contexto de la app)
+        (function() {
+            // Guardar referencias originales
+            window._nativeConfirm = window.confirm;
+            window._nativeAlert = window.alert;
+            
+            // Solo reemplazar si estamos en el contexto de la aplicación
+            // No afectar otras páginas que puedan depender de alert/confirm nativos
+            if (document.querySelector('.dashboard-container')) {
+                window.confirm = window.customConfirm;
+                window.alert = window.customAlert;
+            }
+        })();
     </script>
 
     {{-- Stack opcional para scripts por-vista --}}

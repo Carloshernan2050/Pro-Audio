@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/ajustes.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 
 @section('content')
@@ -84,7 +85,7 @@
                                         <button onclick="openModal('edit', {{ $servicio->id }}, '{{ addslashes($servicio->nombre_servicio) }}', '{{ addslashes($servicio->descripcion ?? '') }}')" class="btn-action edit">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
-                                        <form action="{{ route('servicios.destroy', $servicio->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este servicio?');">
+                                        <form action="{{ route('servicios.destroy', $servicio->id) }}" method="POST" style="display:inline;" onsubmit="event.preventDefault(); customConfirm('¿Estás seguro de que deseas eliminar este servicio?').then(result => { if(result) this.submit(); }); return false;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn-action delete">
@@ -119,9 +120,10 @@
                                 <th>Servicio</th>
                                 <th>Descripción</th>
                                 <th>Precio</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="subservicios-table-body">
                             @php $subServiciosList = isset($subServicios) ? $subServicios : collect([]); @endphp
                             @forelse ($subServiciosList as $sub)
                                 <tr>
@@ -130,10 +132,18 @@
                                     <td>{{ $sub->servicio->nombre_servicio ?? 'N/A' }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($sub->descripcion ?? '', 50) }}</td>
                                     <td>${{ number_format($sub->precio ?? 0, 0, ',', '.') }}</td>
+                                    <td class="actions-cell">
+                                        <button onclick="openSubservicioModal('edit', {{ $sub->id }}, '{{ addslashes($sub->nombre) }}', '{{ addslashes($sub->descripcion ?? '') }}', {{ $sub->precio ?? 0 }}, {{ $sub->servicios_id }})" class="btn-action edit">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                        <button onclick="deleteSubservicio({{ $sub->id }})" class="btn-action delete">
+                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="no-services">No hay subservicios registrados.</td>
+                                    <td colspan="6" class="no-services">No hay subservicios registrados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -415,6 +425,42 @@
                 </div>
             </div>
 
+            {{-- Modal para subservicios --}}
+            <div id="subservicioModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="subservicioModalTitle"></h3>
+                        <span class="close-btn" onclick="closeSubservicioModal()">&times;</span>
+                    </div>
+                    <form id="subservicioForm" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" id="subservicioFormMethod">
+                        <div class="form-group">
+                            <label for="servicios_id_subservicio">Servicio:</label>
+                            <select id="servicios_id_subservicio" name="servicios_id" required>
+                                <option value="">Seleccione un servicio</option>
+                                @foreach($servicios ?? [] as $servicio)
+                                    <option value="{{ $servicio->id }}">{{ $servicio->nombre_servicio }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre_subservicio">Nombre del Subservicio:</label>
+                            <input type="text" id="nombre_subservicio" name="nombre" required maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="descripcion_subservicio">Descripción:</label>
+                            <textarea id="descripcion_subservicio" name="descripcion" rows="4" placeholder="Descripción del subservicio (opcional)"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="precio_subservicio">Precio:</label>
+                            <input type="number" id="precio_subservicio" name="precio" step="0.01" min="0" required>
+                        </div>
+                        <button type="submit" class="btn-submit">Guardar</button>
+                    </form>
+                </div>
+            </div>
+
         </main>
 
     <script>
@@ -422,6 +468,7 @@
         const serviceModal = document.getElementById('serviceModal');
         const inventarioModal = document.getElementById('inventarioModal');
         const movimientoModal = document.getElementById('movimientoModal');
+        const subservicioModal = document.getElementById('subservicioModal');
 
         // Función para mostrar pestañas
         function showTab(tabName) {
@@ -443,6 +490,9 @@
             } else if (tabName === 'movimientos') {
                 loadMovimientos();
                 loadInventarioOptions();
+            } else if (tabName === 'subservicios') {
+                // Los subservicios se cargan inicialmente desde el servidor
+                // Solo se recargan cuando hay cambios
             }
         }
 
@@ -483,9 +533,155 @@
             serviceModal.style.display = 'none';
         }
 
-        // Funciones para inventario
+        // Funciones para subservicios
         function openSubservicioModal(mode, id = null, nombre = '', descripcion = '', precio = 0, servicios_id = '') {
-            window.location.href = '{{ route('subservicios.index') }}';
+            const subservicioModalTitle = document.getElementById('subservicioModalTitle');
+            const subservicioForm = document.getElementById('subservicioForm');
+            const subservicioFormMethod = document.getElementById('subservicioFormMethod');
+            
+            if (mode === 'create') {
+                subservicioModalTitle.textContent = 'Crear Nuevo Subservicio';
+                subservicioForm.action = "{{ route('subservicios.store') }}";
+                subservicioFormMethod.name = '_method';
+                subservicioFormMethod.value = 'POST';
+                // Limpiar campos sin resetear el formulario completo (para mantener el token CSRF)
+                document.getElementById('nombre_subservicio').value = '';
+                document.getElementById('descripcion_subservicio').value = '';
+                document.getElementById('precio_subservicio').value = '';
+                document.getElementById('servicios_id_subservicio').value = '';
+            } else if (mode === 'edit') {
+                subservicioModalTitle.textContent = 'Editar Subservicio';
+                subservicioForm.action = `{{ url('subservicios') }}/${id}`;
+                subservicioFormMethod.name = '_method';
+                subservicioFormMethod.value = 'PUT';
+                document.getElementById('nombre_subservicio').value = nombre;
+                document.getElementById('descripcion_subservicio').value = descripcion;
+                document.getElementById('precio_subservicio').value = precio;
+                document.getElementById('servicios_id_subservicio').value = servicios_id;
+            }
+            subservicioModal.style.display = 'flex';
+        }
+
+        function closeSubservicioModal() {
+            subservicioModal.style.display = 'none';
+        }
+
+        // Función para cargar los subservicios dinámicamente
+        function loadSubservicios() {
+            fetch('{{ route('usuarios.ajustes.subservicios') }}', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('subservicios-table-body');
+                if (!tbody) return;
+                
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-services">No hay subservicios registrados.</td></tr>';
+                    return;
+                }
+                
+                data.forEach(sub => {
+                    // Escapar caracteres especiales para JavaScript
+                    const escapeHtml = (str) => {
+                        if (!str) return '';
+                        return String(str)
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#039;');
+                    };
+                    
+                    const escapeJs = (str) => {
+                        if (!str) return '';
+                        return String(str)
+                            .replace(/\\/g, '\\\\')
+                            .replace(/'/g, "\\'")
+                            .replace(/"/g, '\\"')
+                            .replace(/\n/g, '\\n')
+                            .replace(/\r/g, '\\r');
+                    };
+                    
+                    const nombre = escapeJs(sub.nombre || '');
+                    const descripcion = escapeJs(sub.descripcion || '');
+                    const servicioNombre = sub.servicio ? escapeHtml(sub.servicio.nombre_servicio || 'N/A') : 'N/A';
+                    const nombreHtml = escapeHtml(sub.nombre || '');
+                    const descripcionHtml = sub.descripcion ? (sub.descripcion.length > 50 ? escapeHtml(sub.descripcion.substring(0, 50)) + '...' : escapeHtml(sub.descripcion)) : '';
+                    const precio = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sub.precio || 0);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${sub.id}</td>
+                        <td>${nombreHtml}</td>
+                        <td>${servicioNombre}</td>
+                        <td>${descripcionHtml}</td>
+                        <td>$${precio}</td>
+                        <td class="actions-cell">
+                            <button onclick="openSubservicioModal('edit', ${sub.id}, '${nombre}', '${descripcion}', ${sub.precio || 0}, ${sub.servicios_id})" class="btn-action edit">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button onclick="deleteSubservicio(${sub.id})" class="btn-action delete">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error al cargar subservicios:', error);
+            });
+        }
+
+        async function deleteSubservicio(id) {
+            const confirmed = await customConfirm('¿Estás seguro de que deseas eliminar este subservicio?');
+            if (confirmed) {
+                const url = `{{ url('subservicios') }}/${id}`;
+                const formData = new FormData();
+                formData.append('_method', 'DELETE');
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                 document.querySelector('input[name="_token"]')?.value || 
+                                 '{{ csrf_token() }}';
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    const ct = response.headers.get('content-type') || '';
+                    if (!response.ok) {
+                        if (ct.includes('application/json')) return response.json().then(err => Promise.reject(err));
+                        return response.text().then(text => Promise.reject({ message: text }));
+                    }
+                    return ct.includes('application/json') ? response.json() : {};
+                })
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.success);
+                        // Asegurar que la pestaña de subservicios esté activa
+                        showTab('subservicios');
+                        // Recargar solo los subservicios
+                        loadSubservicios();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const errorMsg = error.error || error.message || 'Error al eliminar el subservicio';
+                    showAlert(errorMsg, 'error');
+                });
+            }
         }
         function openInventarioModal(mode, id = null, descripcion = '', stock = '') {
             const inventarioModalTitle = document.getElementById('inventarioModalTitle');
@@ -625,36 +821,81 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        // Función para mostrar alertas
+        // Función para mostrar alertas tipo toast (notificaciones temporales)
         function showAlert(message, type = 'success') {
             const alertDiv = document.createElement('div');
-            alertDiv.className = `alert ${type}`;
+            alertDiv.className = `custom-toast custom-toast-${type}`;
             alertDiv.textContent = message;
             alertDiv.style.position = 'fixed';
             alertDiv.style.top = '20px';
             alertDiv.style.right = '20px';
-            alertDiv.style.zIndex = '9999';
-            alertDiv.style.padding = '15px 20px';
-            alertDiv.style.borderRadius = '5px';
+            alertDiv.style.zIndex = '99999';
+            alertDiv.style.padding = '16px 24px';
+            alertDiv.style.borderRadius = '8px';
             alertDiv.style.color = 'white';
-            alertDiv.style.fontWeight = 'bold';
+            alertDiv.style.fontWeight = '600';
+            alertDiv.style.fontSize = '14px';
+            alertDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.style.maxWidth = '400px';
+            alertDiv.style.animation = 'toastSlideIn 0.3s ease-out';
+            alertDiv.style.display = 'flex';
+            alertDiv.style.alignItems = 'center';
+            alertDiv.style.gap = '12px';
             
             if (type === 'success') {
-                alertDiv.style.backgroundColor = '#4CAF50';
+                alertDiv.style.backgroundColor = '#2d2d2d';
+                alertDiv.style.borderLeft = '4px solid #4CAF50';
+                alertDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #4CAF50; font-size: 18px;"></i> ' + message;
             } else {
-                alertDiv.style.backgroundColor = '#f44336';
+                alertDiv.style.backgroundColor = '#2d2d2d';
+                alertDiv.style.borderLeft = '4px solid #e91c1c';
+                alertDiv.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #e91c1c; font-size: 18px;"></i> ' + message;
             }
             
             document.body.appendChild(alertDiv);
             
             setTimeout(() => {
-                alertDiv.remove();
+                alertDiv.style.animation = 'toastSlideOut 0.3s ease-out';
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 300);
             }, 3000);
+        }
+        
+        // Agregar animaciones CSS para los toasts
+        if (!document.getElementById('toast-animations')) {
+            const style = document.createElement('style');
+            style.id = 'toast-animations';
+            style.textContent = `
+                @keyframes toastSlideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100%);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                @keyframes toastSlideOut {
+                    from {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translateX(100%);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         }
 
         // Funciones de eliminación
-        function deleteInventario(id) {
-            if (confirm('¿Estás seguro de que deseas eliminar este item?')) {
+        async function deleteInventario(id) {
+            const confirmed = await customConfirm('¿Estás seguro de que deseas eliminar este item?');
+            if (confirmed) {
                 const url = `{{ url('inventario') }}/${id}`;
                 const formData = new FormData();
                 formData.append('_method', 'DELETE');
@@ -689,8 +930,9 @@
             }
         }
 
-        function deleteMovimiento(id) {
-            if (confirm('¿Estás seguro de que deseas eliminar este movimiento?')) {
+        async function deleteMovimiento(id) {
+            const confirmed = await customConfirm('¿Estás seguro de que deseas eliminar este movimiento?');
+            if (confirmed) {
                 const url = `{{ url('movimientos') }}/${id}`;
                 const formData = new FormData();
                 formData.append('_method', 'DELETE');
@@ -735,6 +977,9 @@
             }
             if (event.target == movimientoModal) {
                 closeMovimientoModal();
+            }
+            if (event.target == subservicioModal) {
+                closeSubservicioModal();
             }
         }
 
@@ -852,6 +1097,82 @@
                     .catch(error => {
                         console.error('Error:', error);
                         // No mostrar error aquí si ya se mostró arriba
+                    });
+                });
+            }
+            
+            // Formulario de subservicios
+            const subservicioForm = document.getElementById('subservicioForm');
+            if (subservicioForm) {
+                subservicioForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const url = this.action;
+                    const methodValue = document.getElementById('subservicioFormMethod').value;
+                    const fetchMethod = (methodValue === 'PUT' || methodValue === 'DELETE') ? 'POST' : methodValue;
+
+                    // Asegurar que _method esté presente
+                    if ((methodValue === 'PUT' || methodValue === 'DELETE') && !formData.has('_method')) {
+                        formData.append('_method', methodValue);
+                    }
+                    
+                    // Asegurar que el token CSRF esté presente
+                    const csrfInput = this.querySelector('input[name="_token"]');
+                    if (!formData.has('_token') && csrfInput) {
+                        formData.append('_token', csrfInput.value);
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                     csrfInput?.value || 
+                                     '{{ csrf_token() }}';
+                    
+                    fetch(url, {
+                        method: fetchMethod,
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                if (err.errors) {
+                                    const errorMessages = Object.values(err.errors).flat();
+                                    showAlert(errorMessages.join(', '), 'error');
+                                } else if (err.error) {
+                                    showAlert(err.error, 'error');
+                                } else {
+                                    showAlert('Error al procesar la solicitud del subservicio', 'error');
+                                }
+                                throw new Error(err.error || 'Error');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showAlert(data.success);
+                            closeSubservicioModal();
+                            // Asegurar que la pestaña de subservicios esté activa
+                            showTab('subservicios');
+                            // Recargar solo los subservicios
+                            loadSubservicios();
+                        } else if (data.error) {
+                            showAlert(data.error, 'error');
+                        } else {
+                            // Si no hay JSON, puede ser un redirect, recargar solo subservicios
+                            showTab('subservicios');
+                            loadSubservicios();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Si hay un error de parseo, intentar recargar solo subservicios
+                        showTab('subservicios');
+                        loadSubservicios();
                     });
                 });
             }

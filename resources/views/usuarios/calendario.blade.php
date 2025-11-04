@@ -19,6 +19,224 @@
 
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    {{-- Modales personalizados --}}
+    <div id="customConfirmModal" class="custom-modal" style="display: none;">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 class="custom-modal-title">PRO AUDIO</h3>
+            </div>
+            <div class="custom-modal-body">
+                <p id="customConfirmMessage"></p>
+            </div>
+            <div class="custom-modal-footer">
+                <button id="customConfirmAccept" class="custom-btn-accept">Aceptar</button>
+                <button id="customConfirmCancel" class="custom-btn-cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customAlertModal" class="custom-modal" style="display: none;">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 class="custom-modal-title">PRO AUDIO</h3>
+            </div>
+            <div class="custom-modal-body">
+                <p id="customAlertMessage"></p>
+            </div>
+            <div class="custom-modal-footer">
+                <button id="customAlertOk" class="custom-btn-accept">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .custom-modal {
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .custom-modal-content {
+            background-color: #2d2d2d;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .custom-modal-header {
+            background-color: #1a1a1a;
+            padding: 20px 24px;
+            border-bottom: 2px solid #e91c1c;
+        }
+
+        .custom-modal-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #e91c1c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .custom-modal-body {
+            padding: 24px;
+            color: #ffffff;
+            font-size: 15px;
+            line-height: 1.6;
+            text-align: center;
+            white-space: pre-line;
+        }
+
+        .custom-modal-body p {
+            margin: 0;
+        }
+
+        .custom-modal-footer {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background-color: #1a1a1a;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-btn-accept {
+            background-color: #e91c1c;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .custom-btn-accept:hover {
+            background-color: #ff3333;
+            box-shadow: 0 4px 12px rgba(233, 28, 28, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .custom-btn-cancel {
+            background-color: #2d2d2d;
+            color: white;
+            border: 1px solid #6c757d;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .custom-btn-cancel:hover {
+            background-color: #3d3d3d;
+            border-color: #8c959d;
+            transform: translateY(-1px);
+        }
+    </style>
+
+    <script>
+        window.customAlert = function(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlertModal');
+                const messageEl = document.getElementById('customAlertMessage');
+                const okBtn = document.getElementById('customAlertOk');
+                
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                
+                const closeModal = () => {
+                    modal.style.display = 'none';
+                    resolve();
+                };
+                
+                okBtn.onclick = closeModal;
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+                
+                const escapeHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', escapeHandler);
+                    }
+                };
+                document.addEventListener('keydown', escapeHandler);
+            });
+        };
+
+        window.customConfirm = function(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const messageEl = document.getElementById('customConfirmMessage');
+                const acceptBtn = document.getElementById('customConfirmAccept');
+                const cancelBtn = document.getElementById('customConfirmCancel');
+                
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                
+                const closeModal = () => {
+                    modal.style.display = 'none';
+                };
+                
+                acceptBtn.onclick = () => {
+                    closeModal();
+                    resolve(true);
+                };
+                
+                cancelBtn.onclick = () => {
+                    closeModal();
+                    resolve(false);
+                };
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                        resolve(false);
+                    }
+                });
+                
+                const escapeHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        resolve(false);
+                        document.removeEventListener('keydown', escapeHandler);
+                    }
+                };
+                document.addEventListener('keydown', escapeHandler);
+            });
+        };
+    </script>
 </head>
 <body>
     {{-- Contenedor principal --}}
@@ -49,13 +267,13 @@
                     </div>
 
                     @if(session('ok'))
-                        <div class="alert alert-success">
+                        <div id="alertSuccessMessage" class="alert alert-success" style="animation: slideInDown 0.3s ease-out;">
                             <i class="fas fa-check-circle"></i> {{ session('ok') }}
                         </div>
                     @endif
 
                     @if($errors->any())
-                        <div class="alert alert-danger">
+                        <div id="alertErrorMessage" class="alert alert-danger" style="animation: slideInDown 0.3s ease-out;">
                             <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
                         </div>
                     @endif
@@ -73,11 +291,11 @@
                 <div class="sidebar-header">
                     <h3 class="sidebar-title">
                         <i class="fas fa-list"></i> Listado de Registros
-                        <span class="badge-resumen">({{ count($registros) }})</span>
+                        <span class="badge-resumen" id="sidebar-badge-count">({{ count($registros) }})</span>
                     </h3>
                 </div>
                 
-                <div class="sidebar-content">
+                <div class="sidebar-content" id="sidebar-content">
                                     @forelse($registros as $r)
                                     @php
                         // Si tiene items (nuevo formato), mostrar todos los productos
@@ -126,12 +344,12 @@
                                             </span>
                             </div>
                                             <div class="acciones-buttons">
-                                                <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $r->id }}" title="Editar">
+                                                <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $r->id }}" title="Editar" onclick="var modal = document.getElementById('modalEditar{{ $r->id }}'); if(!modal) { window.location.reload(); return false; }">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 <form action="{{ route('calendario.eliminar',$r->id) }}" method="POST" class="d-inline delete-form">
                                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn-action btn-delete" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar este registro?');">
+                                    <button type="submit" class="btn-action btn-delete" title="Eliminar" onclick="event.preventDefault(); customConfirm('¿Está seguro de eliminar este registro?').then(result => { if(result) this.closest('form').submit(); }); return false;">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -181,15 +399,15 @@
             <div class="modal-dialog modal-xl modal-dialog-scrollable resizable-modal" style="max-width: 90%; width: 90%; min-width: 800px; max-height: 90vh;">
                 <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column; height: auto;">
                     <form action="{{ route('calendario.actualizar', $r->id) }}" method="POST" style="display: flex; flex-direction: column; min-height: 0; flex: 1;">
-                        @csrf
-                        @method('PUT')
+                                                    @csrf
+                                                    @method('PUT')
 
                         <div class="modal-header" style="flex-shrink: 0;">
-                            <h5 class="modal-title">
-                                <i class="fas fa-edit"></i> Editar Reserva
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
+                                                        <h5 class="modal-title">
+                                                            <i class="fas fa-edit"></i> Editar Reserva
+                                                        </h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
 
                         <div class="modal-body" style="overflow-y: auto; overflow-x: hidden; flex: 1 1 auto; min-height: 0; max-height: none;">
                                                         <div id="alertEditar{{ $r->id }}" class="alert alert-danger" style="display: none;"></div>
@@ -298,11 +516,11 @@
                         <div class="modal-footer" style="flex-shrink: 0 !important; border-top: 1px solid rgba(255,255,255,.1) !important; display: flex !important; visibility: visible !important; opacity: 1 !important;">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="pointer-events: auto !important;">Cerrar</button>
                             <button type="submit" class="btn btn-primary" style="pointer-events: auto !important;">Actualizar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
         @endforeach
 
         {{-- MODAL CREAR --}}
@@ -393,11 +611,190 @@
             </div>
         </div>
 
+        {{-- Script para ocultar mensajes automáticamente --}}
+        <script>
+            // Ocultar mensajes de alert automáticamente después de 4 segundos
+            document.addEventListener('DOMContentLoaded', function() {
+                const successAlert = document.getElementById('alertSuccessMessage');
+                const errorAlert = document.getElementById('alertErrorMessage');
+                
+                if (successAlert) {
+                    setTimeout(function() {
+                        successAlert.style.animation = 'slideOutUp 0.3s ease-out';
+                        setTimeout(function() {
+                            successAlert.style.display = 'none';
+                        }, 300);
+                    }, 4000);
+                }
+                
+                if (errorAlert) {
+                    setTimeout(function() {
+                        errorAlert.style.animation = 'slideOutUp 0.3s ease-out';
+                        setTimeout(function() {
+                            errorAlert.style.display = 'none';
+                        }, 300);
+                    }, 5000);
+                }
+            });
+            
+            // Función helper para escapar HTML (debe estar disponible globalmente)
+            window.escapeHtml = function(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            };
+            
+            // Función global para recargar el sidebar de registros (definida antes de DOMContentLoaded)
+            window.reloadSidebar = async function() {
+                try {
+                    const response = await fetch('{{ route('calendario.registros') }}', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const sidebarContent = document.getElementById('sidebar-content');
+                        const badgeCount = document.getElementById('sidebar-badge-count');
+                        
+                        if (!sidebarContent) {
+                            console.warn('No se encontró el elemento sidebar-content');
+                            return Promise.resolve();
+                        }
+                        
+                        // Actualizar el badge de conteo
+                        if (badgeCount) {
+                            badgeCount.textContent = '(' + data.total + ')';
+                        }
+                        
+                        // Limpiar el contenido actual
+                        sidebarContent.innerHTML = '';
+                        
+                        if (data.registros && data.registros.length > 0) {
+                            // Generar HTML para cada registro
+                            data.registros.forEach(function(registro) {
+                                const card = document.createElement('div');
+                                card.className = 'registro-card';
+                                
+                                let productosHTML = '';
+                                registro.productos.forEach(function(prod) {
+                                    productosHTML += `
+                                        <div class="producto-item-sidebar">
+                                            <span class="producto-nombre-sidebar">${window.escapeHtml(prod.nombre)}</span>
+                                            <span class="producto-cantidad-sidebar">x${prod.cantidad}</span>
+                                        </div>
+                                    `;
+                                });
+                                
+                                const descripcionHTML = registro.descripcion_evento 
+                                    ? `<div class="registro-descripcion">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>${window.escapeHtml(registro.descripcion_evento.length > 100 ? registro.descripcion_evento.substring(0, 100) + '...' : registro.descripcion_evento)}</span>
+                                    </div>`
+                                    : '';
+                                
+                                const diasTexto = registro.dias_reserva == 1 ? 'día' : 'días';
+                                
+                                card.innerHTML = `
+                                    <div class="registro-header">
+                                        <div class="registro-info">
+                                            <span class="registro-fechas">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                ${registro.fecha_inicio} - ${registro.fecha_fin}
+                                            </span>
+                                            <span class="registro-dias">
+                                                <i class="fas fa-clock"></i> ${registro.dias_reserva} ${diasTexto}
+                                            </span>
+                                        </div>
+                                        <div class="acciones-buttons">
+                                            <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditar${registro.id}" title="Editar" onclick="var modal = document.getElementById('modalEditar${registro.id}'); if(!modal) { window.location.reload(); return false; }">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form action="{{ url('calendario') }}/${registro.id}" method="POST" class="d-inline delete-form">
+                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="btn-action btn-delete" title="Eliminar" onclick="event.preventDefault(); customConfirm('¿Está seguro de eliminar este registro?').then(result => { if(result) this.closest('form').submit(); }); return false;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="registro-productos">
+                                        <div class="productos-header">
+                                            <i class="fas fa-box"></i> Productos (${registro.productos.length})
+                                            <span class="cantidad-total">Total: ${registro.cantidad_total} unidades</span>
+                                        </div>
+                                        <div class="productos-lista">
+                                            ${productosHTML}
+                                        </div>
+                                    </div>
+                                    ${descripcionHTML}
+                                `;
+                                
+                                sidebarContent.appendChild(card);
+                            });
+                        } else {
+                            // Mostrar mensaje de "no hay registros"
+                            sidebarContent.innerHTML = `
+                                <div class="no-records-card">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>No hay registros disponibles</p>
+                                </div>
+                            `;
+                        }
+                        
+                        return Promise.resolve();
+                    } else {
+                        console.error('Error al obtener registros:', response.status);
+                        return Promise.reject(new Error('Error al obtener registros'));
+                    }
+                } catch (error) {
+                    console.error('Error al recargar el sidebar:', error);
+                    return Promise.reject(error);
+                }
+            };
+        </script>
+
+        <style>
+            @keyframes slideInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes slideOutUp {
+                from {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+            }
+            
+            .alert {
+                transition: all 0.3s ease;
+            }
+        </style>
+
         {{-- FULLCALENDAR SCRIPT --}}
         <script>
+            // Variables globales para el calendario
+            var eventos = @json($eventos);
+            var calendarInstance = null;
+            var reservedDatesGlobal = null;
+            
             document.addEventListener('DOMContentLoaded', function() {
                 var calendarEl = document.getElementById('calendar');
-                var eventos = @json($eventos);
                 var isAdmin = @json($esAdmin);
 
                 // Construir set de días reservados (YYYY-MM-DD) solo por fecha de inicio
@@ -408,15 +805,15 @@
                     return y + '-' + m + '-' + d;
                 }
 
-                var reservedDates = new Set();
+                reservedDatesGlobal = new Set();
                 (eventos || []).forEach(function(e) {
                     try {
                         var s = new Date(e.start);
-                        reservedDates.add(ymd(s));
+                        reservedDatesGlobal.add(ymd(s));
                     } catch(err) { /* noop */ }
                 });
 
-                var calendar = new FullCalendar.Calendar(calendarEl, {
+                calendarInstance = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
                     locale: 'es',
                     firstDay: 1,
@@ -431,7 +828,7 @@
                         var d = arg.date;
                         var key = ymd(d);
                         // Marcar días que tienen eventos (reservados)
-                        if (reservedDates.has(key)) {
+                        if (reservedDatesGlobal && reservedDatesGlobal.has(key)) {
                             arg.el.classList.add('day-reserved');
                         }
                         // También marcar todos los días dentro del rango de cada evento
@@ -461,7 +858,8 @@
                         var descripcion = info.event.extendedProps.description || 'Sin descripción';
                         var inicio = new Date(info.event.start).toLocaleString('es-ES');
                         var fin = info.event.end ? new Date(info.event.end).toLocaleString('es-ES') : 'Sin fecha de fin';
-                        alert("Producto: " + info.event.title + "\nDescripción: " + descripcion + "\nFecha de inicio: " + inicio + "\nFecha de fin: " + fin);
+                        const mensaje = "Producto: " + info.event.title + "\nDescripción: " + descripcion + "\nFecha de inicio: " + inicio + "\nFecha de fin: " + fin;
+                        customAlert(mensaje);
                     },
                     buttonText: {
                         today: 'Hoy',
@@ -482,7 +880,53 @@
                     eventBorderColor: '#e91c1c'
                 });
 
-                calendar.render();
+                calendarInstance.render();
+                
+                // Función global para recargar el calendario sin refrescar la página
+                window.reloadCalendar = async function() {
+                    try {
+                        const response = await fetch('{{ route('calendario.eventos') }}', {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const nuevosEventos = await response.json();
+                            
+                            // Actualizar la variable global de eventos
+                            eventos = nuevosEventos;
+                            
+                            // Recalcular días reservados
+                            if (reservedDatesGlobal) {
+                                reservedDatesGlobal.clear();
+                                (nuevosEventos || []).forEach(function(e) {
+                                    try {
+                                        var s = new Date(e.start);
+                                        reservedDatesGlobal.add(ymd(s));
+                                    } catch(err) { /* noop */ }
+                                });
+                            }
+                            
+                            // Remover todos los eventos actuales y agregar los nuevos
+                            if (calendarInstance) {
+                                calendarInstance.removeAllEvents();
+                                if (nuevosEventos && nuevosEventos.length > 0) {
+                                    calendarInstance.addEventSource(nuevosEventos);
+                                }
+                                // Forzar re-renderizado completo del calendario
+                                calendarInstance.render();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error al recargar el calendario:', error);
+                        showToast('Error al recargar el calendario', 'error');
+                    }
+                };
+                
+                // La función reloadSidebar ya está definida globalmente arriba
+                // Solo la función escapeHtml local (si es necesaria para otros usos)
             });
 
             // Hacer modales redimensionables
@@ -717,20 +1161,52 @@
                                     // Si es HTML (redirect), considerarlo éxito
                                     if (resp.ok || resp.redirected || resp.status === 200) {
                                         showToast('Alquiler actualizado correctamente', 'success');
-                                        setTimeout(() => {
-                                            window.location.reload();
-                                        }, 1000);
+                                        // Cerrar el modal de edición
+                                        var modalEditarEl = document.getElementById('modalEditar{{ $r->id }}');
+                                        if (modalEditarEl) {
+                                            const inst = bootstrap.Modal.getInstance(modalEditarEl);
+                                            if (inst) inst.hide();
+                                        }
+                                        // Recargar solo el calendario sin refrescar la página
+                                        if (typeof window.reloadCalendar === 'function') {
+                                            setTimeout(() => {
+                                                window.reloadCalendar();
+                                            }, 500);
+                                        } else {
+                                            // Fallback: recargar página si la función no está disponible
+                                            setTimeout(() => {
+                                                window.location.reload();
+                                            }, 1000);
+                                        }
                                         return;
                                     }
-                                    data = { message: text || 'Error desconocido' };
+                                    data = { message: text || 'Error desconocido al procesar la solicitud' };
                                 }
                             }
                             
                             if (resp.ok || resp.redirected || resp.status === 200) {
                                 showToast('Alquiler actualizado correctamente', 'success');
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1000);
+                                // Cerrar el modal de edición
+                                var modalEditarEl = document.getElementById('modalEditar{{ $r->id }}');
+                                if (modalEditarEl) {
+                                    const inst = bootstrap.Modal.getInstance(modalEditarEl);
+                                    if (inst) inst.hide();
+                                }
+                                // Recargar el calendario y el sidebar sin refrescar la página
+                                if (typeof window.reloadCalendar === 'function') {
+                                    setTimeout(() => {
+                                        window.reloadCalendar();
+                                        // También recargar el sidebar
+                                        if (typeof window.reloadSidebar === 'function') {
+                                            window.reloadSidebar();
+                                        }
+                                    }, 500);
+                                } else {
+                                    // Fallback: recargar página si la función no está disponible
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1000);
+                                }
                             } else if (resp.status === 422) {
                                 // Error de validación
                                 var errorMessages = [];
@@ -992,7 +1468,7 @@
             @endforeach
             @endif
 
-            // Confirmación estilizada para eliminar
+            // Confirmación estilizada para eliminar con AJAX
             (function() {
                 var formToDelete = null;
                 var deleteModalEl = document.getElementById('confirmDeleteModal');
@@ -1009,11 +1485,66 @@
                 }, true);
 
                 if (confirmBtn) {
-                    confirmBtn.addEventListener('click', function() {
+                    confirmBtn.addEventListener('click', async function() {
                         if (formToDelete) {
-                            formToDelete.submit();
-                            formToDelete = null;
+                            const form = formToDelete;
+                            const url = form.getAttribute('action');
+                            const token = form.querySelector('input[name="_token"]').value;
+                            const method = form.querySelector('input[name="_method"]')?.value || 'DELETE';
+                            
+                            // Cerrar el modal de confirmación
                             if (bsModal) { bsModal.hide(); }
+                            
+                            // Deshabilitar el botón mientras se procesa
+                            confirmBtn.disabled = true;
+                            const originalText = confirmBtn.innerHTML;
+                            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+                            
+                            try {
+                                const formData = new FormData();
+                                formData.append('_token', token);
+                                formData.append('_method', method);
+                                
+                                const response = await fetch(url, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': token
+                                    },
+                                    body: formData
+                                });
+                                
+                                if (response.ok || response.status === 200 || response.redirected) {
+                                    showToast('Evento eliminado', 'success');
+                                    // Recargar el calendario y el sidebar sin refrescar la página
+                                    if (typeof window.reloadCalendar === 'function') {
+                                        setTimeout(() => {
+                                            window.reloadCalendar();
+                                            // También recargar el sidebar
+                                            if (typeof window.reloadSidebar === 'function') {
+                                                window.reloadSidebar();
+                                            }
+                                        }, 500);
+                                    } else {
+                                        // Fallback: recargar página si la función no está disponible
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 1000);
+                                    }
+                                } else {
+                                    const data = await response.json().catch(() => ({}));
+                                    const errorMsg = data?.message || data?.error || 'Error al eliminar el evento';
+                                    showToast(errorMsg, 'error');
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                showToast('Error al conectar con el servidor', 'error');
+                            } finally {
+                                confirmBtn.disabled = false;
+                                confirmBtn.innerHTML = originalText;
+                                formToDelete = null;
+                            }
                         }
                     });
                 }
@@ -1143,11 +1674,11 @@
                                         const item = eventosItems[calId].find(it => it.inventario_id == inventarioId);
                                         if (item) {
                                             acc += parseInt(item.cantidad || 1);
-                                        } else {
+                        } else {
                                             // Fallback: parsear desde descripción
                                             acc += parseCant(ev.description, inventarioId) || 1;
                                         }
-                                    } else {
+                            } else {
                                         // Formato antiguo: parsear desde descripción
                                         acc += parseCant(ev.description, inventarioId) || 1;
                                     }
@@ -1419,7 +1950,7 @@
                             try {
                                 data = JSON.parse(text);
                             } catch {
-                                data = { message: text || 'Error desconocido' };
+                                data = { message: text || 'Error desconocido al procesar la solicitud' };
                             }
                         }
                         
@@ -1436,10 +1967,47 @@
                             seleccionadosMap.clear();
                             inventarioItems = [];
                             if (badgeCount) badgeCount.textContent = '0';
-                            // Recargar la página para actualizar el calendario
+                            // Recargar el calendario y el sidebar inmediatamente sin refrescar la página
+                            // Esperar un momento para asegurar que el servidor haya guardado el registro
                             setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
+                                // Primero recargar el sidebar para que aparezca el nuevo registro inmediatamente
+                                if (typeof window.reloadSidebar === 'function') {
+                                    // Intentar recargar el sidebar con un pequeño retry si falla la primera vez
+                                    let retryCount = 0;
+                                    const maxRetries = 2;
+                                    
+                                    const tryReloadSidebar = () => {
+                                        window.reloadSidebar().then(() => {
+                                            console.log('Sidebar recargado exitosamente');
+                                            // Después recargar el calendario
+                                            if (typeof window.reloadCalendar === 'function') {
+                                                window.reloadCalendar();
+                                            }
+                                        }).catch(error => {
+                                            console.error('Error al recargar sidebar (intento ' + (retryCount + 1) + '):', error);
+                                            retryCount++;
+                                            if (retryCount < maxRetries) {
+                                                // Reintentar después de un pequeño delay
+                                                setTimeout(() => {
+                                                    tryReloadSidebar();
+                                                }, 500);
+                                            } else {
+                                                // Si falla después de varios intentos, recargar página
+                                                console.warn('Falló al recargar sidebar después de varios intentos, recargando página');
+                                                window.location.reload();
+                                            }
+                                        });
+                                    };
+                                    
+                                    tryReloadSidebar();
+                                } else {
+                                    console.warn('reloadSidebar no está disponible, recargando página');
+                                    // Si no está disponible, recargar página
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 500);
+                                }
+                            }, 800);
                         } else if (resp.status === 422) {
                             // Error de validación - mostrar todos los mensajes específicos
                             let errorMessages = [];

@@ -123,6 +123,172 @@ class CalendarioController extends Controller
         ]);
     }
 
+    // Obtener eventos en formato JSON para recargar el calendario
+    public function getEventos()
+    {
+        // Obtener registros y eliminar duplicados reales (mismo contenido)
+        $registros = Calendario::with('items')
+            ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        // Eliminar duplicados basándose en contenido (fecha_inicio, fecha_fin, descripcion, items)
+        $registrosUnicos = [];
+        $vistos = [];
+        
+        foreach ($registros as $r) {
+            // Crear una clave única basada en el contenido
+            $itemsKey = $r->items->map(function($item) {
+                return $item->movimientos_inventario_id . ':' . $item->cantidad;
+            })->sort()->implode(',');
+            
+            $clave = $r->fecha_inicio . '|' . $r->fecha_fin . '|' . $r->descripcion_evento . '|' . $itemsKey;
+            
+            // Solo agregar si no hemos visto este contenido antes
+            if (!isset($vistos[$clave])) {
+                $vistos[$clave] = true;
+                $registrosUnicos[] = $r;
+            }
+        }
+        
+        $registros = collect($registrosUnicos);
+        // Cargar movimientos e inventarios para resolver correctamente la relación
+        $movimientos = DB::table('movimientos_inventario')->get()->keyBy('id');
+        $inventarios = DB::table('inventario')->orderBy('descripcion', 'asc')->get()->keyBy('id');
+
+        $eventos = [];
+        
+        foreach ($registros as $r) {
+            // Si tiene items (nuevo formato), mostrar todos los productos
+            if ($r->items && $r->items->count() > 0) {
+                $productos = [];
+                $inventarioIds = [];
+                
+                foreach ($r->items as $item) {
+                    $mov = $movimientos->get($item->movimientos_inventario_id);
+                    $invId = $mov->inventario_id ?? null;
+                    if ($invId && isset($inventarios[$invId])) {
+                        $nombreProducto = $inventarios[$invId]->descripcion ?? 'Sin producto';
+                        $productos[] = $nombreProducto . ' (x' . $item->cantidad . ')';
+                        $inventarioIds[] = $invId;
+                    }
+                }
+                $titulo = count($productos) > 0 ? implode(', ', $productos) : 'Alquiler';
+                $descripcion = ($r->descripcion_evento ?? '') . ' | Productos: ' . implode(', ', $productos);
+            } else {
+                // Formato antiguo: un solo producto
+                $mov = $movimientos->get($r->movimientos_inventario_id);
+                $invId = $mov->inventario_id ?? null;
+                $titulo = ($invId && isset($inventarios[$invId]))
+                    ? ($inventarios[$invId]->descripcion ?? 'Sin producto')
+                    : 'Sin producto';
+                if ($r->cantidad) {
+                    $titulo .= ' (x' . $r->cantidad . ')';
+                }
+                $descripcion = trim(($r->cantidad ? ('Cantidad solicitada: '.$r->cantidad.'. ') : '').($r->descripcion_evento ?? ''));
+                $inventarioIds = $invId ? [$invId] : [];
+            }
+
+            $eventos[] = [
+                'title'       => $titulo,
+                'start'       => $r->fecha_inicio,
+                'end'         => $r->fecha_fin,
+                'description' => $descripcion,
+                'calendarioId'=> $r->id,
+                'inventarioIds'=> $inventarioIds,
+            ];
+        }
+
+        return response()->json($eventos);
+    }
+
+    // Obtener registros para el sidebar en formato JSON
+    public function getRegistros()
+    {
+        // Obtener registros y eliminar duplicados reales (mismo contenido)
+        $registros = Calendario::with('items')
+            ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        // Eliminar duplicados basándose en contenido (fecha_inicio, fecha_fin, descripcion, items)
+        $registrosUnicos = [];
+        $vistos = [];
+        
+        foreach ($registros as $r) {
+            // Crear una clave única basada en el contenido
+            $itemsKey = $r->items->map(function($item) {
+                return $item->movimientos_inventario_id . ':' . $item->cantidad;
+            })->sort()->implode(',');
+            
+            $clave = $r->fecha_inicio . '|' . $r->fecha_fin . '|' . $r->descripcion_evento . '|' . $itemsKey;
+            
+            // Solo agregar si no hemos visto este contenido antes
+            if (!isset($vistos[$clave])) {
+                $vistos[$clave] = true;
+                $registrosUnicos[] = $r;
+            }
+        }
+        
+        $registros = collect($registrosUnicos);
+        // Cargar movimientos e inventarios para resolver correctamente la relación
+        $movimientos = DB::table('movimientos_inventario')->get()->keyBy('id');
+        $inventarios = DB::table('inventario')->orderBy('descripcion', 'asc')->get()->keyBy('id');
+
+        $registrosData = [];
+        
+        foreach ($registros as $r) {
+            // Si tiene items (nuevo formato), mostrar todos los productos
+            $productosLista = [];
+            $cantidadTotal = 0;
+            if ($r->items && $r->items->count() > 0) {
+                foreach ($r->items as $item) {
+                    $mov = $movimientos->get($item->movimientos_inventario_id);
+                    if ($mov && isset($inventarios[$mov->inventario_id])) {
+                        $productosLista[] = [
+                            'nombre' => $inventarios[$mov->inventario_id]->descripcion,
+                            'cantidad' => $item->cantidad
+                        ];
+                        $cantidadTotal += $item->cantidad;
+                    }
+                }
+            } else {
+                // Formato antiguo: un solo producto
+                $movimiento = collect($movimientos)->first(function($m) use ($r) {
+                    return $m->id == $r->movimientos_inventario_id;
+                });
+                if ($movimiento && isset($inventarios[$movimiento->inventario_id])) {
+                    $cant = $r->cantidad ?? 1;
+                    $productosLista[] = [
+                        'nombre' => $inventarios[$movimiento->inventario_id]->descripcion,
+                        'cantidad' => $cant
+                    ];
+                    $cantidadTotal = $cant;
+                }
+            }
+            
+            $fechaInicio = \Carbon\Carbon::parse($r->fecha_inicio);
+            $fechaFin = \Carbon\Carbon::parse($r->fecha_fin);
+            $diasReserva = $fechaInicio->diffInDays($fechaFin) + 1;
+            
+            $registrosData[] = [
+                'id' => $r->id,
+                'fecha_inicio' => $fechaInicio->format('d/m/Y'),
+                'fecha_fin' => $fechaFin->format('d/m/Y'),
+                'dias_reserva' => $diasReserva,
+                'productos' => $productosLista,
+                'cantidad_total' => $cantidadTotal,
+                'descripcion_evento' => $r->descripcion_evento,
+                'tiene_items' => $r->items && $r->items->count() > 0
+            ];
+        }
+
+        return response()->json([
+            'registros' => $registrosData,
+            'total' => count($registrosData)
+        ]);
+    }
+
     // Guardar nuevo evento
     public function guardar(Request $request)
     {
@@ -508,6 +674,12 @@ class CalendarioController extends Controller
         }
         // Los items se eliminan automáticamente por cascade delete
         Calendario::findOrFail($id)->delete();
+        
+        // Si es una petición AJAX, devolver JSON
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Evento eliminado']);
+        }
+        
         return back()->with('ok','Evento eliminado');
     }
 }

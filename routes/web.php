@@ -67,6 +67,7 @@ Route::get('/usuarios/servicio/{slug}', [ServiciosViewController::class, 'servic
 // Ajustes (solo Admin y Superadmin)
 Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])->name('usuarios.ajustes')->middleware('role:Superadmin,Admin');
 Route::get('/usuarios/ajustes/historial/pdf', [AjustesController::class, 'exportHistorialPdf'])->name('usuarios.ajustes.historial.pdf')->middleware('role:Superadmin,Admin');
+Route::get('/usuarios/ajustes/subservicios', [AjustesController::class, 'getSubservicios'])->name('usuarios.ajustes.subservicios')->middleware('role:Superadmin,Admin');
 
 // Chatbot
 Route::get('/usuarios/chatbot', [ChatbotController::class, 'index'])->name('usuarios.chatbot')->middleware('role:Superadmin,Admin,Usuario');
@@ -86,6 +87,8 @@ Route::resource('movimientos', MovimientosInventarioController::class)->middlewa
 Route::controller(CalendarioController::class)->group(function () {
     // Ver calendario: Admin y Usuario
     Route::get('/calendario', 'inicio')->name('usuarios.calendario')->middleware('role:Superadmin,Admin,Usuario');
+    Route::get('/calendario/eventos', 'getEventos')->name('calendario.eventos')->middleware('role:Superadmin,Admin,Usuario');
+    Route::get('/calendario/registros', 'getRegistros')->name('calendario.registros')->middleware('role:Superadmin,Admin');
     // Mutaciones del calendario: solo Admin/Superadmin
     Route::post('/calendario', 'guardar')->name('calendario.guardar')->middleware('role:Superadmin,Admin');
     Route::put('/calendario/{id}', 'actualizar')->name('calendario.actualizar')->middleware('role:Superadmin,Admin');

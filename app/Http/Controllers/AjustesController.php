@@ -114,4 +114,10 @@ class AjustesController extends Controller
 
         return $pdf->download('historial_cotizaciones.pdf');
     }
+
+    public function getSubservicios()
+    {
+        $subServicios = SubServicios::with('servicio')->orderBy('id', 'asc')->get();
+        return response()->json($subServicios);
+    }
 }

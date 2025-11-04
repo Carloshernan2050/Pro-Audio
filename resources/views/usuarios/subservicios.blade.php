@@ -79,7 +79,7 @@
                                     <button onclick="openModal('edit', {{ $subServicio->id }}, '{{ addslashes($subServicio->nombre) }}', '{{ addslashes($subServicio->descripcion ?? '') }}', {{ $subServicio->precio ?? 0 }}, {{ $subServicio->servicios_id }})" class="btn-action edit">
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
-                                    <form action="{{ route('subservicios.destroy', $subServicio->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este subservicio?');">
+                                    <form action="{{ route('subservicios.destroy', $subServicio->id) }}" method="POST" style="display:inline;" onsubmit="event.preventDefault(); customConfirm('¿Estás seguro de que deseas eliminar este subservicio?').then(result => { if(result) this.submit(); }); return false;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action delete">
