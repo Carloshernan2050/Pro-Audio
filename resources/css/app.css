@@ -621,6 +621,18 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     object-fit: cover;
 }
 
+.producto-imagen-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 3rem;
+}
+
 .producto-nombre {
     background-color: rgba(233, 28, 28, 0.85);
     color: white;
@@ -1169,6 +1181,17 @@ tr:nth-child(even) {
     width: 100%;
     height: 200px;
     object-fit: cover;
+}
+
+.producto-imagen-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 3rem;
 }
 
 .producto-nombre {

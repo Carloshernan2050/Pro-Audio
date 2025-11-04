@@ -11,10 +11,20 @@
         <div class="productos-grid">
             @forelse($subServicios as $subServicio)
                 <div class="producto-item">
-                    <img src="/images/alquiler/{{ strtolower(str_replace(' ', '_', $subServicio->nombre)) }}.jpg" 
-                            alt="{{ $subServicio->nombre }}" 
-                            class="producto-imagen"
-                            onerror="this.src='/images/default.jpg'">
+                    @php
+                        $nombreImagen = strtolower(str_replace(' ', '_', $subServicio->nombre)) . '.jpg';
+                        $rutaImagen = public_path('images/alquiler/' . $nombreImagen);
+                        $existeImagen = file_exists($rutaImagen);
+                    @endphp
+                    @if($existeImagen)
+                        <img src="/images/alquiler/{{ $nombreImagen }}" 
+                                alt="{{ $subServicio->nombre }}" 
+                                class="producto-imagen">
+                    @else
+                        <div class="producto-imagen-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    @endif
                     <h4 class="producto-nombre">{{ $subServicio->nombre }}</h4>
                     @if($subServicio->descripcion)
                         <p class="producto-descripcion">{{ $subServicio->descripcion }}</p>
