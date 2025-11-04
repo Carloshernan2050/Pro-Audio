@@ -50,15 +50,18 @@ class MovimientosInventarioController extends Controller
 
         $inventario->save();
 
-        MovimientosInventario::create([
+        $movimiento = MovimientosInventario::create([
             'inventario_id' => $request->inventario_id,
             'tipo_movimiento' => $request->tipo_movimiento,
             'cantidad' => $request->cantidad,
             'fecha_movimiento' => now(),
-            'descripcion' => ''
+            'descripcion' => $request->descripcion ?? ''
         ]);
 
-        return response()->json(['success' => 'Movimiento de inventario registrado correctamente.']);
+        return response()->json([
+            'success' => 'Movimiento de inventario registrado correctamente.',
+            'movimiento_id' => $movimiento->id
+        ]);
     }
 
     /**

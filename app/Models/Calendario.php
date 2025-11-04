@@ -27,4 +27,9 @@ class Calendario extends Model
     {
         return $this->belongsTo(\App\Models\Usuario::class, 'personas_id');
     }
+
+    public function items()
+    {
+        return $this->hasMany(CalendarioItem::class, 'calendario_id');
+    }
 }

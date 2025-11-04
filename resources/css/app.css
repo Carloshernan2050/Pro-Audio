@@ -23,6 +23,51 @@ body {
     background-attachment: fixed;
 }
 
+/* Estilos para select con filtrado */
+.select-with-search-wrapper {
+    margin-bottom: 10px;
+}
+
+.select-search-container {
+    position: relative;
+}
+
+.sugerencias-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 2px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.5);
+}
+
+.sugerencias-item.select-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    transition: background-color 0.2s;
+    background-color: #1a1a1a;
+}
+
+.sugerencias-item.select-option:hover:not([data-disabled="true"]) {
+    background-color: #2a2a2a;
+}
+
+.sugerencias-item.select-option:last-child {
+    border-bottom: none;
+}
+
+.sugerencias-item.select-option[data-disabled="true"] {
+    background-color: #1a1a1a;
+    cursor: not-allowed;
+}
+
 /* Máscara superior para evitar ver contenido entre la barra y el borde de pantalla */
 .top-gap-mask {
     position: fixed;
@@ -1321,25 +1366,273 @@ tr:nth-child(even) {
 /* ======================================= */
 .modal {
     /* Solución al problema de superposición */
-    z-index: 1060 !important;
+    z-index: 9999 !important;
+    position: fixed !important;
 }
 
+/* SOLUCIÓN DEFINITIVA: El backdrop NO debe bloquear NADA del modal */
 .modal-backdrop {
-    z-index: 1050 !important;
+    z-index: 9998 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    pointer-events: none !important; /* EL BACKDROP NO BLOQUEA NADA */
+}
+
+/* Asegurar que solo haya un backdrop */
+body.modal-open .modal-backdrop {
+    z-index: 9998 !important;
+    pointer-events: none !important; /* NO BLOQUEA */
+}
+
+/* Si hay múltiples backdrops, ocultar los extras */
+.modal-backdrop:not(:last-of-type) {
+    display: none !important;
+}
+
+/* El modal container no bloquea */
+.modal.show {
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    display: block !important;
+    background: transparent !important;
+}
+
+/* El dialog SÍ recibe clicks y está por encima */
+.modal.show .modal-dialog {
+    pointer-events: auto !important;
+    z-index: 10000 !important;
+    position: relative !important;
+}
+
+/* Asegurar que el modal-dialog esté por encima del backdrop y sea interactivo */
+.modal-dialog {
+    z-index: 10000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    margin: 1.75rem auto !important;
+}
+
+/* Modales redimensionables - fuera del contenedor */
+.calendar-modal {
+    z-index: 10000 !important;
+}
+
+.calendar-modal .modal-dialog {
+    z-index: 10001 !important;
+}
+
+.resizable-modal {
+    position: relative !important;
+    min-height: 400px !important;
+}
+
+.resizable-modal .resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(-45deg, transparent 30%, #444 30%, #444 35%, transparent 35%, transparent 65%, #444 65%, #444 70%, transparent 70%);
+    cursor: nwse-resize;
+    z-index: 10002;
+    border-radius: 0 0 12px 0;
+}
+
+.resizable-modal .resize-handle:hover {
+    background: linear-gradient(-45deg, transparent 30%, #e91c1c 30%, #e91c1c 35%, transparent 35%, transparent 65%, #e91c1c 65%, #e91c1c 70%, transparent 70%);
+}
+
+.modal-dialog .modal-content {
+    pointer-events: auto !important;
+    z-index: 10001 !important;
+    position: relative !important;
+    background-color: #222 !important;
+    border: none !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8) !important;
+    border-radius: 12px !important;
+}
+
+/* Modales más grandes y con scroll */
+.modal-dialog.modal-xl {
+    max-width: 95% !important;
+    width: 95% !important;
+    min-width: 900px !important;
+}
+
+/* Mejorar el ancho de los elementos dentro del modal de edición */
+.calendar-modal .seleccionados-lista .item-row {
+    display: flex !important;
+    gap: 15px !important;
+    align-items: center !important;
+    padding: 12px 15px !important;
+    min-width: 0 !important; /* Permite que flex funcione correctamente */
+}
+
+.calendar-modal .item-titulo {
+    flex: 1 1 auto !important;
+    min-width: 0 !important; /* Permite que el texto se ajuste */
+    padding-right: 10px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+.calendar-modal .seleccionados-lista {
+    width: 100% !important;
+}
+
+.calendar-modal #productos_editar,
+.calendar-modal #productos_crear {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.calendar-modal .form-select,
+.calendar-modal select {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.modal-dialog-scrollable {
+    max-height: 90vh !important;
+}
+
+.modal-dialog-scrollable .modal-content {
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.modal-dialog-scrollable .modal-body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    max-height: calc(90vh - 120px) !important;
+    padding: 1.5rem !important;
+}
+
+.calendar-modal .modal-body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 .calendar-modal .modal-content {
-    background-color: #222;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.calendar-modal .modal-dialog {
+    max-height: 90vh !important;
+}
+
+.calendar-modal form {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    flex: 1 !important;
+}
+
+.calendar-modal .modal-body {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+}
+
+.calendar-modal .modal-content {
+    background-color: #222 !important;
     color: #fff;
-    border: 1px solid #444;
+    border: none !important;
+    pointer-events: auto !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8) !important;
+    border-radius: 12px !important;
+    outline: none !important;
 }
 
 .calendar-modal .modal-header {
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid #444 !important;
+    background-color: #222 !important;
+    border-radius: 12px 12px 0 0 !important;
 }
 
 .calendar-modal .modal-footer {
-    border-top: 1px solid #444;
+    border-top: 1px solid rgba(255,255,255,.15) !important;
+    background-color: #222 !important;
+    border-radius: 0 0 12px 12px !important;
+    pointer-events: auto !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    padding: 15px 20px !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    z-index: 10 !important;
+    margin-top: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    min-height: 60px !important;
+}
+
+.calendar-modal .modal-footer .btn {
+    min-width: 120px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    border-radius: 8px !important;
+}
+
+.calendar-modal .modal-footer .btn-primary {
+    background-color: #e91c1c !important;
+    border-color: #e91c1c !important;
+    color: #fff !important;
+}
+
+.calendar-modal .modal-footer .btn-primary:hover {
+    background-color: #c01515 !important;
+    border-color: #c01515 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(233,28,28,.4);
+}
+
+.calendar-modal .modal-footer .btn-secondary {
+    background-color: rgba(255,255,255,.1) !important;
+    border-color: rgba(255,255,255,.2) !important;
+    color: #fff !important;
+}
+
+.calendar-modal .modal-footer .btn-secondary:hover {
+    background-color: rgba(255,255,255,.2) !important;
+    border-color: rgba(255,255,255,.3) !important;
+}
+
+/* Asegurar que los campos del modal sean interactivos */
+.calendar-modal input,
+.calendar-modal select,
+.calendar-modal textarea,
+.calendar-modal button {
+    pointer-events: auto !important;
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+.calendar-modal .form-control {
+    pointer-events: auto !important;
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+/* Asegurar que el modal body sea interactivo */
+.calendar-modal .modal-body {
+    pointer-events: auto !important;
+    z-index: 1 !important;
+    position: relative !important;
 }
 
 .calendar-modal .form-label {
@@ -1393,6 +1686,39 @@ tr:nth-child(even) {
 .fc-day-today .fc-daygrid-day-number {
     color: #fff !important;
     font-weight: 700;
+}
+
+/* Días reservados en rojo - solo color, sin texto */
+.day-reserved {
+    background-color: rgba(233, 28, 28, 0.4) !important;
+    border: 2px solid #e91c1c !important;
+}
+
+.day-reserved .fc-daygrid-day-number {
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+/* Ocultar eventos del calendario - solo mostrar color */
+.fc-event {
+    display: none !important;
+}
+
+.fc-event-title {
+    display: none !important;
+}
+
+/* Ocultar cualquier texto de eventos */
+.fc-daygrid-event {
+    display: none !important;
+}
+
+.fc-event-main {
+    display: none !important;
+}
+
+.fc-event-main-frame {
+    display: none !important;
 }
 
 /* ======================================= */
