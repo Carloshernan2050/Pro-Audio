@@ -19,7 +19,8 @@ class Calendario extends Model
         'descripcion_evento',
         'fecha_inicio',
         'fecha_fin',
-        'evento'
+        'evento',
+        'cantidad'
     ];
 
     public function usuario()

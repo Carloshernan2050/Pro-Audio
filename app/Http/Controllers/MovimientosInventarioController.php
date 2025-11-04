@@ -26,6 +26,14 @@ class MovimientosInventarioController extends Controller
             'inventario_id' => 'required|exists:inventario,id',
             'tipo_movimiento' => 'required|in:entrada,salida',
             'cantidad' => 'required|integer|min:1'
+        ], [
+            'inventario_id.required' => 'Debe seleccionar un artículo del inventario.',
+            'inventario_id.exists' => 'El artículo seleccionado no existe.',
+            'tipo_movimiento.required' => 'Debe seleccionar un tipo de movimiento.',
+            'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada o salida.',
+            'cantidad.required' => 'La cantidad es obligatoria.',
+            'cantidad.integer' => 'La cantidad debe ser un número entero.',
+            'cantidad.min' => 'La cantidad debe ser mayor a 0.'
         ]);
 
         $inventario = Inventario::findOrFail($request->inventario_id);
@@ -35,7 +43,7 @@ class MovimientosInventarioController extends Controller
             $inventario->stock += $request->cantidad;
         } else {
             if ($inventario->stock < $request->cantidad) {
-                return response()->json(['error' => 'No hay suficiente stock disponible.'], 400);
+                return response()->json(['error' => 'No hay suficiente stock disponible para realizar esta operación.'], 400);
             }
             $inventario->stock -= $request->cantidad;
         }
@@ -50,7 +58,7 @@ class MovimientosInventarioController extends Controller
             'descripcion' => ''
         ]);
 
-        return response()->json(['success' => 'Movimiento registrado correctamente.']);
+        return response()->json(['success' => 'Movimiento de inventario registrado correctamente.']);
     }
 
     /**
@@ -62,6 +70,14 @@ class MovimientosInventarioController extends Controller
             'inventario_id' => 'required|exists:inventario,id',
             'tipo_movimiento' => 'required|in:entrada,salida',
             'cantidad' => 'required|integer|min:1'
+        ], [
+            'inventario_id.required' => 'Debe seleccionar un artículo del inventario.',
+            'inventario_id.exists' => 'El artículo seleccionado no existe.',
+            'tipo_movimiento.required' => 'Debe seleccionar un tipo de movimiento.',
+            'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada o salida.',
+            'cantidad.required' => 'La cantidad es obligatoria.',
+            'cantidad.integer' => 'La cantidad debe ser un número entero.',
+            'cantidad.min' => 'La cantidad debe ser mayor a 0.'
         ]);
 
         $movimiento = MovimientosInventario::findOrFail($id);
@@ -81,7 +97,7 @@ class MovimientosInventarioController extends Controller
             $nuevoInventario->stock += $request->cantidad;
         } else {
             if ($nuevoInventario->stock < $request->cantidad) {
-                return response()->json(['error' => 'No hay suficiente stock disponible.'], 400);
+                return response()->json(['error' => 'No hay suficiente stock disponible para realizar esta operación.'], 400);
             }
             $nuevoInventario->stock -= $request->cantidad;
         }
@@ -94,7 +110,7 @@ class MovimientosInventarioController extends Controller
             'cantidad' => $request->cantidad
         ]);
 
-        return response()->json(['success' => 'Movimiento actualizado correctamente.']);
+        return response()->json(['success' => 'Movimiento de inventario actualizado correctamente.']);
     }
 
     /**
@@ -115,6 +131,6 @@ class MovimientosInventarioController extends Controller
         $inventario->save();
         $movimiento->delete();
 
-        return response()->json(['success' => 'Movimiento eliminado correctamente.']);
+        return response()->json(['success' => 'Movimiento de inventario eliminado correctamente.']);
     }
 }

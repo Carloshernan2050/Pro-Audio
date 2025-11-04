@@ -17,7 +17,7 @@
         <div class="roles-legend">
             <span class="legend-pill superadmin">Superadmin</span>
             <span class="legend-pill admin">Admin</span>
-            <span class="legend-pill usuario">Usuario</span>
+            <span class="legend-pill usuario">Cliente</span>
         </div>
         <div class="roles-search">
             <i class="fas fa-search"></i>
@@ -51,17 +51,47 @@
                             <form id="rolesForm{{ $u->id }}" method="POST" action="{{ route('admin.roles.update') }}" class="roles-form">
                                 @csrf
                                 <input type="hidden" name="persona_id" value="{{ $u->id }}">
-                                @php $permitidos = ['Superadmin','Admin','Usuario']; @endphp
+                                @php 
+                                    $permitidos = ['Superadmin','Admin','Cliente']; 
+                                    // Normalizar roles: convertir "Usuario" a "Cliente" si existe
+                                    $rolesUsuario = collect(explode(',', (string)$u->roles))->map(function($role) {
+                                        return trim($role) === 'Usuario' ? 'Cliente' : trim($role);
+                                    })->filter()->unique()->values()->all();
+                                    
+                                    // Agrupar roles por nombre normalizado para evitar duplicados
+                                    $rolesUnicos = [];
+                                    $rolesYaMostrados = [];
+                                @endphp
                                 @foreach($roles as $r)
-                                    @if(in_array($r->name, $permitidos, true))
-                                        @php
-                                            $has = collect(explode(',', (string)$u->roles))->filter()->contains($r->name);
-                                        @endphp
-                                        <label class="chip" data-role="{{ $r->name }}" title="{{ $r->name }}">
-                                            <input type="checkbox" name="roles[]" value="{{ $r->id }}" {{ $has ? 'checked' : '' }}>
-                                            {{ $r->name }}
-                                        </label>
-                                    @endif
+                                    @php
+                                        // Normalizar nombre del rol
+                                        $rolNombre = trim($r->name ?? '');
+                                        if ($rolNombre === 'Usuario') {
+                                            $rolNombre = 'Cliente';
+                                        }
+                                        
+                                        // Si ya mostramos este rol, saltarlo
+                                        if (in_array($rolNombre, $rolesYaMostrados, true)) {
+                                            continue;
+                                        }
+                                        
+                                        // Solo mostrar si está permitido y no se ha mostrado antes
+                                        if (in_array($rolNombre, $permitidos, true) && !in_array($rolNombre, $rolesYaMostrados, true)) {
+                                            $rolesYaMostrados[] = $rolNombre;
+                                            $has = in_array($rolNombre, $rolesUsuario, true);
+                                            $rolesUnicos[] = [
+                                                'id' => $r->id,
+                                                'name' => $rolNombre,
+                                                'checked' => $has
+                                            ];
+                                        }
+                                    @endphp
+                                @endforeach
+                                @foreach($rolesUnicos as $rolUnico)
+                                    <label class="chip" data-role="{{ $rolUnico['name'] }}" title="{{ $rolUnico['name'] }}">
+                                        <input type="checkbox" name="roles[]" value="{{ $rolUnico['id'] }}" {{ $rolUnico['checked'] ? 'checked' : '' }}>
+                                        {{ $rolUnico['name'] }}
+                                    </label>
                                 @endforeach
                             </form>
                         </td>

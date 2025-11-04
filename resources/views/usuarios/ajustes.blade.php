@@ -683,7 +683,8 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('Error al eliminar el elemento', 'error');
+                    const errorMsg = error.error || error.message || 'Error al eliminar el artículo del inventario';
+                    showAlert(errorMsg, 'error');
                 });
             }
         }
@@ -718,7 +719,8 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('Error al eliminar el movimiento', 'error');
+                    const errorMsg = error.error || error.message || 'Error al eliminar el movimiento';
+                    showAlert(errorMsg, 'error');
                 });
             }
         }
@@ -764,17 +766,35 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         }
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                if (err.errors) {
+                                    // Manejar errores de validación de Laravel
+                                    const errorMessages = Object.values(err.errors).flat();
+                                    showAlert(errorMessages.join(', '), 'error');
+                                } else if (err.error) {
+                                    showAlert(err.error, 'error');
+                                } else {
+                                    showAlert('Error al procesar la solicitud del inventario', 'error');
+                                }
+                                throw new Error(err.error || 'Error');
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             showAlert(data.success);
                             closeInventarioModal();
                             loadInventario();
+                        } else if (data.error) {
+                            showAlert(data.error, 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showAlert('Error al procesar la solicitud', 'error');
+                        // No mostrar error aquí si ya se mostró arriba
                     });
                 });
             }
@@ -803,7 +823,23 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         }
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                if (err.errors) {
+                                    // Manejar errores de validación de Laravel
+                                    const errorMessages = Object.values(err.errors).flat();
+                                    showAlert(errorMessages.join(', '), 'error');
+                                } else if (err.error) {
+                                    showAlert(err.error, 'error');
+                                } else {
+                                    showAlert('Error al procesar la solicitud del movimiento', 'error');
+                                }
+                                throw new Error(err.error || 'Error');
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             showAlert(data.success);
@@ -815,7 +851,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showAlert('Error al procesar la solicitud', 'error');
+                        // No mostrar error aquí si ya se mostró arriba
                     });
                 });
             }

@@ -564,6 +564,8 @@
                 const saveBtn = document.getElementById('btn_guardar_crear');
                 // Usaremos el DOM para contar seleccionados y una Map local para validación rápida
                 const seleccionadosMap = new Map();
+                // Variable para rastrear si se hizo click en las sugerencias
+                let clickEnSugerencias = false;
 
                 // Evitar múltiples binds al reabrir el modal
                 function bindOnce(el, eventName, key, handler) {
@@ -578,7 +580,7 @@
                 function rangoActual() {
                     const s = document.getElementById('fecha_inicio_crear')?.value;
                     const f = document.getElementById('fecha_fin_crear')?.value;
-                    return {s, f};
+                    return {s: s || '', f: f || ''};
                 }
 
                 // Parsear cantidad desde descripción de eventos
@@ -637,25 +639,84 @@
                 function renderSugerencias(lista) {
                     if (!lista.length) { sugerencias.style.display = 'none'; sugerencias.innerHTML=''; return; }
                     const {s, f} = rangoActual();
+                    const tieneFechas = s && f && s.trim() !== '' && f.trim() !== '';
                     sugerencias.innerHTML = lista.map(it => {
                         const movId = movimientosPorInventario[it.inventario_id] || null;
-                        const ya = reservadoInventarioEnRango(it.inventario_id, s, f);
-                        const disp = Math.max(0, (it.stock || 0) - ya);
+                        let ya = 0;
+                        let disp = it.stock || 0;
+                        let motivo = '';
+                        
+                        if (tieneFechas) {
+                            // Calcular disponibilidad considerando reservas en el rango de fechas
+                            ya = reservadoInventarioEnRango(it.inventario_id, s, f);
+                            disp = Math.max(0, (it.stock || 0) - ya);
+                        } else {
+                            // Sin fechas, mostrar stock total pero avisar que necesita seleccionar fechas
+                            disp = it.stock || 0;
+                        }
+                        
                         const disabled = disp <= 0 || !movId;
+                        
+                        if (!movId) {
+                            motivo = 'Sin movimiento de inventario asociado';
+                        } else if (disp <= 0) {
+                            if (tieneFechas) {
+                                motivo = 'No hay stock disponible en las fechas seleccionadas';
+                            } else {
+                                motivo = 'Sin stock disponible';
+                            }
+                        } else if (!tieneFechas) {
+                            motivo = 'Seleccione fechas para ver disponibilidad exacta';
+                        }
+                        
+                        const mostrarInfo = tieneFechas 
+                            ? `Disponible en fechas: ${disp} (Stock total: ${it.stock})`
+                            : `Stock total: ${it.stock} (seleccione fechas para ver disponibilidad)`;
+                        
                         return (
-                            `<div class="sugerencias-item" data-inv="${it.inventario_id}" data-disp="${disp}" style="${disabled?'opacity:.5;pointer-events:none;':''}">`+
-                            `<strong>${it.descripcion}</strong><br><small>Disponible en fechas: ${disp}</small>`+
+                            `<div class="sugerencias-item" data-inv="${it.inventario_id}" data-disp="${disp}" data-mov="${movId || ''}" data-disabled="${disabled}" style="${disabled?'opacity:.6;cursor:not-allowed;':''}" title="${disabled ? motivo : (tieneFechas ? '' : motivo)}">`+
+                            `<strong>${it.descripcion}</strong><br>`+
+                            `${disabled ? `<small style="color:#ff6b6b;">${motivo}</small>` : `<small>${mostrarInfo}</small>`}`+
                             `</div>`
                         );
                     }).join('');
                     sugerencias.style.display = 'block';
                     sugerencias.querySelectorAll('.sugerencias-item').forEach(el => {
-                        bindOnce(el, 'click', 'sug-click', function(){
+                        // Agregar listeners directamente (los elementos se crean nuevos cada vez)
+                        const isDisabled = el.getAttribute('data-disabled') === 'true';
+                        
+                        el.addEventListener('mousedown', function(e){
+                            if (isDisabled) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const motivo = this.getAttribute('title') || 'No disponible';
+                                showToast(motivo, 'error');
+                                return;
+                            }
+                            e.preventDefault();
+                            e.stopPropagation();
+                            clickEnSugerencias = true;
+                        });
+                        
+                        el.addEventListener('click', function(e){
+                            if (isDisabled) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const motivo = this.getAttribute('title') || 'No disponible';
+                                showToast(motivo, 'error');
+                                return;
+                            }
+                            e.preventDefault();
+                            e.stopPropagation();
+                            clickEnSugerencias = true;
                             const invId = parseInt(this.getAttribute('data-inv'));
                             const it = inventarioItems.find(x=>x.inventario_id===invId);
                             if (!it) return;
                             const movId = movimientosPorInventario[invId] || null;
-                            if (!movId) { showToast('Producto sin movimiento asociado, no se puede reservar', 'error'); return; }
+                            if (!movId) { 
+                                showToast('Producto sin movimiento asociado, no se puede reservar', 'error'); 
+                                return; 
+                            }
                             it._movId = movId;
                             if (!seleccionadosMap.has(invId)) {
                                 seleccionadosMap.set(invId, it);
@@ -663,6 +724,10 @@
                             }
                             sugerencias.style.display = 'none';
                             inputBuscar.value='';
+                            // Mantener el foco en el input para permitir más búsquedas
+                            setTimeout(() => {
+                                if (inputBuscar) inputBuscar.focus();
+                            }, 100);
                         });
                     });
                 }
@@ -683,9 +748,9 @@
                     const yaInv = reservadoInventarioEnRango(it.inventario_id, s, f);
                     const disp = Math.max(0, (it.stock || 0) - yaInv);
                     row.innerHTML = `
-                        <span class="item-titulo">${it.descripcion} <small style="opacity:.8;">(Disp: ${it.stock})</small></span>
+                        <span class="item-titulo">${it.descripcion} <small style="opacity:.8;">(Disponible: ${it.stock})</small></span>
                         <div style="display:flex;flex-direction:column;gap:4px;width:130px;">
-                            <input type="number" min="1" class="form-control form-control-sm" data-stock="${disp}" name="items[${movId}][cantidad]" placeholder="Cantidad (max ${disp})" required>
+                            <input type="number" min="1" class="form-control form-control-sm" data-stock="${disp}" name="items[${movId}][cantidad]" placeholder="Cantidad (máx ${disp})" required>
                             <small class="field-error" style="display:none;"></small>
                         </div>
                         <input type="hidden" name="items[${movId}][movimientos_inventario_id]" value="${movId}">
@@ -707,14 +772,25 @@
 
                 // Mostrar sugerencias al escribir o al enfocar sin texto (top 10 del servicio)
                 function refreshSugerencias() {
-                    const lista = filtrarProductos(inputBuscar ? inputBuscar.value : '', servicioCrear ? servicioCrear.value : '');
+                    if (!inputBuscar || !sugerencias) return;
+                    const lista = filtrarProductos(inputBuscar.value || '', servicioCrear ? servicioCrear.value : '');
                     renderSugerencias(lista);
                 }
-                bindOnce(inputBuscar, 'input', 'search-input', refreshSugerencias);
-                bindOnce(inputBuscar, 'focus', 'search-focus', function(){
+                
+                // Asegurar que las sugerencias se muestren cuando se hace focus o click
+                bindOnce(inputBuscar, 'input', 'search-input', function(){
                     refreshSugerencias();
                 });
-                bindOnce(inputBuscar, 'click', 'search-click', function(){
+                
+                bindOnce(inputBuscar, 'focus', 'search-focus', function(){
+                    // Pequeño delay para asegurar que el input esté listo
+                    setTimeout(() => {
+                        refreshSugerencias();
+                    }, 10);
+                });
+                
+                bindOnce(inputBuscar, 'click', 'search-click', function(e){
+                    e.stopPropagation();
                     refreshSugerencias();
                 });
 
@@ -724,13 +800,32 @@
 
                 // Cerrar sugerencias solo si se hace click fuera; volverán a abrir en focus/click
                 bindOnce(document, 'mousedown', 'doc-hide-sug', function(e){
+                    // Si el click es en las sugerencias o en el input, no ocultar
+                    if (sugerencias && sugerencias.contains(e.target)) {
+                        clickEnSugerencias = true;
+                        return;
+                    }
+                    if (e.target === inputBuscar) {
+                        clickEnSugerencias = false;
+                        return;
+                    }
+                    // Si es click fuera, ocultar sugerencias
                     if (sugerencias && !sugerencias.contains(e.target) && e.target !== inputBuscar) {
                         sugerencias.style.display = 'none';
+                        clickEnSugerencias = false;
                     }
                 });
-                // Ocultar al perder foco, al hacer scroll global, o al cerrar el modal
-                bindOnce(inputBuscar, 'blur', 'search-blur', function(){
-                    if (sugerencias) sugerencias.style.display = 'none';
+                
+                // Ocultar al perder foco, pero con delay para permitir que el click en sugerencias se procese
+                bindOnce(inputBuscar, 'blur', 'search-blur', function(e){
+                    // Delay para permitir que el click en las sugerencias se procese primero
+                    setTimeout(() => {
+                        // Si no se hizo click en las sugerencias, ocultarlas
+                        if (!clickEnSugerencias && sugerencias) {
+                            sugerencias.style.display = 'none';
+                        }
+                        clickEnSugerencias = false;
+                    }, 200);
                 });
                 bindOnce(document, 'scroll', 'doc-scroll-hide-sug', function(){
                     if (sugerencias) sugerencias.style.display = 'none';
@@ -784,7 +879,7 @@
                         const original = parseInt(qty.getAttribute('data-stock-original') || qty.getAttribute('data-stock') || '0');
                         const disp = Math.max(0, (original || 0) - yaInv);
                         qty.setAttribute('data-stock', String(disp));
-                        qty.setAttribute('placeholder', 'Cantidad (max ' + disp + ')');
+                        qty.setAttribute('placeholder', 'Cantidad (máx ' + disp + ')');
                         const val = parseInt(qty.value || '0');
                         if (val && disp && val > disp) {
                             err.textContent = 'La cantidad supera la disponibilidad en esas fechas (' + disp + ')';
@@ -841,6 +936,21 @@
                             headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
                             body: fd
                         });
+                        
+                        // Intentar parsear la respuesta como JSON
+                        let data;
+                        const contentType = resp.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            data = await resp.json();
+                        } else {
+                            const text = await resp.text();
+                            try {
+                                data = JSON.parse(text);
+                            } catch {
+                                data = { message: text || 'Error desconocido' };
+                            }
+                        }
+                        
                         if (resp.ok) {
                             showToast('Alquiler registrado correctamente', 'success');
                             // Cerrar modal y limpiar
@@ -852,17 +962,45 @@
                             formCrear.reset();
                             contSeleccionados.innerHTML = '';
                             if (badgeCount) badgeCount.textContent = '0';
+                            // Recargar la página para actualizar el calendario
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
                         } else if (resp.status === 422) {
-                            const data = await resp.json();
-                            const messages = data?.errors ? Object.values(data.errors).flat() : ['Error de validación'];
-                            const msg = messages.join('\n');
-                            showToast(messages[0] || 'Error de validación', 'error');
-                            if (alertBox) { alertBox.textContent = msg; alertBox.style.display = 'block'; }
+                            // Error de validación
+                            const messages = data?.errors ? Object.values(data.errors).flat() : 
+                                          (data?.message ? [data.message] : ['Error de validación']);
+                            const msg = Array.isArray(messages) ? messages.join('\n') : messages;
+                            showToast(Array.isArray(messages) ? messages[0] : messages || 'Error de validación', 'error');
+                            if (alertBox) { 
+                                alertBox.textContent = msg; 
+                                alertBox.style.display = 'block'; 
+                            }
+                        } else if (resp.status === 400 || resp.status === 500) {
+                            // Error del servidor
+                            const errorMsg = data?.message || data?.error || 'Error del servidor al procesar la solicitud';
+                            showToast(errorMsg, 'error');
+                            if (alertBox) { 
+                                alertBox.textContent = errorMsg; 
+                                alertBox.style.display = 'block'; 
+                            }
                         } else {
-                            showToast('Ocurrió un error al guardar', 'error');
+                            // Otros errores
+                            const errorMsg = data?.message || data?.error || `Error al guardar (código: ${resp.status})`;
+                            showToast(errorMsg, 'error');
+                            if (alertBox) { 
+                                alertBox.textContent = errorMsg; 
+                                alertBox.style.display = 'block'; 
+                            }
                         }
                     } catch (err) {
-                        showToast('Ocurrió un error de conexión', 'error');
+                        console.error('Error completo:', err);
+                        const errorMsg = err.message || 'Ocurrió un error de conexión. Por favor, intente nuevamente';
+                        showToast(errorMsg, 'error');
+                        if (alertBox) { 
+                            alertBox.textContent = errorMsg; 
+                            alertBox.style.display = 'block'; 
+                        }
                     }
                     return false;
                 });

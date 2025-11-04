@@ -60,24 +60,119 @@ class CalendarioController extends Controller
     public function guardar(Request $request)
     {
         $this->ensureAdminLike();
-        $request->validate([
-            'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
-            'fecha_inicio'              => 'required|date',
-            'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
-            'descripcion_evento'        => 'required'
-        ]);
+        
+        // Validar si se envía como items múltiples (nuevo formato) o campo único (formato antiguo)
+        $items = $request->input('items', []);
+        
+        if (!empty($items)) {
+            // Nuevo formato: múltiples items
+            $request->validate([
+                'items'                      => 'required|array|min:1',
+                'items.*.movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
+                'items.*.cantidad'           => 'required|integer|min:1',
+                'fecha_inicio'              => 'required|date',
+                'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
+                'descripcion_evento'        => 'required|string'
+            ], [
+                'items.required' => 'Debe seleccionar al menos un producto.',
+                'items.min' => 'Debe seleccionar al menos un producto.',
+                'items.*.movimientos_inventario_id.required' => 'El campo de movimiento de inventario es obligatorio.',
+                'items.*.movimientos_inventario_id.exists' => 'El movimiento de inventario seleccionado no existe.',
+                'items.*.cantidad.required' => 'La cantidad es obligatoria para cada producto.',
+                'items.*.cantidad.integer' => 'La cantidad debe ser un número entero.',
+                'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
+                'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
+                'fecha_inicio.date' => 'La fecha de inicio debe ser una fecha válida.',
+                'fecha_fin.required' => 'La fecha de fin es obligatoria.',
+                'fecha_fin.date' => 'La fecha de fin debe ser una fecha válida.',
+                'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
+                'descripcion_evento.required' => 'La descripción del evento es obligatoria.',
+                'descripcion_evento.string' => 'La descripción del evento debe ser texto.'
+            ]);
 
-        Calendario::create([
-            'personas_id'               => session('usuario_id'),
-            'movimientos_inventario_id' => $request->movimientos_inventario_id,
-            'fecha'                     => now(),
-            'fecha_inicio'              => $request->fecha_inicio,
-            'fecha_fin'                 => $request->fecha_fin,
-            'descripcion_evento'        => $request->descripcion_evento,
-            'evento'                    => 'Alquiler'
-        ]);
+            // Crear un registro por cada item
+            foreach ($items as $item) {
+                $movimientoId = $item['movimientos_inventario_id'];
+                
+                // Validar que el movimiento existe y obtener el inventario_id
+                $movimiento = DB::table('movimientos_inventario')->where('id', $movimientoId)->first();
+                if (!$movimiento) {
+                    return response()->json([
+                        'error' => 'El movimiento de inventario seleccionado no existe.'
+                    ], 422);
+                }
+                
+                $inventarioId = $movimiento->inventario_id;
+                $cantidadSolicitada = $item['cantidad'] ?? 1;
+                
+                // Validar stock disponible en el rango de fechas
+                $stockTotal = DB::table('inventario')->where('id', $inventarioId)->value('stock') ?? 0;
+                
+                // Calcular cuántas unidades ya están reservadas en esas fechas
+                $reservadas = DB::table('calendario')
+                    ->join('movimientos_inventario', 'calendario.movimientos_inventario_id', '=', 'movimientos_inventario.id')
+                    ->where('movimientos_inventario.inventario_id', $inventarioId)
+                    ->where(function($query) use ($request) {
+                        // Reservas que se solapan con el rango solicitado
+                        $query->where(function($q) use ($request) {
+                            $q->where('calendario.fecha_inicio', '<=', $request->fecha_fin)
+                              ->where('calendario.fecha_fin', '>=', $request->fecha_inicio);
+                        });
+                    })
+                    ->sum('calendario.cantidad') ?? 0;
+                
+                $disponible = $stockTotal - $reservadas;
+                
+                if ($disponible < $cantidadSolicitada) {
+                    $producto = DB::table('inventario')->where('id', $inventarioId)->first();
+                    $nombreProducto = $producto->descripcion ?? 'Producto';
+                    return response()->json([
+                        'error' => "No hay suficiente stock disponible para '{$nombreProducto}'. Disponible: {$disponible}, Solicitado: {$cantidadSolicitada}"
+                    ], 422);
+                }
+                
+                Calendario::create([
+                    'personas_id'               => session('usuario_id'),
+                    'movimientos_inventario_id' => $movimientoId,
+                    'fecha'                     => now(),
+                    'fecha_inicio'              => $request->fecha_inicio,
+                    'fecha_fin'                 => $request->fecha_fin,
+                    'descripcion_evento'        => $request->descripcion_evento . ' (Cantidad: ' . $cantidadSolicitada . ')',
+                    'cantidad'                  => $cantidadSolicitada,
+                    'evento'                    => 'Alquiler'
+                ]);
+            }
+        } else {
+            // Formato antiguo: un solo campo
+            $request->validate([
+                'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
+                'fecha_inicio'              => 'required|date',
+                'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
+                'descripcion_evento'        => 'required|string'
+            ], [
+                'movimientos_inventario_id.required' => 'Debe seleccionar un producto del inventario.',
+                'movimientos_inventario_id.exists' => 'El producto seleccionado no existe.',
+                'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
+                'fecha_inicio.date' => 'La fecha de inicio debe ser una fecha válida.',
+                'fecha_fin.required' => 'La fecha de fin es obligatoria.',
+                'fecha_fin.date' => 'La fecha de fin debe ser una fecha válida.',
+                'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
+                'descripcion_evento.required' => 'La descripción del evento es obligatoria.',
+                'descripcion_evento.string' => 'La descripción del evento debe ser texto.'
+            ]);
 
-        return back()->with('ok','Alquiler registrado');
+            Calendario::create([
+                'personas_id'               => session('usuario_id'),
+                'movimientos_inventario_id' => $request->movimientos_inventario_id,
+                'fecha'                     => now(),
+                'fecha_inicio'              => $request->fecha_inicio,
+                'fecha_fin'                 => $request->fecha_fin,
+                'descripcion_evento'        => $request->descripcion_evento,
+                'evento'                    => 'Alquiler'
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Alquiler registrado correctamente']);
     }
 
     // Actualizar evento existente
@@ -88,15 +183,34 @@ class CalendarioController extends Controller
             'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
             'fecha_inicio'              => 'required|date',
             'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
-            'descripcion_evento'        => 'required'
+            'descripcion_evento'        => 'required|string',
+            'cantidad'                  => 'nullable|integer|min:1'
+        ], [
+            'movimientos_inventario_id.required' => 'Debe seleccionar un producto del inventario.',
+            'movimientos_inventario_id.exists' => 'El producto seleccionado no existe.',
+            'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
+            'fecha_inicio.date' => 'La fecha de inicio debe ser una fecha válida.',
+            'fecha_fin.required' => 'La fecha de fin es obligatoria.',
+            'fecha_fin.date' => 'La fecha de fin debe ser una fecha válida.',
+            'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
+            'descripcion_evento.required' => 'La descripción del evento es obligatoria.',
+            'descripcion_evento.string' => 'La descripción del evento debe ser texto.',
+            'cantidad.integer' => 'La cantidad debe ser un número entero.',
+            'cantidad.min' => 'La cantidad debe ser mayor a 0.'
         ]);
 
-        Calendario::findOrFail($id)->update([
+        $updateData = [
             'movimientos_inventario_id' => $request->movimientos_inventario_id,
             'fecha_inicio'              => $request->fecha_inicio,
             'fecha_fin'                 => $request->fecha_fin,
             'descripcion_evento'        => $request->descripcion_evento,
-        ]);
+        ];
+        
+        if ($request->has('cantidad')) {
+            $updateData['cantidad'] = $request->cantidad;
+        }
+        
+        Calendario::findOrFail($id)->update($updateData);
 
         return redirect()->route('usuarios.calendario')->with('ok','Evento actualizado correctamente');
     }

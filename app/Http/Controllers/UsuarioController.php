@@ -40,11 +40,11 @@ class UsuarioController extends Controller
 
         $persona = Usuario::create($data);
 
-        // Asignar rol por defecto "Usuario"
+        // Asignar rol por defecto "Cliente"
         try {
-            $rolId = DB::table('roles')->where('name', 'Usuario')->value('id');
+            $rolId = DB::table('roles')->where('name', 'Cliente')->value('id');
             if (!$rolId) {
-                $rolId = DB::table('roles')->where('nombre_rol', 'Usuario')->value('id');
+                $rolId = DB::table('roles')->where('nombre_rol', 'Cliente')->value('id');
             }
             if ($rolId) {
                 DB::table('personas_roles')->insert(['personas_id' => $persona->id, 'roles_id' => $rolId]);
@@ -86,9 +86,9 @@ class UsuarioController extends Controller
             $roles = $rows->map(fn($v) => (string)$v)->unique()->values()->all();
 
             if (empty($roles)) {
-                $roles = ['Usuario'];
+                $roles = ['Cliente'];
             }
-            session(['roles' => $roles, 'role' => $roles[0] ?? 'Usuario']);
+            session(['roles' => $roles, 'role' => $roles[0] ?? 'Cliente']);
 
             if (session('pending_admin')) {
                 return redirect()->route('admin.key.form');

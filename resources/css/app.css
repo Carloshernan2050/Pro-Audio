@@ -264,6 +264,35 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     background: #fff3f3;
 }
 
+.btn-iniciar-sesion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: #e91c1c;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: 2px solid #e91c1c;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.btn-iniciar-sesion:hover {
+    background-color: #000000;
+    border-color: #000000;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-iniciar-sesion i {
+    font-size: 16px;
+}
+
 .profile-btn-header {
     background-color: transparent;
     color: white;

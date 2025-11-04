@@ -12,12 +12,58 @@ class RoleAdminController extends Controller
         $usuarios = DB::table('personas as p')
             ->leftJoin('personas_roles as pr', 'pr.personas_id', '=', 'p.id')
             ->leftJoin('roles as r', 'r.id', '=', 'pr.roles_id')
-            ->select('p.id','p.primer_nombre','p.primer_apellido','p.correo', DB::raw('GROUP_CONCAT(COALESCE(r.name, r.nombre_rol) SEPARATOR ",") as roles'))
+            ->select('p.id','p.primer_nombre','p.primer_apellido','p.correo', DB::raw('GROUP_CONCAT(DISTINCT COALESCE(r.name, r.nombre_rol) ORDER BY COALESCE(r.name, r.nombre_rol) SEPARATOR ",") as roles'))
             ->groupBy('p.id','p.primer_nombre','p.primer_apellido','p.correo')
             ->orderBy('p.id','desc')
-            ->get();
+            ->get()
+            ->map(function($usuario) {
+                // Normalizar roles: convertir "Usuario" a "Cliente" y eliminar duplicados
+                if ($usuario->roles) {
+                    $rolesArray = collect(explode(',', $usuario->roles))
+                        ->map(function($rol) {
+                            $rol = trim($rol);
+                            return $rol === 'Usuario' ? 'Cliente' : $rol;
+                        })
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->toArray();
+                    $usuario->roles = implode(',', $rolesArray);
+                }
+                return $usuario;
+            });
 
-        $roles = DB::table('roles')->select('id', DB::raw('COALESCE(name, nombre_rol) as name'))->orderBy('id')->get();
+        // Obtener roles y agrupar por nombre normalizado
+        $rolesRaw = DB::table('roles')
+            ->select('id', DB::raw('COALESCE(name, nombre_rol) as name'))
+            ->orderBy('id')
+            ->get();
+        
+        $rolesAgrupados = [];
+        foreach ($rolesRaw as $role) {
+            $nombre = trim($role->name ?? '');
+            // Normalizar: convertir "Usuario" a "Cliente"
+            if ($nombre === 'Usuario') {
+                $nombre = 'Cliente';
+            }
+            
+            // Solo procesar roles permitidos
+            if (in_array($nombre, ['Superadmin', 'Admin', 'Cliente'], true)) {
+                // Si ya existe un rol con este nombre, usar el primero (menor ID)
+                if (!isset($rolesAgrupados[$nombre]) || $role->id < $rolesAgrupados[$nombre]->id) {
+                    $role->name = $nombre;
+                    $rolesAgrupados[$nombre] = $role;
+                }
+            }
+        }
+        
+        // Convertir a colección y ordenar
+        $roles = collect($rolesAgrupados)
+            ->sortBy(function($role) {
+                $orden = ['Superadmin' => 1, 'Admin' => 2, 'Cliente' => 3];
+                return $orden[$role->name] ?? 999;
+            })
+            ->values();
 
         return view('admin.roles', compact('usuarios','roles'));
     }
