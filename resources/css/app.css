@@ -1700,6 +1700,177 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     .top-bar h1 {
         display: none !important;
     }
+    
+    /* Asegurar que el contenido principal se vea completo */
+    .dashboard-container {
+        padding-top: 38px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        padding-bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+    
+    .main-content {
+        padding: 10px !important;
+        padding-top: 15px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: visible !important;
+        overflow-y: auto !important;
+        position: relative !important;
+        left: 0 !important;
+    }
+    
+    /* Asegurar que el contenido no se corte */
+    .main-content > * {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        overflow-x: visible !important;
+    }
+    
+    /* Contenedores de contenido específicos */
+    .main-content .content-grid,
+    .main-content .empresa-presentacion,
+    .main-content .carousel-container,
+    .main-content .productos-grid,
+    .main-content .productos-galeria,
+    .main-content .productos-servicio,
+    .main-content .servicio-detalle-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        overflow-x: visible !important;
+    }
+    
+    /* Asegurar que imágenes y elementos grandes no se corten */
+    .main-content img,
+    .main-content video,
+    .main-content iframe,
+    .producto-imagen,
+    .imagen-grande {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Tablas responsive */
+    .table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    table {
+        min-width: 500px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Modales responsive */
+    .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 10px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Productos grid */
+    .productos-grid,
+    .productos-galeria {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        padding: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .producto-item {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        min-height: 180px !important;
+    }
+    
+    .producto-imagen {
+        width: 100% !important;
+        height: 160px !important;
+        object-fit: cover !important;
+    }
+    
+    /* Títulos y subtítulos */
+    .page-title {
+        font-size: 1.4rem !important;
+        margin-bottom: 8px !important;
+        padding: 0 5px !important;
+        word-wrap: break-word !important;
+    }
+    
+    .page-subtitle {
+        font-size: 0.85rem !important;
+        margin-bottom: 18px !important;
+        padding: 0 5px !important;
+        word-wrap: break-word !important;
+    }
+    
+    /* Contenedor de servicio detalle */
+    .servicio-detalle-container {
+        padding: 15px !important;
+        margin: 15px auto !important;
+        width: calc(100% - 20px) !important;
+        max-width: calc(100% - 20px) !important;
+        box-sizing: border-box !important;
+    }
+    
+    .detalle-principal {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+    
+    .detalle-imagen-principal,
+    .detalle-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex: 1 1 100% !important;
+    }
+    
+    .detalle-info h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    /* Galería relacionada */
+    .galeria-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    
+    /* Body sin overflow */
+    body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
 }
 
 /* Móviles muy pequeños (hasta 425px) - Móvil L */
@@ -2350,33 +2521,118 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .main-content {
-        padding: 11px !important;
-        padding-top: 14px !important;
+        padding: 10px !important;
+        padding-top: 15px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: visible !important;
+        overflow-y: auto !important;
+    }
+    
+    /* Asegurar que el contenido no se corte en 425px */
+    .main-content > * {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        overflow-x: visible !important;
+    }
+    
+    .main-content .content-grid,
+    .main-content .empresa-presentacion,
+    .main-content .carousel-container,
+    .main-content .productos-grid,
+    .main-content .productos-galeria,
+    .main-content .productos-servicio,
+    .main-content .servicio-detalle-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        overflow-x: visible !important;
+    }
+    
+    .main-content img,
+    .main-content video,
+    .main-content iframe,
+    .producto-imagen,
+    .imagen-grande {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        box-sizing: border-box !important;
     }
 
     .page-title {
-        font-size: 1.5rem !important;
+        font-size: 1.4rem !important;
         margin-bottom: 7px !important;
+        padding: 0 5px !important;
+        word-wrap: break-word !important;
     }
 
     .page-subtitle {
-        font-size: 0.92rem !important;
-        margin-bottom: 22px !important;
+        font-size: 0.85rem !important;
+        margin-bottom: 20px !important;
+        padding: 0 5px !important;
+        word-wrap: break-word !important;
     }
 
     .productos-grid,
     .productos-galeria {
         grid-template-columns: 1fr !important;
-        gap: 15px !important;
-        padding: 9px !important;
+        gap: 12px !important;
+        padding: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .producto-item {
-        min-height: 190px !important;
+        min-height: 180px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .producto-imagen {
-        height: 170px !important;
+        height: 160px !important;
+        width: 100% !important;
+        object-fit: cover !important;
+    }
+    
+    /* Contenedor de servicio detalle */
+    .servicio-detalle-container {
+        padding: 12px !important;
+        margin: 12px auto !important;
+        width: calc(100% - 20px) !important;
+        max-width: calc(100% - 20px) !important;
+        box-sizing: border-box !important;
+    }
+    
+    .detalle-principal {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    .detalle-imagen-principal,
+    .detalle-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex: 1 1 100% !important;
+    }
+    
+    .detalle-info h2 {
+        font-size: 1.3rem !important;
     }
 
     .welcome-title {
@@ -2744,6 +3000,104 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 }
 
 /* Móviles medianos y grandes (501px - 767px) */
+@media (min-width: 501px) and (max-width: 767px) {
+    .dashboard-container {
+        padding-top: calc(48px + 0.5cm);
+    }
+
+    .main-content {
+        padding: 15px !important;
+        padding-top: 20px !important;
+        margin-left: 0 !important;
+    }
+
+    .page-title {
+        font-size: 1.7rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    .page-subtitle {
+        font-size: 1rem !important;
+        margin-bottom: 25px !important;
+    }
+
+    .productos-grid,
+    .productos-galeria {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 18px !important;
+        padding: 12px !important;
+    }
+
+    .producto-item {
+        min-height: 200px !important;
+    }
+
+    .producto-imagen {
+        height: 180px !important;
+    }
+
+    .producto-imagen-placeholder {
+        height: 180px !important;
+        font-size: 2.5rem !important;
+    }
+
+    .producto-nombre {
+        padding: 12px !important;
+        font-size: 1rem !important;
+    }
+
+    .producto-descripcion {
+        font-size: 0.9rem !important;
+        padding: 10px !important;
+    }
+
+    /* Tablas responsive */
+    .table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 8px !important;
+    }
+
+    table {
+        font-size: 0.8rem !important;
+        min-width: 600px !important;
+    }
+
+    th, td {
+        padding: 8px 6px !important;
+    }
+
+    /* Modales responsive */
+    .modal-content {
+        width: 90% !important;
+        max-width: 90% !important;
+        margin: 15px !important;
+        padding: 18px !important;
+    }
+
+    .modal-header {
+        padding: 12px 15px !important;
+    }
+
+    .modal-header h3 {
+        font-size: 15px !important;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px !important;
+        padding: 10px !important;
+    }
+
+    .btn-submit {
+        padding: 10px 18px !important;
+        font-size: 0.85rem !important;
+        width: 100% !important;
+    }
+}
+
+/* Móviles medianos y grandes (501px - 767px) - versión anterior */
 @media (min-width: 501px) and (max-width: 767px) {
     .dashboard-container {
         grid-template-areas:
