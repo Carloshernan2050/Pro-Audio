@@ -686,26 +686,200 @@ body {
     }
 
     .main-content {
-        padding: 20px 15px; /* Padding reducido */
+        padding: 15px 12px; /* Padding reducido */
         padding-top: 20px; /* Ya que la barra superior ahora es más pequeña y se ajusta automáticamente */
+        margin-left: 0 !important;
+        padding-left: 12px !important;
     }
 
     .welcome-title {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+
+    .welcome-text {
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+    }
+
+    /* Carrusel responsive */
+    .carousel-container {
+        height: 200px;
+        margin-bottom: 20px;
+    }
+
+    .carousel-slide img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .carousel-btn {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .prev-btn {
+        left: 5px;
+    }
+
+    .next-btn {
+        right: 5px;
+    }
+
+    .carousel-dots {
+        bottom: 10px;
+        gap: 6px;
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+    }
+
+    /* Content grid responsive */
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0;
+    }
+
+    .primary-section,
+    .secondary-section {
+        grid-column: 1;
+    }
+
+    /* Featured image */
+    .featured-image-container {
+        margin-bottom: 15px;
+    }
+
+    .presentacion-img-grande {
+        width: 100%;
+        height: auto;
+        max-height: 250px;
+    }
+
+    /* Content cards */
+    .content-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .content-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+    }
+
+    .content-card p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    /* Misión responsive */
+    .presentacion-bloque.row {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .presentacion-bloque-media {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .presentacion-img-pequena {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
     }
 
     /* Proceso de Trabajo: se apila verticalmente */
     .process-steps-grid {
         flex-direction: column;
         align-items: center;
+        gap: 20px;
     }
+
     .process-step {
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 100%;
     }
+
     .process-step:not(:last-child)::after {
         content: '↓'; /* Flecha hacia abajo en móvil */
         right: auto;
-        bottom: -20px;
+        bottom: -15px;
         top: auto;
+    }
+
+    .step-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .process-step h4 {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .process-step p {
+        font-size: 0.85rem;
+    }
+
+    /* Stats grid responsive */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .stat-item {
+        padding: 15px;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+    }
+
+    /* Values card */
+    .values-card ul {
+        padding-left: 20px;
+    }
+
+    .values-card li {
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+    }
+
+    /* Video responsive */
+    .presentacion-video {
+        width: 100%;
+        height: auto;
+        max-height: 250px;
+    }
+
+    /* CTA card */
+    .cta-quote {
+        text-align: center;
+    }
+
+    .cta-quote h3 {
+        font-size: 1.2rem;
+    }
+
+    .cta-quote p {
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .btn-primary-action {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 0.9rem;
     }
 }

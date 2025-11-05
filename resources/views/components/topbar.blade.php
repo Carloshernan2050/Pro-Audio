@@ -1,4 +1,7 @@
 <header class="top-bar">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menú">
+        <i class="fas fa-bars"></i>
+    </button>
     <a href="{{ route('inicio') }}" class="brand-logo" title="PROAUDIO">
         <img src="{{ Vite::asset('resources/images/logo-proaudio.svg') }}" alt="PROAUDIO" />
     </a>
@@ -18,7 +21,8 @@
     
     @if($esInvitado)
         <a href="{{ route('usuarios.inicioSesion') }}" class="btn-iniciar-sesion" title="Iniciar sesión">
-            <i class="fas fa-sign-in-alt"></i> Iniciar sesión
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Iniciar sesión</span>
         </a>
     @else
         <button onclick="openProfileModal()" class="profile-btn-header" title="Perfil" style="background:none; border:none; cursor:pointer; padding:0;">

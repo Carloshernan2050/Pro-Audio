@@ -251,52 +251,33 @@ class ServiciosController extends Controller
     private function crearContenidoBladeDesdeCero($nombreServicio, $descripcion, $nombreVista)
     {
         $contenido = <<<'BLADE'
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO AUDIO - {NOMBRE_SERVICIO}</title>
-    {{-- Llamada al archivo CSS principal usando Vite --}}
-    @vite('resources/css/app.css')
+@extends('layouts.app')
 
-    {{-- Enlace a la librería de Font Awesome para los íconos --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
-<body>
-    {{-- Contenedor principal del dashboard con la imagen de fondo --}}
-    <div class="dashboard-container">
-        {{-- Barra superior --}}
-        <header class="top-bar">
-            <h1>PRO AUDIO</h1>
-            <form class="search-form" action="{{ route('buscar') }}" method="GET">
-                <input type="text" name="buscar" class="search-input" placeholder="Buscar servicios..." value="{{ request('buscar') ?? '' }}">
-                <button type="submit" class="search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </form>
-            <a href="{{ route('usuarios.perfil') }}" class="profile-btn-header" title="Perfil">
-                <i class="fas fa-user-circle"></i>
-                <span>Perfil</span>
-            </a>
-        </header>
+@section('title', '{NOMBRE_SERVICIO}')
 
-        {{-- Barra lateral izquierda --}}
-        @include('components.sidebar')
-
-         {{-- Contenido principal --}}
-        <main class="main-content">
+@section('content')
+       <main class="main-content">
             <h2 class="page-title">{NOMBRE_SERVICIO}</h2>
             <p class="page-subtitle">{DESCRIPCION}</p>
-
+            
             <section class="productos-servicio">
                 <div class="productos-grid">
                     @forelse($subServicios as $subServicio)
                         <div class="producto-item">
-                            <img src="/images/{NOMBRE_VISTA}/{{ strtolower(str_replace(' ', '_', $subServicio->nombre)) }}.jpg" 
-                                 alt="{{ $subServicio->nombre }}" 
-                                 class="producto-imagen"
-                                 onerror="this.src='/images/default.jpg'">
+                            @php
+                                $nombreImagen = strtolower(str_replace(' ', '_', $subServicio->nombre)) . '.jpg';
+                                $rutaImagen = public_path('images/{NOMBRE_VISTA}/' . $nombreImagen);
+                                $existeImagen = file_exists($rutaImagen);
+                            @endphp
+                            @if($existeImagen)
+                                <img src="/images/{NOMBRE_VISTA}/{{ $nombreImagen }}" 
+                                     alt="{{ $subServicio->nombre }}" 
+                                     class="producto-imagen">
+                            @else
+                                <div class="producto-imagen-placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            @endif
                             <h4 class="producto-nombre">{{ $subServicio->nombre }}</h4>
                             @if($subServicio->precio)
                                 <p style="color: #2563eb; font-weight: bold; font-size: 1.1em; margin: 8px 0;">
@@ -315,9 +296,7 @@ class ServiciosController extends Controller
                 </div>
             </section>
         </main>
-    </div>
-</body>
-</html>
+@endsection
 BLADE;
         
         // Reemplazar los placeholders
