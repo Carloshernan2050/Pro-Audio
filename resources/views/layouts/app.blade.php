@@ -28,6 +28,9 @@
         {{-- Barra superior reutilizable --}}
         @include('components.topbar')
 
+        {{-- Overlay para cerrar el menú móvil --}}
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
+
         {{-- Barra lateral izquierda (Sidebar) --}}
         @include('components.sidebar')
 
@@ -721,6 +724,230 @@
     {{-- Stack opcional para scripts por-vista --}}
     @stack('scripts')
     <script>
+    // Función para abrir/cerrar el menú móvil
+    function toggleMobileMenu() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        
+        if (sidebar && overlay) {
+            const isOpen = sidebar.classList.contains('mobile-open');
+            
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+            
+            // Animación del botón hamburguesa
+            if (menuBtn) {
+                if (isOpen) {
+                    menuBtn.classList.remove('active');
+                } else {
+                    menuBtn.classList.add('active');
+                }
+            }
+            
+            // Prevenir scroll del body cuando el menú está abierto
+            if (!isOpen) {
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+            } else {
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+            }
+        }
+    }
+
+    // Cerrar el menú al hacer clic en un enlace del sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarLinks = document.querySelectorAll('.sidebar-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // Cerrar en móviles y tablets (desde 768px)
+                if (window.innerWidth <= 1024 && sidebar && overlay) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                    if (menuBtn) {
+                        menuBtn.classList.remove('active');
+                    }
+                }
+            });
+        });
+
+        // Cerrar el menú al redimensionar la ventana si pasa a desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 1024) {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const menuBtn = document.querySelector('.mobile-menu-btn');
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                    if (menuBtn) {
+                        menuBtn.classList.remove('active');
+                    }
+                }
+            }
+        });
+
+        // Cerrar con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const menuBtn = document.querySelector('.mobile-menu-btn');
+                if (sidebar && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                    if (menuBtn) {
+                        menuBtn.classList.remove('active');
+                    }
+                }
+            }
+        });
+
+        // Header retráctil para tablets y móviles
+        let lastScrollTop = 0;
+        let scrollTimeout = null;
+        const header = document.querySelector('.top-bar');
+        const mainContent = document.querySelector('.main-content');
+        const dashboardContainer = document.querySelector('.dashboard-container');
+        const isMobileOrTablet = () => window.innerWidth <= 1024;
+        
+        function adjustContentPadding() {
+            if (!mainContent || !isMobileOrTablet() || !header) return;
+            
+            // Pequeño delay para que el DOM se actualice
+            setTimeout(() => {
+                const headerHeight = header.offsetHeight;
+                const headerTop = parseFloat(getComputedStyle(header).top) || 0;
+                const headerMargin = parseFloat(getComputedStyle(header).marginTop) || 0;
+                const totalHeaderSpace = headerHeight + headerTop + headerMargin + 20; // 20px de margen extra
+                
+                if (header.classList.contains('header-retracted')) {
+                    // Header oculto - mínimo padding
+                    mainContent.style.paddingTop = '10px';
+                    if (dashboardContainer) {
+                        dashboardContainer.style.paddingTop = '10px';
+                    }
+                } else if (header.classList.contains('header-compact')) {
+                    // Header compacto - padding reducido
+                    const compactHeight = headerHeight;
+                    mainContent.style.paddingTop = (compactHeight + 20) + 'px';
+                    if (dashboardContainer) {
+                        dashboardContainer.style.paddingTop = (compactHeight + 20) + 'px';
+                    }
+                } else {
+                    // Header normal - padding completo
+                    mainContent.style.paddingTop = (totalHeaderSpace) + 'px';
+                    if (dashboardContainer) {
+                        dashboardContainer.style.paddingTop = (totalHeaderSpace) + 'px';
+                    }
+                }
+            }, 50);
+        }
+        
+        function handleHeaderScroll() {
+            if (!header || !isMobileOrTablet()) {
+                header?.classList.remove('header-retracted', 'header-compact');
+                document.body.classList.remove('header-retracted', 'header-compact');
+                if (mainContent) {
+                    mainContent.style.paddingTop = '';
+                }
+                if (dashboardContainer) {
+                    dashboardContainer.style.paddingTop = '';
+                }
+                return;
+            }
+
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollDifference = scrollTop - lastScrollTop;
+            
+            // Limpiar timeout anterior
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+
+            // Si el scroll es muy pequeño, ajustar padding sin cambiar estado
+            if (Math.abs(scrollDifference) < 5) {
+                adjustContentPadding();
+                return;
+            }
+
+            // Si está cerca del top, mostrar el header
+            if (scrollTop < 50) {
+                header.classList.remove('header-retracted', 'header-compact');
+                document.body.classList.remove('header-retracted', 'header-compact');
+                lastScrollTop = scrollTop;
+                adjustContentPadding();
+                return;
+            }
+
+            // Si está scrolleando hacia abajo, ocultar el header
+            if (scrollDifference > 0) {
+                header.classList.add('header-retracted');
+                header.classList.remove('header-compact');
+                document.body.classList.add('header-retracted');
+                document.body.classList.remove('header-compact');
+            } 
+            // Si está scrolleando hacia arriba, mostrar el header compacto
+            else if (scrollDifference < 0) {
+                header.classList.remove('header-retracted');
+                header.classList.add('header-compact');
+                document.body.classList.remove('header-retracted');
+                document.body.classList.add('header-compact');
+            }
+
+            lastScrollTop = scrollTop;
+            adjustContentPadding();
+        }
+        
+        // Ajustar padding inicial cuando la página carga
+        setTimeout(() => {
+            adjustContentPadding();
+        }, 100);
+
+        // Throttle para mejorar el rendimiento
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    handleHeaderScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+
+        // Ajustar el header al redimensionar la ventana
+        window.addEventListener('resize', function() {
+            adjustContentPadding();
+            if (!isMobileOrTablet()) {
+                header?.classList.remove('header-retracted', 'header-compact');
+                document.body.classList.remove('header-retracted', 'header-compact');
+                if (mainContent) {
+                    mainContent.style.paddingTop = '';
+                }
+                if (dashboardContainer) {
+                    dashboardContainer.style.paddingTop = '';
+                }
+            }
+        });
+    });
+
     // Estado de autenticación básico para controles del chatbot
     window.APP_IS_GUEST = @json(!session()->has('usuario_id') || in_array('Invitado', (array)session('roles')));
     window.LOGIN_URL = @json(route('usuarios.inicioSesion'));
