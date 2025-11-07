@@ -21,7 +21,7 @@ Route::get('/', function(){ return redirect()->route('inicio'); });
 // Inicio principal (dashboard de la app)
 Route::get('/inicio', function () {
     return view('usuarios.dashboard');
-})->name('inicio')->middleware('role:Superadmin,Admin,Usuario,Invitado');
+})->name('inicio')->middleware('role:Superadmin,Admin,Usuario,Invitado,Cliente');
 
 // Registro
 Route::get('/usuarios/crear', [UsuarioController::class, 'registro'])->name('usuarios.registroUsuario');
@@ -54,15 +54,15 @@ Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perf
 Route::post('/perfil/photo', [UsuarioController::class, 'updatePhoto'])->name('usuarios.updatePhoto')->middleware('role:Superadmin,Admin,Usuario');
 
 // Búsqueda de servicios
-Route::get('/buscar', [BusquedaController::class, 'buscar'])->name('buscar')->middleware('role:Superadmin,Admin,Usuario,Invitado');
+Route::get('/buscar', [BusquedaController::class, 'buscar'])->name('buscar')->middleware('role:Superadmin,Admin,Usuario,Invitado,Cliente');
 
 // Servicios (secciones del sitio)
-Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])->name('usuarios.animacion')->middleware('role:Superadmin,Admin,Usuario,Invitado');
-Route::get('/usuarios/publicidad', [ServiciosViewController::class, 'publicidad'])->name('usuarios.publicidad')->middleware('role:Superadmin,Admin,Usuario,Invitado');
-Route::get('/usuarios/alquiler', [ServiciosViewController::class, 'alquiler'])->name('usuarios.alquiler')->middleware('role:Superadmin,Admin,Usuario,Invitado');
+Route::get('/usuarios/animacion', [ServiciosViewController::class, 'animacion'])->name('usuarios.animacion')->middleware('role:Superadmin,Admin,Usuario,Invitado,Cliente');
+Route::get('/usuarios/publicidad', [ServiciosViewController::class, 'publicidad'])->name('usuarios.publicidad')->middleware('role:Superadmin,Admin,Usuario,Invitado,Cliente');
+Route::get('/usuarios/alquiler', [ServiciosViewController::class, 'alquiler'])->name('usuarios.alquiler')->middleware('role:Superadmin,Admin,Usuario,Invitado,Cliente');
 
 // Ruta dinámica para servicios creados por el usuario
-Route::get('/usuarios/servicio/{slug}', [ServiciosViewController::class, 'servicioPorSlug'])->name('usuarios.servicio')->middleware('role:Superadmin,Admin,Usuario,Invitado');
+Route::get('/usuarios/servicio/{slug}', [ServiciosViewController::class, 'servicioPorSlug'])->name('usuarios.servicio')->middleware('role:Superadmin,Admin,Usuario,Invitado,Cliente');
 
 // Ajustes (solo Admin y Superadmin)
 Route::get('/usuarios/ajustes', [AjustesController::class, 'index'])->name('usuarios.ajustes')->middleware('role:Superadmin,Admin');
