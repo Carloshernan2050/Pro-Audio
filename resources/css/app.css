@@ -547,7 +547,6 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 .search-btn {
     background: rgba(0, 0, 0, 0.8);
     color: #ffffff;
-    border: none;
     border-radius: 50%;
     padding: 8px 12px;
     border: 2px solid rgba(255, 255, 255, 0.8);
@@ -877,7 +876,6 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     min-height: calc(100vh - 120px);
     color: white;
     text-align: center;
-    padding-top: 40px;
     overflow-y: auto;
     padding-top: 48px; /* altura coherente con la nueva top-bar */
     padding-left: 220px; /* acerca el contenido hacia la izquierda */
