@@ -1,9 +1,11 @@
 @php
     $generatedAt = $generatedAt ?? now();
 @endphp
-<html>
+<!DOCTYPE html>
+<html lang="es">
     <head>
         <meta charset="utf-8" />
+        <title>Historial de Cotizaciones</title>
         <style>
             body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
             h1 { font-size: 16px; margin: 0 0 8px 0; }
@@ -18,6 +20,7 @@
         <div class="muted">Generado: {{ $generatedAt->format('Y-m-d H:i') }}</div>
 
         <table>
+            <caption>Resumen de cotizaciones emitidas.</caption>
             <thead>
                 <tr>
                     <th>ID</th>
