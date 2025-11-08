@@ -7,7 +7,6 @@
     margin-right: 5px;
     border-radius: 5px 5px 0 0;
     cursor: pointer;
-    transition: all 0.3s ease;
     font-size: 14px;
     font-weight: 500;
 }
@@ -15,7 +14,6 @@
 .btn-tab:hover {
     background-color: #e91c1c;
     color: white;
-    box-shadow: 0 0 15px 2px #e91c1c;
     border-color: white;
 }
 
@@ -23,7 +21,6 @@
     background-color: #e91c1c;
     color: white;
     border-color: white;
-    box-shadow: 0 0 15px 2px #e91c1c;
 }
 
 .tab-content {
