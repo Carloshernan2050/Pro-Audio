@@ -750,7 +750,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     transform: rotate(90deg);
 }
 
-.sidebar {
+ .sidebar {
     grid-area: sidebar;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
     padding: 20px;
@@ -764,34 +764,59 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     left: 0;
     height: calc(100vh - (128px + 0.5cm));
     width: 240px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* Estilos de scrollbar para Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(233, 28, 28, 0.6) rgba(0, 0, 0, 0.3);
+    overflow: hidden;
     padding-bottom: 32px; /* deja espacio con el borde inferior */
     backdrop-filter: blur(5px);
     transition: transform 0.3s ease;
 }
 
 /* Estilos personalizados para la barra de desplazamiento del sidebar (Chrome, Safari, Edge) */
-.sidebar::-webkit-scrollbar {
-    width: 8px;
+ .sidebar-scroll-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 14px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(233, 28, 28, 0.7) rgba(0, 0, 0, 0.4);
 }
 
-.sidebar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
+.sidebar-scroll-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-right: 6px;
 }
 
-.sidebar::-webkit-scrollbar-thumb {
-    background: rgba(233, 28, 28, 0.6);
-    border-radius: 10px;
-    transition: background 0.3s;
+
+.sidebar-scroll-wrapper::-webkit-scrollbar {
+    width: 18px;
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(233, 28, 28, 0.9);
+.sidebar-scroll-wrapper::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, rgba(15, 15, 18, 0.92), rgba(40, 40, 46, 0.92));
+    border-radius: 14px;
+    margin: 16px 0;
+    border: 2px solid rgba(0, 0, 0, 0.65);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.45);
+}
+.sidebar-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 70, 70, 0.98), rgba(150, 10, 10, 0.98));
+    border-radius: 14px;
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 14px rgba(255, 70, 70, 0.7), inset 0 0 6px rgba(0, 0, 0, 0.6);
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.sidebar-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 92, 92, 1), rgba(180, 26, 26, 1));
+    box-shadow: 0 0 18px rgba(255, 92, 92, 0.85), inset 0 0 8px rgba(0, 0, 0, 0.65);
+    transform: scaleX(1.05);
+}
+
+.sidebar-scroll-wrapper::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(180deg, rgba(255, 120, 120, 1), rgba(210, 40, 40, 1));
+    box-shadow: 0 0 20px rgba(255, 120, 120, 0.9), inset 0 0 10px rgba(0, 0, 0, 0.7);
 }
 
 .menu-title {
@@ -817,36 +842,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     text-align: center;
     text-decoration: none;
     border-radius: 5px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-bottom: 15px;
     width: 160px; /* más estrecho */
-    align-self: center; /* centra dentro del sidebar */
+    align-self: center;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    position: relative;
-    overflow: hidden;
-    will-change: transform, background-color;
-}
-
-/* Efecto de onda en botones del sidebar */
-.sidebar-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(233, 28, 28, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s ease, height 0.6s ease;
-    z-index: 0;
-}
-
-.sidebar-btn:hover::before,
-.sidebar-btn:active::before {
-    width: 300px;
-    height: 300px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .sidebar-btn:hover,
@@ -854,15 +858,8 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 .sidebar-btn:focus {
     background-color: #e91c1c;
     color: #fff;
-    box-shadow: 0 0 20px 3px rgba(233, 28, 28, 0.6);
     border-color: #fff;
-    transform: translateX(5px) translateY(-1px);
-    position: relative;
-    z-index: 1;
-}
-
-.sidebar-btn:active {
-    transform: translateX(3px) translateY(0);
+    box-shadow: 0 0 30px 8px rgba(233, 28, 28, 0.65), 0 0 12px 3px rgba(233, 28, 28, 0.45);
 }
 
 .sidebar-btn i,
@@ -1053,6 +1050,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
         z-index: 998;
         opacity: 0;
         will-change: left, opacity;
+        overflow: hidden;
     }
 
     .sidebar.mobile-open {

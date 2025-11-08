@@ -35,43 +35,47 @@
 @endphp
 
 <aside class="sidebar">
-    <h5 class="menu-title">Menú</h5>
-    <a href="{{ route('inicio') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
-    
-    {{-- Servicios predefinidos --}}
-    @foreach($serviciosPredefinidos as $nombre => $ruta)
-        @php
-            $icono = $iconos[$nombre] ?? $iconoDefault;
-        @endphp
-        <a href="{{ $ruta }}" class="sidebar-btn">
-            <i class="fas {{ $icono }}"></i> {{ $nombre }}
-        </a>
-    @endforeach
-    
-    {{-- Servicios creados por el usuario --}}
-    @foreach($serviciosUsuario as $servicio)
-        @php
-            $slug = Str::slug($servicio->nombre_servicio, '_');
-            $ruta = route('usuarios.servicio', ['slug' => $slug]);
-            $icono = $iconos[$servicio->nombre_servicio] ?? $iconoDefault;
-        @endphp
-        <a href="{{ $ruta }}" class="sidebar-btn">
-            <i class="fas {{ $icono }}"></i> {{ $servicio->nombre_servicio }}
-        </a>
-    @endforeach
-    
-    @if($noInvitado)
-    <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
-    @endif
+    <div class="sidebar-scroll-wrapper">
+        <div class="sidebar-scroll-inner">
+            <h5 class="menu-title">Menú</h5>
+            <a href="{{ route('inicio') }}" class="sidebar-btn"><i class="fas fa-home"></i> Inicio</a>
+            
+            {{-- Servicios predefinidos --}}
+            @foreach($serviciosPredefinidos as $nombre => $ruta)
+                @php
+                    $icono = $iconos[$nombre] ?? $iconoDefault;
+                @endphp
+                <a href="{{ $ruta }}" class="sidebar-btn">
+                    <i class="fas {{ $icono }}"></i> {{ $nombre }}
+                </a>
+            @endforeach
+            
+            {{-- Servicios creados por el usuario --}}
+            @foreach($serviciosUsuario as $servicio)
+                @php
+                    $slug = Str::slug($servicio->nombre_servicio, '_');
+                    $ruta = route('usuarios.servicio', ['slug' => $slug]);
+                    $icono = $iconos[$servicio->nombre_servicio] ?? $iconoDefault;
+                @endphp
+                <a href="{{ $ruta }}" class="sidebar-btn">
+                    <i class="fas {{ $icono }}"></i> {{ $servicio->nombre_servicio }}
+                </a>
+            @endforeach
+            
+            @if($noInvitado)
+            <a href="{{ route('usuarios.calendario') }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
+            @endif
 
-    {{-- Ajustes: Admin o Superadmin --}}
-    @if($esSuperadmin || in_array('Admin', $rolesSesion, true) || in_array('Administrador', $rolesSesion, true))
-    <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
-        @if($esSuperadmin)
-        <a href="{{ route('admin.roles.index') }}" class="sidebar-btn"><i class="fas fa-user-shield"></i> Control de roles</a>
-        @endif
-    @endif
+            {{-- Ajustes: Admin o Superadmin --}}
+            @if($esSuperadmin || in_array('Admin', $rolesSesion, true) || in_array('Administrador', $rolesSesion, true))
+            <a href="{{ route('usuarios.ajustes') }}" class="sidebar-btn"><i class="fas fa-cog"></i> Ajustes</a>
+                @if($esSuperadmin)
+                <a href="{{ route('admin.roles.index') }}" class="sidebar-btn"><i class="fas fa-user-shield"></i> Control de roles</a>
+                @endif
+            @endif
 
-    {{-- Chatbot movido a botón flotante global; se elimina del menú lateral --}}
+            {{-- Chatbot movido a botón flotante global; se elimina del menú lateral --}}
+        </div>
+    </div>
 </aside>
 
