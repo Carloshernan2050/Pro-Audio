@@ -31,7 +31,8 @@
 
     <div class="roles-card">
         <div class="roles-scroll">
-            <table class="roles-table">
+            <table class="roles-table" aria-label="Listado de usuarios con sus roles asignados">
+                <caption class="sr-only">Tabla con usuarios del sistema, sus correos y roles asignables.</caption>
                 <thead>
                 <tr>
                     <th>ID</th>
