@@ -10,6 +10,45 @@ use Illuminate\Support\Facades\DB;
 
 class CalendarioController extends Controller
 {
+    /**
+     * Paleta de colores utilizada para diferenciar reservas en el calendario.
+     */
+    private array $calendarColorPalette = [
+        ['bg' => '#ff6f00', 'border' => '#ffb74d', 'text' => '#1f1200'], // naranja intenso
+        ['bg' => '#ff4081', 'border' => '#ff80ab', 'text' => '#fff3f7'], // rosado vibrante
+        ['bg' => '#00c853', 'border' => '#69f0ae', 'text' => '#002310'], // verde brillante
+        ['bg' => '#9c27b0', 'border' => '#ce93d8', 'text' => '#fdf2ff'], // morado vivo
+        ['bg' => '#f44336', 'border' => '#ff7961', 'text' => '#fff5f5'], // rojo intenso
+        ['bg' => '#ffd600', 'border' => '#ffef62', 'text' => '#3a2f00'], // amarillo luminoso
+        ['bg' => '#ff1744', 'border' => '#ff616f', 'text' => '#fff2f4'], // rojo neón
+        ['bg' => '#d500f9', 'border' => '#ea80fc', 'text' => '#fff2ff'], // magenta brillante
+    ];
+
+    private int $paletteCursor = 0;
+
+    private function nextPaletteColor(): array
+    {
+        if (empty($this->calendarColorPalette)) {
+            return ['bg' => '#e91c1c', 'border' => '#e91c1c', 'text' => '#ffffff'];
+        }
+
+        $paletteIndex = $this->paletteCursor % count($this->calendarColorPalette);
+        $this->paletteCursor++;
+
+        $color = $this->calendarColorPalette[$paletteIndex] ?? [];
+
+        return [
+            'bg' => $color['bg'] ?? '#e91c1c',
+            'border' => $color['border'] ?? ($color['bg'] ?? '#e91c1c'),
+            'text' => $color['text'] ?? '#ffffff',
+        ];
+    }
+
+    private function resetPaletteCursor(): void
+    {
+        $this->paletteCursor = 0;
+    }
+
     private function isAdminLike(): bool
     {
         $roles = session('roles') ?? [session('role')];
@@ -37,6 +76,8 @@ class CalendarioController extends Controller
         $registrosUnicos = [];
         $vistos = [];
         
+        $this->resetPaletteCursor();
+
         foreach ($registros as $r) {
             // Crear una clave única basada en el contenido
             $itemsKey = $r->items->map(function($item) {
@@ -104,6 +145,8 @@ class CalendarioController extends Controller
                 }
             }
 
+            $colorSet = $this->nextPaletteColor();
+
             $eventos[] = [
                 'title'       => $titulo,
                 'start'       => $r->fecha_inicio,
@@ -111,6 +154,9 @@ class CalendarioController extends Controller
                 'description' => $descripcion,
                 'calendarioId'=> $r->id,
                 'inventarioIds'=> $inventarioIds,
+                'backgroundColor' => $colorSet['bg'],
+                'borderColor' => $colorSet['border'],
+                'textColor' => $colorSet['text'],
             ];
         }
 
@@ -136,6 +182,8 @@ class CalendarioController extends Controller
         $registrosUnicos = [];
         $vistos = [];
         
+        $this->resetPaletteCursor();
+
         foreach ($registros as $r) {
             // Crear una clave única basada en el contenido
             $itemsKey = $r->items->map(function($item) {
@@ -189,6 +237,8 @@ class CalendarioController extends Controller
                 $inventarioIds = $invId ? [$invId] : [];
             }
 
+            $colorSet = $this->nextPaletteColor();
+
             $eventos[] = [
                 'title'       => $titulo,
                 'start'       => $r->fecha_inicio,
@@ -196,6 +246,9 @@ class CalendarioController extends Controller
                 'description' => $descripcion,
                 'calendarioId'=> $r->id,
                 'inventarioIds'=> $inventarioIds,
+                'backgroundColor' => $colorSet['bg'],
+                'borderColor' => $colorSet['border'],
+                'textColor' => $colorSet['text'],
             ];
         }
 
