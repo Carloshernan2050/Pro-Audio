@@ -262,6 +262,11 @@ class ServiciosController extends Controller
             
             <section class="productos-servicio">
                 <div class="productos-grid">
+                    @php
+                        $rolesSesion = session('roles');
+                        $rolesSesion = is_array($rolesSesion) ? $rolesSesion : array_filter([$rolesSesion]);
+                        $puedeVerPrecios = count(array_intersect($rolesSesion, ['Superadmin', 'Admin', 'Usuario'])) > 0;
+                    @endphp
                     @forelse($subServicios as $subServicio)
                         <div class="producto-item">
                             @php
@@ -279,7 +284,7 @@ class ServiciosController extends Controller
                                 </div>
                             @endif
                             <h4 class="producto-nombre">{{ $subServicio->nombre }}</h4>
-                            @if($subServicio->precio)
+                            @if($puedeVerPrecios && $subServicio->precio)
                                 <p style="color: #2563eb; font-weight: bold; font-size: 1.1em; margin: 8px 0;">
                                     ${{ number_format($subServicio->precio, 0, ',', '.') }}
                                 </p>
