@@ -11,10 +11,8 @@
 
 /* Empuja todo el contenido principal más a la izquierda (sin solapar el sidebar de 240px) */
 .main-content {
-	margin-left: 0;
-	margin-right: 0;
-	max-width: 1200px;
 	margin: 0 auto;
+	max-width: 1200px;
 	box-sizing: border-box;
 }
 
