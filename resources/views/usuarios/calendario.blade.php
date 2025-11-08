@@ -373,8 +373,13 @@
                         
                         @if($r->descripcion_evento)
                         <div class="registro-descripcion">
-                            <i class="fas fa-info-circle"></i>
-                            <span>{{ Str::limit($r->descripcion_evento, 100) }}</span>
+                            <div class="descripcion-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="descripcion-content">
+                                <span class="descripcion-title">Descripción</span>
+                                <p>{{ Str::limit($r->descripcion_evento, 100) }}</p>
+                            </div>
                         </div>
                         @endif
                     </div>
@@ -546,7 +551,7 @@
                             </select>
                         </div>
                         <div class="mb-2">
-                            <label>Subservicio / Productos *</label>
+                            <label>Subservicios / Productos *</label>
                             <div id="productos_crear" class="table-container" style="max-height:280px;overflow:auto;padding:10px;">
                                 <div style="position:relative;">
                                     <select id="select_producto" class="form-select form-control" style="width:100%;">
@@ -792,26 +797,103 @@
             var eventos = @json($eventos);
             var calendarInstance = null;
             var reservedDatesGlobal = null;
+            var dayColorStyles = {};
+
+            function ymd(dateObj) {
+                var y = dateObj.getFullYear();
+                var m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                var d = String(dateObj.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + d;
+            }
+
+            function clearDayHighlight(cellEl) {
+                if (!cellEl) return;
+                
+                cellEl.classList.remove('day-reserved');
+                cellEl.style.removeProperty('--reserved-border');
+                delete cellEl.dataset.reservationsCount;
+                
+                var frame = cellEl.querySelector('.fc-daygrid-day-frame');
+                if (frame) {
+                    var dotsContainer = frame.querySelector('.reservation-dots');
+                    if (dotsContainer) {
+                        dotsContainer.remove();
+                    }
+                }
+            }
+
+            function applyDayHighlight(cellEl, styles) {
+                if (!cellEl || !styles || styles.length === 0) {
+                    clearDayHighlight(cellEl);
+                    return;
+                }
+
+                var frame = cellEl.querySelector('.fc-daygrid-day-frame');
+                if (!frame) {
+                    return;
+                }
+
+                var dotsContainer = frame.querySelector('.reservation-dots');
+                if (!dotsContainer) {
+                    dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'reservation-dots';
+                    frame.appendChild(dotsContainer);
+                } else {
+                    dotsContainer.innerHTML = '';
+                }
+
+                var maxDots = 6;
+                styles.slice(0, maxDots).forEach(function(styleInfo) {
+                    var dot = document.createElement('span');
+                    dot.className = 'reservation-dot';
+                    var bgColor = styleInfo.bg || styleInfo.color || '#e91c1c';
+                    var borderColor = styleInfo.border || bgColor;
+                    dot.style.setProperty('--dot-color', bgColor);
+                    dot.style.setProperty('--dot-border', borderColor);
+                    dotsContainer.appendChild(dot);
+                });
+
+                cellEl.style.setProperty('--reserved-border', styles[0].border || styles[0].bg || '#e91c1c');
+                cellEl.dataset.reservationsCount = styles.length;
+                cellEl.classList.add('day-reserved');
+            }
+
+            function recalculateReservedData(listaEventos) {
+                reservedDatesGlobal = new Set();
+                dayColorStyles = {};
+
+                (listaEventos || []).forEach(function(e) {
+                    try {
+                        var startDate = new Date(e.start);
+                        var endDate = e.end ? new Date(e.end) : new Date(e.start);
+                        var start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        var end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+                        var cursor = new Date(start.getTime());
+                        while (cursor <= end) {
+                            var key = ymd(cursor);
+                            reservedDatesGlobal.add(key);
+                            if (!dayColorStyles[key]) {
+                                dayColorStyles[key] = [];
+                            }
+                            dayColorStyles[key].push({
+                                bg: e.backgroundColor || e.color || '#e91c1c',
+                                border: e.borderColor || e.backgroundColor || e.color || '#e91c1c',
+                                text: e.textColor || '#ffffff'
+                            });
+                            cursor.setDate(cursor.getDate() + 1);
+                        }
+                    } catch (err) {
+                        // noop
+                    }
+                });
+            }
             
             document.addEventListener('DOMContentLoaded', function() {
                 var calendarEl = document.getElementById('calendar');
                 var isAdmin = @json($esAdmin);
-
-                // Construir set de días reservados (YYYY-MM-DD) solo por fecha de inicio
-                function ymd(dateObj) {
-                    var y = dateObj.getFullYear();
-                    var m = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    var d = String(dateObj.getDate()).padStart(2, '0');
-                    return y + '-' + m + '-' + d;
-                }
-
-                reservedDatesGlobal = new Set();
-                (eventos || []).forEach(function(e) {
-                    try {
-                        var s = new Date(e.start);
-                        reservedDatesGlobal.add(ymd(s));
-                    } catch(err) { /* noop */ }
-                });
+                
+                recalculateReservedData(eventos);
 
                 calendarInstance = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
@@ -827,22 +909,12 @@
                     dayCellDidMount: function(arg) {
                         var d = arg.date;
                         var key = ymd(d);
-                        // Marcar días que tienen eventos (reservados)
-                        if (reservedDatesGlobal && reservedDatesGlobal.has(key)) {
+                        clearDayHighlight(arg.el);
+                        if (dayColorStyles[key] && dayColorStyles[key].length) {
+                            applyDayHighlight(arg.el, dayColorStyles[key]);
+                        } else if (reservedDatesGlobal && reservedDatesGlobal.has(key)) {
                             arg.el.classList.add('day-reserved');
                         }
-                        // También marcar todos los días dentro del rango de cada evento
-                        (eventos || []).forEach(function(e) {
-                            try {
-                                var start = new Date(e.start);
-                                var end = e.end ? new Date(e.end) : new Date(e.start);
-                                // Agregar un día a end para incluir el último día
-                                end.setDate(end.getDate() + 1);
-                                if (d >= start && d < end) {
-                                    arg.el.classList.add('day-reserved');
-                                }
-                            } catch(err) { /* noop */ }
-                        });
                     },
                     headerToolbar: isAdmin ? {
                         left: 'prev,next today',
@@ -898,16 +970,8 @@
                             // Actualizar la variable global de eventos
                             eventos = nuevosEventos;
                             
-                            // Recalcular días reservados
-                            if (reservedDatesGlobal) {
-                                reservedDatesGlobal.clear();
-                                (nuevosEventos || []).forEach(function(e) {
-                                    try {
-                                        var s = new Date(e.start);
-                                        reservedDatesGlobal.add(ymd(s));
-                                    } catch(err) { /* noop */ }
-                                });
-                            }
+                            // Recalcular días reservados y colores
+                            recalculateReservedData(nuevosEventos);
                             
                             // Remover todos los eventos actuales y agregar los nuevos
                             if (calendarInstance) {
