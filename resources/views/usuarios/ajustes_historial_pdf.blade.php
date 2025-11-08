@@ -19,7 +19,7 @@
         <h1>Historial de Cotizaciones</h1>
         <div class="muted">Generado: {{ $generatedAt->format('Y-m-d H:i') }}</div>
 
-        <table>
+        <table aria-label="Historial detallado de cotizaciones generadas para clientes">
             <caption>Resumen de cotizaciones emitidas.</caption>
             <thead>
                 <tr>
