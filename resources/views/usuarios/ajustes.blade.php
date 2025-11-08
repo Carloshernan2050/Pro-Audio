@@ -209,10 +209,10 @@
                     <a href="{{ route('usuarios.ajustes.historial.pdf', ['group_by' => $groupBy ?? null]) }}" class="btn-primary">
                         <i class="fas fa-file-pdf"></i> Descargar PDF
                     </a>
-                    <form method="GET" action="{{ route('usuarios.ajustes') }}" style="display:flex; align-items:center; gap:6px;">
+                    <form method="GET" action="{{ route('usuarios.ajustes') }}" class="historial-filter-form">
                         <input type="hidden" name="tab" value="historial">
-                        <label for="group_by" style="font-size: 14px; color:#333;">Agrupar por:</label>
-                        <select id="group_by" name="group_by" onchange="this.form.submit()" style="padding:6px;">
+                        <label for="group_by">Agrupar por:</label>
+                        <select id="group_by" name="group_by" onchange="this.form.submit()">
                             <option value="" {{ empty($groupBy) ? 'selected' : '' }}>Sin agrupación</option>
                             <option value="consulta" {{ ($groupBy ?? '') === 'consulta' ? 'selected' : '' }}>Consulta</option>
                             <option value="dia" {{ ($groupBy ?? '') === 'dia' ? 'selected' : '' }}>Día</option>
@@ -362,7 +362,7 @@
                         </div>
                         <div class="form-group">
                             <label for="descripcion">Descripción:</label>
-                            <textarea id="descripcion" name="descripcion" rows="3" placeholder="Descripción del servicio (opcional)"></textarea>
+                            <textarea id="descripcion" name="descripcion" rows="3"></textarea>
                         </div>
                         <button type="submit" class="btn-submit">Guardar</button>
                     </form>
@@ -450,7 +450,7 @@
                         </div>
                         <div class="form-group">
                             <label for="descripcion_subservicio">Descripción:</label>
-                            <textarea id="descripcion_subservicio" name="descripcion" rows="4" placeholder="Descripción del subservicio (opcional)"></textarea>
+                            <textarea id="descripcion_subservicio" name="descripcion" rows="4"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="precio_subservicio">Precio:</label>

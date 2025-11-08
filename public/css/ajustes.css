@@ -55,7 +55,7 @@
 }
 
 .modal-content {
-    background-color: #1a202c;
+    background: linear-gradient(135deg, rgba(10, 10, 12, 0.95), rgba(22, 22, 28, 0.95));
     padding: 0;
     border-radius: 8px;
     width: 90%;
@@ -93,6 +93,8 @@
 
 .modal form {
     padding: 20px;
+    background: linear-gradient(135deg, rgba(8, 8, 10, 0.92), rgba(18, 18, 24, 0.92));
+    border-radius: 0 0 8px 8px;
 }
 
 .form-group {
@@ -101,28 +103,92 @@
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #333;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #4a5568;
-    border-radius: 4px;
+    padding: 10px 14px;
+    border: 1px solid rgba(233, 28, 28, 0.55);
+    border-radius: 6px;
     font-size: 14px;
     box-sizing: border-box;
-    background-color: #2d3748;
-    color: white;
+    background: linear-gradient(135deg, rgba(7, 7, 9, 0.96), rgba(18, 18, 22, 0.96));
+    color: #f5f5f8;
+    transition: all 0.3s ease;
+}
+
+.form-group textarea {
+    min-height: 130px;
+    line-height: 1.6;
+    resize: vertical;
+    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.45);
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
-    border-color: #e91c1c;
-    box-shadow: 0 0 0 2px rgba(233, 28, 28, 0.25);
+    border-color: #ff3b4a;
+    box-shadow: 0 0 0 2px rgba(255, 66, 82, 0.45), 0 12px 22px rgba(233, 28, 28, 0.3);
+    background: linear-gradient(135deg, rgba(18, 18, 22, 0.98), rgba(35, 35, 42, 0.98));
+}
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: linear-gradient(135deg, rgba(9, 9, 12, 0.98), rgba(24, 24, 30, 0.98));
+    color: #fafafc;
+    font-weight: 600;
+}
+
+.form-group select:focus {
+    border-color: #ff4f5f;
+    background: linear-gradient(135deg, rgba(18, 18, 24, 0.98), rgba(36, 36, 44, 0.98));
+    color: #ffffff;
+}
+
+.form-group select option {
+    background-color: #0a0a0f;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+#serviceModal .form-group select option:hover,
+#serviceModal .form-group select option:focus,
+.form-group select option:hover,
+.form-group select option:focus {
+    background-color: #ff4f5f;
+    color: #ffffff;
+}
+
+.form-group select option:disabled {
+    color: rgba(120, 120, 122, 0.5);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: rgba(90, 90, 92, 0.7);
+    font-style: italic;
+}
+
+#serviceModal #nombre_servicio {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ffe4e6;
+    border-color: rgba(255, 66, 82, 0.7);
+}
+
+#serviceModal #nombre_servicio:focus {
+    color: #fff8f9;
+    border-color: #ff4f5f;
 }
 
 .btn-submit {
@@ -273,23 +339,43 @@
 }
 
 /* Historial: controles y agrupaciones */
+.historial-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .button-container label[for="group_by"] {
-    color: #e91c1c;
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
 }
 
 .button-container select#group_by {
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #e91c1c;
-    background-color: #2d3748;
-    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(233, 28, 28, 0.55);
+    background: linear-gradient(135deg, rgba(9, 9, 12, 0.98), rgba(24, 24, 30, 0.98));
+    color: #ffffff;
     font-size: 14px;
+    font-weight: 600;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    min-width: 160px;
 }
 
 .button-container select#group_by:focus {
     outline: none;
-    border-color: #e91c1c;
-    box-shadow: 0 0 0 2px rgba(233, 28, 28, 0.25);
+    border-color: #ff4f5f;
+    box-shadow: 0 0 0 2px rgba(255, 66, 82, 0.45);
+    background: linear-gradient(135deg, rgba(18, 18, 24, 0.98), rgba(36, 36, 44, 0.98));
+}
+
+.button-container select#group_by option {
+    background-color: #08080b;
+    color: #ffffff;
 }
 
 tr.group-header td,
