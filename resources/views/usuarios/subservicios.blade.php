@@ -29,18 +29,27 @@
 
             {{-- Mensajes de estado (éxito o error) --}}
             @if(session('success'))
-                <div class="alert success">{{ session('success') }}</div>
+                <div class="alert success" data-alert>
+                    <div class="alert-message">{{ session('success') }}</div>
+                    <button type="button" class="alert-hide" aria-label="Ocultar mensaje">Ocultar</button>
+                </div>
             @endif
             @if(session('error'))
-                <div class="alert error">{{ session('error') }}</div>
+                <div class="alert error" data-alert>
+                    <div class="alert-message">{{ session('error') }}</div>
+                    <button type="button" class="alert-hide" aria-label="Ocultar mensaje">Ocultar</button>
+                </div>
             @endif
             @if($errors->any())
-                <div class="alert error">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="alert error" data-alert>
+                    <div class="alert-message">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <button type="button" class="alert-hide" aria-label="Ocultar mensaje">Ocultar</button>
                 </div>
             @endif
 
@@ -142,6 +151,29 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('[data-alert]');
+            alerts.forEach(alert => {
+                const hideAlert = () => {
+                    if (!alert.classList.contains('hidden')) {
+                        alert.classList.add('hidden');
+                        setTimeout(() => {
+                            if (alert.parentNode) {
+                                alert.parentNode.removeChild(alert);
+                            }
+                        }, 300);
+                    }
+                };
+
+                const closeBtn = alert.querySelector('.alert-hide');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', hideAlert);
+                }
+
+                setTimeout(hideAlert, 10000);
+            });
+        });
+
         function openModal(action, id = null, nombre = '', descripcion = '', precio = 0, servicios_id = '') {
             const modal = document.getElementById('subservicioModal');
             const form = document.getElementById('subservicioForm');

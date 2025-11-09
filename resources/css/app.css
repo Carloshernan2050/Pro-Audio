@@ -4009,10 +4009,15 @@ tr:nth-child(even) {
 }
 
 .alert {
-    padding: 15px;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 18px;
     border-radius: 8px;
     margin-bottom: 20px;
     font-weight: bold;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .alert.success {
@@ -4023,6 +4028,39 @@ tr:nth-child(even) {
 .alert.error {
     background-color: #f44336;
     color: white;
+}
+
+.alert.warning {
+    background-color: #ffa500;
+    color: #fff;
+}
+
+.alert-message {
+    flex: 1;
+}
+
+.alert-hide {
+    background: rgba(255, 255, 255, 0.15);
+    color: inherit;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.alert-hide:hover,
+.alert-hide:focus {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.alert.hidden {
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
 }
 
 /* ======================================= */

@@ -40,13 +40,17 @@
             @foreach($serviciosPredefinidos as $nombre => $ruta)
                 @php
                     $servicioExistente = $todosLosServicios->firstWhere('nombre_servicio', $nombre);
-                    $icono = $servicioExistente && $servicioExistente->icono
-                        ? $servicioExistente->icono
-                        : ($iconos[$nombre] ?? $iconoDefault);
                 @endphp
-                <a href="{{ $ruta }}" class="sidebar-btn">
-                    <i class="{{ $icono }}"></i> {{ $nombre }}
-                </a>
+                @if($servicioExistente)
+                    @php
+                        $icono = $servicioExistente->icono
+                            ? $servicioExistente->icono
+                            : ($iconos[$nombre] ?? $iconoDefault);
+                    @endphp
+                    <a href="{{ $ruta }}" class="sidebar-btn">
+                        <i class="{{ $icono }}"></i> {{ $nombre }}
+                    </a>
+                @endif
             @endforeach
             
             {{-- Servicios creados por el usuario --}}
