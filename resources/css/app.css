@@ -867,6 +867,65 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     z-index: 1;
 }
 
+/* Botones circulares de retorno */
+.btn-volver {
+    background: linear-gradient(135deg, #ff4040 0%, #c81616 100%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn-volver:hover {
+    background: linear-gradient(135deg, #ff5959 0%, #d21c1c 100%);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    transform: translateY(-2px);
+}
+
+.btn-volver i {
+    font-size: 1.1rem;
+}
+
+.btn-volver:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.btn-volver:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(210, 28, 28, 0.35);
+}
+
+.btn-volver-inline {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 14px;
+}
+
+@media (max-width: 1024px) {
+    .btn-volver {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .btn-volver {
+        width: 34px;
+        height: 34px;
+        font-size: 0.9rem;
+    }
+}
+
 .main-content {
     grid-area: content;
     padding: 20px;
@@ -3679,10 +3738,11 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 /* Estilos para el contenedor de perfil, se integra con el dashboard-container */
 .profile-container {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.65);
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.3);
+    border: 1px solid rgba(233, 28, 28, 0.22);
+    box-shadow: none;
     max-width: 600px;
     margin: 40px auto;
     color: white;

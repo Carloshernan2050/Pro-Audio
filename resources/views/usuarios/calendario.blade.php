@@ -251,7 +251,7 @@
             {{-- Contenido principal: Calendario --}}
             <div class="calendario-main-content">
                 <a href="{{ route('inicio') }}" class="btn btn-volver btn-volver-page-fixed" title="Volver al inicio">
-                    <i class="fas fa-arrow-left"></i> Volver al inicio
+                    <i class="fas fa-arrow-left"></i>
                 </a>
                 <div class="calendar-section">
                     {{-- ENCABEZADO --}}

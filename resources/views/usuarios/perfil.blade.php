@@ -40,8 +40,8 @@
                 @endif
 
                 {{-- Botón para volver al panel --}}
-                    <a href="{{ route('inicio') }}" class="btn-secondary inline-block" style="margin-top: 18px;">
-                        <i class="fas fa-arrow-left"></i> Volver al panel
+                    <a href="{{ route('inicio') }}" class="btn btn-volver btn-volver-page-fixed" style="margin-top: 18px; position: static;">
+                        <i class="fas fa-arrow-left"></i>
                     </a>
                 {{-- Contenedor flexible para los botones --}}
                 <div class="flex items-center justify-center sm:justify-start gap-4 mt-5" style="margin-top: 26px;">

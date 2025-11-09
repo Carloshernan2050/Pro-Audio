@@ -9,7 +9,9 @@
 </head>
 <body>
 <div class="dashboard-container roles-page" style="padding:20px;">
-    <a href="{{ route('inicio') }}" class="btn-back btn-back-fixed"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+    <a href="{{ route('inicio') }}" class="btn-volver btn-back-fixed" title="Volver al inicio">
+        <i class="fas fa-arrow-left"></i>
+    </a>
     <div class="roles-header">
         <h2 class="roles-title"><i class="fas fa-user-shield"></i> Gestión de Roles</h2>
     </div>

@@ -23,7 +23,11 @@
                     <input type="password" id="admin_key" name="admin_key" class="form-control" autocomplete="new-password" style="margin-top:8px;">
                     <button type="submit" class="btn" style="margin-top:12px; width:100%; padding:12px 16px; border-radius:10px; border:none; cursor:pointer; font-weight:600; background:#1f6feb; color:#fff;">Confirmar</button>
                 </form>
-                <a href="{{ route('role.select') }}" class="btn" style="display:block; text-align:center; margin-top:8px; padding:10px; border-radius:10px; background:#6e7681; color:#fff;">Volver</a>
+                <div style="margin-top:16px; display:flex; justify-content:center;">
+                    <a href="{{ route('role.select') }}" class="btn-volver" title="Volver">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
             </div>
         </main>
     </div>

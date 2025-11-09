@@ -142,31 +142,6 @@
 .fc-daygrid-day-number { color: #fff !important; font-weight: 600; font-size: .9rem; }
 .fc-day-today .fc-daygrid-day-frame { background: rgba(233,28,28,.4) !important; border-radius: 8px; }
 
-/* Botón Volver: igual estilo que "Nuevo alquiler" y 1cm a la derecha */
-.btn-volver {
-	background-color: var(--color-primary);
-	border: 2px solid var(--color-primary);
-	color: var(--color-white);
-	padding: 8px 16px;
-	border-radius: 10px;
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	text-decoration: none;
-	font-weight: 600;
-	font-size: 0.9rem;
-	transition: all 0.3s ease;
-}
-
-.btn-volver:hover {
-	background-color: var(--color-primary-dark);
-	box-shadow: 0 0 15px 2px var(--color-primary);
-	transform: translateY(-2px);
-}
-
-.btn-volver:active { transform: translateY(0); }
-.btn-volver:focus { outline: none; box-shadow: 0 0 0 3px rgba(233,28,28,.35); }
-
 /* Posición fija respecto a la página (esquina superior derecha) */
 .btn-volver-page-fixed{ position: fixed; top: calc(0.5cm + 12px); left: 12px; right: auto; z-index: 1202; }
 
@@ -456,8 +431,7 @@
 		font-size: 1.6rem;
 	}
 	
-	.btn-crear-alquiler,
-	.btn-volver {
+	.btn-crear-alquiler {
 		padding: 7px 14px;
 		font-size: 0.85rem;
 	}
@@ -525,12 +499,9 @@
 		width: 100%;
 	}
 	
-	.btn-crear-alquiler,
-	.btn-volver {
+	.btn-crear-alquiler {
 		padding: 8px 12px;
 		font-size: 0.8rem;
-		width: 100%;
-		justify-content: center;
 	}
 	
 	.btn-volver-page-fixed {
