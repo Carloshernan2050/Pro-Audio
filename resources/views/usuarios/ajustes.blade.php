@@ -52,7 +52,36 @@
                 </button>
             </div>
 
-            <div id="page-meta" data-initial-tab="{{ $activeTab ?? 'servicios' }}" style="display:none;"></div>
+            <div id="page-meta"
+                data-initial-tab="{{ $activeTab ?? 'servicios' }}"
+                data-subservicios-url="{{ route('usuarios.ajustes.subservicios') }}"
+                style="display:none;"></div>
+
+            @php
+                $iconOptions = [
+                    'fas fa-microphone' => 'Micrófono (Audio en vivo)',
+                    'fas fa-volume-up' => 'Bocina (Sonido)',
+                    'fas fa-headphones' => 'Auriculares (Monitoreo)',
+                    'fas fa-music' => 'Nota musical (Producción musical)',
+                    'fas fa-guitar' => 'Guitarra (Instrumental)',
+                    'fas fa-drum' => 'Tambor (Percusión)',
+                    'fas fa-theater-masks' => 'Máscaras (Animación y shows)',
+                    'fas fa-magic' => 'Varita mágica (Efectos y animación)',
+                    'fas fa-film' => 'Cinta de video (Producción audiovisual)',
+                    'fas fa-video' => 'Cámara de video (Grabación)',
+                    'fas fa-camera-retro' => 'Cámara retro (Publicidad visual)',
+                    'fas fa-bullhorn' => 'Megáfono (Publicidad)',
+                    'fas fa-ad' => 'Anuncio (Campañas publicitarias)',
+                    'fas fa-mail-bulk' => 'Mailing (Promociones y difusión)',
+                    'fas fa-lightbulb' => 'Bombilla (Ideas creativas)',
+                    'fas fa-glass-cheers' => 'Brindis (Fiestas y celebraciones)',
+                    'fas fa-cocktail' => 'Cóctel (Eventos sociales)',
+                    'fas fa-birthday-cake' => 'Pastel (Cumpleaños y fiestas)',
+                    'fas fa-star' => 'Estrella (Eventos especiales)',
+                    'fas fa-users' => 'Equipo humano (Staff)',
+                ];
+                $defaultIconClass = 'fas fa-tag';
+            @endphp
 
             {{-- Tab de Servicios --}}
             <div id="tab-servicios" class="tab-content active">
@@ -70,6 +99,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre del Servicio</th>
+                                <th>Ícono</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -81,8 +111,24 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td> {{-- Número consecutivo limpio --}}
                                     <td>{{ $servicio->nombre_servicio }}</td>
+                                    <td>
+                                        @php
+                                            $iconClass = $servicio->icono ?: $defaultIconClass;
+                                        @endphp
+                                        <span class="service-icon-cell">
+                                            <i class="{{ $iconClass }}"></i>
+                                            <small>{{ $servicio->icono ? 'Personalizado' : 'Predeterminado' }}</small>
+                                        </span>
+                                    </td>
                                     <td class="actions-cell">
-                                        <button onclick="openModal('edit', {{ $servicio->id }}, '{{ addslashes($servicio->nombre_servicio) }}', '{{ addslashes($servicio->descripcion ?? '') }}')" class="btn-action edit">
+                                        <button
+                                            class="btn-action edit"
+                                            data-id="{{ $servicio->id }}"
+                                            data-nombre="{{ e($servicio->nombre_servicio) }}"
+                                            data-descripcion="{{ e($servicio->descripcion ?? '') }}"
+                                            data-icono="{{ e($servicio->icono ?? '') }}"
+                                            onclick="handleServiceEdit(this)"
+                                        >
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
                                         <form action="{{ route('servicios.destroy', $servicio->id) }}" method="POST" style="display:inline;" onsubmit="event.preventDefault(); customConfirm('¿Estás seguro de que deseas eliminar este servicio?').then(result => { if(result) this.submit(); }); return false;">
@@ -96,7 +142,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="no-services">No hay servicios registrados.</td>
+                                    <td colspan="4" class="no-services">No hay servicios registrados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -133,10 +179,22 @@
                                     <td>{{ \Illuminate\Support\Str::limit($sub->descripcion ?? '', 50) }}</td>
                                     <td>${{ number_format($sub->precio ?? 0, 0, ',', '.') }}</td>
                                     <td class="actions-cell">
-                                        <button onclick="openSubservicioModal('edit', {{ $sub->id }}, '{{ addslashes($sub->nombre) }}', '{{ addslashes($sub->descripcion ?? '') }}', {{ $sub->precio ?? 0 }}, {{ $sub->servicios_id }})" class="btn-action edit">
+                                        <button
+                                            class="btn-action edit"
+                                            data-id="{{ $sub->id }}"
+                                            data-nombre="{{ e($sub->nombre) }}"
+                                            data-descripcion="{{ e($sub->descripcion ?? '') }}"
+                                            data-precio="{{ $sub->precio ?? 0 }}"
+                                            data-servicios-id="{{ $sub->servicios_id }}"
+                                            onclick="handleSubservicioEdit(this)"
+                                        >
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
-                                        <button onclick="deleteSubservicio({{ $sub->id }})" class="btn-action delete">
+                                        <button
+                                            class="btn-action delete"
+                                            data-id="{{ $sub->id }}"
+                                            onclick="handleSubservicioDelete(this)"
+                                        >
                                             <i class="fas fa-trash-alt"></i> Eliminar
                                         </button>
                                     </td>
@@ -361,6 +419,20 @@
                             <input type="text" id="nombre_servicio" name="nombre_servicio" required>
                         </div>
                         <div class="form-group">
+                            <label for="icono">Ícono representativo:</label>
+                            <div class="icon-picker">
+                                <select id="icono" name="icono" data-default-icon="{{ $defaultIconClass }}">
+                                    <option value="">Sin ícono</option>
+                                    @foreach($iconOptions as $value => $label)
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="icon-preview" id="iconPreview">
+                                    <i class="{{ $defaultIconClass }}"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label for="descripcion">Descripción:</label>
                             <textarea id="descripcion" name="descripcion" rows="3"></textarea>
                         </div>
@@ -469,6 +541,8 @@
         const inventarioModal = document.getElementById('inventarioModal');
         const movimientoModal = document.getElementById('movimientoModal');
         const subservicioModal = document.getElementById('subservicioModal');
+        const pageMetaEl = document.getElementById('page-meta');
+        const subserviciosEndpoint = pageMetaEl ? pageMetaEl.getAttribute('data-subservicios-url') : '';
 
         // Función para mostrar pestañas
         function showTab(tabName) {
@@ -498,9 +572,20 @@
 
         // Activar pestaña según el servidor (si hay agrupación, ir a historial)
         document.addEventListener('DOMContentLoaded', function() {
-            const metaEl = document.getElementById('page-meta');
-            const initialTab = metaEl ? metaEl.getAttribute('data-initial-tab') : 'servicios';
+            const initialTab = pageMetaEl ? pageMetaEl.getAttribute('data-initial-tab') : 'servicios';
             showTab(initialTab);
+
+            const oldDataEl = document.getElementById('service-old-data');
+            if (oldDataEl) {
+                openModal(
+                    'edit',
+                    oldDataEl.dataset.id,
+                    oldDataEl.dataset.nombre || '',
+                    oldDataEl.dataset.descripcion || '',
+                    oldDataEl.dataset.icono || ''
+                );
+                oldDataEl.remove();
+            }
         });
 
         // Funciones para servicios (existentes)
@@ -509,8 +594,41 @@
         const formMethod = document.getElementById('formMethod');
         const nombreInput = document.getElementById('nombre_servicio');
         const descripcionInput = document.getElementById('descripcion');
+        const iconoSelect = document.getElementById('icono');
+        const iconPreview = document.getElementById('iconPreview');
+        const iconDefaultClass = iconoSelect ? (iconoSelect.dataset.defaultIcon || 'fas fa-tag') : 'fas fa-tag';
 
-        function openModal(mode, id = null, nombre = '', descripcion = '') {
+        function updateIconPreview(className) {
+            if (!iconPreview) return;
+            const iconClass = className && className.trim() !== '' ? className : iconDefaultClass;
+            iconPreview.innerHTML = `<i class="${iconClass}"></i>`;
+        }
+
+        if (iconoSelect) {
+            iconoSelect.addEventListener('change', () => {
+                updateIconPreview(iconoSelect.value);
+            });
+        }
+
+        function setIconSelectValue(iconClass) {
+            if (!iconoSelect) return;
+            const options = Array.from(iconoSelect.options).map(opt => opt.value);
+            if (!iconClass) {
+                iconoSelect.value = '';
+                updateIconPreview('');
+                return;
+            }
+            if (options.includes(iconClass)) {
+                iconoSelect.value = iconClass;
+            } else if (options.includes(iconDefaultClass)) {
+                iconoSelect.value = iconDefaultClass;
+            } else {
+                iconoSelect.value = '';
+            }
+            updateIconPreview(iconoSelect.value);
+        }
+
+        function openModal(mode, id = null, nombre = '', descripcion = '', icono = '') {
             if (mode === 'create') {
                 modalTitle.textContent = 'Crear Nuevo Servicio';
                 serviceForm.action = "{{ route('servicios.store') }}";
@@ -518,6 +636,7 @@
                 formMethod.value = 'POST';
                 nombreInput.value = '';
                 descripcionInput.value = '';
+                setIconSelectValue(iconDefaultClass);
             } else if (mode === 'edit') {
                 modalTitle.textContent = 'Editar Servicio';
                 serviceForm.action = `{{ url('servicios') }}/${id}`;
@@ -525,9 +644,37 @@
                 formMethod.value = 'PUT';
                 nombreInput.value = nombre;
                 descripcionInput.value = descripcion || '';
+                setIconSelectValue(icono);
             }
             serviceModal.style.display = 'flex';
         }
+
+        window.handleServiceEdit = function(button) {
+            if (!button) return;
+            const { id, nombre, descripcion, icono } = button.dataset;
+            openModal('edit', id, nombre || '', descripcion || '', icono || '');
+        };
+
+        window.handleSubservicioEdit = function(button) {
+            if (!button) return;
+            const { id, nombre, descripcion, precio, serviciosId } = button.dataset;
+            openSubservicioModal(
+                'edit',
+                id,
+                nombre || '',
+                descripcion || '',
+                precio || 0,
+                serviciosId || ''
+            );
+        };
+
+        window.handleSubservicioDelete = function(button) {
+            if (!button) return;
+            const { id } = button.dataset;
+            if (id) {
+                deleteSubservicio(id);
+            }
+        };
 
         function closeModal() {
             serviceModal.style.display = 'none';
@@ -568,7 +715,8 @@
 
         // Función para cargar los subservicios dinámicamente
         function loadSubservicios() {
-            fetch('{{ route('usuarios.ajustes.subservicios') }}', {
+            if (!subserviciosEndpoint) return;
+            fetch(subserviciosEndpoint, {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
@@ -598,21 +746,11 @@
                             .replace(/'/g, '&#039;');
                     };
                     
-                    const escapeJs = (str) => {
-                        if (!str) return '';
-                        return String(str)
-                            .replace(/\\/g, '\\\\')
-                            .replace(/'/g, "\\'")
-                            .replace(/"/g, '\\"')
-                            .replace(/\n/g, '\\n')
-                            .replace(/\r/g, '\\r');
-                    };
-                    
-                    const nombre = escapeJs(sub.nombre || '');
-                    const descripcion = escapeJs(sub.descripcion || '');
                     const servicioNombre = sub.servicio ? escapeHtml(sub.servicio.nombre_servicio || 'N/A') : 'N/A';
                     const nombreHtml = escapeHtml(sub.nombre || '');
+                    const nombreAttr = escapeHtml(sub.nombre || '');
                     const descripcionHtml = sub.descripcion ? (sub.descripcion.length > 50 ? escapeHtml(sub.descripcion.substring(0, 50)) + '...' : escapeHtml(sub.descripcion)) : '';
+                    const descripcionAttr = escapeHtml(sub.descripcion || '');
                     const precio = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sub.precio || 0);
                     
                     const row = document.createElement('tr');
@@ -623,10 +761,22 @@
                         <td>${descripcionHtml}</td>
                         <td>$${precio}</td>
                         <td class="actions-cell">
-                            <button onclick="openSubservicioModal('edit', ${sub.id}, '${nombre}', '${descripcion}', ${sub.precio || 0}, ${sub.servicios_id})" class="btn-action edit">
+                            <button
+                                class="btn-action edit"
+                                data-id="${sub.id}"
+                                data-nombre="${nombreAttr}"
+                                data-descripcion="${descripcionAttr}"
+                                data-precio="${sub.precio || 0}"
+                                data-servicios-id="${sub.servicios_id}"
+                                onclick="handleSubservicioEdit(this)"
+                            >
                                 <i class="fas fa-edit"></i> Editar
                             </button>
-                            <button onclick="deleteSubservicio(${sub.id})" class="btn-action delete">
+                            <button
+                                class="btn-action delete"
+                                data-id="${sub.id}"
+                                onclick="handleSubservicioDelete(this)"
+                            >
                                 <i class="fas fa-trash-alt"></i> Eliminar
                             </button>
                         </td>
@@ -1181,8 +1331,11 @@
     </script>
 
     @if ($errors->any() && old('id'))
-        <script>
-            openModal('edit', {{ old('id') }}, '{{ old('nombre_servicio') }}');
-        </script>
+        <div id="service-old-data"
+            data-id="{{ old('id') }}"
+            data-nombre="{{ e(old('nombre_servicio', '')) }}"
+            data-descripcion="{{ e(old('descripcion', '')) }}"
+            data-icono="{{ e(old('icono', '')) }}"
+            style="display: none;"></div>
     @endif
 @endsection

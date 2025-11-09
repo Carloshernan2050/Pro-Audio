@@ -5,7 +5,7 @@
 {{-- Define la sección 'content' que se insertará en el @yield('content') del layout --}}
 @section('content')
     <h2 class="page-title">Alquiler de Equipo de Sonido</h2>
-    <p class="page-subtitle">Equipos profesionales de alta calidad para tus eventos. Disponibles por día.</p>
+    <p class="page-subtitle"></p>
     
     <section class="productos-servicio">
         <div class="productos-grid">

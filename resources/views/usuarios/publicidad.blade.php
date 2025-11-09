@@ -21,7 +21,7 @@
          {{-- Contenido principal --}}
         <main class="main-content">
             <h2 class="page-title">Publicidad Sonora</h2>
-            <p class="page-subtitle">Creamos audio que captura la atención y refuerza el mensaje de tu marca.</p>
+            <p class="page-subtitle"></p>
 
             <section class="productos-servicio">
                 <div class="productos-grid">

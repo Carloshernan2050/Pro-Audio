@@ -5,7 +5,7 @@
 @section('content')
        <main class="main-content">
             <h2 class="page-title">Animación de Eventos</h2>
-            <p class="page-subtitle">Personal capacitado y sistemas de última generación para crear el ambiente perfecto en tu evento.</p>
+            <p class="page-subtitle"></p>
             
             <section class="productos-servicio">
                 <div class="productos-grid">

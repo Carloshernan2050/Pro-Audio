@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Servicios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ServiciosController extends Controller
@@ -19,14 +20,14 @@ class ServiciosController extends Controller
             
             // Debug: verificar que hay servicios
             if ($servicios->isEmpty()) {
-                \Log::info('ServiciosController@index: No hay servicios en la base de datos');
+                Log::info('ServiciosController@index: No hay servicios en la base de datos');
             } else {
-                \Log::info('ServiciosController@index: Se encontraron ' . $servicios->count() . ' servicios');
+                Log::info('ServiciosController@index: Se encontraron ' . $servicios->count() . ' servicios');
             }
             
             return view('usuarios.ajustes', compact('servicios'));
         } catch (\Exception $e) {
-            \Log::error('ServiciosController@index Error: ' . $e->getMessage());
+            Log::error('ServiciosController@index Error: ' . $e->getMessage());
             return view('usuarios.ajustes', ['servicios' => collect()])
                 ->with('error', 'Error al cargar los servicios: ' . $e->getMessage());
         }
@@ -48,6 +49,7 @@ class ServiciosController extends Controller
         $request->validate([
             'nombre_servicio' => 'required|string|max:100|unique:servicios,nombre_servicio',
             'descripcion' => 'nullable|string|max:500',
+            'icono' => 'nullable|string|max:80',
         ]);
 
         try {
@@ -55,6 +57,7 @@ class ServiciosController extends Controller
             $servicio = Servicios::create([
                 'nombre_servicio' => $request->nombre_servicio,
                 'descripcion' => $request->descripcion ?? '',
+                'icono' => $request->icono ?: null,
             ]);
 
             // Verificar que se guardó correctamente
@@ -114,6 +117,7 @@ class ServiciosController extends Controller
         $request->validate([
             'nombre_servicio' => 'required|string|max:100|unique:servicios,nombre_servicio,' . $id,
             'descripcion' => 'nullable|string|max:500',
+            'icono' => 'nullable|string|max:80',
         ]);
 
         try {
@@ -122,6 +126,7 @@ class ServiciosController extends Controller
             $servicio->update([
                 'nombre_servicio' => $request->nombre_servicio,
                 'descripcion' => $request->descripcion ?? '',
+                'icono' => $request->icono ?: null,
             ]);
 
             // Si cambió el nombre, regenerar el blade con el nuevo nombre

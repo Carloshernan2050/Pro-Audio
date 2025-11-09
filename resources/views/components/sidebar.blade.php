@@ -18,15 +18,11 @@
         return !isset($serviciosPredefinidos[$servicio->nombre_servicio]);
     });
     
-    // Iconos por servicio (puedes expandir esto)
-    $iconos = [
-        'Animación' => 'fa-laugh-beam',
-        'Publicidad' => 'fa-bullhorn',
-        'Alquiler' => 'fa-box',
-    ];
+    // Iconos por servicio definidos manualmente (opcional)
+    $iconos = [];
     
     // Icono por defecto para servicios nuevos
-    $iconoDefault = 'fa-tag';
+    $iconoDefault = 'fas fa-tag';
 
     $rolesSesion = session('roles') ?? [session('role')];
     $rolesSesion = is_array($rolesSesion) ? $rolesSesion : [$rolesSesion];
@@ -43,10 +39,13 @@
             {{-- Servicios predefinidos --}}
             @foreach($serviciosPredefinidos as $nombre => $ruta)
                 @php
-                    $icono = $iconos[$nombre] ?? $iconoDefault;
+                    $servicioExistente = $todosLosServicios->firstWhere('nombre_servicio', $nombre);
+                    $icono = $servicioExistente && $servicioExistente->icono
+                        ? $servicioExistente->icono
+                        : ($iconos[$nombre] ?? $iconoDefault);
                 @endphp
                 <a href="{{ $ruta }}" class="sidebar-btn">
-                    <i class="fas {{ $icono }}"></i> {{ $nombre }}
+                    <i class="{{ $icono }}"></i> {{ $nombre }}
                 </a>
             @endforeach
             
@@ -55,10 +54,10 @@
                 @php
                     $slug = Str::slug($servicio->nombre_servicio, '_');
                     $ruta = route('usuarios.servicio', ['slug' => $slug]);
-                    $icono = $iconos[$servicio->nombre_servicio] ?? $iconoDefault;
+                    $icono = $servicio->icono ?: ($iconos[$servicio->nombre_servicio] ?? $iconoDefault);
                 @endphp
                 <a href="{{ $ruta }}" class="sidebar-btn">
-                    <i class="fas {{ $icono }}"></i> {{ $servicio->nombre_servicio }}
+                    <i class="{{ $icono }}"></i> {{ $servicio->nombre_servicio }}
                 </a>
             @endforeach
             
