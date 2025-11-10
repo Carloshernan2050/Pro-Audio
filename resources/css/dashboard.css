@@ -88,7 +88,6 @@ body {
 .search-btn {
     background: rgb(0, 0, 0); /* Fondo negro (ESTILO DESEADO) */
     color: #ffffff;
-    border: none;
     border-radius: 50%;
     padding: 8px 12px;
     border: 2px solid blanchedalmond; /* Borde específico (ESTILO DESEADO) */
@@ -221,10 +220,11 @@ body {
     padding: 32px 24px; /* padding horizontal uniforme */
     padding-top: 18px; /* ajuste fino: menos espacio arriba */
     margin-left: 238px; /* corre un poco más a la izquierda */
+    margin-right: 0;
     color: white;
     max-width: none; /* ocupar el ancho disponible */
     width: auto;
-    margin: 0; /* evita centrado que lo empujaba a la derecha */
+    margin: 0;
     box-sizing: border-box;
     overflow-x: hidden;
 }
