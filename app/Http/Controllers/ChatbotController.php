@@ -3,14 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\Servicios;
 use App\Models\SubServicios;
 use App\Models\Cotizacion;
 
 class ChatbotController extends Controller
 {
+    private const STOPWORDS = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
+    private const STOPWORDS_EXT = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al','par'];
+    private const TOKENS_GENERICOS = ['necesito','nececito','nesecito','necesitar','requiero','quiero','busco','hola','buenas','gracias','dias','dia'];
+    private const CUES_AGREGAR = ['tambien','también','ademas','además','y ',' y','sumar','agrega','agregar','junto','ademas de','además de'];
+
+    private const SUGERENCIAS_BASE = ['alquiler','animacion','publicidad','luces','dj','audio'];
+
     /**
      * Muestra la vista principal del chatbot
      */
@@ -32,37 +37,27 @@ class ChatbotController extends Controller
             $diasReq = (int) $request->input('dias', 0);
             $daysForResponse = $diasReq > 0 ? $diasReq : ((int) session('chat.days', 0) ?: null);
             if (!empty($intencionesConfirmadas)) {
-                $relSub = SubServicios::query()
-                    ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 'servicios.nombre_servicio')
-                    ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
-                    ->whereIn('servicios.nombre_servicio', $intencionesConfirmadas)
-                    ->orderBy('servicios.nombre_servicio')
-                    ->orderBy('sub_servicios.nombre')
-                    ->get();
+                $relSub = $this->obtenerSubServiciosPorIntenciones($intencionesConfirmadas);
                 if ($relSub->isNotEmpty()) {
                     session(['chat.intenciones' => $intencionesConfirmadas]);
                     $seleccionesActuales = (array) session('chat.selecciones', []);
-                    return response()->json([
-                        'respuesta' => 'Perfecto. Estas son las opciones relacionadas. Selecciona los sub-servicios que deseas cotizar:',
-                        'optionGroups' => $this->agruparOpciones($relSub),
-                        'days' => $daysForResponse,
-                        'seleccionesPrevias' => $seleccionesActuales,
-                    ]);
+                    return $this->responderOpciones(
+                        'Perfecto. Estas son las opciones relacionadas. Selecciona los sub-servicios que deseas cotizar:',
+                        $relSub,
+                        $daysForResponse,
+                        $seleccionesActuales
+                    );
                 }
             }
-            // Si no hay intenciones válidas confirmadas, devolver catálogo
-            return response()->json([
-                'respuesta' => 'No encontré una coincidencia clara. Aquí tienes el catálogo:',
-                'optionGroups' => $this->catalogoOpcionesAgrupado(),
-                'days' => $daysForResponse ?? null,
-                'seleccionesPrevias' => (array) session('chat.selecciones', []),
-            ]);
+            return $this->mostrarCatalogoJson(
+                'No encontré una coincidencia clara. Aquí tienes el catálogo:',
+                $daysForResponse ?? null,
+                (array) session('chat.selecciones', [])
+            );
         }
         // Manejar limpieza de cotización
         if ($request->has('limpiar_cotizacion') && $request->input('limpiar_cotizacion') === true) {
-            session()->forget('chat.selecciones');
-            session()->forget('chat.intenciones');
-            session()->forget('chat.days');
+            $this->limpiarSesionChat();
             return response()->json([
                 'respuesta' => 'Cotización limpiada. Puedes empezar una nueva selección.',
                 'selecciones' => [],
@@ -76,35 +71,9 @@ class ChatbotController extends Controller
             $selecciones = (array) session('chat.selecciones', []);
             $dias = (int) session('chat.days', 1);
             $personasId = session('usuario_id'); // ID del usuario autenticado
-            
-            // Guardar cotizaciones en la base de datos si hay selecciones y el usuario está autenticado
-            if (!empty($selecciones) && $personasId) {
-                try {
-                    $items = SubServicios::whereIn('id', $selecciones)->get(['id', 'precio']);
-                    $fechaCotizacion = now();
-                    
-                    foreach ($items as $item) {
-                        // Calcular monto considerando los días
-                        $monto = (float) $item->precio * $dias;
-                        
-                        Cotizacion::create([
-                            'personas_id' => $personasId,
-                            'sub_servicios_id' => $item->id,
-                            'monto' => $monto,
-                            'fecha_cotizacion' => $fechaCotizacion,
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    // Log del error pero no fallar la respuesta
-                    Log::error('Error al guardar cotización: ' . $e->getMessage());
-                }
-            }
-            
-            // Limpiar toda la sesión de chat
-            session()->forget('chat.selecciones');
-            session()->forget('chat.intenciones');
-            session()->forget('chat.days');
-            
+            $this->guardarCotizacion($personasId, $selecciones, $dias);
+            $this->limpiarSesionChat();
+
             return response()->json([
                 'respuesta' => 'Gracias por tu interés. Contacta con un trabajador en <a href="https://w.app/zlxp23" target="_blank" rel="noopener noreferrer">https://w.app/zlxp23</a>. Tu cotización ha sido guardada.',
                 'limpiar_chat' => true,
@@ -121,6 +90,7 @@ class ChatbotController extends Controller
             // Continuidad por sesión
             $sessionDays = (int) session('chat.days', 0);
             $sessionIntenciones = (array) session('chat.intenciones', []);
+            $intenciones = $sessionIntenciones;
             $esContinuacion = $this->esContinuacion($mensaje);
             // Extraer días: request -> mensaje con números -> palabras -> sesión
             $dias = (int) $request->input('dias', 0);
@@ -143,17 +113,10 @@ class ChatbotController extends Controller
 
         // Si el usuario envía una selección, calculamos el total acumulado
         if (is_array($seleccion) && !empty($seleccion)) {
-            // Obtener selecciones previas de la sesión
             $seleccionesPrevias = (array) session('chat.selecciones', []);
-            
-            // Combinar nuevas selecciones con previas, eliminando duplicados
             $todasLasSelecciones = array_values(array_unique(array_merge($seleccionesPrevias, $seleccion)));
-            
-            // Obtener todos los items seleccionados (previos + nuevos)
-            $items = SubServicios::query()
-                ->whereIn('id', $todasLasSelecciones)
-                ->with('servicio')
-                ->get(['id', 'servicios_id', 'nombre', 'precio']);
+
+            $items = $this->obtenerItemsSeleccionados($todasLasSelecciones);
 
             if ($items->isEmpty()) {
                 return response()->json([
@@ -161,61 +124,10 @@ class ChatbotController extends Controller
                 ]);
             }
 
-            // Guardar selecciones acumuladas en sesión
             session(['chat.selecciones' => $todasLasSelecciones]);
-
             $diasCalculo = $dias > 0 ? $dias : 1;
-            $total = 0;
-            $detalle = "<div style='line-height: 1.6;'>";
-            $detalle .= "<h3 style='margin-bottom: 12px; font-size: 1.1em;'>Resumen de tu cotización" . ($diasCalculo > 1 ? " ({$diasCalculo} días)" : "") . "</h3>";
-            
-            // Agrupar por servicio para mejor visualización
-            $itemsPorServicio = [];
-            foreach ($items as $it) {
-                $servicioNombre = $it->servicio->nombre_servicio;
-                if (!isset($itemsPorServicio[$servicioNombre])) {
-                    $itemsPorServicio[$servicioNombre] = [];
-                }
-                $itemsPorServicio[$servicioNombre][] = $it;
-            }
-            
-            // Mostrar items agrupados por servicio con subtotales
-            foreach ($itemsPorServicio as $servicioNombre => $itemsServicio) {
-                $subtotalServicio = 0;
-                $detalle .= "<div style='margin-bottom: 16px;'>";
-                $detalle .= "<strong style='font-size: 1.05em; color: #333;'>{$servicioNombre}</strong><br>";
-                foreach ($itemsServicio as $it) {
-                    $subtotal = (float) $it->precio * $diasCalculo;
-                    $subtotalServicio += $subtotal;
-                    $total += $subtotal;
-                    if ($diasCalculo > 1) {
-                        $detalle .= "<span style='margin-left: 16px; display: block; margin-top: 4px;'>";
-                        $detalle .= "{$it->nombre} — $" . number_format($it->precio, 0, ',', '.') . " × {$diasCalculo} = <strong>$" . number_format($subtotal, 0, ',', '.') . "</strong></span>";
-                    } else {
-                        $detalle .= "<span style='margin-left: 16px; display: block; margin-top: 4px;'>";
-                        $detalle .= "{$it->nombre} — <strong>$" . number_format($subtotal, 0, ',', '.') . "</strong></span>";
-                    }
-                }
-                $detalle .= "<div style='margin-left: 16px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ddd;'>";
-                $detalle .= "Subtotal {$servicioNombre}: <strong style='color: #2563eb;'>$" . number_format($subtotalServicio, 0, ',', '.') . "</strong></div>";
-                $detalle .= "</div>";
-            }
-            
-            $detalle .= "<div style='margin-top: 16px; padding-top: 12px; border-top: 2px solid #333; font-size: 1.1em;'>";
-            $detalle .= "<strong style='color: #059669; font-size: 1.15em;'>Total estimado: $" . number_format($total, 0, ',', '.') . "</strong>";
-            $detalle .= "</div></div>";
 
-            return response()->json([
-                'respuesta' => $detalle, // No escapar HTML para que los estilos funcionen
-                'days' => $diasCalculo,
-                'selecciones' => $todasLasSelecciones,
-                'total' => $total,
-                'actions' => [
-                    ['id' => 'add_more', 'label' => 'Añadir más sub-servicios'],
-                    ['id' => 'clear', 'label' => 'Limpiar cotización'],
-                    ['id' => 'finish', 'label' => 'Terminar cotización'],
-                ],
-            ]);
+            return $this->responderCotizacion($items, $diasCalculo, $todasLasSelecciones);
         }
 
         // Si no hay mensaje, invitamos a cotizar directamente
@@ -224,18 +136,16 @@ class ChatbotController extends Controller
         }
 
         // Si el mensaje es "catalogo", devolver catálogo completo directamente
-        $mensajeLower = strtolower(trim($mensaje));
-        $mensajeCorregidoLower = strtolower(trim($mensajeCorregido));
-        if ($mensajeLower === 'catalogo' || $mensajeLower === 'catálogo' || 
-            $mensajeCorregidoLower === 'catalogo' || $mensajeCorregidoLower === 'catálogo') {
+        $esSolicitudCatalogo = in_array(mb_strtolower(trim($mensaje)), ['catalogo','catálogo'], true)
+            || in_array(mb_strtolower(trim($mensajeCorregido)), ['catalogo','catálogo'], true);
+        if ($esSolicitudCatalogo) {
             $seleccionesActuales = (array) session('chat.selecciones', []);
             $sessionDays = (int) session('chat.days', 1);
-            return response()->json([
-                'respuesta' => 'Catálogo completo. Selecciona los sub-servicios que deseas agregar a tu cotización:',
-                'optionGroups' => $this->catalogoOpcionesAgrupado(),
-                'days' => $sessionDays > 0 ? $sessionDays : null,
-                'seleccionesPrevias' => $seleccionesActuales,
-            ]);
+            return $this->mostrarCatalogoJson(
+                'Catálogo completo. Selecciona los sub-servicios que deseas agregar a tu cotización:',
+                $sessionDays > 0 ? $sessionDays : null,
+                $seleccionesActuales
+            );
         }
 
         // Si no es relacionado con el dominio, responder fuera de tema (sin catálogo)
@@ -248,25 +158,7 @@ class ChatbotController extends Controller
             if (!($soloDiasNowGate && !empty($seleccionesPrevChk))) {
                 // Al no ser relacionado, no conservar contexto previo de intenciones
                 session()->forget('chat.intenciones');
-                $sugerencias = [];
-                $tokenHints = [];
-                try { 
-                    $sugerencias = $this->generarSugerencias($mensajeCorregido); 
-                    // Usar el mensaje ORIGINAL para elegir y mostrar el token a corregir
-                    $tokenHints = $this->generarSugerenciasPorToken($mensaje);
-                } catch (\Throwable $e) { 
-                    $sugerencias = ['alquiler','animacion','publicidad','luces','dj','audio']; 
-                    $tokenHints = $this->fallbackTokenHints($mensaje);
-                }
-                $best = $this->extraerMejorSugerencia($tokenHints);
-                return response()->json([
-                    'respuesta' => 'perdon no entiendo, tal vez quisiste decir:',
-                    'sugerencias' => $sugerencias,
-                    'tokenHints' => $tokenHints,
-                    'originalMensaje' => $mensaje,
-                    'bestToken' => $best['token'] ?? null,
-                    'bestSuggestion' => $best['sugerencia'] ?? null,
-                ]);
+                return $this->responderFueraDeTema($mensaje, $mensajeCorregido);
             }
         }
 
@@ -282,15 +174,12 @@ class ChatbotController extends Controller
             $t = trim($t);
             if ($t === '') return false;
             if (mb_strlen($t) < 3) return false;
-            // Filtrar stopwords comunes
-            $stop = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
-            return !in_array($t, $stop, true);
+            return !in_array($t, self::STOPWORDS, true);
         }));
         // Determinar si el usuario está agregando (en lugar de reemplazar) intención
-        $textoNorm = $mensajeCorregido;
-        $cuesAgregar = ['tambien','también','ademas','además','y ',' y','sumar','agrega','agregar','junto','ademas de','además de'];
+        $textoNorm = $this->normalizarTexto($mensajeCorregido);
         $esAgregado = false;
-        foreach ($cuesAgregar as $cue) {
+        foreach (self::CUES_AGREGAR as $cue) {
             if (str_contains($textoNorm, $this->normalizarTexto($cue))) { $esAgregado = true; break; }
         }
 
@@ -303,11 +192,7 @@ class ChatbotController extends Controller
         }
 
         // Verificar si es acción de "añadir más" (mensaje "catalogo")
-        // Verificar tanto en mensaje original como corregido
-        $mensajeLower = strtolower(trim($mensaje));
-        $mensajeCorregidoLower = strtolower(trim($mensajeCorregido));
-        $esAnadirMas = ($mensajeLower === 'catalogo' || $mensajeLower === 'catálogo' || 
-                       $mensajeCorregidoLower === 'catalogo' || $mensajeCorregidoLower === 'catálogo');
+        $esAnadirMas = $esSolicitudCatalogo;
         
         // Verificar si el mensaje solo contiene definición de días (por ejemplo, "por 3 dias")
         // Verificar tanto en mensaje original como corregido
@@ -323,77 +208,28 @@ class ChatbotController extends Controller
         if (($soloDias || $dias > 0) && !empty($seleccionesPrevias)) {
             try {
                 // Recalcular y mostrar la cotización con los nuevos días
-                $items = SubServicios::query()
-                    ->whereIn('id', $seleccionesPrevias)
-                    ->with('servicio')
-                    ->get(['id', 'servicios_id', 'nombre', 'precio']);
+                $items = $this->obtenerItemsSeleccionados($seleccionesPrevias);
 
                 if ($items->isNotEmpty()) {
-                    $diasCalculo = $dias;
-                    $total = 0;
-                    $detalle = "<div style='line-height: 1.6;'>";
-                    $detalle .= "<h3 style='margin-bottom: 12px; font-size: 1.1em;'>Resumen de tu cotización ({$diasCalculo} días)</h3>";
-                    
-                    $itemsPorServicio = [];
-                    foreach ($items as $it) {
-                        $servicioNombre = $it->servicio->nombre_servicio;
-                        if (!isset($itemsPorServicio[$servicioNombre])) {
-                            $itemsPorServicio[$servicioNombre] = [];
-                        }
-                        $itemsPorServicio[$servicioNombre][] = $it;
-                    }
-                    
-                    foreach ($itemsPorServicio as $servicioNombre => $itemsServicio) {
-                        $subtotalServicio = 0;
-                        $detalle .= "<div style='margin-bottom: 16px;'>";
-                        $detalle .= "<strong style='font-size: 1.05em; color: #333;'>{$servicioNombre}</strong><br>";
-                        foreach ($itemsServicio as $it) {
-                            $subtotal = (float) $it->precio * $diasCalculo;
-                            $subtotalServicio += $subtotal;
-                            $total += $subtotal;
-                            $detalle .= "<span style='margin-left: 16px; display: block; margin-top: 4px;'>";
-                            $detalle .= "{$it->nombre} — $" . number_format($it->precio, 0, ',', '.') . " × {$diasCalculo} = <strong>$" . number_format($subtotal, 0, ',', '.') . "</strong></span>";
-                        }
-                        $detalle .= "<div style='margin-left: 16px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ddd;'>";
-                        $detalle .= "Subtotal {$servicioNombre}: <strong style='color: #2563eb;'>$" . number_format($subtotalServicio, 0, ',', '.') . "</strong></div>";
-                        $detalle .= "</div>";
-                    }
-                    
-                    $detalle .= "<div style='margin-top: 16px; padding-top: 12px; border-top: 2px solid #333; font-size: 1.1em;'>";
-                    $detalle .= "<strong style='color: #059669; font-size: 1.15em;'>Total estimado: $" . number_format($total, 0, ',', '.') . "</strong>";
-                    $detalle .= "</div></div>";
-
-                    return response()->json([
-                        'respuesta' => $detalle,
-                        'days' => $diasCalculo,
-                        'selecciones' => $seleccionesPrevias,
-                        'total' => $total,
-                        'actions' => [
-                            ['id' => 'add_more', 'label' => 'Añadir más sub-servicios'],
-                            ['id' => 'clear', 'label' => 'Limpiar cotización'],
-                            ['id' => 'finish', 'label' => 'Terminar cotización'],
-                        ],
-                    ]);
+                    $diasCalculo = (int) $dias;
+                    return $this->responderCotizacion($items, $diasCalculo, $seleccionesPrevias, true);
                 } else {
                     // Si no hay items pero hay selecciones, puede ser que los IDs sean inválidos
                     // Limpiar selecciones inválidas y mostrar catálogo
                     session()->forget('chat.selecciones');
-                    $seleccionesActuales = [];
-                    return response()->json([
-                        'respuesta' => 'No se encontraron los servicios seleccionados. Aquí está el catálogo completo:',
-                        'optionGroups' => $this->catalogoOpcionesAgrupado(),
-                        'days' => $dias > 0 ? $dias : null,
-                        'seleccionesPrevias' => $seleccionesActuales,
-                    ]);
+                    return $this->mostrarCatalogoJson(
+                        'No se encontraron los servicios seleccionados. Aquí está el catálogo completo:',
+                        $dias > 0 ? $dias : null,
+                        []
+                    );
                 }
             } catch (\Exception $e) {
                 // Si hay un error, mostrar catálogo con mensaje
-                return response()->json([
-                    'respuesta' => 'Ocurrió un error al calcular la cotización. Aquí está el catálogo completo:',
-                    'optionGroups' => $this->catalogoOpcionesAgrupado(),
-                    'days' => $dias > 0 ? $dias : null,
-                    'seleccionesPrevias' => $seleccionesPrevias,
-                ]);
+                return $this->mostrarCatalogoJson(
+                    'Ocurrió un error al calcular la cotización. Aquí está el catálogo completo:',
+                    $dias > 0 ? $dias : null,
+                    $seleccionesPrevias
+                );
             }
         }
 
@@ -427,18 +263,9 @@ class ChatbotController extends Controller
         if ($mensaje !== '') {
             $daysForResponse = $dias > 0 ? $dias : ($esContinuacion && $sessionDays > 0 ? $sessionDays : null);
         }
-        $forzarAlquiler = in_array('Alquiler', $intenciones, true);
-
         // Si hay intención detectada y el mensaje es relacionado
         if (!empty($intenciones) && $this->esRelacionado($mensajeCorregido)) {
-            $relSub = SubServicios::query()
-                ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 'servicios.nombre_servicio')
-                ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
-                ->whereIn('servicios.nombre_servicio', $intenciones)
-                ->orderBy('servicios.nombre_servicio')
-                ->orderBy('sub_servicios.nombre')
-                ->get();
-
+            $relSub = $this->obtenerSubServiciosPorIntenciones($intenciones);
             if ($relSub->isNotEmpty()) {
                 $lista = implode(' y ', $intenciones);
                 $provieneDeSugerencia = $request->boolean('sugerencia_aplicada', false);
@@ -459,19 +286,18 @@ class ChatbotController extends Controller
                 }
                 $prefijo = $dias > 0 ? " para {$dias} día" . ($dias > 1 ? 's' : '') : '';
                 $seleccionesActuales = (array) session('chat.selecciones', []);
-                return response()->json([
-                    'respuesta' => "Estas son nuestras opciones de {$lista}{$prefijo}. Selecciona los sub-servicios que deseas cotizar:",
-                    'optionGroups' => $this->agruparOpciones($relSub),
-                    'days' => $daysForResponse,
-                    'seleccionesPrevias' => $seleccionesActuales,
-                ]);
+                return $this->responderOpciones(
+                    "Estas son nuestras opciones de {$lista}{$prefijo}. Selecciona los sub-servicios que deseas cotizar:",
+                    $relSub,
+                    $daysForResponse,
+                    $seleccionesActuales
+                );
             }
         }
 
         // Búsqueda semántica simple en DB, sin intención forzada
-        $relSub = SubServicios::query()
-            ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 'servicios.nombre_servicio')
-            ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
+        $relSub = $this->ordenarSubServicios(
+            $this->subServiciosQuery()
             ->where(function ($q) use ($mensajeCorregido, $tokens) {
                 if ($mensajeCorregido !== '') {
                     $q->where('sub_servicios.nombre', 'like', "%{$mensajeCorregido}%")
@@ -488,67 +314,22 @@ class ChatbotController extends Controller
             ->when(!empty($intenciones), function ($q) use ($intenciones) {
                 $q->whereIn('servicios.nombre_servicio', $intenciones);
             })
-            ->orderBy('servicios.nombre_servicio')
-            ->orderBy('sub_servicios.nombre')
-            ->limit(12)
-            ->get();
+        )->limit(12)->get();
 
         if ($relSub->isNotEmpty()) {
             $intro = $mensajeCorregido !== ''
                 ? 'Con base en tu consulta, estas opciones están relacionadas. '
                 : 'He encontrado opciones relacionadas.';
             $seleccionesActuales = (array) session('chat.selecciones', []);
-            return response()->json([
-                'respuesta' => $intro . 'Selecciona los sub-servicios que deseas cotizar:',
-                'optionGroups' => $this->agruparOpciones($relSub),
-                'days' => $daysForResponse,
-                'seleccionesPrevias' => $seleccionesActuales,
-            ]);
+            return $this->responderOpciones(
+                $intro . 'Selecciona los sub-servicios que deseas cotizar:',
+                $relSub,
+                $daysForResponse,
+                $seleccionesActuales
+            );
         }
 
-        // Si no encontramos relación y no hubo intenciones válidas, mensaje fuera de tema (sin catálogo)
-        if (empty($intenciones)) {
-            $sugerencias = [];
-            $tokenHints = [];
-            try { 
-                $sugerencias = $this->generarSugerencias($mensajeCorregido); 
-                // Usar el mensaje ORIGINAL para elegir y mostrar el token a corregir
-                $tokenHints = $this->generarSugerenciasPorToken($mensaje);
-            } catch (\Throwable $e) { 
-                $sugerencias = ['alquiler','animacion','publicidad','luces','dj','audio']; 
-                $tokenHints = $this->fallbackTokenHints($mensaje);
-            }
-            $best = $this->extraerMejorSugerencia($tokenHints);
-            return response()->json([
-                'respuesta' => 'perdon no entiendo, tal vez quisiste decir:',
-                'sugerencias' => $sugerencias,
-                'tokenHints' => $tokenHints,
-                'originalMensaje' => $mensaje,
-                'bestToken' => $best['token'] ?? null,
-                'bestSuggestion' => $best['sugerencia'] ?? null,
-            ]);
-        }
-
-        // Si hubo intención pero no encontramos items, responder fuera de tema también
-        $sugerencias = [];
-        $tokenHints = [];
-        try { 
-            $sugerencias = $this->generarSugerencias($mensajeCorregido); 
-            // Usar el mensaje ORIGINAL para elegir y mostrar el token a corregir
-            $tokenHints = $this->generarSugerenciasPorToken($mensaje);
-        } catch (\Throwable $e) { 
-            $sugerencias = ['alquiler','animacion','publicidad','luces','dj','audio']; 
-            $tokenHints = $this->fallbackTokenHints($mensaje);
-        }
-        $best = $this->extraerMejorSugerencia($tokenHints);
-        return response()->json([
-            'respuesta' => 'perdon no entiendo, tal vez quisiste decir:',
-            'sugerencias' => $sugerencias,
-            'tokenHints' => $tokenHints,
-            'originalMensaje' => $mensaje,
-            'bestToken' => $best['token'] ?? null,
-            'bestSuggestion' => $best['sugerencia'] ?? null,
-        ]);
+        return $this->responderFueraDeTema($mensaje, $mensajeCorregido);
         } catch (\Throwable $e) {
             Log::error('Error en ChatbotController@enviar: ' . $e->getMessage(), [ 'trace' => $e->getTraceAsString() ]);
             // Intento de recuperación: si hay intención detectable, pedir confirmación
@@ -570,14 +351,152 @@ class ChatbotController extends Controller
                 }
             } catch (\Throwable $_) {}
             // Respuesta de contingencia en JSON para evitar romper el frontend
-            $seleccionesActuales = (array) session('chat.selecciones', []);
-            return response()->json([
-                'respuesta' => 'Estoy teniendo inconvenientes para procesar tu mensaje. Te muestro el catálogo para que puedas continuar:',
-                'optionGroups' => $this->catalogoOpcionesAgrupado(),
-                'days' => (int) session('chat.days', 1) ?: null,
-                'seleccionesPrevias' => $seleccionesActuales,
-            ]);
+            return $this->mostrarCatalogoJson(
+                'Estoy teniendo inconvenientes para procesar tu mensaje. Te muestro el catálogo para que puedas continuar:',
+                (int) session('chat.days', 1) ?: null,
+                (array) session('chat.selecciones', [])
+            );
         }
+    }
+
+    private function limpiarSesionChat(): void
+    {
+        session()->forget('chat.selecciones');
+        session()->forget('chat.intenciones');
+        session()->forget('chat.days');
+    }
+
+    private function guardarCotizacion(int $personasId, array $selecciones, int $dias): void
+    {
+        if (empty($selecciones) || !$personasId) {
+            return;
+        }
+
+        try {
+            $items = SubServicios::whereIn('id', $selecciones)->get(['id', 'precio']);
+            $fechaCotizacion = now();
+            $diasValidos = max(1, $dias);
+
+            foreach ($items as $item) {
+                $monto = (float) $item->precio * $diasValidos;
+
+                Cotizacion::create([
+                    'personas_id' => $personasId,
+                    'sub_servicios_id' => $item->id,
+                    'monto' => $monto,
+                    'fecha_cotizacion' => $fechaCotizacion,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al guardar cotización: ' . $e->getMessage());
+        }
+    }
+
+    private function responderFueraDeTema(string $mensajeOriginal, string $mensajeCorregido)
+    {
+        [$sugerencias, $tokenHints, $best] = $this->obtenerSugerenciasConHints($mensajeOriginal, $mensajeCorregido);
+
+        return response()->json([
+            'respuesta' => 'perdon no entiendo, tal vez quisiste decir:',
+            'sugerencias' => $sugerencias,
+            'tokenHints' => $tokenHints,
+            'originalMensaje' => $mensajeOriginal,
+            'bestToken' => $best['token'] ?? null,
+            'bestSuggestion' => $best['sugerencia'] ?? null,
+        ]);
+    }
+
+    private function obtenerSugerenciasConHints(string $mensajeOriginal, string $mensajeCorregido): array
+    {
+        try {
+            $sugerencias = $this->generarSugerencias($mensajeCorregido);
+            $tokenHints = $this->generarSugerenciasPorToken($mensajeOriginal);
+        } catch (\Throwable $e) {
+            $sugerencias = self::SUGERENCIAS_BASE;
+            $tokenHints = $this->fallbackTokenHints($mensajeOriginal);
+        }
+
+        return [$sugerencias, $tokenHints, $this->extraerMejorSugerencia($tokenHints)];
+    }
+
+    private function responderCotizacion($items, int $diasCalculo, array $selecciones, bool $mostrarDiasSiempre = false)
+    {
+        [$detalle, $total] = $this->construirDetalleCotizacion($items, $diasCalculo, $mostrarDiasSiempre);
+
+        return response()->json([
+            'respuesta' => $detalle,
+            'days' => $diasCalculo,
+            'selecciones' => $selecciones,
+            'total' => $total,
+            'actions' => [
+                ['id' => 'add_more', 'label' => 'Añadir más sub-servicios'],
+                ['id' => 'clear', 'label' => 'Limpiar cotización'],
+                ['id' => 'finish', 'label' => 'Terminar cotización'],
+            ],
+        ]);
+    }
+
+    private function construirDetalleCotizacion($items, int $diasCalculo, bool $mostrarDiasSiempre): array
+    {
+        $detalle = "<div style='line-height: 1.6;'>";
+        $diasLabel = ($mostrarDiasSiempre || $diasCalculo > 1) ? " ({$diasCalculo} días)" : '';
+        $detalle .= "<h3 style='margin-bottom: 12px; font-size: 1.1em;'>Resumen de tu cotización{$diasLabel}</h3>";
+
+        $itemsPorServicio = [];
+        foreach ($items as $it) {
+            $servicioNombre = $it->servicio->nombre_servicio;
+            $itemsPorServicio[$servicioNombre][] = $it;
+        }
+
+        $total = 0;
+        foreach ($itemsPorServicio as $servicioNombre => $itemsServicio) {
+            $subtotalServicio = 0;
+            $detalle .= "<div style='margin-bottom: 16px;'>";
+            $detalle .= "<strong style='font-size: 1.05em; color: #333;'>{$servicioNombre}</strong><br>";
+            foreach ($itemsServicio as $it) {
+                $subtotal = (float) $it->precio * $diasCalculo;
+                $subtotalServicio += $subtotal;
+                $total += $subtotal;
+                $detalle .= "<span style='margin-left: 16px; display: block; margin-top: 4px;'>";
+                if ($diasCalculo > 1 || $mostrarDiasSiempre) {
+                    $detalle .= "{$it->nombre} — $" . number_format($it->precio, 0, ',', '.') . " × {$diasCalculo} = <strong>$" . number_format($subtotal, 0, ',', '.') . "</strong></span>";
+                } else {
+                    $detalle .= "{$it->nombre} — <strong>$" . number_format($subtotal, 0, ',', '.') . "</strong></span>";
+                }
+            }
+            $detalle .= "<div style='margin-left: 16px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ddd;'>";
+            $detalle .= "Subtotal {$servicioNombre}: <strong style='color: #2563eb;'>$" . number_format($subtotalServicio, 0, ',', '.') . "</strong></div>";
+            $detalle .= "</div>";
+        }
+
+        $detalle .= "<div style='margin-top: 16px; padding-top: 12px; border-top: 2px solid #333; font-size: 1.1em;'>";
+        $detalle .= "<strong style='color: #059669; font-size: 1.15em;'>Total estimado: $" . number_format($total, 0, ',', '.') . "</strong>";
+        $detalle .= "</div></div>";
+
+        return [$detalle, $total];
+    }
+
+    private function obtenerSubServiciosPorIntenciones(array $intenciones)
+    {
+        if (empty($intenciones)) {
+            return collect();
+        }
+
+        return $this->ordenarSubServicios(
+            $this->subServiciosQuery()->whereIn('servicios.nombre_servicio', $intenciones)
+        )->get();
+    }
+
+    private function obtenerItemsSeleccionados(array $ids)
+    {
+        if (empty($ids)) {
+            return collect();
+        }
+
+        return SubServicios::query()
+            ->whereIn('id', $ids)
+            ->with('servicio')
+            ->get(['id', 'servicios_id', 'nombre', 'precio']);
     }
 
     private function validarIntencionesContraMensaje(array $intenciones, string $mensajeCorregido): array
@@ -619,7 +538,7 @@ class ChatbotController extends Controller
                     $content = trim(($r->nombre ?? '') . ' ' . ($r->descripcion ?? ''));
                     $docsBySvc[$svc] = ($docsBySvc[$svc] ?? '') . ' ' . $content;
                 }
-                $stop = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
+                $stop = self::STOPWORDS;
                 $df = [];
                 $N = 0;
                 foreach ($docsBySvc as $svc => $doc) {
@@ -638,7 +557,7 @@ class ChatbotController extends Controller
                 return [];
             }
         }
-        $stop = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
+        $stop = self::STOPWORDS;
         $qTokens = array_values(array_filter(preg_split('/[^a-z0-9áéíóúñ]+/u', $texto), function($t) use ($stop){
             $t = trim($t);
             return $t !== '' && mb_strlen($t) >= 3 && !in_array($t, $stop, true);
@@ -678,58 +597,69 @@ class ChatbotController extends Controller
 
     private function responderConOpciones()
     {
-        $seleccionesActuales = (array) session('chat.selecciones', []);
+        return $this->mostrarCatalogoJson(
+            '¡Hola! Soy tu asistente de cotizaciones. Selecciona los sub-servicios que deseas agregar a tu cotización:',
+            null,
+            (array) session('chat.selecciones', [])
+        );
+    }
+
+    private function mostrarCatalogoJson(string $mensaje, ?int $dias = null, array $seleccionesPrevias = [])
+    {
+        $items = $this->ordenarSubServicios($this->subServiciosQuery())->get();
+
+        return $this->responderOpciones($mensaje, $items, $dias, $seleccionesPrevias);
+    }
+
+    private function responderOpciones(string $mensaje, $items, ?int $dias = null, array $seleccionesPrevias = [])
+    {
         return response()->json([
-            'respuesta' => '¡Hola! Soy tu asistente de cotizaciones. Selecciona los sub-servicios que deseas agregar a tu cotización:',
-            'optionGroups' => $this->catalogoOpcionesAgrupado(),
-            'seleccionesPrevias' => $seleccionesActuales,
+            'respuesta' => $mensaje,
+            'optionGroups' => $this->formatearOpciones($items),
+            'days' => $dias,
+            'seleccionesPrevias' => $seleccionesPrevias,
         ]);
     }
 
-    private function catalogoOpciones()
+    private function subServiciosQuery()
     {
-        $todos = SubServicios::query()
+        return SubServicios::query()
             ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 'servicios.nombre_servicio')
-            ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
+            ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id');
+    }
+
+    private function ordenarSubServicios($query)
+    {
+        return $query
             ->orderBy('servicios.nombre_servicio')
-            ->orderBy('sub_servicios.nombre')
-            ->get();
-
-        return $todos->map(function ($r) {
-            return [
-                'id' => $r->id,
-                'nombre' => $r->nombre,
-                'precio' => (float) $r->precio,
-                'servicio' => $r->nombre_servicio,
-            ];
-        })->values();
+            ->orderBy('sub_servicios.nombre');
     }
 
-    private function catalogoOpcionesAgrupado()
+    private function formatearOpciones($items): array
     {
-        $todos = $this->catalogoOpciones();
-        return $this->agruparOpciones(collect($todos));
-    }
-
-    private function agruparOpciones($collection)
-    {
-        // $collection es una colección de arrays con claves: id, nombre, precio, servicio
-        $grupos = [];
-        foreach ($collection as $item) {
-            $svc = is_array($item) ? $item['servicio'] : $item->nombre_servicio;
-            $grupos[$svc] = $grupos[$svc] ?? ['servicio' => $svc, 'items' => []];
-            $grupos[$svc]['items'][] = [
-                'id' => is_array($item) ? $item['id'] : $item->id,
-                'nombre' => is_array($item) ? $item['nombre'] : $item->nombre,
-                'precio' => (float) (is_array($item) ? $item['precio'] : $item->precio),
-            ];
-        }
-        // Ordenar por nombre de servicio e items por nombre
-        ksort($grupos);
-        foreach ($grupos as &$g) {
-            usort($g['items'], function ($a, $b) { return strcmp($a['nombre'], $b['nombre']); });
-        }
-        return array_values($grupos);
+        return collect($items)
+            ->groupBy(function ($item) {
+                return is_array($item) ? $item['servicio'] : $item->nombre_servicio;
+            })
+            ->sortKeys()
+            ->map(function ($grupo, $servicio) {
+                return [
+                    'servicio' => $servicio,
+                    'items' => collect($grupo)
+                        ->map(function ($item) {
+                            return [
+                                'id' => is_array($item) ? $item['id'] : $item->id,
+                                'nombre' => is_array($item) ? $item['nombre'] : $item->nombre,
+                                'precio' => (float) (is_array($item) ? $item['precio'] : $item->precio),
+                            ];
+                        })
+                        ->sortBy('nombre')
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     private function extraerDiasDesdePalabras(string $mensaje): ?int
@@ -925,8 +855,7 @@ class ChatbotController extends Controller
                     if ($tk === '') { continue; }
                     $norm = $this->normalizarTexto($tk);
                     // Filtrar stopwords y términos demasiado cortos (excepto 'dj')
-                    $stop = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al','par'];
-                    if (($norm === 'dj' || mb_strlen($norm) >= 4) && mb_strlen($norm) <= 30 && !in_array($norm, $stop, true)) {
+                    if (($norm === 'dj' || mb_strlen($norm) >= 4) && mb_strlen($norm) <= 30 && !in_array($norm, self::STOPWORDS_EXT, true)) {
                         $vocab[$norm] = true;
                     }
                 }
@@ -969,14 +898,14 @@ class ChatbotController extends Controller
     {
         $vocab = $this->obtenerVocabularioCorreccion();
         if (empty($vocab)) { return []; }
-        $stop = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
+        $stop = self::STOPWORDS;
         $tokens = array_values(array_filter(preg_split('/\s+/', $this->normalizarTexto($mensajeCorregido)), function($t) use ($stop){
             $t = trim($t);
             return $t !== '' && mb_strlen($t) >= 3 && !in_array($t, $stop, true);
         }));
         if (empty($tokens)) { $tokens = [$this->normalizarTexto($mensajeCorregido)]; }
         $scores = [];
-        $stop = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al','par'];
+        $stop = self::STOPWORDS_EXT;
         foreach ($tokens as $t) {
             foreach ($vocab as $term) {
                 if (in_array($term, $stop, true) || mb_strlen($term) < 3) { continue; }
@@ -990,7 +919,7 @@ class ChatbotController extends Controller
         arsort($scores);
         $lista = array_slice(array_keys($scores), 0, 5);
         if (empty($lista)) {
-            $lista = ['alquiler','animacion','publicidad','luces','dj','audio'];
+            $lista = self::SUGERENCIAS_BASE;
         }
         return $lista;
     }
@@ -998,10 +927,10 @@ class ChatbotController extends Controller
     private function generarSugerenciasPorToken(string $mensajeOriginal): array
     {
         $vocab = $this->obtenerVocabularioCorreccion();
-        $stop = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
+        $stop = self::STOPWORDS;
         $rawTokens = preg_split('/\s+/', trim($mensajeOriginal));
         $pairs = [];
-        $genericos = ['necesito','nececito','nesecito','necesitar','requiero','quiero','busco','hola','buenas','gracias','dias','dia'];
+        $genericos = self::TOKENS_GENERICOS;
         foreach ($rawTokens as $rt) {
             $norm = $this->normalizarTexto($rt);
             if ($norm === '' || mb_strlen($norm) < 3) { continue; }
@@ -1045,7 +974,7 @@ class ChatbotController extends Controller
             return trim($t) !== '' && mb_strlen(trim($t)) >= 3;
         }));
         if (empty($tokens)) { return []; }
-        return [[ 'token' => $tokens[0], 'sugerencias' => ['alquiler','animacion','publicidad','luces','dj','audio'] ]];
+        return [[ 'token' => $tokens[0], 'sugerencias' => self::SUGERENCIAS_BASE ]];
     }
 
     private function extraerMejorSugerencia(array $tokenHints): array
