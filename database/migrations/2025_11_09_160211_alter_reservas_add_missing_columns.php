@@ -24,6 +24,7 @@ return new class extends Migration
             if (!Schema::hasColumn('reservas', 'cantidad_total')) $table->unsignedInteger('cantidad_total')->default(0)->after('descripcion_evento');
             if (!Schema::hasColumn('reservas', 'estado')) $table->string('estado', 20)->default('pendiente')->after('cantidad_total');
             if (!Schema::hasColumn('reservas', 'meta')) $table->json('meta')->nullable()->after('estado');
+            if (!Schema::hasColumn('reservas', 'calendario_id')) $table->foreignId('calendario_id')->nullable()->after('meta')->constrained('calendario');
             if (!Schema::hasColumn('reservas', 'created_at')) $table->timestamps();
         });
     }
@@ -38,6 +39,10 @@ return new class extends Migration
         }
 
         Schema::table('reservas', function (Blueprint $table) {
+            if (Schema::hasColumn('reservas', 'calendario_id')) {
+                $table->dropForeign(['calendario_id']);
+                $table->dropColumn('calendario_id');
+            }
             if (Schema::hasColumn('reservas', 'meta')) {
                 $table->dropColumn('meta');
             }

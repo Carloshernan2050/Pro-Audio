@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ServiceCreationException;
 use App\Models\Servicios;
 use App\Models\Cotizacion;
 use Illuminate\Http\Request;
@@ -64,7 +65,7 @@ class ServiciosController extends Controller
 
             // Verificar que se guardó correctamente
             if (!$servicio || !$servicio->id) {
-                throw new \Exception('Error: El servicio no se guardó correctamente en la base de datos.');
+                throw new ServiceCreationException('El servicio no se guardó correctamente en la base de datos.');
             }
 
             // PASO 2: Después de guardar en DB, generar el archivo blade
@@ -73,17 +74,22 @@ class ServiciosController extends Controller
             } catch (\Exception $bladeError) {
                 // Si falla la generación del blade, el servicio ya está guardado en DB
                 // Solo mostramos un mensaje de advertencia
-                return redirect()->route('servicios.index')
+                $redirect = redirect()->route('servicios.index')
                     ->with('success', 'Servicio creado exitosamente en la base de datos.')
                     ->with('warning', 'Advertencia: No se pudo generar la vista automáticamente. ' . $bladeError->getMessage());
             }
 
-            return redirect()->route('servicios.index')
+            $redirect = $redirect ?? redirect()->route('servicios.index')
                 ->with('success', 'Servicio creado exitosamente y vista generada automáticamente.');
-        } catch (\Exception $e) {
-            return redirect()->route('servicios.index')
+        } catch (ServiceCreationException $e) {
+            $redirect = redirect()->route('servicios.index')
                 ->with('error', 'Error al crear el servicio: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            $redirect = redirect()->route('servicios.index')
+                ->with('error', 'Error inesperado al crear el servicio: ' . $e->getMessage());
         }
+
+        return $redirect;
     }
 
     /**
@@ -290,8 +296,8 @@ class ServiciosController extends Controller
                                 $existeImagen = file_exists($rutaImagen);
                             @endphp
                             @if($existeImagen)
-                                <img src="/images/{NOMBRE_VISTA}/{{ $nombreImagen }}" 
-                                     alt="{{ $subServicio->nombre }}" 
+                                <img src="/images/{NOMBRE_VISTA}/{{ $nombreImagen }}"
+                                     alt="{{ $subServicio->nombre }}"
                                      class="producto-imagen">
                             @else
                                 <div class="producto-imagen-placeholder">
