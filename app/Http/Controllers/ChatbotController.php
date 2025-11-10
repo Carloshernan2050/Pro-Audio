@@ -112,22 +112,35 @@ class ChatbotController extends Controller
             }
 
         // Si el usuario envía una selección, calculamos el total acumulado
-        if (is_array($seleccion) && !empty($seleccion)) {
-            $seleccionesPrevias = (array) session('chat.selecciones', []);
-            $todasLasSelecciones = array_values(array_unique(array_merge($seleccionesPrevias, $seleccion)));
+        if (is_array($seleccion)) {
+            $seleccionNormalizada = array_values(array_filter(array_unique(array_map('intval', $seleccion)), function ($id) {
+                return $id > 0;
+            }));
 
-            $items = $this->obtenerItemsSeleccionados($todasLasSelecciones);
-
-            if ($items->isEmpty()) {
-                return response()->json([
-                    'respuesta' => 'No se encontraron sub-servicios para tu selección. Intenta de nuevo.',
-                ]);
+            if (empty($seleccionNormalizada)) {
+                session()->forget('chat.selecciones');
+                return $this->mostrarCatalogoJson(
+                    'No tienes sub-servicios seleccionados. El catálogo está disponible para que agregues los que necesites:',
+                    $dias > 0 ? $dias : ((int) session('chat.days', 0) ?: null),
+                    []
+                );
             }
 
-            session(['chat.selecciones' => $todasLasSelecciones]);
-            $diasCalculo = $dias > 0 ? $dias : 1;
+            $items = $this->obtenerItemsSeleccionados($seleccionNormalizada);
 
-            return $this->responderCotizacion($items, $diasCalculo, $todasLasSelecciones);
+            if ($items->isEmpty()) {
+                session()->forget('chat.selecciones');
+                return $this->mostrarCatalogoJson(
+                    'No se encontraron sub-servicios para tu selección. Aquí está el catálogo completo:',
+                    $dias > 0 ? $dias : ((int) session('chat.days', 0) ?: null),
+                    []
+                );
+            }
+
+            session(['chat.selecciones' => $seleccionNormalizada]);
+            $diasCalculo = $dias > 0 ? $dias : max(1, (int) session('chat.days', 0) ?: 1);
+
+            return $this->responderCotizacion($items, $diasCalculo, $seleccionNormalizada);
         }
 
         // Si no hay mensaje, invitamos a cotizar directamente
