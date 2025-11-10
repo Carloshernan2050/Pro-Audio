@@ -9,10 +9,16 @@ use App\Models\Historial;
 use App\Models\Inventario;
 use App\Models\Reserva;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CalendarioController extends Controller
 {
+    private const DEFAULT_COLOR = '#e91c1c';
+    private const DEFAULT_TEXT_COLOR = '#ffffff';
+    private const DEFAULT_PRODUCT_LABEL = 'Sin producto';
+    private const DEFAULT_EVENT_TITLE = 'Alquiler';
+
     /**
      * Paleta de colores utilizada para diferenciar reservas en el calendario.
      */
@@ -32,7 +38,7 @@ class CalendarioController extends Controller
     private function nextPaletteColor(): array
     {
         if (empty($this->calendarColorPalette)) {
-            return ['bg' => '#e91c1c', 'border' => '#e91c1c', 'text' => '#ffffff'];
+            return ['bg' => self::DEFAULT_COLOR, 'border' => self::DEFAULT_COLOR, 'text' => self::DEFAULT_TEXT_COLOR];
         }
 
         $paletteIndex = $this->paletteCursor % count($this->calendarColorPalette);
@@ -41,9 +47,9 @@ class CalendarioController extends Controller
         $color = $this->calendarColorPalette[$paletteIndex] ?? [];
 
         return [
-            'bg' => $color['bg'] ?? '#e91c1c',
-            'border' => $color['border'] ?? ($color['bg'] ?? '#e91c1c'),
-            'text' => $color['text'] ?? '#ffffff',
+            'bg' => $color['bg'] ?? self::DEFAULT_COLOR,
+            'border' => $color['border'] ?? ($color['bg'] ?? self::DEFAULT_COLOR),
+            'text' => $color['text'] ?? self::DEFAULT_TEXT_COLOR,
         ];
     }
 
@@ -69,98 +75,20 @@ class CalendarioController extends Controller
     // Mostrar el calendario
     public function inicio()
     {
-        // Obtener registros y eliminar duplicados reales (mismo contenido)
-        $registros = Calendario::with(['items', 'reserva'])
-            ->orderBy('fecha', 'desc')
-            ->orderBy('id', 'desc')
-            ->get();
-        
-        // Eliminar duplicados basándose en contenido (fecha_inicio, fecha_fin, descripcion, items)
-        $registrosUnicos = [];
-        $vistos = [];
-        
+        $registros = $this->obtenerRegistrosUnicos();
+        [$movimientos, $inventarios] = $this->cargarMovimientosEInventarios();
+
         $this->resetPaletteCursor();
 
-        foreach ($registros as $r) {
-            // Crear una clave única basada en el contenido
-            $itemsKey = $r->items->map(function($item) {
-                return $item->movimientos_inventario_id . ':' . $item->cantidad;
-            })->sort()->implode(',');
-            
-            $clave = $r->fecha_inicio . '|' . $r->fecha_fin . '|' . $r->descripcion_evento . '|' . $itemsKey;
-            
-            // Solo agregar si no hemos visto este contenido antes
-            if (!isset($vistos[$clave])) {
-                $vistos[$clave] = true;
-                $registrosUnicos[] = $r;
-            }
-        }
-        
-        $registros = collect($registrosUnicos);
-        // Cargar movimientos e inventarios para resolver correctamente la relación
-        $movimientos = DB::table('movimientos_inventario')->get()->keyBy('id');
-        $inventarios = DB::table('inventario')->orderBy('descripcion', 'asc')->get()->keyBy('id');
-
         $eventos = [];
-        $eventosItems = []; // Para pasar información detallada de items a JavaScript
-        
-        foreach ($registros as $r) {
-            // Si tiene items (nuevo formato), mostrar todos los productos
-            if ($r->items && $r->items->count() > 0) {
-                $productos = [];
-                $inventarioIds = [];
-                $itemsData = [];
-                
-                foreach ($r->items as $item) {
-                    $mov = $movimientos->get($item->movimientos_inventario_id);
-                    $invId = $mov->inventario_id ?? null;
-                    if ($invId && isset($inventarios[$invId])) {
-                        $nombreProducto = $inventarios[$invId]->descripcion ?? 'Sin producto';
-                        $productos[] = $nombreProducto . ' (x' . $item->cantidad . ')';
-                        $inventarioIds[] = $invId;
-                        // Guardar información detallada para JavaScript
-                        $itemsData[] = [
-                            'inventario_id' => $invId,
-                            'cantidad' => $item->cantidad
-                        ];
-                    }
-                }
-                $titulo = count($productos) > 0 ? implode(', ', $productos) : 'Alquiler';
-                $descripcion = ($r->descripcion_evento ?? '') . ' | Productos: ' . implode(', ', $productos);
-                
-                // Guardar items para el cálculo de disponibilidad
-                $eventosItems[$r->id] = $itemsData;
-            } else {
-                // Formato antiguo: un solo producto
-                $mov = $movimientos->get($r->movimientos_inventario_id);
-                $invId = $mov->inventario_id ?? null;
-                $titulo = ($invId && isset($inventarios[$invId]))
-                    ? ($inventarios[$invId]->descripcion ?? 'Sin producto')
-                    : 'Sin producto';
-                if ($r->cantidad) {
-                    $titulo .= ' (x' . $r->cantidad . ')';
-                }
-                $descripcion = trim(($r->cantidad ? ('Cantidad solicitada: '.$r->cantidad.'. ') : '').($r->descripcion_evento ?? ''));
-                $inventarioIds = $invId ? [$invId] : [];
-                // Para formato antiguo, guardar también
-                if ($invId) {
-                    $eventosItems[$r->id] = [['inventario_id' => $invId, 'cantidad' => $r->cantidad ?? 1]];
-                }
+        $eventosItems = [];
+
+        foreach ($registros as $registro) {
+            $eventoData = $this->construirEvento($registro, $movimientos, $inventarios);
+            $eventos[] = $eventoData['evento'];
+            if (!empty($eventoData['items'])) {
+                $eventosItems[$registro->id] = $eventoData['items'];
             }
-
-            $colorSet = $this->nextPaletteColor();
-
-            $eventos[] = [
-                'title'       => $titulo,
-                'start'       => $r->fecha_inicio,
-                'end'         => $r->fecha_fin,
-                'description' => $descripcion,
-                'calendarioId'=> $r->id,
-                'inventarioIds'=> $inventarioIds,
-                'backgroundColor' => $colorSet['bg'],
-                'borderColor' => $colorSet['border'],
-                'textColor' => $colorSet['text'],
-            ];
         }
 
         $reservasPendientes = Reserva::with(['items.inventario'])
@@ -171,9 +99,9 @@ class CalendarioController extends Controller
         return view('usuarios.calendario', [
             'registros'   => $registros,
             'inventarios' => $inventarios,
-            'movimientos' => $movimientos->values(), // para la vista (no keyBy)
+            'movimientos' => $movimientos->values(),
             'eventos'     => $eventos,
-            'eventosItems' => $eventosItems, // Items detallados para JavaScript
+            'eventosItems' => $eventosItems,
             'reservasPendientes' => $reservasPendientes,
         ]);
     }
@@ -181,84 +109,15 @@ class CalendarioController extends Controller
     // Obtener eventos en formato JSON para recargar el calendario
     public function getEventos()
     {
-        // Obtener registros y eliminar duplicados reales (mismo contenido)
-        $registros = Calendario::with(['items', 'reserva'])
-            ->orderBy('fecha', 'desc')
-            ->orderBy('id', 'desc')
-            ->get();
-        
-        // Eliminar duplicados basándose en contenido (fecha_inicio, fecha_fin, descripcion, items)
-        $registrosUnicos = [];
-        $vistos = [];
-        
+        $registros = $this->obtenerRegistrosUnicos();
+        [$movimientos, $inventarios] = $this->cargarMovimientosEInventarios();
+
         $this->resetPaletteCursor();
 
-        foreach ($registros as $r) {
-            // Crear una clave única basada en el contenido
-            $itemsKey = $r->items->map(function($item) {
-                return $item->movimientos_inventario_id . ':' . $item->cantidad;
-            })->sort()->implode(',');
-            
-            $clave = $r->fecha_inicio . '|' . $r->fecha_fin . '|' . $r->descripcion_evento . '|' . $itemsKey;
-            
-            // Solo agregar si no hemos visto este contenido antes
-            if (!isset($vistos[$clave])) {
-                $vistos[$clave] = true;
-                $registrosUnicos[] = $r;
-            }
-        }
-        
-        $registros = collect($registrosUnicos);
-        // Cargar movimientos e inventarios para resolver correctamente la relación
-        $movimientos = DB::table('movimientos_inventario')->get()->keyBy('id');
-        $inventarios = DB::table('inventario')->orderBy('descripcion', 'asc')->get()->keyBy('id');
-
         $eventos = [];
-        
-        foreach ($registros as $r) {
-            // Si tiene items (nuevo formato), mostrar todos los productos
-            if ($r->items && $r->items->count() > 0) {
-                $productos = [];
-                $inventarioIds = [];
-                
-                foreach ($r->items as $item) {
-                    $mov = $movimientos->get($item->movimientos_inventario_id);
-                    $invId = $mov->inventario_id ?? null;
-                    if ($invId && isset($inventarios[$invId])) {
-                        $nombreProducto = $inventarios[$invId]->descripcion ?? 'Sin producto';
-                        $productos[] = $nombreProducto . ' (x' . $item->cantidad . ')';
-                        $inventarioIds[] = $invId;
-                    }
-                }
-                $titulo = count($productos) > 0 ? implode(', ', $productos) : 'Alquiler';
-                $descripcion = ($r->descripcion_evento ?? '') . ' | Productos: ' . implode(', ', $productos);
-            } else {
-                // Formato antiguo: un solo producto
-                $mov = $movimientos->get($r->movimientos_inventario_id);
-                $invId = $mov->inventario_id ?? null;
-                $titulo = ($invId && isset($inventarios[$invId]))
-                    ? ($inventarios[$invId]->descripcion ?? 'Sin producto')
-                    : 'Sin producto';
-                if ($r->cantidad) {
-                    $titulo .= ' (x' . $r->cantidad . ')';
-                }
-                $descripcion = trim(($r->cantidad ? ('Cantidad solicitada: '.$r->cantidad.'. ') : '').($r->descripcion_evento ?? ''));
-                $inventarioIds = $invId ? [$invId] : [];
-            }
 
-            $colorSet = $this->nextPaletteColor();
-
-            $eventos[] = [
-                'title'       => $titulo,
-                'start'       => $r->fecha_inicio,
-                'end'         => $r->fecha_fin,
-                'description' => $descripcion,
-                'calendarioId'=> $r->id,
-                'inventarioIds'=> $inventarioIds,
-                'backgroundColor' => $colorSet['bg'],
-                'borderColor' => $colorSet['border'],
-                'textColor' => $colorSet['text'],
-            ];
+        foreach ($registros as $registro) {
+            $eventos[] = $this->construirEvento($registro, $movimientos, $inventarios)['evento'];
         }
 
         return response()->json($eventos);
@@ -322,7 +181,7 @@ class CalendarioController extends Controller
                 if ($movimiento && isset($inventarios[$movimiento->inventario_id])) {
                     $cant = $r->cantidad ?? 1;
                     $productosLista[] = [
-                        'nombre' => $inventarios[$movimiento->inventario_id]->descripcion,
+                        'nombre' => $inventarios[$movimiento->inventario_id]->descripcion ?? self::DEFAULT_PRODUCT_LABEL,
                         'cantidad' => $cant
                     ];
                     $cantidadTotal = $cant;
@@ -349,6 +208,139 @@ class CalendarioController extends Controller
             'registros' => $registrosData,
             'total' => count($registrosData)
         ]);
+    }
+
+    private function obtenerRegistrosUnicos(): Collection
+    {
+        $registros = Calendario::with(['items', 'reserva'])
+            ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $vistos = [];
+        $registrosUnicos = [];
+
+        foreach ($registros as $registro) {
+            $itemsKey = $registro->items->map(function ($item) {
+                return $item->movimientos_inventario_id . ':' . $item->cantidad;
+            })->sort()->implode(',');
+
+            $clave = $registro->fecha_inicio . '|' . $registro->fecha_fin . '|' . $registro->descripcion_evento . '|' . $itemsKey;
+
+            if (!isset($vistos[$clave])) {
+                $vistos[$clave] = true;
+                $registrosUnicos[] = $registro;
+            }
+        }
+
+        return collect($registrosUnicos);
+    }
+
+    /**
+     * @return array{Collection, Collection}
+     */
+    private function cargarMovimientosEInventarios(): array
+    {
+        $movimientos = DB::table('movimientos_inventario')->get()->keyBy('id');
+        $inventarios = DB::table('inventario')->orderBy('descripcion', 'asc')->get()->keyBy('id');
+
+        return [$movimientos, $inventarios];
+    }
+
+    /**
+     * Construye el evento y los datos relacionados para un registro.
+     *
+     * @return array{evento: array<string, mixed>, items: array<int, array<string, mixed>>}
+     */
+    private function construirEvento($registro, Collection $movimientos, Collection $inventarios): array
+    {
+        if ($registro->items && $registro->items->count() > 0) {
+            [$titulo, $descripcion, $inventarioIds, $itemsData] = $this->construirEventoDesdeItems(
+                $registro,
+                $movimientos,
+                $inventarios
+            );
+        } else {
+            [$titulo, $descripcion, $inventarioIds, $itemsData] = $this->construirEventoFormatoAntiguo(
+                $registro,
+                $movimientos,
+                $inventarios
+            );
+        }
+
+        $colorSet = $this->nextPaletteColor();
+
+        return [
+            'evento' => [
+                'title' => $titulo,
+                'start' => $registro->fecha_inicio,
+                'end' => $registro->fecha_fin,
+                'description' => $descripcion,
+                'calendarioId' => $registro->id,
+                'inventarioIds' => $inventarioIds,
+                'backgroundColor' => $colorSet['bg'],
+                'borderColor' => $colorSet['border'],
+                'textColor' => $colorSet['text'],
+            ],
+            'items' => $itemsData,
+        ];
+    }
+
+    private function construirEventoDesdeItems($registro, Collection $movimientos, Collection $inventarios): array
+    {
+        $productos = [];
+        $inventarioIds = [];
+        $itemsData = [];
+
+        foreach ($registro->items as $item) {
+            $mov = $movimientos->get($item->movimientos_inventario_id);
+            $inventarioId = $mov->inventario_id ?? null;
+            if ($inventarioId && isset($inventarios[$inventarioId])) {
+                $nombreProducto = $inventarios[$inventarioId]->descripcion ?? self::DEFAULT_PRODUCT_LABEL;
+                $productos[] = $nombreProducto . ' (x' . $item->cantidad . ')';
+                $inventarioIds[] = $inventarioId;
+                $itemsData[] = [
+                    'inventario_id' => $inventarioId,
+                    'cantidad' => $item->cantidad,
+                ];
+            }
+        }
+
+        $titulo = !empty($productos) ? implode(', ', $productos) : self::DEFAULT_EVENT_TITLE;
+        $descripcion = ($registro->descripcion_evento ?? '') . ' | Productos: ' . implode(', ', $productos);
+
+        return [$titulo, $descripcion, $inventarioIds, $itemsData];
+    }
+
+    private function construirEventoFormatoAntiguo($registro, Collection $movimientos, Collection $inventarios): array
+    {
+        $mov = $movimientos->get($registro->movimientos_inventario_id);
+        $inventarioId = $mov->inventario_id ?? null;
+
+        $titulo = ($inventarioId && isset($inventarios[$inventarioId]))
+            ? ($inventarios[$inventarioId]->descripcion ?? self::DEFAULT_PRODUCT_LABEL)
+            : self::DEFAULT_PRODUCT_LABEL;
+
+        if ($registro->cantidad) {
+            $titulo .= ' (x' . $registro->cantidad . ')';
+        }
+
+        $descripcion = trim(
+            ($registro->cantidad ? ('Cantidad solicitada: ' . $registro->cantidad . '. ') : '') .
+            ($registro->descripcion_evento ?? '')
+        );
+
+        $inventarioIds = $inventarioId ? [$inventarioId] : [];
+        $itemsData = [];
+
+        if ($inventarioId) {
+            $itemsData[] = [
+                'inventario_id' => $inventarioId,
+                'cantidad' => $registro->cantidad ?? 1,
+            ];
+        }
+
+        return [$titulo, $descripcion, $inventarioIds, $itemsData];
     }
 
     // Guardar nuevo evento
@@ -457,7 +449,7 @@ class CalendarioController extends Controller
                 'fecha_fin'                 => $request->fecha_fin,
                 'descripcion_evento'        => $request->descripcion_evento,
                 'cantidad'                  => $cantidadTotal, // Cantidad total de todos los productos
-                'evento'                    => 'Alquiler'
+                'evento'                    => self::DEFAULT_EVENT_TITLE
             ]);
             
             // Crear los items (productos) asociados al alquiler
@@ -528,7 +520,7 @@ class CalendarioController extends Controller
                 'fecha_inicio'              => $request->fecha_inicio,
                 'fecha_fin'                 => $request->fecha_fin,
                 'descripcion_evento'        => $request->descripcion_evento,
-                'evento'                    => 'Alquiler'
+                'evento'                    => self::DEFAULT_EVENT_TITLE
             ]);
             
             // Confirmar transacción
