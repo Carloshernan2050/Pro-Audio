@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Servicios;
+use App\Models\Cotizacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ServiciosController extends Controller
@@ -152,13 +154,21 @@ class ServiciosController extends Controller
     public function destroy($id)
     {
         try {
-            $servicio = Servicios::findOrFail($id);
+            $servicio = Servicios::with('subServicios')->findOrFail($id);
             $nombreVista = Str::slug($servicio->nombre_servicio, '_');
-            
-            // Eliminar el servicio
-            $servicio->delete();
-            
-            // Eliminar el archivo blade asociado
+
+            DB::transaction(function () use ($servicio) {
+                $subServicioIds = $servicio->subServicios->pluck('id');
+
+                if ($subServicioIds->isNotEmpty()) {
+                    Cotizacion::whereIn('sub_servicios_id', $subServicioIds)->delete();
+                    $servicio->subServicios()->delete();
+                }
+
+                $servicio->delete();
+            });
+
+            // Eliminar el archivo blade asociado (fuera de la transacción)
             $this->eliminarBlade($nombreVista);
 
             return redirect()->route('servicios.index')

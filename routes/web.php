@@ -14,6 +14,7 @@ use App\Http\Controllers\BusquedaController;
 use App\Http\Controllers\SubServiciosController;
 use App\Http\Controllers\RoleAdminController;
 use App\Http\Controllers\HistorialController;
+use App\Http\Controllers\ReservaController;
 
 // Inicio directo al dashboard (middleware pondrá Invitado por defecto)
 Route::get('/', function(){ return redirect()->route('inicio'); });
@@ -82,6 +83,14 @@ Route::resource('subservicios', SubServiciosController::class)->middleware('role
 // Rutas para inventario y movimientos
 Route::resource('inventario', InventarioController::class)->middleware('role:Superadmin,Admin');
 Route::resource('movimientos', MovimientosInventarioController::class)->middleware('role:Superadmin,Admin');
+
+// Reservas
+Route::controller(ReservaController::class)->middleware('role:Superadmin,Admin')->group(function () {
+    Route::get('/reservas', 'index')->name('reservas.index');
+    Route::post('/reservas', 'store')->name('reservas.store');
+    Route::post('/reservas/{reserva}/confirmar', 'confirm')->name('reservas.confirm');
+    Route::delete('/reservas/{reserva}', 'destroy')->name('reservas.destroy');
+});
 
 // Rutas del calendario
 Route::controller(CalendarioController::class)->group(function () {

@@ -498,6 +498,8 @@
                                 <option value="">Seleccionar tipo</option>
                                 <option value="entrada">Entrada</option>
                                 <option value="salida">Salida</option>
+                                <option value="alquilado">Alquilado</option>
+                                <option value="devuelto">Devuelto</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -960,14 +962,21 @@
                 .then(data => {
                     const tbody = document.getElementById('movimientos-table-body');
                     tbody.innerHTML = '';
+                    const tipoLabels = {
+                        entrada: 'Entrada',
+                        salida: 'Salida',
+                        alquilado: 'Alquilado',
+                        devuelto: 'Devuelto'
+                    };
                     
                     data.forEach(movimiento => {
                         const fecha = new Date(movimiento.fecha_movimiento).toLocaleDateString();
+                        const tipoTexto = tipoLabels[movimiento.tipo_movimiento] || movimiento.tipo_movimiento;
                         const row = `
                             <tr>
                                 <td>${movimiento.id}</td>
                                 <td>${movimiento.inventario ? movimiento.inventario.descripcion : 'N/A'}</td>
-                                <td>${movimiento.tipo_movimiento}</td>
+                                <td>${tipoTexto}</td>
                                 <td>${movimiento.cantidad}</td>
                                 <td>${fecha}</td>
                                 <td class="actions-cell">

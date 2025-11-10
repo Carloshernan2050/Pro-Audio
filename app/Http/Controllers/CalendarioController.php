@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Calendario;
 use App\Models\CalendarioItem;
 use App\Models\MovimientosInventario;
+use App\Models\Historial;
+use App\Models\Inventario;
+use App\Models\Reserva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -67,7 +70,7 @@ class CalendarioController extends Controller
     public function inicio()
     {
         // Obtener registros y eliminar duplicados reales (mismo contenido)
-        $registros = Calendario::with('items')
+        $registros = Calendario::with(['items', 'reserva'])
             ->orderBy('fecha', 'desc')
             ->orderBy('id', 'desc')
             ->get();
@@ -160,12 +163,18 @@ class CalendarioController extends Controller
             ];
         }
 
+        $reservasPendientes = Reserva::with(['items.inventario'])
+            ->where('estado', 'pendiente')
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('usuarios.calendario', [
             'registros'   => $registros,
             'inventarios' => $inventarios,
             'movimientos' => $movimientos->values(), // para la vista (no keyBy)
             'eventos'     => $eventos,
             'eventosItems' => $eventosItems, // Items detallados para JavaScript
+            'reservasPendientes' => $reservasPendientes,
         ]);
     }
 
@@ -173,7 +182,7 @@ class CalendarioController extends Controller
     public function getEventos()
     {
         // Obtener registros y eliminar duplicados reales (mismo contenido)
-        $registros = Calendario::with('items')
+        $registros = Calendario::with(['items', 'reserva'])
             ->orderBy('fecha', 'desc')
             ->orderBy('id', 'desc')
             ->get();
@@ -259,7 +268,7 @@ class CalendarioController extends Controller
     public function getRegistros()
     {
         // Obtener registros y eliminar duplicados reales (mismo contenido)
-        $registros = Calendario::with('items')
+        $registros = Calendario::with(['items', 'reserva'])
             ->orderBy('fecha', 'desc')
             ->orderBy('id', 'desc')
             ->get();
@@ -550,7 +559,7 @@ class CalendarioController extends Controller
         DB::beginTransaction();
         
         try {
-            $calendario = Calendario::findOrFail($id);
+            $calendario = Calendario::with(['items.movimientoInventario', 'reserva'])->findOrFail($id);
             
             // Verificar si es un registro con items (nuevo formato) o formato antiguo
             $tieneItems = $calendario->items && $calendario->items->count() > 0;
@@ -564,6 +573,7 @@ class CalendarioController extends Controller
                 }
                 
                 $request->validate([
+                    'servicio'                  => 'required|string|max:120',
                     'items'                      => 'required|array|min:1',
                     'items.*.inventario_id'      => 'required|exists:inventario,id',
                     'items.*.cantidad'           => 'required|integer|min:1',
@@ -571,6 +581,7 @@ class CalendarioController extends Controller
                     'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
                     'descripcion_evento'        => 'required|string'
                 ], [
+                    'servicio.required' => 'Debe seleccionar un servicio.',
                     'items.required' => 'Debe seleccionar al menos un producto.',
                     'items.min' => 'Debe seleccionar al menos un producto.',
                     'items.*.inventario_id.required' => 'Debe seleccionar un producto del inventario.',
@@ -587,6 +598,16 @@ class CalendarioController extends Controller
                     'descripcion_evento.string' => 'La descripción del evento debe ser texto.'
                 ]);
 
+                // Cantidades actuales del calendario (para devolver stock temporalmente)
+                $itemsActuales = [];
+                foreach ($calendario->items as $itemActual) {
+                    if (!$itemActual->movimientoInventario) {
+                        continue;
+                    }
+                    $invId = $itemActual->movimientoInventario->inventario_id;
+                    $itemsActuales[$invId] = ($itemsActuales[$invId] ?? 0) + $itemActual->cantidad;
+                }
+
                 // Validar stock de todos los items antes de actualizar nada
                 foreach ($items as $item) {
                     $inventarioId = $item['inventario_id'];
@@ -599,6 +620,7 @@ class CalendarioController extends Controller
                     
                     $cantidadSolicitada = $item['cantidad'] ?? 1;
                     $stockTotal = DB::table('inventario')->where('id', $inventarioId)->value('stock') ?? 0;
+                    $cantidadActual = $itemsActuales[$inventarioId] ?? 0;
                     
                     // Calcular reservas que se solapan (excluyendo el registro actual que se está editando)
                     $reservadas = DB::table('calendario')
@@ -610,7 +632,7 @@ class CalendarioController extends Controller
                         ->where('calendario.fecha_fin', '>', $request->fecha_inicio)
                         ->sum('calendario_items.cantidad') ?? 0;
                     
-                    $disponible = $stockTotal - $reservadas;
+                    $disponible = ($stockTotal + $cantidadActual) - $reservadas;
                     
                     if ($disponible < $cantidadSolicitada) {
                         $producto = DB::table('inventario')->where('id', $inventarioId)->first();
@@ -620,6 +642,23 @@ class CalendarioController extends Controller
                     }
                 }
                 
+                // Devolver stock actual antes de aplicar los nuevos cambios
+                foreach ($itemsActuales as $invId => $cant) {
+                    if ($cant <= 0) {
+                        continue;
+                    }
+
+                    Inventario::where('id', $invId)->increment('stock', $cant);
+
+                    MovimientosInventario::create([
+                        'inventario_id' => $invId,
+                        'tipo_movimiento' => 'devuelto',
+                        'cantidad' => $cant,
+                        'fecha_movimiento' => now(),
+                        'descripcion' => 'Ajuste de reserva #' . $id . ' (devolución por actualización)',
+                    ]);
+                }
+
                 // Actualizar el registro principal
                 $cantidadTotal = array_sum(array_column($items, 'cantidad'));
                 
@@ -634,8 +673,10 @@ class CalendarioController extends Controller
                 CalendarioItem::where('calendario_id', $id)->delete();
                 
                 // Crear los nuevos items
+                $nuevosItemsReserva = [];
                 foreach ($items as $item) {
                     $inventarioId = $item['inventario_id'];
+                    $cantidad = $item['cantidad'] ?? 1;
                     
                     // Buscar o crear un movimiento para este inventario
                     $movimiento = DB::table('movimientos_inventario')
@@ -657,12 +698,49 @@ class CalendarioController extends Controller
                     } else {
                         $movimientoIdFinal = $movimiento->id;
                     }
+
+                    // Descontar nuevamente el stock con la cantidad nueva
+                    Inventario::where('id', $inventarioId)->decrement('stock', $cantidad);
+
+                    MovimientosInventario::create([
+                        'inventario_id' => $inventarioId,
+                        'tipo_movimiento' => 'alquilado',
+                        'cantidad' => $cantidad,
+                        'fecha_movimiento' => now(),
+                        'descripcion' => 'Ajuste de reserva #' . $id . ' (nueva cantidad)',
+                    ]);
                     
                     CalendarioItem::create([
                         'calendario_id'           => $id,
                         'movimientos_inventario_id' => $movimientoIdFinal,
-                        'cantidad'                => $item['cantidad'] ?? 1
+                        'cantidad'                => $cantidad
                     ]);
+
+                    $nuevosItemsReserva[] = [
+                        'inventario_id' => $inventarioId,
+                        'cantidad' => $cantidad,
+                    ];
+                }
+
+                // Actualizar información de la reserva vinculada (si existe)
+                $reserva = Reserva::with('items')->where('calendario_id', $id)->first();
+                if ($reserva) {
+                    $reserva->update([
+                        'servicio' => $request->input('servicio'),
+                        'fecha_inicio' => $request->fecha_inicio,
+                        'fecha_fin' => $request->fecha_fin,
+                        'descripcion_evento' => $request->descripcion_evento,
+                        'cantidad_total' => $cantidadTotal,
+                        'meta' => array_merge($reserva->meta ?? [], [
+                            'actualizada_en' => now()->toDateTimeString(),
+                        ]),
+                    ]);
+
+                    // Reemplazar items de la reserva
+                    $reserva->items()->delete();
+                    foreach ($nuevosItemsReserva as $item) {
+                        $reserva->items()->create($item);
+                    }
                 }
                 
                 DB::commit();
@@ -670,12 +748,14 @@ class CalendarioController extends Controller
             } else {
                 // Formato antiguo: validar con movimientos_inventario_id
                 $request->validate([
+                    'servicio'                  => 'required|string|max:120',
                     'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
                     'fecha_inicio'              => 'required|date',
                     'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
                     'descripcion_evento'        => 'required|string',
                     'cantidad'                  => 'nullable|integer|min:1'
                 ], [
+                    'servicio.required' => 'Debe seleccionar un servicio.',
                     'movimientos_inventario_id.required' => 'Debe seleccionar un producto del inventario.',
                     'movimientos_inventario_id.exists' => 'El producto seleccionado no existe.',
                     'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
@@ -702,6 +782,20 @@ class CalendarioController extends Controller
                 }
                 
                 $calendario->update($updateData);
+
+                $reserva = Reserva::where('calendario_id', $id)->first();
+                if ($reserva) {
+                    $reserva->update([
+                        'servicio' => $request->input('servicio'),
+                        'fecha_inicio' => $request->fecha_inicio,
+                        'fecha_fin' => $request->fecha_fin,
+                        'descripcion_evento' => $request->descripcion_evento,
+                        'cantidad_total' => $request->cantidad ?? $calendario->cantidad,
+                        'meta' => array_merge($reserva->meta ?? [], [
+                            'actualizada_en' => now()->toDateTimeString(),
+                        ]),
+                    ]);
+                }
                 
                 DB::commit();
                 return redirect()->route('usuarios.calendario')->with('ok', 'Alquiler actualizado correctamente.');
@@ -719,20 +813,52 @@ class CalendarioController extends Controller
     public function eliminar($id)
     {
         $this->ensureAdminLike();
-        // Borrar dependencias en historial para evitar error de clave foránea
-        try {
-            DB::table('historial')->where('calendario_id', $id)->delete();
-        } catch (\Throwable $e) {
-            // continuar; si no existe la tabla/columna, se ignora silenciosamente
-        }
-        // Los items se eliminan automáticamente por cascade delete
-        Calendario::findOrFail($id)->delete();
-        
-        // Si es una petición AJAX, devolver JSON
+
+        $calendario = Calendario::with(['items.movimientoInventario', 'reserva'])->findOrFail($id);
+
+        DB::transaction(function () use ($calendario) {
+            foreach ($calendario->items as $item) {
+                $movimiento = $item->movimientoInventario;
+
+                if ($movimiento && $movimiento->inventario_id) {
+                    Inventario::where('id', $movimiento->inventario_id)->increment('stock', $item->cantidad);
+
+                    MovimientosInventario::create([
+                        'inventario_id' => $movimiento->inventario_id,
+                        'tipo_movimiento' => 'devuelto',
+                        'cantidad' => $item->cantidad,
+                        'fecha_movimiento' => now(),
+                        'descripcion' => 'Devolución automática: Calendario #' . $calendario->id,
+                    ]);
+                }
+            }
+
+            $reserva = Reserva::where('calendario_id', $calendario->id)->first();
+
+            if ($reserva) {
+                $reserva->update([
+                    'estado' => 'devuelta',
+                    'calendario_id' => null,
+                    'meta' => array_merge($reserva->meta ?? [], [
+                        'devuelta_en' => now()->toDateTimeString(),
+                    ]),
+                ]);
+
+                Historial::create([
+                    'reserva_id' => $reserva->id,
+                    'accion' => 'devuelta',
+                    'confirmado_en' => now(),
+                    'observaciones' => 'Reserva devuelta y evento eliminado del calendario.',
+                ]);
+            }
+
+            $calendario->delete();
+        });
+
         if (request()->ajax() || request()->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Evento eliminado']);
+            return response()->json(['success' => true, 'message' => 'Evento eliminado y stock restaurado.']);
         }
-        
-        return back()->with('ok','Evento eliminado');
+
+        return back()->with('ok', 'Evento eliminado y stock restaurado.');
     }
 }

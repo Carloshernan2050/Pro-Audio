@@ -486,11 +486,14 @@
                                                         <div id="alertEditar{{ $r->id }}" class="alert alert-danger" style="display: none;"></div>
                                                         <div class="mb-3">
                                                             <label class="form-label">Servicio *</label>
-                                                            <select id="servicio_editar{{ $r->id }}" class="form-select" required>
+                                                            @php
+                                                                $servicioSeleccionado = optional($r->reserva)->servicio ?? '';
+                                                            @endphp
+                                                            <select id="servicio_editar{{ $r->id }}" name="servicio" class="form-select" required>
                                                                 <option value="">Seleccione un servicio</option>
-                                                                <option value="Publicidad">Publicidad</option>
-                                                                <option value="Alquiler">Alquiler</option>
-                                                                <option value="Animación">Animación</option>
+                                                                <option value="Publicidad" {{ $servicioSeleccionado === 'Publicidad' ? 'selected' : '' }}>Publicidad</option>
+                                                                <option value="Alquiler" {{ $servicioSeleccionado === 'Alquiler' ? 'selected' : '' }}>Alquiler</option>
+                                                                <option value="Animación" {{ $servicioSeleccionado === 'Animación' ? 'selected' : '' }}>Animación</option>
                                                             </select>
                                                         </div>
                             @if(!$tieneItems)
@@ -551,7 +554,7 @@
                                                 </div>
                                                 <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
                                                     <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                                                    <input type="number" min="1" class="form-control form-control-sm" data-stock="{{ $stock }}" name="items[{{ $loop->index }}][cantidad]" value="{{ $item->cantidad }}" placeholder="Cantidad (máx {{ $stock }})" required style="width:100%;">
+                                                    <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="{{ $stock }}" name="items[{{ $loop->index }}][cantidad]" value="{{ $item->cantidad }}" placeholder="Cantidad (máx {{ $stock }})" required style="width:100%;">
                                                     <small class="field-error" style="display:none;"></small>
                                                 </div>
                                                 <input type="hidden" name="items[{{ $loop->index }}][inventario_id]" value="{{ $invId }}">
@@ -576,7 +579,7 @@
                             @if(!$tieneItems)
                                                         <div class="mb-3">
                                                             <label class="form-label">Cantidad *</label>
-                                <input type="number" name="cantidad" id="cantidad_editar{{ $r->id }}" class="form-control" min="1" value="{{ $r->cantidad ?? 1 }}" required>
+                                <input type="number" name="cantidad" id="cantidad_editar{{ $r->id }}" class="form-control" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" value="{{ $r->cantidad ?? 1 }}" required>
                                                         </div>
                             @endif
 
@@ -611,11 +614,11 @@
                         <div id="alertCrear" class="alert alert-danger" style="display: none;"></div>
                         <div class="mb-2">
                             <label>Servicio *</label>
-                            <select id="servicio_crear" class="form-control" required>
+                            <select id="servicio_crear" name="servicio" class="form-control" required>
                                 <option value="">Seleccione un servicio</option>
-                                <option value="Publicidad">Publicidad</option>
-                                <option value="Alquiler">Alquiler</option>
-                                <option value="Animación">Animación</option>
+                                <option value="Publicidad" {{ old('servicio') === 'Publicidad' ? 'selected' : '' }}>Publicidad</option>
+                                <option value="Alquiler" {{ old('servicio') === 'Alquiler' ? 'selected' : '' }}>Alquiler</option>
+                                <option value="Animación" {{ old('servicio') === 'Animación' ? 'selected' : '' }}>Animación</option>
                             </select>
                         </div>
                         <div class="mb-2">
@@ -690,6 +693,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const successAlert = document.getElementById('alertSuccessMessage');
                 const errorAlert = document.getElementById('alertErrorMessage');
+                document.querySelectorAll('[data-only-numeric]').forEach(bindNumericSanitizer);
                 
                 if (successAlert) {
                     setTimeout(function() {
@@ -1017,18 +1021,18 @@
                         return;
                     }
 
-                const actionBtn = confirmBtn || cancelBtn;
-                let originalBtnHtml = '';
-                if (actionBtn) {
-                    originalBtnHtml = actionBtn.innerHTML;
-                    actionBtn.disabled = true;
-                    actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                }
+                    const actionBtn = confirmBtn || cancelBtn;
+                    let originalBtnHtml = '';
+                    if (actionBtn) {
+                        originalBtnHtml = actionBtn.innerHTML;
+                        actionBtn.disabled = true;
+                        actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    }
 
-                try {
+                    try {
                         if (confirmBtn) {
                             const data = await confirmarReservaRequest(id);
-                        showToast(data.message || 'Reserva confirmada correctamente.', 'success');
+                            showToast(data.message || 'Reserva confirmada correctamente.', 'success');
                             await reloadReservas();
                             if (typeof window.refreshInventarioData === 'function') {
                                 await window.refreshInventarioData();
@@ -1449,6 +1453,33 @@
                 setTimeout(() => { el.remove(); }, 3000);
             }
 
+            const numericInputsBound = new WeakSet();
+            function bindNumericSanitizer(input) {
+                if (!input || numericInputsBound.has(input)) return;
+                const handler = () => {
+                    if (!input.value) {
+                        input.value = '';
+                        return;
+                    }
+                    const digits = input.value.replace(/\D/g, '');
+                    if (input.value !== digits) {
+                        input.value = digits;
+                    }
+                    if (digits) {
+                        const minAttr = input.getAttribute('min');
+                        if (minAttr !== null && minAttr !== '') {
+                            const minVal = parseInt(minAttr, 10);
+                            if (!Number.isNaN(minVal) && parseInt(input.value || '0', 10) < minVal) {
+                                input.value = String(minVal);
+                            }
+                        }
+                    }
+                };
+                input.addEventListener('input', handler);
+                input.addEventListener('blur', handler);
+                numericInputsBound.add(input);
+            }
+
             // Validar formularios de editar
             @if(session('role') === 'Administrador')
             @foreach($registros as $r)
@@ -1734,9 +1765,13 @@
                     // Cargar productos existentes en el mapa
                     contSeleccionados.querySelectorAll('.item-row').forEach(function(row) {
                         var invId = parseInt(row.getAttribute('data-inv-id'));
-                        if (invId) {
-                            seleccionadosMap.set(invId, true);
-                        }
+                    if (invId) {
+                        seleccionadosMap.set(invId, true);
+                    }
+                    var qtyExisting = row.querySelector('input[type="number"]');
+                    if (qtyExisting) {
+                        bindNumericSanitizer(qtyExisting);
+                    }
                     });
                     
                     function actualizarBadgeEditar{{ $r->id }}() {
@@ -1791,19 +1826,23 @@
                                 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;">
                                     <div style="flex:1;min-width:0;">
                                         <span class="item-titulo" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">${descripcion}</span>
-                                        <small style="opacity:.8;font-size:.85em;">Disponible: ${stock}</small>
+                                        <small class="disponible-actual" style="opacity:.8;font-size:.85em;">Disponible: ${stock}</small>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-secondary btn-remove-item" data-inv-id="${inventarioId}" style="flex-shrink:0;"><i class="fas fa-times"></i></button>
                                 </div>
                                 <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
                                     <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                                    <input type="number" min="1" class="form-control form-control-sm" data-stock="${stock}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${stock})" required style="width:100%;">
+                                    <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${stock}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${stock})" required style="width:100%;">
                                     <small class="field-error" style="display:none;"></small>
                                 </div>
                                 <input type="hidden" name="items[${itemIndex}][inventario_id]" value="${inventarioId}">
                             `;
                             
                             contSeleccionados.appendChild(row);
+                            var qtyInput = row.querySelector('input[type="number"]');
+                            if (qtyInput) {
+                                bindNumericSanitizer(qtyInput);
+                            }
                             
                             // Agregar listener al botón de eliminar
                             var removeBtn = row.querySelector('.btn-remove-item');
@@ -2036,6 +2075,7 @@
                         }
                         const qty = row.querySelector('input[type=number]');
                         if (qty) {
+                            bindNumericSanitizer(qty);
                             qty.setAttribute('data-stock', String(disponible));
                             qty.setAttribute('data-stock-original', String(item.stock));
                             qty.setAttribute('placeholder', 'Cantidad (máx ' + disponible + ')');
@@ -2220,7 +2260,7 @@
                         </div>
                         <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
                             <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                            <input type="number" min="1" class="form-control form-control-sm" data-stock="${disp}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${disp})" required style="width:100%;">
+                            <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${disp}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${disp})" required style="width:100%;">
                             <small class="field-error" style="display:none;"></small>
                         </div>
                         <input type="hidden" name="items[${itemIndex}][inventario_id]" value="${it.inventario_id}">
@@ -2241,6 +2281,7 @@
                     actualizarBadge();
                     showToast('Producto agregado a la reserva', 'success');
                     const qty = row.querySelector('input[type=number]');
+                    bindNumericSanitizer(qty);
                     qty.addEventListener('input', validarTodo);
                 }
 
@@ -2311,10 +2352,12 @@
                 function validarTodo() {
                     let valido = true;
                     contSeleccionados.querySelectorAll('.item-row').forEach(function(row){
-                        const qty = row.querySelector('input[type=number]');
+                    const qty = row.querySelector('input[type=number]');
                         const err = row.querySelector('.field-error');
                         const max = parseInt(qty.getAttribute('data-stock') || '0');
                         const val = parseInt(qty.value || '0');
+                    bindNumericSanitizer(qty);
+                    bindNumericSanitizer(qty);
                         err.style.display = 'none';
                         if (!val || val < 1) {
                             err.textContent = 'Cantidad mínima: 1';
