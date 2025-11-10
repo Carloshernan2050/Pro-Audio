@@ -16,14 +16,23 @@
                 <thead>
                     <tr>
                         <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">ID</th>
-                        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Calendario</th>
+                        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Tipo</th>
+                        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Descripción</th>
+                        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($items as $h)
+                        @php
+                            $tipo = $h->reserva ? 'Reserva' : 'Evento';
+                            $descripcion = $h->reserva?->descripcion_evento ?? 'N/A';
+                            $estado = $h->reserva?->estado ?? ucfirst($h->accion ?? 'N/A');
+                        @endphp
                         <tr>
                             <td style="border-bottom:1px solid #f0f0f0; padding:8px;">{{ $h->id }}</td>
-                            <td style="border-bottom:1px solid #f0f0f0; padding:8px;">{{ optional($h->calendario)->descripcion_evento ?? 'N/A' }}</td>
+                            <td style="border-bottom:1px solid #f0f0f0; padding:8px;">{{ $tipo }}</td>
+                            <td style="border-bottom:1px solid #f0f0f0; padding:8px;">{{ $descripcion }}</td>
+                            <td style="border-bottom:1px solid #f0f0f0; padding:8px; text-transform:capitalize;">{{ $estado }}</td>
                         </tr>
                     @endforeach
                 </tbody>

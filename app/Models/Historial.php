@@ -11,12 +11,19 @@ class Historial extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'calendario_id',
+        'reserva_id',
+        'accion',
+        'confirmado_en',
+        'observaciones',
     ];
 
-    public function calendario()
+    protected $casts = [
+        'confirmado_en' => 'datetime',
+    ];
+
+    public function reserva()
     {
-        return $this->belongsTo(Calendario::class, 'calendario_id');
+        return $this->belongsTo(Reserva::class, 'reserva_id');
     }
 }
 

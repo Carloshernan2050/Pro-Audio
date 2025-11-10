@@ -24,22 +24,23 @@ class MovimientosInventarioController extends Controller
     {
         $request->validate([
             'inventario_id' => 'required|exists:inventario,id',
-            'tipo_movimiento' => 'required|in:entrada,salida',
+            'tipo_movimiento' => 'required|in:entrada,salida,alquilado,devuelto',
             'cantidad' => 'required|integer|min:1'
         ], [
             'inventario_id.required' => 'Debe seleccionar un artículo del inventario.',
             'inventario_id.exists' => 'El artículo seleccionado no existe.',
             'tipo_movimiento.required' => 'Debe seleccionar un tipo de movimiento.',
-            'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada o salida.',
+            'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada, salida, alquilado o devuelto.',
             'cantidad.required' => 'La cantidad es obligatoria.',
             'cantidad.integer' => 'La cantidad debe ser un número entero.',
             'cantidad.min' => 'La cantidad debe ser mayor a 0.'
         ]);
 
         $inventario = Inventario::findOrFail($request->inventario_id);
+        $incrementaStock = in_array($request->tipo_movimiento, ['entrada', 'devuelto'], true);
 
         // Actualizar stock según el tipo de movimiento
-        if ($request->tipo_movimiento === 'entrada') {
+        if ($incrementaStock) {
             $inventario->stock += $request->cantidad;
         } else {
             if ($inventario->stock < $request->cantidad) {
@@ -71,13 +72,13 @@ class MovimientosInventarioController extends Controller
     {
         $request->validate([
             'inventario_id' => 'required|exists:inventario,id',
-            'tipo_movimiento' => 'required|in:entrada,salida',
+            'tipo_movimiento' => 'required|in:entrada,salida,alquilado,devuelto',
             'cantidad' => 'required|integer|min:1'
         ], [
             'inventario_id.required' => 'Debe seleccionar un artículo del inventario.',
             'inventario_id.exists' => 'El artículo seleccionado no existe.',
             'tipo_movimiento.required' => 'Debe seleccionar un tipo de movimiento.',
-            'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada o salida.',
+            'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada, salida, alquilado o devuelto.',
             'cantidad.required' => 'La cantidad es obligatoria.',
             'cantidad.integer' => 'La cantidad debe ser un número entero.',
             'cantidad.min' => 'La cantidad debe ser mayor a 0.'
@@ -86,9 +87,11 @@ class MovimientosInventarioController extends Controller
         $movimiento = MovimientosInventario::findOrFail($id);
         $inventarioOriginal = $movimiento->inventario;
         $nuevoInventario = Inventario::findOrFail($request->inventario_id);
+        $incrementaStockNuevo = in_array($request->tipo_movimiento, ['entrada', 'devuelto'], true);
+        $incrementaStockOriginal = in_array($movimiento->tipo_movimiento, ['entrada', 'devuelto'], true);
 
         // Revertir el movimiento original
-        if ($movimiento->tipo_movimiento === 'entrada') {
+        if ($incrementaStockOriginal) {
             $inventarioOriginal->stock -= $movimiento->cantidad;
         } else {
             $inventarioOriginal->stock += $movimiento->cantidad;
@@ -96,7 +99,7 @@ class MovimientosInventarioController extends Controller
         $inventarioOriginal->save();
 
         // Aplicar el nuevo movimiento
-        if ($request->tipo_movimiento === 'entrada') {
+        if ($incrementaStockNuevo) {
             $nuevoInventario->stock += $request->cantidad;
         } else {
             if ($nuevoInventario->stock < $request->cantidad) {
@@ -123,9 +126,10 @@ class MovimientosInventarioController extends Controller
     {
         $movimiento = MovimientosInventario::findOrFail($id);
         $inventario = $movimiento->inventario;
+        $incrementaStock = in_array($movimiento->tipo_movimiento, ['entrada', 'devuelto'], true);
 
         // Revertir el movimiento en el stock
-        if ($movimiento->tipo_movimiento === 'entrada') {
+        if ($incrementaStock) {
             $inventario->stock -= $movimiento->cantidad;
         } else {
             $inventario->stock += $movimiento->cantidad;

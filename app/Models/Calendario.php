@@ -32,4 +32,9 @@ class Calendario extends Model
     {
         return $this->hasMany(CalendarioItem::class, 'calendario_id');
     }
+
+    public function reserva()
+    {
+        return $this->hasOne(Reserva::class, 'calendario_id');
+    }
 }

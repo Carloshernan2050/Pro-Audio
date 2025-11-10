@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Calendario de Alquileres</title>
+    <title>Calendario de Reservas</title>
 
     {{-- FullCalendar --}}
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
@@ -257,11 +257,11 @@
                     {{-- ENCABEZADO --}}
                     <div class="calendar-header">
                         <h2 class="calendar-title">
-                            <i class="fas fa-calendar-alt"></i> Calendario de Alquileres
+                            <i class="fas fa-calendar-alt"></i> Calendario de Reservas
                         </h2>
                         @if($esAdmin)
                         <button class="btn btn-crear-alquiler" data-bs-toggle="modal" data-bs-target="#modalCrear">
-                            <i class="fas fa-plus"></i> Nuevo alquiler
+                            <i class="fas fa-plus"></i> Nueva reserva
                         </button>
                         @endif
                     </div>
@@ -290,104 +290,172 @@
             <aside class="calendario-sidebar">
                 <div class="sidebar-header">
                     <h3 class="sidebar-title">
-                        <i class="fas fa-list"></i> Listado de Registros
+                        <i class="fas fa-clock"></i> Reservas pendientes
+                        <span class="badge-resumen" id="reservas-badge-count">({{ $reservasPendientes->unique('id')->count() }})</span>
+                    </h3>
+                </div>
+
+                <div class="sidebar-content" id="reservas-pendientes">
+            @forelse($reservasPendientes->unique('id') as $reserva)
+                        @php
+                            $reservaFechaInicio = \Carbon\Carbon::parse($reserva->fecha_inicio);
+                            $reservaFechaFin = \Carbon\Carbon::parse($reserva->fecha_fin);
+                            $reservaDias = $reservaFechaInicio->diffInDays($reservaFechaFin) + 1;
+                        @endphp
+                        <div class="registro-card reserva-card" data-reserva-id="{{ $reserva->id }}">
+                            <div class="registro-header">
+                                <div class="registro-info">
+                                    <span class="registro-fechas">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        {{ $reservaFechaInicio->format('d/m/Y') }} - {{ $reservaFechaFin->format('d/m/Y') }}
+                                    </span>
+                                    <span class="registro-dias">
+                                        <i class="fas fa-clock"></i> {{ $reservaDias }} {{ $reservaDias === 1 ? 'día' : 'días' }}
+                                    </span>
+                                </div>
+                                <div class="acciones-buttons">
+                                    <button class="btn-action btn-success confirm-reserva-btn" data-id="{{ $reserva->id }}">
+                                        <i class="fas fa-check"></i> Confirmar
+                                    </button>
+                                    <button class="btn-action btn-delete cancel-reserva-btn" data-id="{{ $reserva->id }}">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="registro-productos">
+                                <div class="productos-header">
+                                    <i class="fas fa-box"></i> Productos ({{ $reserva->items->count() }})
+                                    <span class="cantidad-total">Total: {{ $reserva->cantidad_total }} unidades</span>
+                                </div>
+                                <div class="productos-lista">
+                                    @foreach($reserva->items as $item)
+                                        <div class="producto-item-sidebar">
+                                            <span class="producto-nombre-sidebar">{{ optional($item->inventario)->descripcion ?? 'Sin descripción' }}</span>
+                                            <span class="producto-cantidad-sidebar">x{{ $item->cantidad }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @if($reserva->descripcion_evento)
+                                <div class="registro-descripcion">
+                                    <div class="descripcion-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="descripcion-content">
+                                        <span class="descripcion-title">Descripción</span>
+                                        <p>{{ Str::limit($reserva->descripcion_evento, 100) }}</p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="no-records-card">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay reservas pendientes</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="sidebar-header" style="margin-top: 18px;">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-list"></i> Reservas confirmadas
                         <span class="badge-resumen" id="sidebar-badge-count">({{ count($registros) }})</span>
                     </h3>
                 </div>
                 
                 <div class="sidebar-content" id="sidebar-content">
-                                    @forelse($registros as $r)
-                                    @php
-                        // Si tiene items (nuevo formato), mostrar todos los productos
-                        $productosLista = [];
-                        $cantidadTotal = 0;
-                        if ($r->items && $r->items->count() > 0) {
-                            foreach ($r->items as $item) {
-                                $mov = collect($movimientos ?? [])->first(function($m) use ($item) {
-                                    return $m->id == $item->movimientos_inventario_id;
+                    @forelse($registros as $r)
+                        @php
+                            // Si tiene items (nuevo formato), mostrar todos los productos
+                            $productosLista = [];
+                            $cantidadTotal = 0;
+                            if ($r->items && $r->items->count() > 0) {
+                                foreach ($r->items as $item) {
+                                    $mov = collect($movimientos ?? [])->first(function($m) use ($item) {
+                                        return $m->id == $item->movimientos_inventario_id;
+                                    });
+                                    if ($mov && isset($inventarios[$mov->inventario_id])) {
+                                        $productosLista[] = [
+                                            'nombre' => $inventarios[$mov->inventario_id]->descripcion,
+                                            'cantidad' => $item->cantidad
+                                        ];
+                                        $cantidadTotal += $item->cantidad;
+                                    }
+                                }
+                            } else {
+                                // Formato antiguo: un solo producto
+                                $movimiento = collect($movimientos ?? [])->first(function($m) use ($r) {
+                                    return $m->id == $r->movimientos_inventario_id;
                                 });
-                                if ($mov && isset($inventarios[$mov->inventario_id])) {
+                                if ($movimiento && isset($inventarios[$movimiento->inventario_id])) {
+                                    $cant = $r->cantidad ?? 1;
                                     $productosLista[] = [
-                                        'nombre' => $inventarios[$mov->inventario_id]->descripcion,
-                                        'cantidad' => $item->cantidad
+                                        'nombre' => $inventarios[$movimiento->inventario_id]->descripcion,
+                                        'cantidad' => $cant
                                     ];
-                                    $cantidadTotal += $item->cantidad;
+                                    $cantidadTotal = $cant;
                                 }
                             }
-                        } else {
-                            // Formato antiguo: un solo producto
-                                        $movimiento = collect($movimientos ?? [])->first(function($m) use ($r) {
-                                            return $m->id == $r->movimientos_inventario_id;
-                                        });
-                                        if ($movimiento && isset($inventarios[$movimiento->inventario_id])) {
-                                $cant = $r->cantidad ?? 1;
-                                $productosLista[] = [
-                                    'nombre' => $inventarios[$movimiento->inventario_id]->descripcion,
-                                    'cantidad' => $cant
-                                ];
-                                $cantidadTotal = $cant;
-                            }
-                        }
-                        $fechaInicio = \Carbon\Carbon::parse($r->fecha_inicio);
-                        $fechaFin = \Carbon\Carbon::parse($r->fecha_fin);
-                        $diasReserva = $fechaInicio->diffInDays($fechaFin) + 1;
-                                    @endphp
-                    <div class="registro-card">
-                        <div class="registro-header">
-                            <div class="registro-info">
-                                <span class="registro-fechas">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    {{ $fechaInicio->format('d/m/Y') }} - {{ $fechaFin->format('d/m/Y') }}
-                                            </span>
-                                <span class="registro-dias">
-                                    <i class="fas fa-clock"></i> {{ $diasReserva }} {{ $diasReserva == 1 ? 'día' : 'días' }}
-                                            </span>
-                            </div>
-                                            <div class="acciones-buttons">
-                                                <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $r->id }}" title="Editar" onclick="var modal = document.getElementById('modalEditar{{ $r->id }}'); if(!modal) { window.location.reload(); return false; }">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <form action="{{ route('calendario.eliminar',$r->id) }}" method="POST" class="d-inline delete-form">
-                                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn-action btn-delete" title="Eliminar" onclick="event.preventDefault(); customConfirm('¿Está seguro de eliminar este registro?').then(result => { if(result) this.closest('form').submit(); }); return false;">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                        </div>
-                        
-                        <div class="registro-productos">
-                            <div class="productos-header">
-                                <i class="fas fa-box"></i> Productos ({{ count($productosLista) }})
-                                <span class="cantidad-total">Total: {{ $cantidadTotal }} unidades</span>
-                            </div>
-                            <div class="productos-lista">
-                                @foreach($productosLista as $prod)
-                                <div class="producto-item-sidebar">
-                                    <span class="producto-nombre-sidebar">{{ $prod['nombre'] }}</span>
-                                    <span class="producto-cantidad-sidebar">x{{ $prod['cantidad'] }}</span>
+                            $fechaInicio = \Carbon\Carbon::parse($r->fecha_inicio);
+                            $fechaFin = \Carbon\Carbon::parse($r->fecha_fin);
+                            $diasReserva = $fechaInicio->diffInDays($fechaFin) + 1;
+                        @endphp
+                        <div class="registro-card">
+                            <div class="registro-header">
+                                <div class="registro-info">
+                                    <span class="registro-fechas">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        {{ $fechaInicio->format('d/m/Y') }} - {{ $fechaFin->format('d/m/Y') }}
+                                    </span>
+                                    <span class="registro-dias">
+                                        <i class="fas fa-clock"></i> {{ $diasReserva }} {{ $diasReserva == 1 ? 'día' : 'días' }}
+                                    </span>
                                 </div>
-                                @endforeach
+                                <div class="acciones-buttons">
+                                    <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $r->id }}" title="Editar" onclick="var modal = document.getElementById('modalEditar{{ $r->id }}'); if(!modal) { window.location.reload(); return false; }">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form action="{{ route('calendario.eliminar',$r->id) }}" method="POST" class="d-inline delete-form">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn-action btn-delete" title="Eliminar" onclick="event.preventDefault(); customConfirm('¿Está seguro de eliminar este registro?').then(result => { if(result) this.closest('form').submit(); }); return false;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
+                            
+                            <div class="registro-productos">
+                                <div class="productos-header">
+                                    <i class="fas fa-box"></i> Productos ({{ count($productosLista) }})
+                                    <span class="cantidad-total">Total: {{ $cantidadTotal }} unidades</span>
+                                </div>
+                                <div class="productos-lista">
+                                    @foreach($productosLista as $prod)
+                                        <div class="producto-item-sidebar">
+                                            <span class="producto-nombre-sidebar">{{ $prod['nombre'] }}</span>
+                                            <span class="producto-cantidad-sidebar">x{{ $prod['cantidad'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            
+                            @if($r->descripcion_evento)
+                                <div class="registro-descripcion">
+                                    <div class="descripcion-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="descripcion-content">
+                                        <span class="descripcion-title">Descripción</span>
+                                        <p>{{ Str::limit($r->descripcion_evento, 100) }}</p>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
-                        
-                        @if($r->descripcion_evento)
-                        <div class="registro-descripcion">
-                            <div class="descripcion-icon">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="descripcion-content">
-                                <span class="descripcion-title">Descripción</span>
-                                <p>{{ Str::limit($r->descripcion_evento, 100) }}</p>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
                     @empty
-                    <div class="no-records-card">
-                        <i class="fas fa-inbox"></i>
-                        <p>No hay registros disponibles</p>
-                    </div>
+                        <div class="no-records-card">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay registros disponibles</p>
+                        </div>
                     @endforelse
                 </div>
             </aside>
@@ -418,11 +486,14 @@
                                                         <div id="alertEditar{{ $r->id }}" class="alert alert-danger" style="display: none;"></div>
                                                         <div class="mb-3">
                                                             <label class="form-label">Servicio *</label>
-                                                            <select id="servicio_editar{{ $r->id }}" class="form-select" required>
+                                                            @php
+                                                                $servicioSeleccionado = optional($r->reserva)->servicio ?? '';
+                                                            @endphp
+                                                            <select id="servicio_editar{{ $r->id }}" name="servicio" class="form-select" required>
                                                                 <option value="">Seleccione un servicio</option>
-                                                                <option value="Publicidad">Publicidad</option>
-                                                                <option value="Alquiler">Alquiler</option>
-                                                                <option value="Animación">Animación</option>
+                                                                <option value="Publicidad" {{ $servicioSeleccionado === 'Publicidad' ? 'selected' : '' }}>Publicidad</option>
+                                                                <option value="Alquiler" {{ $servicioSeleccionado === 'Alquiler' ? 'selected' : '' }}>Alquiler</option>
+                                                                <option value="Animación" {{ $servicioSeleccionado === 'Animación' ? 'selected' : '' }}>Animación</option>
                                                             </select>
                                                         </div>
                             @if(!$tieneItems)
@@ -444,7 +515,7 @@
                                                         </div>
                             @else
                             <div class="mb-3">
-                                <label class="form-label">Productos del Alquiler *</label>
+                                <label class="form-label">Productos de la Reserva *</label>
                                 <div id="productos_editar{{ $r->id }}" class="table-container" style="max-height:280px;overflow:auto;padding:10px;">
                                     <div style="position:relative;">
                                         <select id="select_producto_editar{{ $r->id }}" class="form-select form-control" style="width:100%;">
@@ -477,13 +548,13 @@
                                                 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;">
                                                     <div style="flex:1;min-width:0;">
                                                         <span class="item-titulo" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">{{ $desc }}</span>
-                                                        <small style="opacity:.8;font-size:.85em;">Disponible: {{ $stock }}</small>
+                                                        <small class="disponible-actual" style="opacity:.8;font-size:.85em;">Disponible: {{ $stock }}</small>
                                                     </div>
                                                     <button type="button" class="btn btn-sm btn-secondary btn-remove-item" data-inv-id="{{ $invId }}" style="flex-shrink:0;"><i class="fas fa-times"></i></button>
                                                 </div>
                                                 <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
                                                     <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                                                    <input type="number" min="1" class="form-control form-control-sm" data-stock="{{ $stock }}" name="items[{{ $loop->index }}][cantidad]" value="{{ $item->cantidad }}" placeholder="Cantidad (máx {{ $stock }})" required style="width:100%;">
+                                                    <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="{{ $stock }}" name="items[{{ $loop->index }}][cantidad]" value="{{ $item->cantidad }}" placeholder="Cantidad (máx {{ $stock }})" required style="width:100%;">
                                                     <small class="field-error" style="display:none;"></small>
                                                 </div>
                                                 <input type="hidden" name="items[{{ $loop->index }}][inventario_id]" value="{{ $invId }}">
@@ -508,7 +579,7 @@
                             @if(!$tieneItems)
                                                         <div class="mb-3">
                                                             <label class="form-label">Cantidad *</label>
-                                <input type="number" name="cantidad" id="cantidad_editar{{ $r->id }}" class="form-control" min="1" value="{{ $r->cantidad ?? 1 }}" required>
+                                <input type="number" name="cantidad" id="cantidad_editar{{ $r->id }}" class="form-control" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" value="{{ $r->cantidad ?? 1 }}" required>
                                                         </div>
                             @endif
 
@@ -531,7 +602,7 @@
         {{-- MODAL CREAR --}}
         <div class="modal fade calendar-modal" id="modalCrear" tabindex="-1">
             <div class="modal-dialog modal-xl modal-dialog-scrollable resizable-modal" style="max-width: 90%; width: 90%; min-width: 800px; max-height: 90vh;">
-                <form class="modal-content" id="formCrear" method="POST" action="{{ route('calendario.guardar') }}" style="max-height: 90vh; display: flex; flex-direction: column;">
+                <form class="modal-content" id="formCrear" method="POST" action="{{ route('reservas.store') }}" style="max-height: 90vh; display: flex; flex-direction: column;">
                     @csrf
                     <div class="modal-header" style="flex-shrink: 0;">
                         <h5 class="modal-title">
@@ -543,11 +614,11 @@
                         <div id="alertCrear" class="alert alert-danger" style="display: none;"></div>
                         <div class="mb-2">
                             <label>Servicio *</label>
-                            <select id="servicio_crear" class="form-control" required>
+                            <select id="servicio_crear" name="servicio" class="form-control" required>
                                 <option value="">Seleccione un servicio</option>
-                                <option value="Publicidad">Publicidad</option>
-                                <option value="Alquiler">Alquiler</option>
-                                <option value="Animación">Animación</option>
+                                <option value="Publicidad" {{ old('servicio') === 'Publicidad' ? 'selected' : '' }}>Publicidad</option>
+                                <option value="Alquiler" {{ old('servicio') === 'Alquiler' ? 'selected' : '' }}>Alquiler</option>
+                                <option value="Animación" {{ old('servicio') === 'Animación' ? 'selected' : '' }}>Animación</option>
                             </select>
                         </div>
                         <div class="mb-2">
@@ -622,6 +693,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const successAlert = document.getElementById('alertSuccessMessage');
                 const errorAlert = document.getElementById('alertErrorMessage');
+                document.querySelectorAll('[data-only-numeric]').forEach(bindNumericSanitizer);
                 
                 if (successAlert) {
                     setTimeout(function() {
@@ -639,6 +711,9 @@
                             errorAlert.style.display = 'none';
                         }, 300);
                     }, 5000);
+                }
+                if (typeof window.reloadReservas === 'function') {
+                    window.reloadReservas();
                 }
             });
             
@@ -761,6 +836,239 @@
                     return Promise.reject(error);
                 }
             };
+
+            const reservasEndpoint = @json($esAdmin ? route('reservas.index') : null);
+            const reservasBaseUrl = @json($esAdmin ? url('reservas') : null);
+            const csrfToken = "{{ csrf_token() }}";
+
+            if (reservasEndpoint && reservasBaseUrl) {
+                function renderReservasPendientes(reservas) {
+                    const container = document.getElementById('reservas-pendientes');
+                    const badge = document.getElementById('reservas-badge-count');
+                    if (!container) {
+                        return;
+                    }
+
+                    const pendientes = Array.isArray(reservas)
+                        ? reservas
+                            .filter(function(reserva) { return reserva && reserva.estado === 'pendiente'; })
+                            .filter(function(reserva, index, arr) {
+                                return arr.findIndex(function(other) { return other && reserva && other.id === reserva.id; }) === index;
+                            })
+                        : [];
+
+                    reservasPendientesData = pendientes.map(function(reserva) {
+                        const items = Array.isArray(reserva.items) ? reserva.items : [];
+                        return {
+                            id: reserva.id,
+                            fecha_inicio: reserva.fecha_inicio,
+                            fecha_fin: reserva.fecha_fin,
+                            items: items.map(function(item) {
+                                const invId = item && item.inventario_id !== undefined ? item.inventario_id : item?.pivot?.inventario_id;
+                                const cantidad = item && item.cantidad !== undefined ? item.cantidad : item?.pivot?.cantidad;
+                                return {
+                                    inventario_id: parseInt(invId ?? 0),
+                                    cantidad: parseInt(cantidad ?? 0),
+                                };
+                            }),
+                        };
+                    });
+
+                    if (badge) {
+                        badge.textContent = '(' + pendientes.length + ')';
+                    }
+
+                    if (pendientes.length === 0) {
+                        container.innerHTML = `
+                            <div class="no-records-card">
+                                <i class="fas fa-inbox"></i>
+                                <p>No hay reservas pendientes</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const formatter = new Intl.DateTimeFormat('es-ES');
+                    container.innerHTML = pendientes.map(function(reserva) {
+                        const fechaInicio = reserva && reserva.fecha_inicio ? formatter.format(new Date(reserva.fecha_inicio)) : '';
+                        const fechaFin = reserva && reserva.fecha_fin ? formatter.format(new Date(reserva.fecha_fin)) : '';
+                        const createdItems = (reserva && Array.isArray(reserva.items)) ? reserva.items : [];
+                        const descripcion = reserva && reserva.descripcion_evento ? reserva.descripcion_evento : '';
+                        const diasReserva = (reserva && reserva.fecha_inicio && reserva.fecha_fin)
+                            ? Math.round((new Date(reserva.fecha_fin) - new Date(reserva.fecha_inicio)) / (1000 * 60 * 60 * 24)) + 1
+                            : 1;
+
+                        const productosHTML = createdItems.map(function(item) {
+                            const inventario = item && item.inventario ? item.inventario : null;
+                            const nombre = inventario && inventario.descripcion ? inventario.descripcion : 'Sin descripción';
+                            const cantidad = item && item.cantidad ? item.cantidad : 0;
+                            return `
+                                <div class="producto-item-sidebar">
+                                    <span class="producto-nombre-sidebar">${window.escapeHtml(nombre)}</span>
+                                    <span class="producto-cantidad-sidebar">x${cantidad}</span>
+                                </div>
+                            `;
+                        }).join('');
+
+                        return `
+                            <div class="registro-card reserva-card" data-reserva-id="${reserva.id}">
+                                <div class="registro-header">
+                                    <div class="registro-info">
+                                        <span class="registro-fechas">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            ${window.escapeHtml(fechaInicio)} - ${window.escapeHtml(fechaFin)}
+                                        </span>
+                                        <span class="registro-dias">
+                                            <i class="fas fa-clock"></i> ${diasReserva} ${diasReserva === 1 ? 'día' : 'días'}
+                                        </span>
+                                    </div>
+                                    <div class="acciones-buttons">
+                                        <button class="btn-action btn-success confirm-reserva-btn" data-id="${reserva.id}">
+                                            <i class="fas fa-check"></i> Confirmar
+                                        </button>
+                                        <button class="btn-action btn-delete cancel-reserva-btn" data-id="${reserva.id}">
+                                            <i class="fas fa-times"></i> Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="registro-productos">
+                                    <div class="productos-header">
+                                        <i class="fas fa-box"></i> Productos (${createdItems.length})
+                                        <span class="cantidad-total">Total: ${(reserva && reserva.cantidad_total) ? reserva.cantidad_total : 0} unidades</span>
+                                    </div>
+                                    <div class="productos-lista">
+                                        ${productosHTML}
+                                    </div>
+                                </div>
+                                ${descripcion
+                                    ? `
+                                        <div class="registro-descripcion">
+                                            <div class="descripcion-icon">
+                                                <i class="fas fa-file-alt"></i>
+                                            </div>
+                                            <div class="descripcion-content">
+                                                <span class="descripcion-title">Descripción</span>
+                                                <p>${window.escapeHtml(descripcion.length > 100 ? descripcion.substring(0, 100) + '...' : descripcion)}</p>
+                                            </div>
+                                        </div>
+                                    `
+                                    : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                window.reloadReservas = async function() {
+                    try {
+                    const response = await fetch(reservasEndpoint, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        if (!response.ok) {
+                            throw new Error('No se pudieron cargar las reservas pendientes');
+                        }
+                        const data = await response.json();
+                        renderReservasPendientes(Array.isArray(data) ? data : []);
+                    } catch (error) {
+                        console.error('Error al recargar reservas:', error);
+                    }
+                };
+
+                async function confirmarReservaRequest(id) {
+                const response = await fetch(reservasBaseUrl + '/' + id + '/confirmar', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                    });
+                    const data = await response.json().catch(function() { return {}; });
+                    if (!response.ok) {
+                        throw new Error(data.error || data.message || 'No fue posible confirmar la reserva');
+                    }
+                    return data;
+                }
+
+                async function cancelarReservaRequest(id) {
+                const response = await fetch(reservasBaseUrl + '/' + id, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                    });
+                    const data = await response.json().catch(function() { return {}; });
+                    if (!response.ok) {
+                        throw new Error(data.error || data.message || 'No fue posible cancelar la reserva');
+                    }
+                    return data;
+                }
+
+                document.addEventListener('click', async function(event) {
+                    const confirmBtn = event.target.closest('.confirm-reserva-btn');
+                    const cancelBtn = event.target.closest('.cancel-reserva-btn');
+                    if (!confirmBtn && !cancelBtn) {
+                        return;
+                    }
+                    event.preventDefault();
+
+                    const id = confirmBtn ? confirmBtn.dataset.id : (cancelBtn ? cancelBtn.dataset.id : null);
+                    if (!id) {
+                        return;
+                    }
+
+                    const actionBtn = confirmBtn || cancelBtn;
+                    let originalBtnHtml = '';
+                    if (actionBtn) {
+                        originalBtnHtml = actionBtn.innerHTML;
+                        actionBtn.disabled = true;
+                        actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    }
+
+                    try {
+                        if (confirmBtn) {
+                            const data = await confirmarReservaRequest(id);
+                            showToast(data.message || 'Reserva confirmada correctamente.', 'success');
+                            await reloadReservas();
+                            if (typeof window.refreshInventarioData === 'function') {
+                                await window.refreshInventarioData();
+                            }
+                            if (typeof window.reloadSidebar === 'function') {
+                                await window.reloadSidebar();
+                            }
+                            if (typeof window.reloadCalendar === 'function') {
+                                window.reloadCalendar();
+                            }
+                        } else if (cancelBtn) {
+                            const data = await cancelarReservaRequest(id);
+                            showToast(data.message || 'Reserva cancelada correctamente.', 'info');
+                            await reloadReservas();
+                            if (typeof window.refreshInventarioData === 'function') {
+                                await window.refreshInventarioData();
+                            }
+                            if (typeof window.reloadCalendar === 'function') {
+                                window.reloadCalendar();
+                            }
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        showToast(error.message || 'No fue posible procesar la reserva.', 'error');
+                    } finally {
+                        if (actionBtn) {
+                            actionBtn.disabled = false;
+                            actionBtn.innerHTML = originalBtnHtml || '<i class="fas fa-check"></i>';
+                        }
+                    }
+                });
+            } else {
+                window.reloadReservas = function() {
+                    return Promise.resolve();
+                };
+            }
         </script>
 
         <style>
@@ -1145,6 +1453,33 @@
                 setTimeout(() => { el.remove(); }, 3000);
             }
 
+            const numericInputsBound = new WeakSet();
+            function bindNumericSanitizer(input) {
+                if (!input || numericInputsBound.has(input)) return;
+                const handler = () => {
+                    if (!input.value) {
+                        input.value = '';
+                        return;
+                    }
+                    const digits = input.value.replace(/\D/g, '');
+                    if (input.value !== digits) {
+                        input.value = digits;
+                    }
+                    if (digits) {
+                        const minAttr = input.getAttribute('min');
+                        if (minAttr !== null && minAttr !== '') {
+                            const minVal = parseInt(minAttr, 10);
+                            if (!Number.isNaN(minVal) && parseInt(input.value || '0', 10) < minVal) {
+                                input.value = String(minVal);
+                            }
+                        }
+                    }
+                };
+                input.addEventListener('input', handler);
+                input.addEventListener('blur', handler);
+                numericInputsBound.add(input);
+            }
+
             // Validar formularios de editar
             @if(session('role') === 'Administrador')
             @foreach($registros as $r)
@@ -1224,7 +1559,7 @@
                                 } catch {
                                     // Si es HTML (redirect), considerarlo éxito
                                     if (resp.ok || resp.redirected || resp.status === 200) {
-                                        showToast('Alquiler actualizado correctamente', 'success');
+                                        showToast('Reserva actualizada correctamente', 'success');
                                         // Cerrar el modal de edición
                                         var modalEditarEl = document.getElementById('modalEditar{{ $r->id }}');
                                         if (modalEditarEl) {
@@ -1249,7 +1584,7 @@
                             }
                             
                             if (resp.ok || resp.redirected || resp.status === 200) {
-                                showToast('Alquiler actualizado correctamente', 'success');
+                                showToast('Reserva actualizada correctamente', 'success');
                                 // Cerrar el modal de edición
                                 var modalEditarEl = document.getElementById('modalEditar{{ $r->id }}');
                                 if (modalEditarEl) {
@@ -1263,6 +1598,9 @@
                                         // También recargar el sidebar
                                         if (typeof window.reloadSidebar === 'function') {
                                             window.reloadSidebar();
+                                        }
+                                        if (typeof window.refreshInventarioData === 'function') {
+                                            window.refreshInventarioData();
                                         }
                                     }, 500);
                                 } else {
@@ -1427,9 +1765,13 @@
                     // Cargar productos existentes en el mapa
                     contSeleccionados.querySelectorAll('.item-row').forEach(function(row) {
                         var invId = parseInt(row.getAttribute('data-inv-id'));
-                        if (invId) {
-                            seleccionadosMap.set(invId, true);
-                        }
+                    if (invId) {
+                        seleccionadosMap.set(invId, true);
+                    }
+                    var qtyExisting = row.querySelector('input[type="number"]');
+                    if (qtyExisting) {
+                        bindNumericSanitizer(qtyExisting);
+                    }
                     });
                     
                     function actualizarBadgeEditar{{ $r->id }}() {
@@ -1484,19 +1826,23 @@
                                 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;">
                                     <div style="flex:1;min-width:0;">
                                         <span class="item-titulo" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">${descripcion}</span>
-                                        <small style="opacity:.8;font-size:.85em;">Disponible: ${stock}</small>
+                                        <small class="disponible-actual" style="opacity:.8;font-size:.85em;">Disponible: ${stock}</small>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-secondary btn-remove-item" data-inv-id="${inventarioId}" style="flex-shrink:0;"><i class="fas fa-times"></i></button>
                                 </div>
                                 <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
                                     <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                                    <input type="number" min="1" class="form-control form-control-sm" data-stock="${stock}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${stock})" required style="width:100%;">
+                                    <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${stock}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${stock})" required style="width:100%;">
                                     <small class="field-error" style="display:none;"></small>
                                 </div>
                                 <input type="hidden" name="items[${itemIndex}][inventario_id]" value="${inventarioId}">
                             `;
                             
                             contSeleccionados.appendChild(row);
+                            var qtyInput = row.querySelector('input[type="number"]');
+                            if (qtyInput) {
+                                bindNumericSanitizer(qtyInput);
+                            }
                             
                             // Agregar listener al botón de eliminar
                             var removeBtn = row.querySelector('.btn-remove-item');
@@ -1589,6 +1935,9 @@
                                             if (typeof window.reloadSidebar === 'function') {
                                                 window.reloadSidebar();
                                             }
+                                            if (typeof window.refreshInventarioData === 'function') {
+                                                window.refreshInventarioData();
+                                            }
                                         }, 500);
                                     } else {
                                         // Fallback: recargar página si la función no está disponible
@@ -1633,8 +1982,33 @@
                 }
 
             // Búsqueda y selección dinámica de productos
+            @php
+                $reservasPendientesJs = ($reservasPendientes ?? collect())->map(function ($reserva) {
+                    return [
+                        'id' => $reserva->id,
+                        'fecha_inicio' => optional($reserva->fecha_inicio)->format('Y-m-d H:i:s'),
+                        'fecha_fin' => optional($reserva->fecha_fin)->format('Y-m-d H:i:s'),
+                        'items' => $reserva->items->map(function ($item) {
+                            return [
+                                'inventario_id' => $item->inventario_id,
+                                'cantidad' => (int) ($item->cantidad ?? 0),
+                            ];
+                        })->values()->all(),
+                    ];
+                })->values()->all();
+            @endphp
+            let reservasPendientesData = @json($reservasPendientesJs);
+
             function initCrearUI() {
-                const inventarioItems = [
+                function inferirServicio(descripcion) {
+                    if (!descripcion) return 'Alquiler';
+                    const lower = descripcion.toLowerCase();
+                    if (lower.includes('publi')) return 'Publicidad';
+                    if (lower.includes('anim')) return 'Animación';
+                    return 'Alquiler';
+                }
+
+                let inventarioItems = [
                     @foreach($inventarios ?? [] as $inv)
                         @php
                             $descI = $inv->descripcion ?? '';
@@ -1643,7 +2017,7 @@
                         { inventario_id: {{ $inv->id }}, descripcion: @json($descI ?: 'Sin descripción'), stock: {{ (int)($inv->stock ?? 0) }}, servicio: @json($servI) },
                     @endforeach
                 ];
-                
+
                 // Items detallados de eventos para calcular disponibilidad correcta
                 const eventosItems = @json($eventosItems ?? []);
                 const movimientosPorInventario = {
@@ -1659,6 +2033,90 @@
                 const saveBtn = document.getElementById('btn_guardar_crear');
                 // Usaremos el DOM para contar seleccionados y una Map local para validación rápida
                 const seleccionadosMap = new Map();
+
+                function renderProductoOptions() {
+                    if (!selectProducto) return;
+                    const previousValue = selectProducto.value;
+                    selectProducto.innerHTML = '<option value=\"\">-- Seleccione un producto del inventario --</option>';
+                    const rango = rangoActual();
+                    inventarioItems.forEach(it => {
+                        const reservado = reservadoInventarioEnRango(it.inventario_id, rango.s, rango.f);
+                        const disponible = Math.max(0, (it.stock || 0) - reservado);
+                        const option = document.createElement('option');
+                        option.value = String(it.inventario_id);
+                        option.setAttribute('data-stock', String(disponible));
+                        option.setAttribute('data-descripcion', it.descripcion);
+                        option.textContent = `${it.descripcion} - Stock: ${disponible}`;
+                        if (seleccionadosMap.has(it.inventario_id)) {
+                            option.disabled = true;
+                            option.textContent += ' (seleccionado)';
+                        }
+                        selectProducto.appendChild(option);
+                    });
+                    if (previousValue && selectProducto.querySelector(`option[value=\"${previousValue}\"]`)) {
+                        selectProducto.value = previousValue;
+                    } else {
+                        selectProducto.selectedIndex = 0;
+                    }
+                }
+
+                function updateSelectedRowsStock() {
+                    if (!contSeleccionados) return;
+                    const rango = rangoActual();
+                    contSeleccionados.querySelectorAll('.item-row').forEach(function(row){
+                        const invId = parseInt(row.getAttribute('data-inv-id') || '0');
+                        const item = inventarioItems.find(x => x.inventario_id === invId);
+                        if (!item) return;
+                        const yaInv = reservadoInventarioEnRango(invId, rango.s, rango.f);
+                        const disponible = Math.max(0, (item.stock || 0) - yaInv);
+                        const label = row.querySelector('.disponible-actual');
+                        if (label) {
+                            label.textContent = 'Disponible: ' + disponible;
+                        }
+                        const qty = row.querySelector('input[type=number]');
+                        if (qty) {
+                            bindNumericSanitizer(qty);
+                            qty.setAttribute('data-stock', String(disponible));
+                            qty.setAttribute('data-stock-original', String(item.stock));
+                            qty.setAttribute('placeholder', 'Cantidad (máx ' + disponible + ')');
+                            const currentVal = parseInt(qty.value || '0');
+                            if (currentVal > disponible) {
+                                qty.value = disponible > 0 ? disponible : '';
+                            }
+                        }
+                    });
+                    validarTodo();
+                }
+
+                async function refreshInventarioData() {
+                    try {
+                        const response = await fetch('{{ route('inventario.index') }}', {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        if (!response.ok) {
+                            throw new Error('No se pudo actualizar el inventario');
+                        }
+                        const data = await response.json();
+                        inventarioItems = Array.isArray(data) ? data.map(item => ({
+                            inventario_id: item.id,
+                            descripcion: item.descripcion || 'Sin descripción',
+                            stock: parseInt(item.stock ?? 0),
+                            servicio: inferirServicio(item.descripcion || '')
+                        })) : inventarioItems;
+                        renderProductoOptions();
+                        updateSelectedRowsStock();
+                        recomputeAvailability();
+                    } catch (error) {
+                        console.error('Error al refrescar inventario:', error);
+                    }
+                }
+
+                window.refreshInventarioData = refreshInventarioData;
+                renderProductoOptions();
+                updateSelectedRowsStock();
 
                 // Evitar múltiples binds al reabrir el modal
                 function bindOnce(el, eventName, key, handler) {
@@ -1715,7 +2173,7 @@
                 function reservadoInventarioEnRango(inventarioId, s, f) {
                     if (!s || !f) return 0;
                     const si = new Date(s); const fi = new Date(f);
-                    return (eventos || []).reduce((acc, ev) => {
+                    let total = (eventos || []).reduce((acc, ev) => {
                         try {
                             // Verificar si el inventario está en el array de inventarioIds o en el campo único (formato antiguo)
                             const inventarioIds = ev.inventarioIds || [];
@@ -1751,6 +2209,26 @@
                         } catch {}
                         return acc;
                     }, 0);
+                    if (Array.isArray(reservasPendientesData)) {
+                        reservasPendientesData.forEach(function(reserva) {
+                            try {
+                                if (!reserva) return;
+                                const resInicio = reserva.fecha_inicio ? new Date(reserva.fecha_inicio) : null;
+                                const resFin = reserva.fecha_fin ? new Date(reserva.fecha_fin) : resInicio;
+                                if (!resInicio || !resFin || isNaN(resInicio.getTime()) || isNaN(resFin.getTime())) return;
+                                const solapa = resInicio < fi && resFin > si;
+                                if (!solapa) return;
+                                const items = Array.isArray(reserva.items) ? reserva.items : [];
+                                items.forEach(function(item) {
+                                    const invId = item && item.inventario_id !== undefined ? parseInt(item.inventario_id) : NaN;
+                                    if (!Number.isNaN(invId) && invId === inventarioId) {
+                                        total += parseInt(item.cantidad || 0);
+                                    }
+                                });
+                            } catch {}
+                        });
+                    }
+                    return total;
                 }
 
 
@@ -1776,13 +2254,13 @@
                         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;">
                             <div style="flex:1;min-width:0;">
                                 <span class="item-titulo" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">${it.descripcion}</span>
-                                <small style="opacity:.8;font-size:.85em;">Disponible: ${it.stock}</small>
+                                <small class="disponible-actual" style="opacity:.8;font-size:.85em;">Disponible: ${disp}</small>
                             </div>
                             <button type="button" class="btn btn-sm btn-secondary" data-remove="${it.inventario_id}" style="flex-shrink:0;"><i class="fas fa-times"></i></button>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
                             <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                            <input type="number" min="1" class="form-control form-control-sm" data-stock="${disp}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${disp})" required style="width:100%;">
+                            <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${disp}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${disp})" required style="width:100%;">
                             <small class="field-error" style="display:none;"></small>
                         </div>
                         <input type="hidden" name="items[${itemIndex}][inventario_id]" value="${it.inventario_id}">
@@ -1794,12 +2272,16 @@
                         row.remove();
                         // Recalcular índices después de eliminar
                         recalcularIndicesItems();
+                        renderProductoOptions();
+                        updateSelectedRowsStock();
+                        validarTodo();
                     });
 
                     contSeleccionados.appendChild(row);
                     actualizarBadge();
                     showToast('Producto agregado a la reserva', 'success');
                     const qty = row.querySelector('input[type=number]');
+                    bindNumericSanitizer(qty);
                     qty.addEventListener('input', validarTodo);
                 }
 
@@ -1842,24 +2324,14 @@
                         // AGREGAR A LA LISTA INMEDIATAMENTE
                         seleccionadosMap.set(inventarioId, it);
                         agregarSeleccionado(it);
+                    renderProductoOptions();
+                    updateSelectedRowsStock();
                         
                         // Resetear select
                         this.selectedIndex = 0;
                     };
                 }
                 
-                // Mostrar todos los productos siempre (sin filtro por servicio)
-                // Todos los productos están habilitados - se crearán movimientos automáticamente si no existen
-                if (selectProducto) {
-                    const options = selectProducto.querySelectorAll('option');
-                    options.forEach((opt, index) => {
-                        if (index === 0) return;
-                        // Todos habilitados - si no tiene movimiento, se creará automáticamente
-                        opt.disabled = false;
-                        opt.style.display = '';
-                    });
-                }
-
                 // Función para recalcular los índices de los items después de eliminar uno
                 function recalcularIndicesItems() {
                     if (!contSeleccionados) return;
@@ -1880,10 +2352,12 @@
                 function validarTodo() {
                     let valido = true;
                     contSeleccionados.querySelectorAll('.item-row').forEach(function(row){
-                        const qty = row.querySelector('input[type=number]');
+                    const qty = row.querySelector('input[type=number]');
                         const err = row.querySelector('.field-error');
                         const max = parseInt(qty.getAttribute('data-stock') || '0');
                         const val = parseInt(qty.value || '0');
+                    bindNumericSanitizer(qty);
+                    bindNumericSanitizer(qty);
                         err.style.display = 'none';
                         if (!val || val < 1) {
                             err.textContent = 'Cantidad mínima: 1';
@@ -1978,9 +2452,10 @@
                     
                     // Marcar como enviando y deshabilitar botón
                     isSubmitting = true;
+                    let originalText = '';
                     if (saveBtn) {
+                        originalText = saveBtn.innerHTML;
                         saveBtn.disabled = true;
-                        const originalText = saveBtn.innerHTML;
                         saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
                         
                         // Rehabilitar después de un tiempo por si acaso
@@ -2019,7 +2494,12 @@
                         }
                         
                         if (resp.ok) {
-                            showToast('Alquiler registrado correctamente', 'success');
+                            const duplicated = data && data.duplicated;
+                            const successMessage = duplicated
+                                ? (data?.message || 'La reserva ya estaba registrada y se reutilizó.')
+                                : 'Reserva registrada correctamente';
+                            const toastType = duplicated ? 'warning' : 'success';
+                            showToast(successMessage, toastType);
                             // Cerrar modal y limpiar
                             const modalEl = document.getElementById('modalCrear');
                             if (modalEl) {
@@ -2029,11 +2509,14 @@
                             formCrear.reset();
                             contSeleccionados.innerHTML = '';
                             seleccionadosMap.clear();
-                            inventarioItems = [];
                             if (badgeCount) badgeCount.textContent = '0';
+                            await refreshInventarioData();
                             // Recargar el calendario y el sidebar inmediatamente sin refrescar la página
                             // Esperar un momento para asegurar que el servidor haya guardado el registro
                             setTimeout(() => {
+                                if (typeof window.reloadReservas === 'function') {
+                                    window.reloadReservas();
+                                }
                                 // Primero recargar el sidebar para que aparezca el nuevo registro inmediatamente
                                 if (typeof window.reloadSidebar === 'function') {
                                     // Intentar recargar el sidebar con un pequeño retry si falla la primera vez
@@ -2144,6 +2627,12 @@
                         if (alertBox) { 
                             alertBox.textContent = errorMsg; 
                             alertBox.style.display = 'block'; 
+                        }
+                    } finally {
+                        isSubmitting = false;
+                        if (saveBtn) {
+                            saveBtn.disabled = false;
+                            saveBtn.innerHTML = originalText || 'Guardar';
                         }
                     }
                     return false;
