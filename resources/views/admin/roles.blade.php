@@ -26,7 +26,7 @@
             <input type="text" id="rolesSearch" class="search-input" placeholder="Buscar por nombre o correo...">
         </div>
     </div>
-    <p class="roles-hint">Asigna uno o varios roles a cada persona. Usa la búsqueda para filtrar rápidamente.</p>
+    <p class="roles-hint">Asigna un rol a cada persona. Usa la búsqueda para filtrar rápidamente.</p>
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -90,9 +90,16 @@
                                         }
                                     @endphp
                                 @endforeach
+                                @php $seleccionMarcada = false; @endphp
                                 @foreach($rolesUnicos as $rolUnico)
+                                    @php
+                                        $isChecked = $rolUnico['checked'] && !$seleccionMarcada;
+                                        if ($isChecked) {
+                                            $seleccionMarcada = true;
+                                        }
+                                    @endphp
                                     <label class="chip" data-role="{{ $rolUnico['name'] }}" title="{{ $rolUnico['name'] }}">
-                                        <input type="checkbox" name="roles[]" value="{{ $rolUnico['id'] }}" {{ $rolUnico['checked'] ? 'checked' : '' }}>
+                                        <input type="radio" name="role_id" value="{{ $rolUnico['id'] }}" {{ $isChecked ? 'checked' : '' }}>
                                         {{ $rolUnico['name'] }}
                                     </label>
                                 @endforeach

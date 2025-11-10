@@ -72,19 +72,36 @@ class RoleAdminController extends Controller
     {
         $request->validate([
             'persona_id' => 'required|integer|exists:personas,id',
-            'roles' => 'array'
+            'role_id' => 'nullable|integer|exists:roles,id'
         ]);
 
-        $personaId = (int)$request->persona_id;
-        $roleIds = collect($request->roles ?? [])->map(fn($v)=>(int)$v)->filter()->values()->all();
+        $personaId = (int) $request->persona_id;
+        $roleId = $request->filled('role_id') ? (int) $request->role_id : null;
 
-        // No permitir asignar Superadmin a uno mismo a menos que ya lo sea (simple safeguard)
-        // Se puede ampliar con políticas
+        $rolesPermitidos = DB::table('roles')
+            ->select('id', DB::raw('COALESCE(name, nombre_rol) as name'))
+            ->get()
+            ->filter(function ($role) {
+                $nombre = trim($role->name ?? '');
+                if ($nombre === 'Usuario') {
+                    $nombre = 'Cliente';
+                }
+                return in_array($nombre, ['Superadmin', 'Admin', 'Cliente'], true);
+            })
+            ->pluck('name', 'id');
 
-        DB::transaction(function() use ($personaId, $roleIds) {
+        if (!is_null($roleId) && !$rolesPermitidos->has($roleId)) {
+            return back()->withErrors(['role_id' => 'El rol seleccionado no está permitido.']);
+        }
+
+        DB::transaction(function () use ($personaId, $roleId) {
             DB::table('personas_roles')->where('personas_id', $personaId)->delete();
-            foreach ($roleIds as $rid) {
-                DB::table('personas_roles')->insert(['personas_id'=>$personaId,'roles_id'=>$rid]);
+
+            if (!is_null($roleId)) {
+                DB::table('personas_roles')->insert([
+                    'personas_id' => $personaId,
+                    'roles_id' => $roleId
+                ]);
             }
         });
 
