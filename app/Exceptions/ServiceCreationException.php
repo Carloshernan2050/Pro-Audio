@@ -2,9 +2,9 @@
 
 namespace App\Exceptions;
 
-use Exception;
+use RuntimeException;
 
-class ServiceCreationException extends Exception
+class ServiceCreationException extends RuntimeException
 {
 }
 

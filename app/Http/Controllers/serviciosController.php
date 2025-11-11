@@ -280,7 +280,7 @@ class ServiciosController extends Controller
        <main class="main-content">
             <h2 class="page-title">{NOMBRE_SERVICIO}</h2>
             <p class="page-subtitle">{DESCRIPCION}</p>
-            
+
             <section class="productos-servicio">
                 <div class="productos-grid">
                     @php
