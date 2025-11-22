@@ -26,13 +26,8 @@
                 <div class="productos-grid">
                     @forelse($subServicios as $subServicio)
                         <div class="producto-item">
-                            @php
-                                $nombreImagen = strtolower(str_replace(' ', '_', $subServicio->nombre)) . '.jpg';
-                                $rutaImagen = public_path('images/fiestas/' . $nombreImagen);
-                                $existeImagen = file_exists($rutaImagen);
-                            @endphp
-                            @if($existeImagen)
-                                <img src="/images/fiestas/{{ $nombreImagen }}" 
+                            @if($subServicio->imagen)
+                                <img src="{{ asset('storage/subservicios/' . $subServicio->imagen) }}" 
                                      alt="{{ $subServicio->nombre }}" 
                                      class="producto-imagen">
                             @else

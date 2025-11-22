@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SubServicios;
 use App\Models\Servicios;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SubServiciosController extends Controller
 {
@@ -51,13 +52,23 @@ class SubServiciosController extends Controller
                 'nombre' => 'required|string|max:100',
                 'descripcion' => 'nullable|string',
                 'precio' => 'required|numeric|min:0',
+                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB máximo
             ]);
+
+            $imagenPath = null;
+            if ($request->hasFile('imagen')) {
+                $file = $request->file('imagen');
+                $filename = 'subservicio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('subservicios', $filename, 'public');
+                $imagenPath = $filename;
+            }
 
             SubServicios::create([
                 'servicios_id' => $request->servicios_id,
                 'nombre' => $request->nombre,
                 'descripcion' => $request->descripcion ?? '',
                 'precio' => $request->precio,
+                'imagen' => $imagenPath,
             ]);
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -115,13 +126,32 @@ class SubServiciosController extends Controller
                 'nombre' => 'required|string|max:100',
                 'descripcion' => 'nullable|string',
                 'precio' => 'required|numeric|min:0',
+                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB máximo
             ]);
+
+            // Manejar la imagen
+            if ($request->hasFile('imagen')) {
+                // Eliminar imagen anterior si existe
+                if ($subServicio->imagen && Storage::disk('public')->exists('subservicios/' . $subServicio->imagen)) {
+                    Storage::disk('public')->delete('subservicios/' . $subServicio->imagen);
+                }
+                
+                // Guardar nueva imagen
+                $file = $request->file('imagen');
+                $filename = 'subservicio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('subservicios', $filename, 'public');
+                $imagenPath = $filename;
+            } else {
+                // Mantener la imagen existente si no se sube una nueva
+                $imagenPath = $subServicio->imagen;
+            }
 
             $subServicio->update([
                 'servicios_id' => $request->servicios_id,
                 'nombre' => $request->nombre,
                 'descripcion' => $request->descripcion ?? '',
                 'precio' => $request->precio,
+                'imagen' => $imagenPath,
             ]);
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -154,6 +184,12 @@ class SubServiciosController extends Controller
         try {
             $request = request();
             $subServicio = SubServicios::findOrFail($id);
+            
+            // Eliminar imagen si existe
+            if ($subServicio->imagen && Storage::disk('public')->exists('subservicios/' . $subServicio->imagen)) {
+                Storage::disk('public')->delete('subservicios/' . $subServicio->imagen);
+            }
+            
             $subServicio->delete();
 
             if ($request->ajax() || $request->wantsJson()) {

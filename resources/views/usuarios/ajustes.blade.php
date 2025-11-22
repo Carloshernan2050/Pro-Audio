@@ -174,6 +174,7 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Imagen</th>
                                 <th>Nombre</th>
                                 <th>Servicio</th>
                                 <th>Descripción</th>
@@ -186,6 +187,13 @@
                             @forelse ($subServiciosList as $sub)
                                 <tr>
                                     <td>{{ $sub->id }}</td>
+                                    <td>
+                                        @if($sub->imagen)
+                                            <img src="{{ asset('storage/subservicios/' . $sub->imagen) }}" alt="{{ $sub->nombre }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                        @else
+                                            <span style="color: #999;">Sin imagen</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $sub->nombre }}</td>
                                     <td>{{ $sub->servicio->nombre_servicio ?? 'N/A' }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($sub->descripcion ?? '', 50) }}</td>
@@ -198,6 +206,7 @@
                                             data-descripcion="{{ e($sub->descripcion ?? '') }}"
                                             data-precio="{{ $sub->precio ?? 0 }}"
                                             data-servicios-id="{{ $sub->servicios_id }}"
+                                            data-imagen="{{ $sub->imagen ? asset('storage/subservicios/' . $sub->imagen) : '' }}"
                                             onclick="handleSubservicioEdit(this)"
                                         >
                                             <i class="fas fa-edit"></i> Editar
@@ -213,7 +222,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="no-services">No hay subservicios registrados.</td>
+                                    <td colspan="7" class="no-services">No hay subservicios registrados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -518,7 +527,7 @@
                         <h3 id="subservicioModalTitle"></h3>
                         <span class="close-btn" onclick="closeSubservicioModal()">&times;</span>
                     </div>
-                    <form id="subservicioForm" method="POST">
+                    <form id="subservicioForm" method="POST" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="_method" id="subservicioFormMethod">
                         <div class="form-group">
@@ -541,6 +550,18 @@
                         <div class="form-group">
                             <label for="precio_subservicio">Precio:</label>
                             <input type="number" id="precio_subservicio" name="precio" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="imagen_subservicio">Imagen:</label>
+                            <input type="file" id="imagen_subservicio" name="imagen" accept="image/jpeg,image/png,image/jpg,image/gif">
+                            <small style="display: block; margin-top: 5px; color: #666;">Formatos permitidos: JPEG, PNG, JPG, GIF. Tamaño máximo: 5MB</small>
+                            <div id="imagen-preview-subservicio" style="margin-top: 10px; display: none;">
+                                <img id="imagen-preview-img-subservicio" src="" alt="Vista previa" style="max-width: 200px; max-height: 200px; border-radius: 4px;">
+                            </div>
+                            <div id="imagen-actual-subservicio" style="margin-top: 10px; display: none;">
+                                <p style="margin: 5px 0; color: #666;">Imagen actual:</p>
+                                <img id="imagen-actual-img-subservicio" src="" alt="Imagen actual" style="max-width: 200px; max-height: 200px; border-radius: 4px;">
+                            </div>
                         </div>
                         <button type="submit" class="btn-submit">Guardar</button>
                     </form>
@@ -692,14 +713,15 @@
 
         window.handleSubservicioEdit = function(button) {
             if (!button) return;
-            const { id, nombre, descripcion, precio, serviciosId } = button.dataset;
+            const { id, nombre, descripcion, precio, serviciosId, imagen } = button.dataset;
             openSubservicioModal(
                 'edit',
                 id,
                 nombre || '',
                 descripcion || '',
                 precio || 0,
-                serviciosId || ''
+                serviciosId || '',
+                imagen || ''
             );
         };
 
@@ -716,10 +738,15 @@
         }
 
         // Funciones para subservicios
-        function openSubservicioModal(mode, id = null, nombre = '', descripcion = '', precio = 0, servicios_id = '') {
+        function openSubservicioModal(mode, id = null, nombre = '', descripcion = '', precio = 0, servicios_id = '', imagenUrl = '') {
             const subservicioModalTitle = document.getElementById('subservicioModalTitle');
             const subservicioForm = document.getElementById('subservicioForm');
             const subservicioFormMethod = document.getElementById('subservicioFormMethod');
+            const imagenInput = document.getElementById('imagen_subservicio');
+            const imagenPreview = document.getElementById('imagen-preview-subservicio');
+            const imagenPreviewImg = document.getElementById('imagen-preview-img-subservicio');
+            const imagenActual = document.getElementById('imagen-actual-subservicio');
+            const imagenActualImg = document.getElementById('imagen-actual-img-subservicio');
             
             if (mode === 'create') {
                 subservicioModalTitle.textContent = 'Crear Nuevo Subservicio';
@@ -731,6 +758,9 @@
                 document.getElementById('descripcion_subservicio').value = '';
                 document.getElementById('precio_subservicio').value = '';
                 document.getElementById('servicios_id_subservicio').value = '';
+                imagenInput.value = '';
+                imagenPreview.style.display = 'none';
+                imagenActual.style.display = 'none';
             } else if (mode === 'edit') {
                 subservicioModalTitle.textContent = 'Editar Subservicio';
                 subservicioForm.action = `{{ url('subservicios') }}/${id}`;
@@ -740,9 +770,44 @@
                 document.getElementById('descripcion_subservicio').value = descripcion;
                 document.getElementById('precio_subservicio').value = precio;
                 document.getElementById('servicios_id_subservicio').value = servicios_id;
+                imagenInput.value = '';
+                
+                // Mostrar imagen actual si existe
+                if (imagenUrl) {
+                    imagenActualImg.src = imagenUrl;
+                    imagenActual.style.display = 'block';
+                } else {
+                    imagenActual.style.display = 'none';
+                }
+                imagenPreview.style.display = 'none';
             }
             subservicioModal.style.display = 'flex';
         }
+        
+        // Vista previa de imagen al seleccionar archivo en ajustes
+        document.addEventListener('DOMContentLoaded', function() {
+            const imagenInputSubservicio = document.getElementById('imagen_subservicio');
+            if (imagenInputSubservicio) {
+                imagenInputSubservicio.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    const preview = document.getElementById('imagen-preview-subservicio');
+                    const previewImg = document.getElementById('imagen-preview-img-subservicio');
+                    const imagenActual = document.getElementById('imagen-actual-subservicio');
+                    
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            preview.style.display = 'block';
+                            imagenActual.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.style.display = 'none';
+                    }
+                });
+            }
+        });
 
         function closeSubservicioModal() {
             subservicioModal.style.display = 'none';
@@ -765,7 +830,7 @@
                 tbody.innerHTML = '';
                 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-services">No hay subservicios registrados.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="no-services">No hay subservicios registrados.</td></tr>';
                     return;
                 }
                 
@@ -787,10 +852,15 @@
                     const descripcionHtml = sub.descripcion ? (sub.descripcion.length > 50 ? escapeHtml(sub.descripcion.substring(0, 50)) + '...' : escapeHtml(sub.descripcion)) : '';
                     const descripcionAttr = escapeHtml(sub.descripcion || '');
                     const precio = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sub.precio || 0);
+                    const imagenUrl = sub.imagen ? `/storage/subservicios/${sub.imagen}` : '';
+                    const imagenHtml = sub.imagen 
+                        ? `<img src="${imagenUrl}" alt="${nombreAttr}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`
+                        : '<span style="color: #999;">Sin imagen</span>';
                     
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${sub.id}</td>
+                        <td>${imagenHtml}</td>
                         <td>${nombreHtml}</td>
                         <td>${servicioNombre}</td>
                         <td>${descripcionHtml}</td>
@@ -803,6 +873,7 @@
                                 data-descripcion="${descripcionAttr}"
                                 data-precio="${sub.precio || 0}"
                                 data-servicios-id="${sub.servicios_id}"
+                                data-imagen="${imagenUrl}"
                                 onclick="handleSubservicioEdit(this)"
                             >
                                 <i class="fas fa-edit"></i> Editar

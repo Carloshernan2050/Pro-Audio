@@ -17,7 +17,8 @@ class SubServicios extends Model
         'servicios_id',
         'nombre',
         'descripcion',
-        'precio'
+        'precio',
+        'imagen'
     ];
 
     // Relación con el modelo Servicios
