@@ -9,6 +9,44 @@ use Illuminate\Support\Facades\Storage;
 
 class SubServiciosController extends Controller
 {
+    private const STORAGE_PATH = 'subservicios/';
+
+    /**
+     * Handle AJAX or redirect response for success messages.
+     */
+    private function handleSuccessResponse(Request $request, string $message)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => $message]);
+        }
+        return redirect()->route('subservicios.index')->with('success', $message);
+    }
+
+    /**
+     * Handle AJAX or redirect response for validation errors.
+     */
+    private function handleValidationError(Request $request, \Illuminate\Validation\ValidationException $e)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['errors' => $e->errors(), 'error' => 'Error de validación'], 422);
+        }
+        return redirect()->route('subservicios.index')
+            ->withErrors($e->errors())
+            ->withInput();
+    }
+
+    /**
+     * Handle AJAX or redirect response for general exceptions.
+     */
+    private function handleExceptionError(Request $request, \Exception $e, string $action)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['error' => "Error al {$action}: " . $e->getMessage()], 422);
+        }
+        return redirect()->route('subservicios.index')
+            ->with('error', "Error al {$action}: " . $e->getMessage());
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -59,7 +97,7 @@ class SubServiciosController extends Controller
             if ($request->hasFile('imagen')) {
                 $file = $request->file('imagen');
                 $filename = 'subservicio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('subservicios', $filename, 'public');
+                $file->storeAs(self::STORAGE_PATH, $filename, 'public');
                 $imagenPath = $filename;
             }
 
@@ -71,25 +109,11 @@ class SubServiciosController extends Controller
                 'imagen' => $imagenPath,
             ]);
 
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => 'Subservicio creado exitosamente.']);
-            }
-
-            return redirect()->route('subservicios.index')
-                ->with('success', 'Subservicio creado exitosamente.');
+            return $this->handleSuccessResponse($request, 'Subservicio creado exitosamente.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['errors' => $e->errors(), 'error' => 'Error de validación'], 422);
-            }
-            return redirect()->route('subservicios.index')
-                ->withErrors($e->errors())
-                ->withInput();
+            return $this->handleValidationError($request, $e);
         } catch (\Exception $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['error' => 'Error al crear el subservicio: ' . $e->getMessage()], 422);
-            }
-            return redirect()->route('subservicios.index')
-                ->with('error', 'Error al crear el subservicio: ' . $e->getMessage());
+            return $this->handleExceptionError($request, $e, 'crear el subservicio');
         }
     }
 
@@ -132,14 +156,14 @@ class SubServiciosController extends Controller
             // Manejar la imagen
             if ($request->hasFile('imagen')) {
                 // Eliminar imagen anterior si existe
-                if ($subServicio->imagen && Storage::disk('public')->exists('subservicios/' . $subServicio->imagen)) {
-                    Storage::disk('public')->delete('subservicios/' . $subServicio->imagen);
+                if ($subServicio->imagen && Storage::disk('public')->exists(self::STORAGE_PATH . $subServicio->imagen)) {
+                    Storage::disk('public')->delete(self::STORAGE_PATH . $subServicio->imagen);
                 }
                 
                 // Guardar nueva imagen
                 $file = $request->file('imagen');
                 $filename = 'subservicio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('subservicios', $filename, 'public');
+                $file->storeAs(self::STORAGE_PATH, $filename, 'public');
                 $imagenPath = $filename;
             } else {
                 // Mantener la imagen existente si no se sube una nueva
@@ -154,25 +178,11 @@ class SubServiciosController extends Controller
                 'imagen' => $imagenPath,
             ]);
 
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => 'Subservicio actualizado exitosamente.']);
-            }
-
-            return redirect()->route('subservicios.index')
-                ->with('success', 'Subservicio actualizado exitosamente.');
+            return $this->handleSuccessResponse($request, 'Subservicio actualizado exitosamente.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['errors' => $e->errors(), 'error' => 'Error de validación'], 422);
-            }
-            return redirect()->route('subservicios.index')
-                ->withErrors($e->errors())
-                ->withInput();
+            return $this->handleValidationError($request, $e);
         } catch (\Exception $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['error' => 'Error al actualizar el subservicio: ' . $e->getMessage()], 422);
-            }
-            return redirect()->route('subservicios.index')
-                ->with('error', 'Error al actualizar el subservicio: ' . $e->getMessage());
+            return $this->handleExceptionError($request, $e, 'actualizar el subservicio');
         }
     }
 
@@ -186,25 +196,15 @@ class SubServiciosController extends Controller
             $subServicio = SubServicios::findOrFail($id);
             
             // Eliminar imagen si existe
-            if ($subServicio->imagen && Storage::disk('public')->exists('subservicios/' . $subServicio->imagen)) {
-                Storage::disk('public')->delete('subservicios/' . $subServicio->imagen);
+            if ($subServicio->imagen && Storage::disk('public')->exists(self::STORAGE_PATH . $subServicio->imagen)) {
+                Storage::disk('public')->delete(self::STORAGE_PATH . $subServicio->imagen);
             }
             
             $subServicio->delete();
 
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => 'Subservicio eliminado exitosamente.']);
-            }
-
-            return redirect()->route('subservicios.index')
-                ->with('success', 'Subservicio eliminado exitosamente.');
+            return $this->handleSuccessResponse($request, 'Subservicio eliminado exitosamente.');
         } catch (\Exception $e) {
-            $request = request();
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['error' => 'Error al eliminar el subservicio: ' . $e->getMessage()], 422);
-            }
-            return redirect()->route('subservicios.index')
-                ->with('error', 'Error al eliminar el subservicio: ' . $e->getMessage());
+            return $this->handleExceptionError(request(), $e, 'eliminar el subservicio');
         }
     }
 }
