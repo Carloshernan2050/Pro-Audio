@@ -41,7 +41,7 @@ class ChatbotSubServicioService
 
     public function buscarSubServiciosRelacionados(string $mensajeCorregido, array $tokens, array $intenciones): Collection
     {
-        $relSub = $this->responseBuilder->ordenarSubServicios(
+        return $this->responseBuilder->ordenarSubServicios(
             $this->responseBuilder->subServiciosQuery()
             ->where(function ($q) use ($mensajeCorregido, $tokens) {
                 if ($mensajeCorregido !== '') {
@@ -60,8 +60,6 @@ class ChatbotSubServicioService
                 $q->whereIn('servicios.nombre_servicio', $intenciones);
             })
         )->limit(12)->get();
-
-        return $relSub;
     }
 }
 

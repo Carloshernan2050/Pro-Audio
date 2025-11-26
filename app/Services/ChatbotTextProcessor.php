@@ -6,14 +6,10 @@ class ChatbotTextProcessor
 {
     private const STOPWORDS = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
     private const STOPWORDS_EXT = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al','par'];
-    private const TOKENS_GENERICOS = ['necesito','nececito','nesecito','necesitar','requiero','quiero','busco','hola','buenas','gracias','dias','dia'];
     private const CUES_AGREGAR = ['tambien','también','ademas','además','y ',' y','sumar','agrega','agregar','junto','ademas de','además de'];
     private const REGEX_WHITESPACE = '/\s+/';
     private const REGEX_DIAS = '/^(por\s+)?\d+\s*d[ií]as?$/i';
     private const PAR_LED = 'par led';
-    private const ANIMACION = 'animación';
-    private const CUMPLEANOS = 'cumpleaños';
-    private const MAESTRO_CEREMONIAS = 'maestro de ceremonias';
     private const LOCUCION = 'locución';
     private const EQUIPO_SONIDO = 'equipo de sonido';
 
