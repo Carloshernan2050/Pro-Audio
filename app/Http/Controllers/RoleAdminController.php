@@ -48,12 +48,11 @@ class RoleAdminController extends Controller
             }
             
             // Solo procesar roles permitidos
-            if (in_array($nombre, ['Superadmin', 'Admin', 'Cliente'], true)) {
-                // Si ya existe un rol con este nombre, usar el primero (menor ID)
-                if (!isset($rolesAgrupados[$nombre]) || $role->id < $rolesAgrupados[$nombre]->id) {
-                    $role->name = $nombre;
-                    $rolesAgrupados[$nombre] = $role;
-                }
+            // Si ya existe un rol con este nombre, usar el primero (menor ID)
+            if (in_array($nombre, ['Superadmin', 'Admin', 'Cliente'], true)
+                && (!isset($rolesAgrupados[$nombre]) || $role->id < $rolesAgrupados[$nombre]->id)) {
+                $role->name = $nombre;
+                $rolesAgrupados[$nombre] = $role;
             }
         }
         
@@ -108,3 +107,4 @@ class RoleAdminController extends Controller
         return back()->with('success', 'Roles actualizados correctamente');
     }
 }
+

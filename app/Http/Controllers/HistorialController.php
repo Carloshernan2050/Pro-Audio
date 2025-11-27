@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Historial;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class HistorialController extends Controller
@@ -14,7 +13,7 @@ class HistorialController extends Controller
         return view('usuarios.historial', compact('items'));
     }
 
-    public function exportPdf(Request $request)
+    public function exportPdf()
     {
         $items = Historial::with(['reserva'])->get();
 

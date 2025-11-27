@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 class CalendarioDataService
 {
     private const DEFAULT_PRODUCT_LABEL = 'Sin producto';
-    private const DEFAULT_EVENT_TITLE = 'Alquiler';
 
     /**
      * Elimina duplicados de registros basándose en contenido.

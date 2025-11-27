@@ -10,7 +10,18 @@ class Usuario extends Model
 {
     use HasFactory, HasRoles;
 
-    protected string $guard_name = 'web';
+    /**
+     * Guard por defecto para spatie/permission
+     */
+    protected string $guardName = 'web';
+
+    /**
+     * Get the guard name for spatie/permission
+     */
+    public function guardName(): string
+    {
+        return $this->guardName;
+    }
 
     protected $table = 'personas';
 
@@ -28,3 +39,4 @@ class Usuario extends Model
         'foto_perfil'
     ];
 }
+

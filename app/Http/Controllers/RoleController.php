@@ -18,20 +18,35 @@ class RoleController extends Controller
         ]);
 
         $role = $request->input('role');
+        $route = 'inicio';
+        $messageType = 'success';
+        $message = 'Rol establecido: ' . $role;
+
         if ($role === 'Administrador') {
-            if (!session()->has('usuario_id')) {
-                session(['pending_admin' => true]);
-                return redirect()->route('usuarios.inicioSesion')->with('info', 'Inicia sesión para continuar como Administrador.');
-            }
             session(['pending_admin' => true]);
-            return redirect()->route('admin.key.form');
+            if (!session()->has('usuario_id')) {
+                $route = 'usuarios.inicioSesion';
+                $messageType = 'info';
+                $message = 'Inicia sesión para continuar como Administrador.';
+            } else {
+                $route = 'admin.key.form';
+                $message = null;
+            }
         } elseif ($role === 'Cliente') {
             session(['role' => 'Cliente']);
-            return redirect()->route('usuarios.registroUsuario')->with('success', 'Seleccionaste Cliente, regístrate para continuar.');
+            $route = 'usuarios.registroUsuario';
+            $message = 'Seleccionaste Cliente, regístrate para continuar.';
+        } else {
+            // Invitado
+            session(['role' => 'Invitado']);
         }
-        // Invitado
-        session(['role' => 'Invitado']);
-        return redirect()->route('inicio')->with('success', 'Rol establecido: ' . $role);
+
+        $redirect = redirect()->route($route);
+        if ($message !== null) {
+            $redirect = $redirect->with($messageType, $message);
+        }
+
+        return $redirect;
     }
 
     public function adminKeyForm()

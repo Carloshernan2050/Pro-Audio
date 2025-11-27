@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,7 +15,15 @@ class User extends Authenticatable
     /**
      * Guard por defecto para spatie/permission
      */
-    protected string $guard_name = 'web';
+    protected string $guardName = 'web';
+
+    /**
+     * Get the guard name for spatie/permission
+     */
+    public function guardName(): string
+    {
+        return $this->guardName;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -52,3 +59,4 @@ class User extends Authenticatable
         ];
     }
 }
+
