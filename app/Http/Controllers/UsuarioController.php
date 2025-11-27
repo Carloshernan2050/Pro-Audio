@@ -122,25 +122,17 @@ class UsuarioController extends Controller
     {
         $usuarioId = session('usuario_id');
         
-        if (!$usuarioId) {
-            return response()->json(['success' => false, 'message' => 'Debes iniciar sesión'], 401);
+        // Validar autenticación, permisos y existencia del usuario
+        $validationResult = $this->validatePhotoUpdate($usuarioId);
+        if ($validationResult['error']) {
+            return $validationResult['response'];
         }
         
-        // Verificar si es Invitado
-        $roles = (array)session('roles');
-        if (in_array('Invitado', $roles)) {
-            return response()->json(['success' => false, 'message' => 'Los usuarios invitados no pueden subir foto de perfil'], 403);
-        }
+        $usuario = $validationResult['usuario'];
         
         $request->validate([
             'foto_perfil' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB máximo
         ]);
-        
-        $usuario = Usuario::find($usuarioId);
-        
-        if (!$usuario) {
-            return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 404);
-        }
         
         // Eliminar foto anterior si existe
         if ($usuario->foto_perfil && Storage::disk('public')->exists('perfiles/' . $usuario->foto_perfil)) {
@@ -150,7 +142,7 @@ class UsuarioController extends Controller
         // Guardar nueva foto
         $file = $request->file('foto_perfil');
         $filename = 'perfil_' . $usuarioId . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('perfiles', $filename, 'public');
+        $file->storeAs('perfiles', $filename, 'public');
         
         // Actualizar en la base de datos
         $usuario->foto_perfil = $filename;
@@ -161,6 +153,49 @@ class UsuarioController extends Controller
             'message' => 'Foto de perfil actualizada correctamente',
             'foto_url' => asset('storage/perfiles/' . $filename)
         ]);
+    }
+
+    /**
+     * Valida los permisos para actualizar foto de perfil
+     * @param mixed $usuarioId
+     * @return array Retorna array con 'error' (bool), 'response' (JsonResponse|null) y 'usuario' (Usuario|null)
+     */
+    private function validatePhotoUpdate($usuarioId)
+    {
+        $errorCode = null;
+        $errorMessage = null;
+        $usuario = null;
+        
+        if (!$usuarioId) {
+            $errorCode = 401;
+            $errorMessage = 'Debes iniciar sesión';
+        } else {
+            $roles = (array)session('roles');
+            if (in_array('Invitado', $roles)) {
+                $errorCode = 403;
+                $errorMessage = 'Los usuarios invitados no pueden subir foto de perfil';
+            } else {
+                $usuario = Usuario::find($usuarioId);
+                if (!$usuario) {
+                    $errorCode = 404;
+                    $errorMessage = 'Usuario no encontrado';
+                }
+            }
+        }
+        
+        if ($errorCode !== null) {
+            return [
+                'error' => true,
+                'response' => response()->json(['success' => false, 'message' => $errorMessage], $errorCode),
+                'usuario' => null
+            ];
+        }
+        
+        return [
+            'error' => false,
+            'response' => null,
+            'usuario' => $usuario
+        ];
     }
 
 }

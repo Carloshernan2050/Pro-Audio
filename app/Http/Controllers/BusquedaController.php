@@ -29,7 +29,7 @@ class BusquedaController extends Controller
         
         // Buscar en sub-servicios (nombre y descripción)
         $resultados = SubServicios::query()
-            ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 
+            ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio',
                      'sub_servicios.descripcion', 'servicios.nombre_servicio')
             ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
             ->where(function ($query) use ($terminoNormalizado, $tokens) {
@@ -84,4 +84,3 @@ class BusquedaController extends Controller
         return trim($texto);
     }
 }
-
