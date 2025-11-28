@@ -18,6 +18,8 @@ class ChatbotSubServicioServiceTest extends TestCase
 
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
     private const NOMBRE_EQUIPO_SONIDO = 'Equipo de sonido';
+    private const DESC_EQUIPO_COMPLETO = 'Equipo completo';
+    private const DESC_EQUIPO_COMPLETO_AUDIO = 'Equipo completo de audio';
 
     protected ChatbotSubServicioService $service;
 
@@ -50,7 +52,7 @@ class ChatbotSubServicioServiceTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
-            'descripcion' => 'Equipo completo',
+            'descripcion' => self::DESC_EQUIPO_COMPLETO,
             'precio' => 100
         ]);
         
@@ -150,7 +152,7 @@ class ChatbotSubServicioServiceTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
-            'descripcion' => 'Equipo completo de audio',
+            'descripcion' => self::DESC_EQUIPO_COMPLETO_AUDIO,
             'precio' => 100
         ]);
         
@@ -244,6 +246,163 @@ class ChatbotSubServicioServiceTest extends TestCase
         
         $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
         $this->assertTrue($resultado->isEmpty());
+    }
+
+    public function test_buscar_sub_servicios_relacionados_por_mensaje_y_tokens(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => 'Alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_COMPLETO,
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->service->buscarSubServiciosRelacionados(
+            'sonido',
+            ['equipo', 'sonido'],
+            []
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
+    }
+
+    public function test_buscar_sub_servicios_relacionados_por_mensaje_y_intenciones(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => 'Alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo',
+            'descripcion' => self::DESC_EQUIPO_COMPLETO,
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->service->buscarSubServiciosRelacionados(
+            'equipo',
+            [],
+            ['Alquiler']
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
+    }
+
+    public function test_buscar_sub_servicios_relacionados_con_tokens_vacios(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => 'Alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->service->buscarSubServiciosRelacionados(
+            'equipo',
+            ['', '   '],
+            []
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
+    }
+
+    public function test_buscar_sub_servicios_relacionados_por_descripcion(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => 'Alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo',
+            'descripcion' => 'Equipo profesional de audio',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->service->buscarSubServiciosRelacionados(
+            'audio',
+            [],
+            []
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
+    }
+
+    public function test_obtener_items_seleccionados_con_relacion_servicio(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => 'Alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Item1',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->service->obtenerItemsSeleccionados([$subServicio->id]);
+        
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
+        $this->assertCount(1, $resultado);
+        $this->assertNotNull($resultado->first()->servicio);
+    }
+
+    public function test_buscar_sub_servicios_relacionados_mensaje_vacio_con_tokens_e_intenciones(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => 'Alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_COMPLETO,
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->service->buscarSubServiciosRelacionados(
+            '',
+            ['equipo', 'sonido'],
+            ['Alquiler']
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
+    }
+
+    public function test_buscar_sub_servicios_relacionados_mensaje_y_tokens_e_intenciones(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => 'Alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo profesional',
+            'descripcion' => self::DESC_EQUIPO_COMPLETO_AUDIO,
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->service->buscarSubServiciosRelacionados(
+            'equipo',
+            ['profesional', 'audio'],
+            ['Alquiler']
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
     }
 }
 

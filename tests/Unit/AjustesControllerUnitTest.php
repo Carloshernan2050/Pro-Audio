@@ -68,8 +68,14 @@ class AjustesControllerUnitTest extends TestCase
         $response = $this->controller->index($request);
 
         $this->assertNotNull($response);
-        $this->assertArrayHasKey('servicios', $response->getData());
-        $this->assertArrayHasKey('subServicios', $response->getData());
+        $data = $response->getData();
+        $this->assertArrayHasKey('servicios', $data);
+        $this->assertArrayHasKey('subServicios', $data);
+        $this->assertArrayHasKey('cotizaciones', $data);
+        $this->assertArrayHasKey('groupBy', $data);
+        $this->assertArrayHasKey('groupedCotizaciones', $data);
+        $this->assertArrayHasKey('activeTab', $data);
+        $this->assertEquals('servicios', $data['activeTab']);
     }
 
     public function test_index_con_group_by_dia(): void
@@ -102,6 +108,37 @@ class AjustesControllerUnitTest extends TestCase
         $this->assertNotNull($response);
         $data = $response->getData();
         $this->assertEquals('inventario', $data['activeTab']);
+    }
+
+    public function test_index_con_tab_subservicios(): void
+    {
+        $request = Request::create(self::ROUTE_AJUSTES, 'GET', ['tab' => 'subservicios']);
+        $response = $this->controller->index($request);
+
+        $this->assertNotNull($response);
+        $data = $response->getData();
+        $this->assertEquals('subservicios', $data['activeTab']);
+    }
+
+    public function test_index_con_tab_movimientos(): void
+    {
+        $request = Request::create(self::ROUTE_AJUSTES, 'GET', ['tab' => 'movimientos']);
+        $response = $this->controller->index($request);
+
+        $this->assertNotNull($response);
+        $data = $response->getData();
+        $this->assertEquals('movimientos', $data['activeTab']);
+    }
+
+    public function test_index_con_tab_invalido(): void
+    {
+        $request = Request::create(self::ROUTE_AJUSTES, 'GET', ['tab' => 'tab_invalido']);
+        $response = $this->controller->index($request);
+
+        $this->assertNotNull($response);
+        $data = $response->getData();
+        // Si hay group_by, debería ser 'historial', si no, 'servicios'
+        $this->assertContains($data['activeTab'], ['servicios', 'historial']);
     }
 
     public function test_index_con_cotizaciones(): void
@@ -144,7 +181,8 @@ class AjustesControllerUnitTest extends TestCase
         $response = $this->controller->exportHistorialPdf($request);
 
         $this->assertNotNull($response);
-        $this->assertEquals('historial_cotizaciones.pdf', $response->headers->get('Content-Disposition'));
+        $contentDisposition = $response->headers->get('Content-Disposition');
+        $this->assertStringContainsString('historial_cotizaciones.pdf', $contentDisposition);
     }
 
     public function test_export_historial_pdf_con_group_by(): void
@@ -153,6 +191,36 @@ class AjustesControllerUnitTest extends TestCase
         $response = $this->controller->exportHistorialPdf($request);
 
         $this->assertNotNull($response);
+        $this->assertEquals('application/pdf', $response->headers->get('Content-Type'));
+    }
+
+    public function test_export_historial_pdf_con_group_by_consulta(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => 'password'
+        ]);
+
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100
+        ]);
+
+        Cotizacion::create([
+            'personas_id' => $usuario->id,
+            'sub_servicios_id' => $subServicio->id,
+            'monto' => 100,
+            'fecha_cotizacion' => now()
+        ]);
+
+        $request = Request::create(self::ROUTE_EXPORT_PDF, 'GET', ['group_by' => 'consulta']);
+        $response = $this->controller->exportHistorialPdf($request);
+
+        $this->assertNotNull($response);
+        $this->assertEquals('application/pdf', $response->headers->get('Content-Type'));
     }
 
     // ============================================
@@ -444,14 +512,8 @@ class AjustesControllerUnitTest extends TestCase
         $this->assertNotNull($grouped);
     }
 
-    public function test_export_historial_pdf_con_group_by_consulta(): void
+    public function test_group_cotizaciones_por_consulta_con_personas_id_null(): void
     {
-        $usuario = Usuario::create([
-            'primer_nombre' => 'Test',
-            'correo' => self::TEST_EMAIL,
-            'contrasena' => 'password'
-        ]);
-
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
@@ -459,17 +521,32 @@ class AjustesControllerUnitTest extends TestCase
             'precio' => 100
         ]);
 
-        Cotizacion::create([
-            'personas_id' => $usuario->id,
-            'sub_servicios_id' => $subServicio->id,
-            'monto' => 100,
-            'fecha_cotizacion' => now()
-        ]);
+        $cotizacion = new Cotizacion();
+        $cotizacion->personas_id = null;
+        $cotizacion->sub_servicios_id = $subServicio->id;
+        $cotizacion->monto = 100;
+        $cotizacion->fecha_cotizacion = now();
+        $cotizacion->save();
 
-        $request = Request::create('/ajustes/export-pdf', 'GET', ['group_by' => 'consulta']);
-        $response = $this->controller->exportHistorialPdf($request);
+        $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
+        $grouped = $this->invokePrivateMethod($this->controller, 'groupCotizaciones', [$cotizaciones, 'consulta']);
+        
+        $this->assertNotNull($grouped);
+    }
+
+    public function test_index_con_group_by_y_tab(): void
+    {
+        $request = Request::create(self::ROUTE_AJUSTES, 'GET', [
+            'group_by' => 'dia',
+            'tab' => 'servicios'
+        ]);
+        $response = $this->controller->index($request);
 
         $this->assertNotNull($response);
+        $data = $response->getData();
+        $this->assertEquals('dia', $data['groupBy']);
+        $this->assertEquals('servicios', $data['activeTab']); // El tab tiene prioridad
     }
+
 }
 
