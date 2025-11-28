@@ -6,15 +6,28 @@ Write-Host "Instalador de Xdebug para XAMPP" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
+# Rutas específicas para XAMPP
 $phpPath = "C:\xampp\php"
-$extPath = "$phpPath\ext"
+$extPath = "C:\xampp\php\ext"  # Ruta específica para extensiones de PHP
 $iniPath = "$phpPath\php.ini"
+
+Write-Host "Ruta de extensiones PHP: $extPath" -ForegroundColor Gray
 
 # Verificar que XAMPP existe
 if (-not (Test-Path $phpPath)) {
     Write-Host "ERROR: XAMPP no encontrado en $phpPath" -ForegroundColor Red
     exit 1
 }
+
+# Verificar que el directorio de extensiones existe
+if (-not (Test-Path $extPath)) {
+    Write-Host "ERROR: Directorio de extensiones no encontrado en $extPath" -ForegroundColor Red
+    Write-Host "Por favor, verifica que XAMPP esta instalado correctamente." -ForegroundColor Yellow
+    exit 1
+} else {
+    Write-Host "[OK] Directorio de extensiones encontrado" -ForegroundColor Green
+}
+Write-Host ""
 
 # Verificar y configurar PHP en el PATH si no está disponible
 Write-Host "Verificando PHP..." -ForegroundColor Yellow
@@ -63,38 +76,55 @@ Write-Host "  Thread Safety: $phpZts" -ForegroundColor Gray
 Write-Host "  Arquitectura: $phpArch" -ForegroundColor Gray
 Write-Host ""
 
-# Verificar si Xdebug ya está instalado
+# Verificar si Xdebug ya está instalado (DLL en la ruta de extensiones)
+$xdebugDll = Get-ChildItem -Path $extPath -Filter "php_xdebug.dll" -ErrorAction SilentlyContinue
+if ($xdebugDll) {
+    Write-Host "[INFO] php_xdebug.dll encontrado en: $extPath" -ForegroundColor Cyan
+}
+
+# Verificar si Xdebug está cargado en PHP
 $phpModules = & php -m 2>&1 | Out-String
 if ($phpModules -match "xdebug") {
-    Write-Host "[OK] Xdebug ya esta instalado!" -ForegroundColor Green
+    Write-Host "[OK] Xdebug ya esta instalado y cargado!" -ForegroundColor Green
     Write-Host ""
     Write-Host "Verificando configuracion..." -ForegroundColor Yellow
     $phpIni = Get-Content $iniPath -Raw
     if ($phpIni -match "xdebug\.mode\s*=\s*coverage") {
         Write-Host "[OK] Xdebug configurado para coverage" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "Xdebug esta listo para generar coverage.xml" -ForegroundColor Green
     } else {
         Write-Host "[ADVERTENCIA] Xdebug no esta configurado para coverage" -ForegroundColor Yellow
         Write-Host "Agregando configuracion de coverage..." -ForegroundColor Yellow
         Add-Content -Path $iniPath -Value "`nxdebug.mode=coverage"
         Write-Host "[OK] Configuracion agregada" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "IMPORTANTE: Reinicia Apache en XAMPP para aplicar los cambios." -ForegroundColor Yellow
     }
     exit 0
+} elseif ($xdebugDll) {
+    Write-Host "[ADVERTENCIA] php_xdebug.dll encontrado pero no esta cargado" -ForegroundColor Yellow
+    Write-Host "Verifica la configuracion en php.ini" -ForegroundColor Yellow
+    Write-Host ""
 }
 
-Write-Host "Xdebug no esta instalado." -ForegroundColor Yellow
-Write-Host ""
-Write-Host "Para instalar Xdebug manualmente:" -ForegroundColor Cyan
-Write-Host "1. Visita: https://xdebug.org/download" -ForegroundColor Gray
-Write-Host "2. Descarga: php_xdebug-3.x.x-8.2-zts-vs16-x86_64.dll" -ForegroundColor Gray
-Write-Host "   (Para PHP 8.2 ZTS x64 con Visual C++ 2019)" -ForegroundColor Gray
-Write-Host "3. Renombra el archivo a: php_xdebug.dll" -ForegroundColor Gray
-Write-Host "4. Copia a: $extPath" -ForegroundColor Gray
-Write-Host "5. Edita: $iniPath" -ForegroundColor Gray
-Write-Host "   Agrega estas lineas:" -ForegroundColor Gray
-Write-Host "   [Xdebug]" -ForegroundColor Gray
-Write-Host "   zend_extension=xdebug" -ForegroundColor Gray
-Write-Host "   xdebug.mode=coverage" -ForegroundColor Gray
-Write-Host ""
+if (-not $xdebugDll) {
+    Write-Host "Xdebug no esta instalado." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Para instalar Xdebug manualmente:" -ForegroundColor Cyan
+    Write-Host "1. Visita: https://xdebug.org/download" -ForegroundColor Gray
+    Write-Host "2. Descarga: php_xdebug-3.x.x-8.2-zts-vs16-x86_64.dll" -ForegroundColor Gray
+    Write-Host "   (Para PHP 8.2 ZTS x64 con Visual C++ 2019)" -ForegroundColor Gray
+    Write-Host "3. Renombra el archivo a: php_xdebug.dll" -ForegroundColor Gray
+    Write-Host "4. Copia el DLL a la ruta de extensiones:" -ForegroundColor Gray
+    Write-Host "   $extPath" -ForegroundColor Yellow
+    Write-Host "5. Edita: $iniPath" -ForegroundColor Gray
+    Write-Host "   Agrega estas lineas:" -ForegroundColor Gray
+    Write-Host "   [Xdebug]" -ForegroundColor Gray
+    Write-Host "   zend_extension=xdebug" -ForegroundColor Gray
+    Write-Host "   xdebug.mode=coverage" -ForegroundColor Gray
+    Write-Host ""
+}
 Write-Host "O usa el asistente de Xdebug:" -ForegroundColor Cyan
 Write-Host "  https://xdebug.org/wizard" -ForegroundColor Yellow
 Write-Host "  (Pega el resultado de: php -i)" -ForegroundColor Gray
@@ -126,8 +156,12 @@ Write-Host "     y sigue las instrucciones para descargar" -ForegroundColor Gray
 Write-Host ""
 Write-Host "PASO 2: Instalar el DLL" -ForegroundColor Yellow
 Write-Host "  Una vez descargado el DLL:" -ForegroundColor Cyan
-Write-Host "  1. Copia el DLL a: $extPath" -ForegroundColor Gray
+Write-Host "  1. Copia el DLL a la ruta de extensiones:" -ForegroundColor Gray
+Write-Host "     $extPath" -ForegroundColor Yellow
 Write-Host "  2. Renombralo a: php_xdebug.dll" -ForegroundColor Gray
+Write-Host ""
+Write-Host "  NOTA: Esta es la ruta donde PHP busca las extensiones" -ForegroundColor Cyan
+Write-Host "        para generar el coverage.xml" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "PASO 3: Configurar php.ini" -ForegroundColor Yellow
 Write-Host "  Despues de copiar el DLL, ejecuta:" -ForegroundColor Cyan
@@ -177,10 +211,15 @@ xdebug.mode=coverage
     Write-Host "Xdebug configurado correctamente!" -ForegroundColor Green
     Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
+    Write-Host "Ubicacion del DLL: $extPath\php_xdebug.dll" -ForegroundColor Cyan
+    Write-Host ""
     Write-Host "IMPORTANTE: Reinicia Apache en XAMPP para aplicar los cambios." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Para verificar la instalacion:" -ForegroundColor Cyan
     Write-Host "  php -m | Select-String xdebug" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "Despues de reiniciar, puedes generar coverage.xml ejecutando:" -ForegroundColor Cyan
+    Write-Host "  .\generate-sonar-reports.ps1" -ForegroundColor Yellow
     Write-Host ""
 }
 

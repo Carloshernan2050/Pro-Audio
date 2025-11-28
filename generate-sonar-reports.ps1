@@ -5,6 +5,9 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
+# Ruta de extensiones de PHP para coverage
+$phpExtPath = "C:\xampp\php\ext"
+
 # Verificar y configurar PHP en el PATH si no está disponible
 Write-Host "Verificando PHP..." -ForegroundColor Yellow
 try {
@@ -28,6 +31,10 @@ try {
             Write-Host "[OK] PHP encontrado en: $phpPath" -ForegroundColor Green
             Write-Host "     Agregado al PATH para esta sesion." -ForegroundColor Gray
             $phpFound = $true
+            # Actualizar ruta de extensiones si es XAMPP
+            if ($phpPath -eq "C:\xampp\php") {
+                $phpExtPath = "$phpPath\ext"
+            }
             break
         }
     }
@@ -39,6 +46,15 @@ try {
         Write-Host "  3. O ejecuta este script desde una terminal con PHP en el PATH" -ForegroundColor Yellow
         exit 1
     }
+}
+
+# Verificar ruta de extensiones
+Write-Host "Ruta de extensiones PHP: $phpExtPath" -ForegroundColor Gray
+if (Test-Path $phpExtPath) {
+    Write-Host "[OK] Directorio de extensiones encontrado" -ForegroundColor Green
+} else {
+    Write-Host "[ADVERTENCIA] Directorio de extensiones no encontrado en: $phpExtPath" -ForegroundColor Yellow
+    Write-Host "  Verificando extensiones en ubicacion por defecto..." -ForegroundColor Gray
 }
 Write-Host ""
 
@@ -87,25 +103,61 @@ try {
 
     # Verificar si existe extensión de cobertura (Xdebug o PCOV)
     Write-Host "Verificando extension de cobertura..." -ForegroundColor Yellow
+    
+    # Verificar archivos DLL en la ruta de extensiones
+    if (Test-Path $phpExtPath) {
+        $xdebugDll = Get-ChildItem -Path $phpExtPath -Filter "php_xdebug.dll" -ErrorAction SilentlyContinue
+        $pcovDll = Get-ChildItem -Path $phpExtPath -Filter "php_pcov.dll" -ErrorAction SilentlyContinue
+        
+        if ($xdebugDll) {
+            Write-Host "[INFO] php_xdebug.dll encontrado en: $phpExtPath" -ForegroundColor Cyan
+        }
+        if ($pcovDll) {
+            Write-Host "[INFO] php_pcov.dll encontrado en: $phpExtPath" -ForegroundColor Cyan
+        }
+        if (-not $xdebugDll -and -not $pcovDll) {
+            Write-Host "[ADVERTENCIA] No se encontraron DLLs de cobertura en: $phpExtPath" -ForegroundColor Yellow
+            Write-Host "  Para generar coverage.xml, necesitas instalar Xdebug o PCOV en esta ruta." -ForegroundColor Yellow
+        }
+    }
+    
     $phpInfo = & php -m 2>&1 | Out-String
     
     if ($phpInfo -notmatch "xdebug" -and $phpInfo -notmatch "pcov") {
         Write-Host ""
-        Write-Host "ADVERTENCIA: No se detecto ninguna extension de cobertura (Xdebug o PCOV)." -ForegroundColor Yellow
+        Write-Host "ADVERTENCIA: No se detecto ninguna extension de cobertura (Xdebug o PCOV) cargada." -ForegroundColor Yellow
         Write-Host "Los reportes de cobertura pueden no generarse correctamente." -ForegroundColor Yellow
         Write-Host "Los reportes de tests (JUnit XML) se generaran normalmente." -ForegroundColor Cyan
         Write-Host ""
         Write-Host "Para instalar extension de cobertura:" -ForegroundColor Cyan
-        Write-Host "  - Xdebug: https://xdebug.org/docs/install" -ForegroundColor Gray
-        Write-Host "  - PCOV: pecl install pcov (mas rapido, recomendado)" -ForegroundColor Gray
+        Write-Host "  1. Descarga Xdebug desde: https://xdebug.org/download" -ForegroundColor Gray
+        Write-Host "  2. Copia el DLL a: $phpExtPath" -ForegroundColor Gray
+        Write-Host "  3. Configura php.ini con:" -ForegroundColor Gray
+        Write-Host "     [Xdebug]" -ForegroundColor Gray
+        Write-Host "     zend_extension=xdebug" -ForegroundColor Gray
+        Write-Host "     xdebug.mode=coverage" -ForegroundColor Gray
+        Write-Host "  4. Reinicia Apache/PHP" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "  O usa el script: .\install-xdebug.ps1" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "Continuando sin extension de cobertura..." -ForegroundColor Yellow
     } else {
         if ($phpInfo -match "xdebug") {
-            Write-Host "[OK] Xdebug detectado" -ForegroundColor Green
+            Write-Host "[OK] Xdebug detectado y cargado" -ForegroundColor Green
+            # Verificar configuración de modo
+            $phpIniContent = & php --ini 2>&1 | Select-String "Loaded Configuration File" | ForEach-Object { $_.ToString() -replace ".*:\s*", "" }
+            if ($phpIniContent -and (Test-Path $phpIniContent)) {
+                $iniContent = Get-Content $phpIniContent -Raw
+                if ($iniContent -match "xdebug\.mode\s*=\s*coverage") {
+                    Write-Host "[OK] Xdebug configurado para coverage" -ForegroundColor Green
+                } else {
+                    Write-Host "[ADVERTENCIA] Xdebug no tiene modo coverage configurado" -ForegroundColor Yellow
+                    Write-Host "  Agrega 'xdebug.mode=coverage' en php.ini" -ForegroundColor Gray
+                }
+            }
         }
         if ($phpInfo -match "pcov") {
-            Write-Host "[OK] PCOV detectado" -ForegroundColor Green
+            Write-Host "[OK] PCOV detectado y cargado" -ForegroundColor Green
         }
     }
     Write-Host ""
@@ -136,11 +188,42 @@ try {
     if (Test-Path $coverageFile) {
         $size = (Get-Item $coverageFile).Length
         Write-Host "[OK] coverage.xml generado - $size bytes" -ForegroundColor Green
+        
+        # Verificar si el archivo tiene datos de cobertura reales
+        $coverageContent = Get-Content $coverageFile -Raw
+        if ($coverageContent -match 'coveredstatements="0"|count="0"') {
+            # Verificar si TODOS los valores están en 0
+            $allZero = $coverageContent -match 'coveredstatements="0".*coveredmethods="0".*coveredelements="0"'
+            if ($allZero -or ($coverageContent -notmatch 'coveredstatements="[1-9]')) {
+                Write-Host ""
+                Write-Host "========================================" -ForegroundColor Yellow
+                Write-Host "ADVERTENCIA: coverage.xml tiene 0% de cobertura" -ForegroundColor Yellow
+                Write-Host "========================================" -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "El archivo coverage.xml se generó pero todos los valores están en 0." -ForegroundColor Yellow
+                Write-Host "Esto significa que Xdebug/PCOV no está instalado o no está funcionando." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Para solucionarlo:" -ForegroundColor Cyan
+                Write-Host "  1. Ejecuta: .\install-xdebug-automatic.ps1" -ForegroundColor White
+                Write-Host "  2. Sigue las instrucciones para instalar Xdebug" -ForegroundColor Gray
+                Write-Host "  3. Reinicia Apache/PHP" -ForegroundColor Gray
+                Write-Host "  4. Vuelve a ejecutar este script" -ForegroundColor Gray
+                Write-Host ""
+            } else {
+                # Extraer porcentaje de cobertura si está disponible
+                if ($coverageContent -match 'line-rate="([^"]+)"') {
+                    $lineRate = [double]$matches[1] * 100
+                    Write-Host "[INFO] Cobertura de líneas: $([math]::Round($lineRate, 2))%" -ForegroundColor Cyan
+                }
+            }
+        }
         $reportsGenerated = $true
     } else {
         Write-Host "[ADVERTENCIA] coverage.xml NO encontrado" -ForegroundColor Yellow
         Write-Host "  Esto es normal si no tienes extension de cobertura instalada." -ForegroundColor Gray
         Write-Host "  SonarQube puede funcionar sin coverage, pero lo necesita para mostrar cobertura." -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "  Para instalar Xdebug: .\install-xdebug-automatic.ps1" -ForegroundColor Cyan
     }
     
     Write-Host ""

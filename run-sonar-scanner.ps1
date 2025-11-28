@@ -21,20 +21,106 @@ if (-not $scannerExe) {
     exit 1
 }
 
-# Obtener el token de la variable de entorno
-$token = [System.Environment]::GetEnvironmentVariable('SONAR_TOKEN', 'User')
+# Obtener el token de diferentes fuentes (parámetro, variable de entorno, o prompt)
+$token = $null
+
+# 1. Intentar obtener desde parámetro del script
+if ($args.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace($args[0])) {
+    $token = $args[0]
+    Write-Host "[INFO] Token obtenido desde parámetro del script" -ForegroundColor Cyan
+}
+# 2. Intentar obtener desde variable de entorno de usuario
+elseif (-not [string]::IsNullOrEmpty([System.Environment]::GetEnvironmentVariable('SONAR_TOKEN', 'User'))) {
+    $token = [System.Environment]::GetEnvironmentVariable('SONAR_TOKEN', 'User')
+    Write-Host "[INFO] Token obtenido desde variable de entorno SONAR_TOKEN (User)" -ForegroundColor Cyan
+}
+# 3. Intentar obtener desde variable de entorno del proceso
+elseif (-not [string]::IsNullOrEmpty($env:SONAR_TOKEN)) {
+    $token = $env:SONAR_TOKEN
+    Write-Host "[INFO] Token obtenido desde variable de entorno SONAR_TOKEN (Process)" -ForegroundColor Cyan
+}
 
 if ([string]::IsNullOrEmpty($token)) {
-    Write-Host "ERROR: La variable de entorno SONAR_TOKEN no está configurada." -ForegroundColor Red
-    Write-Host "Configúrala con:" -ForegroundColor Yellow
-    Write-Host '[System.Environment]::SetEnvironmentVariable("SONAR_TOKEN", "tu-token-aqui", "User")' -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host "ERROR: Token de SonarQube no encontrado" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Opciones para configurar el token:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "OPCION 1: Pasar el token como parámetro" -ForegroundColor Cyan
+    Write-Host "  .\run-sonar-scanner.ps1 tu-token-aqui" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "OPCION 2: Configurar variable de entorno (recomendado)" -ForegroundColor Cyan
+    Write-Host "  [System.Environment]::SetEnvironmentVariable('SONAR_TOKEN', 'tu-token-aqui', 'User')" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  Después de configurarla, cierra y vuelve a abrir PowerShell." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "OPCION 3: Variable de entorno temporal (solo esta sesión)" -ForegroundColor Cyan
+    Write-Host "  `$env:SONAR_TOKEN = 'tu-token-aqui'" -ForegroundColor Gray
+    Write-Host "  .\run-sonar-scanner.ps1" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "Para obtener tu token:" -ForegroundColor Yellow
+    Write-Host "  1. Inicia sesión en: https://sonarqube.dataguaviare.com.co" -ForegroundColor Gray
+    Write-Host "  2. Ve a: My Account > Security" -ForegroundColor Gray
+    Write-Host "  3. Genera un nuevo token" -ForegroundColor Gray
+    Write-Host ""
     exit 1
 }
 
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Ejecutando SonarQube Scanner..." -ForegroundColor Cyan
-Write-Host "Token encontrado en variable de entorno." -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Servidor: https://sonarqube.dataguaviare.com.co" -ForegroundColor Gray
+Write-Host "Proyecto: pro-audio" -ForegroundColor Gray
+Write-Host "Token: [configurado]" -ForegroundColor Green
+Write-Host ""
+
+# Verificar que los reportes existan antes de ejecutar
+$coverageFile = "tests\_coverage\coverage.xml"
+$testReportFile = "tests\_coverage\test-reporter.xml"
+
+Write-Host "Verificando reportes..." -ForegroundColor Yellow
+if (Test-Path $testReportFile) {
+    Write-Host "[OK] test-reporter.xml encontrado" -ForegroundColor Green
+} else {
+    Write-Host "[ADVERTENCIA] test-reporter.xml no encontrado" -ForegroundColor Yellow
+    Write-Host "  Ejecuta primero: .\generate-sonar-reports.ps1" -ForegroundColor Gray
+}
+
+if (Test-Path $coverageFile) {
+    Write-Host "[OK] coverage.xml encontrado" -ForegroundColor Green
+} else {
+    Write-Host "[ADVERTENCIA] coverage.xml no encontrado" -ForegroundColor Yellow
+    Write-Host "  Esto es normal si no tienes Xdebug/PCOV instalado" -ForegroundColor Gray
+    Write-Host "  SonarQube funcionará sin coverage, pero no mostrará métricas de cobertura" -ForegroundColor Gray
+}
 Write-Host ""
 
 # Ejecutar el scanner con el token
+Write-Host "Iniciando análisis..." -ForegroundColor Cyan
+Write-Host ""
 & $scannerExe -D"sonar.token=$token"
+
+# Verificar el resultado
+if ($LASTEXITCODE -eq 0) {
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Green
+    Write-Host "Análisis completado exitosamente!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Revisa los resultados en:" -ForegroundColor Cyan
+    Write-Host "  https://sonarqube.dataguaviare.com.co/dashboard?id=pro-audio" -ForegroundColor Yellow
+    Write-Host ""
+} else {
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host "El análisis falló" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Revisa los errores arriba para más detalles." -ForegroundColor Yellow
+    Write-Host ""
+}
 
