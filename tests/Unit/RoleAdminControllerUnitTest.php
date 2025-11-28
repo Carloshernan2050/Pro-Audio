@@ -2,8 +2,12 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use App\Http\Controllers\RoleAdminController;
+use App\Models\Usuario;
+use Illuminate\Http\Request;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Tests Unitarios para RoleAdminController
@@ -12,6 +16,12 @@ use App\Http\Controllers\RoleAdminController;
  */
 class RoleAdminControllerUnitTest extends TestCase
 {
+    use RefreshDatabase;
+
+    private const TEST_EMAIL = 'test@test.com';
+    private const ROUTE_ADMIN_ROLES_UPDATE = '/admin/roles/update';
+    private const ROL_CLIENTE = 'Cliente';
+
     protected $controller;
 
     protected function setUp(): void
@@ -86,6 +96,117 @@ class RoleAdminControllerUnitTest extends TestCase
         $rolNoPermitido = 'Invitado';
 
         $this->assertNotContains($rolNoPermitido, $rolesPermitidos);
+    }
+
+    public function test_index_retorna_vista(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => 'password'
+        ]);
+
+        // Crear roles
+        $rolId = DB::table('roles')->insertGetId([
+            'name' => self::ROL_CLIENTE,
+            'nombre_rol' => self::ROL_CLIENTE
+        ]);
+
+        DB::table('personas_roles')->insert([
+            'personas_id' => $usuario->id,
+            'roles_id' => $rolId
+        ]);
+
+        $response = $this->controller->index();
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_update_asigna_rol(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => 'password'
+        ]);
+
+        $rolId = DB::table('roles')->insertGetId([
+            'name' => self::ROL_CLIENTE,
+            'nombre_rol' => self::ROL_CLIENTE
+        ]);
+
+        $request = Request::create(self::ROUTE_ADMIN_ROLES_UPDATE, 'POST', [
+            'persona_id' => $usuario->id,
+            'role_id' => $rolId
+        ]);
+
+        $response = $this->controller->update($request);
+        
+        $this->assertNotNull($response);
+        
+        $asignado = DB::table('personas_roles')
+            ->where('personas_id', $usuario->id)
+            ->where('roles_id', $rolId)
+            ->exists();
+        
+        $this->assertTrue($asignado);
+    }
+
+    public function test_update_remueve_rol(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => 'password'
+        ]);
+
+        $rolId = DB::table('roles')->insertGetId([
+            'name' => self::ROL_CLIENTE,
+            'nombre_rol' => self::ROL_CLIENTE
+        ]);
+
+        DB::table('personas_roles')->insert([
+            'personas_id' => $usuario->id,
+            'roles_id' => $rolId
+        ]);
+
+        $request = Request::create(self::ROUTE_ADMIN_ROLES_UPDATE, 'POST', [
+            'persona_id' => $usuario->id,
+            'role_id' => null
+        ]);
+
+        $response = $this->controller->update($request);
+        
+        $this->assertNotNull($response);
+        
+        $asignado = DB::table('personas_roles')
+            ->where('personas_id', $usuario->id)
+            ->exists();
+        
+        $this->assertFalse($asignado);
+    }
+
+    public function test_update_rechaza_rol_no_permitido(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => 'password'
+        ]);
+
+        $rolId = DB::table('roles')->insertGetId([
+            'name' => 'Invitado',
+            'nombre_rol' => 'Invitado'
+        ]);
+
+        $request = Request::create(self::ROUTE_ADMIN_ROLES_UPDATE, 'POST', [
+            'persona_id' => $usuario->id,
+            'role_id' => $rolId
+        ]);
+
+        $response = $this->controller->update($request);
+        
+        $this->assertNotNull($response);
     }
 }
 

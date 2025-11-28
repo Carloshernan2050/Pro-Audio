@@ -2,8 +2,14 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use App\Http\Controllers\UsuarioController;
+use App\Models\Usuario;
+use Illuminate\Http\Request;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Tests Unitarios para UsuarioController
@@ -12,11 +18,20 @@ use App\Http\Controllers\UsuarioController;
  */
 class UsuarioControllerUnitTest extends TestCase
 {
+    use RefreshDatabase;
+
+    private const TEST_EMAIL_JUAN = 'juan@test.com';
+    private const TEST_PASSWORD = 'password123';
+    private const ROL_CLIENTE = 'Cliente';
+    private const ROUTE_USUARIOS_AUTENTICAR = '/usuarios/autenticar';
+    private const ROUTE_USUARIOS_PERFIL_PHOTO = '/usuarios/perfil/photo';
+
     protected $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('public');
         $this->controller = new UsuarioController();
     }
 
@@ -132,9 +147,249 @@ class UsuarioControllerUnitTest extends TestCase
     public function test_rol_cliente_por_defecto(): void
     {
         // El rol por defecto es 'Cliente'
-        $rolDefecto = 'Cliente';
+        $rolDefecto = self::ROL_CLIENTE;
         
-        $this->assertEquals('Cliente', $rolDefecto);
+        $this->assertEquals(self::ROL_CLIENTE, $rolDefecto);
+    }
+
+    public function test_registro_retorna_vista(): void
+    {
+        $response = $this->controller->registro();
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_store_crea_usuario(): void
+    {
+        DB::table('roles')->insertGetId([
+            'name' => self::ROL_CLIENTE,
+            'nombre_rol' => self::ROL_CLIENTE
+        ]);
+
+        $request = Request::create('/usuarios/registro', 'POST', [
+            'primer_nombre' => 'Juan',
+            'primer_apellido' => 'Pérez',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => self::TEST_PASSWORD,
+            'contrasena_confirmation' => self::TEST_PASSWORD
+        ]);
+
+        $response = $this->controller->store($request);
+        
+        $this->assertNotNull($response);
+        
+        $this->assertDatabaseHas('personas', [
+            'correo' => self::TEST_EMAIL_JUAN,
+            'primer_nombre' => 'Juan'
+        ]);
+    }
+
+    public function test_inicio_sesion_retorna_vista(): void
+    {
+        $response = $this->controller->inicioSesion();
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_autenticar_exitoso(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => Hash::make(self::TEST_PASSWORD)
+        ]);
+
+        $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => self::TEST_PASSWORD
+        ]);
+
+        $response = $this->controller->autenticar($request);
+        
+        $this->assertNotNull($response);
+        $this->assertEquals($usuario->id, session('usuario_id'));
+    }
+
+    public function test_autenticar_fallido(): void
+    {
+        Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => Hash::make(self::TEST_PASSWORD)
+        ]);
+
+        $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password_incorrecta'
+        ]);
+
+        $response = $this->controller->autenticar($request);
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_autenticar_con_roles(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => Hash::make(self::TEST_PASSWORD)
+        ]);
+
+        $rolId = DB::table('roles')->insertGetId([
+            'name' => self::ROL_CLIENTE,
+            'nombre_rol' => self::ROL_CLIENTE
+        ]);
+
+        DB::table('personas_roles')->insert([
+            'personas_id' => $usuario->id,
+            'roles_id' => $rolId
+        ]);
+
+        $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => self::TEST_PASSWORD
+        ]);
+
+        $response = $this->controller->autenticar($request);
+        
+        $this->assertNotNull($response);
+        $this->assertTrue(session()->has('roles'));
+    }
+
+    public function test_autenticar_con_pending_admin(): void
+    {
+        Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => Hash::make(self::TEST_PASSWORD)
+        ]);
+
+        session(['pending_admin' => true]);
+
+        $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => self::TEST_PASSWORD
+        ]);
+
+        $response = $this->controller->autenticar($request);
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_cerrar_sesion(): void
+    {
+        session(['usuario_id' => 1, 'usuario_nombre' => 'Juan']);
+
+        $response = $this->controller->cerrarSesion();
+        
+        $this->assertNotNull($response);
+        $this->assertFalse(session()->has('usuario_id'));
+    }
+
+    public function test_perfil_retorna_vista(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password'
+        ]);
+
+        session(['usuario_id' => $usuario->id]);
+
+        $response = $this->controller->perfil();
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_update_photo_exitoso(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password'
+        ]);
+
+        session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
+
+        $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
+            'foto_perfil' => $file
+        ]);
+
+        $response = $this->controller->updatePhoto($request);
+        
+        $this->assertNotNull($response);
+        
+        $data = json_decode($response->getContent(), true);
+        $this->assertTrue($data['success']);
+    }
+
+    public function test_update_photo_sin_sesion(): void
+    {
+        $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
+
+        $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
+            'foto_perfil' => $file
+        ]);
+
+        $response = $this->controller->updatePhoto($request);
+        
+        $this->assertNotNull($response);
+        
+        $data = json_decode($response->getContent(), true);
+        $this->assertFalse($data['success']);
+    }
+
+    public function test_update_photo_usuario_invitado(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password'
+        ]);
+
+        session(['usuario_id' => $usuario->id, 'roles' => ['Invitado']]);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
+
+        $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
+            'foto_perfil' => $file
+        ]);
+
+        $response = $this->controller->updatePhoto($request);
+        
+        $this->assertNotNull($response);
+        
+        $data = json_decode($response->getContent(), true);
+        $this->assertFalse($data['success']);
+    }
+
+    public function test_update_photo_elimina_foto_anterior(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password',
+            'foto_perfil' => 'old_perfil.jpg'
+        ]);
+
+        Storage::disk('public')->put('perfiles/old_perfil.jpg', 'fake content');
+
+        session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('new_perfil.jpg', 100, 100);
+
+        $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
+            'foto_perfil' => $file
+        ]);
+
+        $response = $this->controller->updatePhoto($request);
+        
+        $this->assertNotNull($response);
+        
+        $this->assertFalse(Storage::disk('public')->exists('perfiles/old_perfil.jpg'));
     }
 }
 
