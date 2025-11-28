@@ -116,10 +116,10 @@
         <line num="112" type="stmt" count="0"/>
         <line num="113" type="stmt" count="0"/>
         <line num="115" type="stmt" count="0"/>
-        <line num="118" type="method" name="getSubservicios" visibility="public" complexity="1" crap="2" count="0"/>
-        <line num="120" type="stmt" count="0"/>
-        <line num="121" type="stmt" count="0"/>
-        <metrics loc="124" ncloc="120" classes="1" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="85" coveredstatements="0" elements="88" coveredelements="0"/>
+        <line num="58" type="method" name="getSubservicios" visibility="public" complexity="1" crap="2" count="0"/>
+        <line num="60" type="stmt" count="0"/>
+        <line num="61" type="stmt" count="0"/>
+        <metrics loc="117" ncloc="113" classes="1" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="83" coveredstatements="0" elements="86" coveredelements="0"/>
       </file>
       <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\BusquedaController.php">
         <class name="App\Http\Controllers\BusquedaController" namespace="App\Http\Controllers">

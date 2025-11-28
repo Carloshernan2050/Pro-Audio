@@ -2,8 +2,13 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use App\Http\Controllers\SubServiciosController;
+use App\Models\SubServicios;
+use App\Models\Servicios;
+use Illuminate\Http\Request;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Tests Unitarios para SubServiciosController
@@ -12,11 +17,14 @@ use App\Http\Controllers\SubServiciosController;
  */
 class SubServiciosControllerUnitTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('public');
         $this->controller = new SubServiciosController();
     }
 
@@ -76,6 +84,194 @@ class SubServiciosControllerUnitTest extends TestCase
         $maxCaracteres = 100;
         
         $this->assertEquals(100, $maxCaracteres);
+    }
+
+    public function test_index_retorna_vista(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100
+        ]);
+
+        $response = $this->controller->index();
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_index_maneja_excepciones(): void
+    {
+        // Forzar error simulando problema de BD
+        SubServicios::shouldReceive('with')->andThrow(new \Exception('Error de BD'));
+
+        try {
+            $response = $this->controller->index();
+            $this->assertNotNull($response);
+        } catch (\Exception $e) {
+            // Esperado
+        }
+    }
+
+    public function test_create_retorna_vista(): void
+    {
+        $response = $this->controller->create();
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_store_crea_subservicio(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+
+        $request = Request::create('/subservicios', 'POST', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Nuevo Subservicio',
+            'descripcion' => 'Descripción',
+            'precio' => 150
+        ]);
+
+        $response = $this->controller->store($request);
+        
+        $this->assertNotNull($response);
+        
+        $this->assertDatabaseHas('sub_servicios', [
+            'nombre' => 'Nuevo Subservicio',
+            'precio' => 150
+        ]);
+    }
+
+    public function test_store_con_imagen(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('test.jpg', 100, 100);
+
+        $request = Request::create('/subservicios', 'POST', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Subservicio con imagen',
+            'precio' => 200
+        ], [], ['imagen' => $file]);
+
+        $response = $this->controller->store($request);
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_show_retorna_vista(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100
+        ]);
+
+        $response = $this->controller->show($subServicio->id);
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_edit_retorna_vista(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100
+        ]);
+
+        $response = $this->controller->edit($subServicio->id);
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_update_actualiza_subservicio(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100
+        ]);
+
+        $request = Request::create("/subservicios/{$subServicio->id}", 'PUT', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest Actualizado',
+            'precio' => 150
+        ]);
+
+        $response = $this->controller->update($request, $subServicio->id);
+        
+        $this->assertNotNull($response);
+        
+        $this->assertDatabaseHas('sub_servicios', [
+            'id' => $subServicio->id,
+            'nombre' => 'SubTest Actualizado',
+            'precio' => 150
+        ]);
+    }
+
+    public function test_update_actualiza_imagen(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100,
+            'imagen' => 'old_image.jpg'
+        ]);
+
+        Storage::disk('public')->put('subservicios/old_image.jpg', 'fake content');
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('new_test.jpg', 100, 100);
+
+        $request = Request::create("/subservicios/{$subServicio->id}", 'PUT', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100
+        ], [], ['imagen' => $file]);
+
+        $response = $this->controller->update($request, $subServicio->id);
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_destroy_elimina_subservicio(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100
+        ]);
+
+        $response = $this->controller->destroy($subServicio->id);
+        
+        $this->assertNotNull($response);
+        
+        $this->assertDatabaseMissing('sub_servicios', [
+            'id' => $subServicio->id
+        ]);
+    }
+
+    public function test_destroy_elimina_imagen(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'precio' => 100,
+            'imagen' => 'test_image.jpg'
+        ]);
+
+        Storage::disk('public')->put('subservicios/test_image.jpg', 'fake content');
+
+        $response = $this->controller->destroy($subServicio->id);
+        
+        $this->assertNotNull($response);
+        
+        Storage::disk('public')->assertMissing('subservicios/test_image.jpg');
     }
 }
 

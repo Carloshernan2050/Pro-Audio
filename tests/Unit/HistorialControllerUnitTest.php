@@ -2,8 +2,12 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use App\Http\Controllers\HistorialController;
+use App\Models\Historial;
+use App\Models\Reserva;
+use App\Models\Usuario;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * Tests Unitarios para HistorialController
@@ -12,6 +16,8 @@ use App\Http\Controllers\HistorialController;
  */
 class HistorialControllerUnitTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected $controller;
 
     protected function setUp(): void
@@ -23,6 +29,55 @@ class HistorialControllerUnitTest extends TestCase
     public function test_controller_instancia_correctamente(): void
     {
         $this->assertInstanceOf(HistorialController::class, $this->controller);
+    }
+
+    public function test_index_retorna_vista(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'correo' => 'test@test.com',
+            'contrasena' => 'password'
+        ]);
+
+        $reserva = Reserva::create([
+            'personas_id' => $usuario->id,
+            'fecha_inicio' => now(),
+            'estado' => 'pendiente'
+        ]);
+
+        Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => 'creada'
+        ]);
+
+        $response = $this->controller->index();
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_export_pdf_retorna_pdf(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'correo' => 'test@test.com',
+            'contrasena' => 'password'
+        ]);
+
+        $reserva = Reserva::create([
+            'personas_id' => $usuario->id,
+            'fecha_inicio' => now(),
+            'estado' => 'pendiente'
+        ]);
+
+        Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => 'creada'
+        ]);
+
+        $response = $this->controller->exportPdf();
+        
+        $this->assertNotNull($response);
+        $this->assertStringContainsString('historial.pdf', $response->headers->get('Content-Disposition'));
     }
 
     public function test_pdf_configuracion_estructura(): void
