@@ -7,7 +7,7 @@ use App\Http\Controllers\AjustesController;
 
 /**
  * Tests Unitarios para AjustesController
- * 
+ *
  * Tests para lógica de agrupación y estructura
  */
 class AjustesControllerUnitTest extends TestCase

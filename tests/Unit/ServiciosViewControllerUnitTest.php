@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 /**
  * Tests Unitarios para ServiciosViewController
- * 
+ *
  * Tests para lógica de vistas y servicios
  */
 class ServiciosViewControllerUnitTest extends TestCase
@@ -29,7 +29,7 @@ class ServiciosViewControllerUnitTest extends TestCase
     {
         // Los servicios principales son: Alquiler, Animación, Publicidad
         $servicios = ['Alquiler', 'Animación', 'Publicidad'];
-        
+
         $this->assertCount(3, $servicios);
         $this->assertContains('Alquiler', $servicios);
         $this->assertContains('Animación', $servicios);
@@ -41,7 +41,7 @@ class ServiciosViewControllerUnitTest extends TestCase
         // Verificar generación de slug para servicios
         $servicio = 'Alquiler de Equipos';
         $slug = Str::slug($servicio, '_');
-        
+
         $this->assertIsString($slug);
         $this->assertNotEmpty($slug);
     }
@@ -51,7 +51,7 @@ class ServiciosViewControllerUnitTest extends TestCase
         // Verificar estructura de ruta de vista
         $slug = 'alquiler';
         $rutaVista = "views/usuarios/{$slug}.blade.php";
-        
+
         $this->assertIsString($rutaVista);
         $this->assertStringContainsString('views/usuarios/', $rutaVista);
         $this->assertStringEndsWith('.blade.php', $rutaVista);
@@ -61,7 +61,7 @@ class ServiciosViewControllerUnitTest extends TestCase
     {
         // Verificar que las vistas principales existen conceptualmente
         $vistas = ['usuarios.alquiler', 'usuarios.animacion', 'usuarios.publicidad'];
-        
+
         foreach ($vistas as $vista) {
             $this->assertIsString($vista);
             $this->assertStringStartsWith('usuarios.', $vista);

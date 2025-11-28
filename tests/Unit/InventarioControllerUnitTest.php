@@ -7,7 +7,7 @@ use App\Http\Controllers\InventarioController;
 
 /**
  * Tests Unitarios para InventarioController
- * 
+ *
  * Tests para validaciones y estructura
  */
 class InventarioControllerUnitTest extends TestCase
@@ -30,7 +30,7 @@ class InventarioControllerUnitTest extends TestCase
             'descripcion' => 'required|string|max:255',
             'stock' => 'required|integer|min:0'
         ];
-        
+
         $this->assertArrayHasKey('descripcion', $reglasEsperadas);
         $this->assertStringContainsString('required', $reglasEsperadas['descripcion']);
         $this->assertStringContainsString('string', $reglasEsperadas['descripcion']);
@@ -42,7 +42,7 @@ class InventarioControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'stock' => 'required|integer|min:0'
         ];
-        
+
         $this->assertArrayHasKey('stock', $reglasEsperadas);
         $this->assertStringContainsString('required', $reglasEsperadas['stock']);
         $this->assertStringContainsString('integer', $reglasEsperadas['stock']);
@@ -59,7 +59,7 @@ class InventarioControllerUnitTest extends TestCase
             'stock.integer' => 'El stock debe ser un número entero.',
             'stock.min' => 'El stock no puede ser menor a 0.'
         ];
-        
+
         $this->assertCount(6, $mensajes);
         $this->assertArrayHasKey('descripcion.required', $mensajes);
         $this->assertArrayHasKey('stock.required', $mensajes);
@@ -69,7 +69,7 @@ class InventarioControllerUnitTest extends TestCase
     {
         // Verificar que el stock mínimo permitido es 0
         $stockMinimo = 0;
-        
+
         $this->assertEquals(0, $stockMinimo);
         $this->assertGreaterThanOrEqual(0, $stockMinimo);
     }
@@ -78,7 +78,7 @@ class InventarioControllerUnitTest extends TestCase
     {
         // Verificar que el máximo de caracteres es 255
         $maxCaracteres = 255;
-        
+
         $this->assertEquals(255, $maxCaracteres);
         $this->assertIsInt($maxCaracteres);
     }

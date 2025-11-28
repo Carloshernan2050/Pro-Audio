@@ -5,12 +5,10 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\ServiciosController;
 use Illuminate\Support\Str;
-use ReflectionClass;
-use ReflectionMethod;
 
 /**
  * Tests Unitarios para ServiciosController
- * 
+ *
  * Tests para métodos privados con lógica pura
  */
 class ServiciosControllerUnitTest extends TestCase
@@ -21,17 +19,6 @@ class ServiciosControllerUnitTest extends TestCase
     {
         parent::setUp();
         $this->controller = new ServiciosController();
-    }
-
-    /**
-     * Helper para acceder a métodos privados mediante reflexión
-     */
-    private function getPrivateMethod(string $methodName): ReflectionMethod
-    {
-        $reflection = new ReflectionClass(ServiciosController::class);
-        $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
-        return $method;
     }
 
     // ============================================

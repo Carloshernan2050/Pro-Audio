@@ -7,7 +7,7 @@ use App\Http\Controllers\ReservaController;
 
 /**
  * Tests Unitarios para ReservaController
- * 
+ *
  * Tests para validaciones y estructura
  */
 class ReservaControllerUnitTest extends TestCase
@@ -35,7 +35,7 @@ class ReservaControllerUnitTest extends TestCase
             'items.*.inventario_id' => 'required|exists:inventario,id',
             'items.*.cantidad' => 'required|integer|min:1',
         ];
-        
+
         $this->assertArrayHasKey('servicio', $reglasEsperadas);
         $this->assertArrayHasKey('fecha_inicio', $reglasEsperadas);
         $this->assertArrayHasKey('items', $reglasEsperadas);
@@ -47,7 +47,7 @@ class ReservaControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'items' => 'required|array|min:1'
         ];
-        
+
         $this->assertStringContainsString('min:1', $reglasEsperadas['items']);
     }
 
@@ -57,7 +57,7 @@ class ReservaControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'items.*.cantidad' => 'required|integer|min:1'
         ];
-        
+
         $this->assertStringContainsString('min:1', $reglasEsperadas['items.*.cantidad']);
     }
 
@@ -65,7 +65,7 @@ class ReservaControllerUnitTest extends TestCase
     {
         // Los estados válidos son: pendiente, confirmada
         $estados = ['pendiente', 'confirmada'];
-        
+
         $this->assertContains('pendiente', $estados);
         $this->assertContains('confirmada', $estados);
     }
@@ -74,7 +74,7 @@ class ReservaControllerUnitTest extends TestCase
     {
         // El servicio máximo es 120 caracteres
         $maxCaracteres = 120;
-        
+
         $this->assertEquals(120, $maxCaracteres);
     }
 
@@ -82,7 +82,7 @@ class ReservaControllerUnitTest extends TestCase
     {
         // El tipo de movimiento para reserva confirmada es 'alquilado'
         $tipoMovimiento = 'alquilado';
-        
+
         $this->assertEquals('alquilado', $tipoMovimiento);
     }
 }

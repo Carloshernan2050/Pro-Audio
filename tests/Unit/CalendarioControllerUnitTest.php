@@ -4,47 +4,23 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\CalendarioController;
-use ReflectionClass;
-use ReflectionMethod;
 
 /**
  * Tests Unitarios para CalendarioController
- * 
- * Tests para métodos privados con lógica pura
+ *
+ * Tests para constantes y lógica de roles
  */
 class CalendarioControllerUnitTest extends TestCase
 {
-    protected $controller;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        // CalendarioController requiere inyección de dependencias
-        // Por ahora solo probamos métodos que no dependen de ellas
-    }
-
-    /**
-     * Helper para acceder a métodos privados mediante reflexión
-     */
-    private function getPrivateMethod(string $methodName): ReflectionMethod
-    {
-        $reflection = new ReflectionClass(CalendarioController::class);
-        $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
-        return $method;
-    }
-
     // ============================================
     // TESTS PARA Constantes
     // ============================================
 
     public function test_default_event_title_constante(): void
     {
-        $reflection = new ReflectionClass(CalendarioController::class);
-        $constants = $reflection->getConstants();
-        
-        $this->assertArrayHasKey('DEFAULT_EVENT_TITLE', $constants);
-        $this->assertEquals('Alquiler', $constants['DEFAULT_EVENT_TITLE']);
+        // Verificar que la constante DEFAULT_EVENT_TITLE tiene el valor esperado
+        $this->assertEquals('Alquiler', CalendarioController::DEFAULT_EVENT_TITLE);
+        $this->assertIsString(CalendarioController::DEFAULT_EVENT_TITLE);
     }
 
     // ============================================
@@ -55,7 +31,7 @@ class CalendarioControllerUnitTest extends TestCase
     {
         // Verificar la lógica de detección de admin
         $rolesAdmin = ['administrador', 'admin', 'superadmin'];
-        
+
         foreach ($rolesAdmin as $rol) {
             $rolLower = strtolower($rol);
             $this->assertContains($rolLower, $rolesAdmin);
@@ -67,7 +43,7 @@ class CalendarioControllerUnitTest extends TestCase
         // Los roles deben ser case insensitive
         $roles = ['Administrador', 'ADMIN', 'SuperAdmin'];
         $rolesLower = array_map('strtolower', $roles);
-        
+
         $this->assertContains('administrador', $rolesLower);
         $this->assertContains('admin', $rolesLower);
         $this->assertContains('superadmin', $rolesLower);

@@ -7,7 +7,7 @@ use App\Http\Controllers\SubServiciosController;
 
 /**
  * Tests Unitarios para SubServiciosController
- * 
+ *
  * Tests para validaciones y estructura
  */
 class SubServiciosControllerUnitTest extends TestCase
@@ -52,10 +52,10 @@ class SubServiciosControllerUnitTest extends TestCase
     public function test_validacion_imagen_max_tamaño(): void
     {
         // El tamaño máximo de imagen es 5120 KB (5MB)
-        $maxTamaño = 5120;
+        $maxTamano = 5120;
         
-        $this->assertEquals(5120, $maxTamaño);
-        $this->assertIsInt($maxTamaño);
+        $this->assertEquals(5120, $maxTamano);
+        $this->assertIsInt($maxTamano);
     }
 
     public function test_validacion_imagen_formatos_permitidos(): void

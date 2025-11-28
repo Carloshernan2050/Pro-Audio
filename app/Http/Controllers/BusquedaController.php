@@ -62,7 +62,7 @@ class BusquedaController extends Controller
     /**
      * Normaliza el texto para mejorar la búsqueda
      */
-    private function normalizarTexto(string $texto): string
+    public function normalizarTexto(string $texto): string
     {
         // Convertir a minúsculas y eliminar acentos
         $texto = mb_strtolower($texto, 'UTF-8');

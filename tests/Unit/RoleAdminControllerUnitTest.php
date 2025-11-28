@@ -7,7 +7,7 @@ use App\Http\Controllers\RoleAdminController;
 
 /**
  * Tests Unitarios para RoleAdminController
- * 
+ *
  * Tests para validaciones y lógica de roles
  */
 class RoleAdminControllerUnitTest extends TestCase
@@ -30,7 +30,7 @@ class RoleAdminControllerUnitTest extends TestCase
             'persona_id' => 'required|integer|exists:personas,id',
             'role_id' => 'nullable|integer|exists:roles,id'
         ];
-        
+
         $this->assertArrayHasKey('persona_id', $reglasEsperadas);
         $this->assertArrayHasKey('role_id', $reglasEsperadas);
     }
@@ -41,7 +41,7 @@ class RoleAdminControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'role_id' => 'nullable|integer|exists:roles,id'
         ];
-        
+
         $this->assertStringContainsString('nullable', $reglasEsperadas['role_id']);
     }
 
@@ -53,7 +53,7 @@ class RoleAdminControllerUnitTest extends TestCase
     {
         // Los roles permitidos son: Superadmin, Admin, Cliente
         $rolesPermitidos = ['Superadmin', 'Admin', 'Cliente'];
-        
+
         $this->assertCount(3, $rolesPermitidos);
         $this->assertContains('Superadmin', $rolesPermitidos);
         $this->assertContains('Admin', $rolesPermitidos);
@@ -64,7 +64,7 @@ class RoleAdminControllerUnitTest extends TestCase
     {
         // El orden de roles es: Superadmin (1), Admin (2), Cliente (3)
         $orden = ['Superadmin' => 1, 'Admin' => 2, 'Cliente' => 3];
-        
+
         $this->assertEquals(1, $orden['Superadmin']);
         $this->assertEquals(2, $orden['Admin']);
         $this->assertEquals(3, $orden['Cliente']);
@@ -75,7 +75,7 @@ class RoleAdminControllerUnitTest extends TestCase
         // El rol "Usuario" se normaliza a "Cliente"
         $rolUsuario = 'Usuario';
         $rolNormalizado = $rolUsuario === 'Usuario' ? 'Cliente' : $rolUsuario;
-        
+
         $this->assertEquals('Cliente', $rolNormalizado);
     }
 
@@ -84,7 +84,7 @@ class RoleAdminControllerUnitTest extends TestCase
         // Solo se permiten Superadmin, Admin, Cliente
         $rolesPermitidos = ['Superadmin', 'Admin', 'Cliente'];
         $rolNoPermitido = 'Invitado';
-        
+
         $this->assertNotContains($rolNoPermitido, $rolesPermitidos);
     }
 }
