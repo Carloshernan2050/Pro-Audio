@@ -25,6 +25,7 @@ class UsuarioControllerUnitTest extends TestCase
     private const ROL_CLIENTE = 'Cliente';
     private const ROUTE_USUARIOS_AUTENTICAR = '/usuarios/autenticar';
     private const ROUTE_USUARIOS_PERFIL_PHOTO = '/usuarios/perfil/photo';
+    private const APELLIDO_PEREZ = 'Pérez';
 
     protected $controller;
 
@@ -168,7 +169,7 @@ class UsuarioControllerUnitTest extends TestCase
 
         $request = Request::create('/usuarios/registro', 'POST', [
             'primer_nombre' => 'Juan',
-            'primer_apellido' => 'Pérez',
+            'primer_apellido' => self::APELLIDO_PEREZ,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
             'contrasena_confirmation' => self::TEST_PASSWORD
@@ -195,8 +196,12 @@ class UsuarioControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Juan',
+            'primer_apellido' => self::APELLIDO_PEREZ,
+            'telefono' => '1234567890',
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => Hash::make(self::TEST_PASSWORD)
+            'contrasena' => Hash::make(self::TEST_PASSWORD),
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
@@ -232,8 +237,12 @@ class UsuarioControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Juan',
+            'primer_apellido' => self::APELLIDO_PEREZ,
+            'telefono' => '1234567890',
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => Hash::make(self::TEST_PASSWORD)
+            'contrasena' => Hash::make(self::TEST_PASSWORD),
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
@@ -328,6 +337,11 @@ class UsuarioControllerUnitTest extends TestCase
 
     public function test_update_photo_sin_sesion(): void
     {
+        if (!extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension is not installed');
+            return;
+        }
+
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [

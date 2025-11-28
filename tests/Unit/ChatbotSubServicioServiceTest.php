@@ -77,12 +77,14 @@ class ChatbotSubServicioServiceTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio1->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_COMPLETO,
             'precio' => 100
         ]);
         
         SubServicios::create([
             'servicios_id' => $servicio2->id,
             'nombre' => 'DJ',
+            'descripcion' => 'Servicio de DJ',
             'precio' => 200
         ]);
         
@@ -114,12 +116,14 @@ class ChatbotSubServicioServiceTest extends TestCase
         $subServicio1 = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Item1',
+            'descripcion' => 'Descripción Item1',
             'precio' => 100
         ]);
         
         $subServicio2 = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Item2',
+            'descripcion' => 'Descripción Item2',
             'precio' => 200
         ]);
         
@@ -198,6 +202,7 @@ class ChatbotSubServicioServiceTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
+            'descripcion' => self::DESC_EQUIPO_COMPLETO,
             'precio' => 100
         ]);
         
@@ -222,6 +227,7 @@ class ChatbotSubServicioServiceTest extends TestCase
             SubServicios::create([
                 'servicios_id' => $servicio->id,
                 'nombre' => "Item {$i}",
+                'descripcion' => "Descripción Item {$i}",
                 'precio' => 100
             ]);
         }
@@ -304,6 +310,7 @@ class ChatbotSubServicioServiceTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
+            'descripcion' => self::DESC_EQUIPO_COMPLETO,
             'precio' => 100
         ]);
         
@@ -349,6 +356,7 @@ class ChatbotSubServicioServiceTest extends TestCase
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Item1',
+            'descripcion' => 'Descripción Item1',
             'precio' => 100
         ]);
         
