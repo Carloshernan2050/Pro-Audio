@@ -15,6 +15,8 @@ class ChatbotResponseBuilderTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const NOMBRE_EQUIPO_1 = 'Equipo 1';
+
     protected ChatbotResponseBuilder $builder;
 
     protected function setUp(): void
@@ -321,7 +323,7 @@ class ChatbotResponseBuilderTest extends TestCase
         $servicio = Servicios::create(['nombre_servicio' => 'Alquiler']);
         SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo 1',
+            'nombre' => self::NOMBRE_EQUIPO_1,
             'precio' => 100
         ]);
         SubServicios::create([
@@ -386,6 +388,134 @@ class ChatbotResponseBuilderTest extends TestCase
         
         $data = json_decode($resultado->getContent(), true);
         $this->assertNull($data['actions'][0]['meta']['dias']);
+    }
+
+    public function test_solicitar_confirmacion_intencion_con_hint_vacio(): void
+    {
+        $resultado = $this->builder->solicitarConfirmacionIntencion(
+            'Alquiler',
+            ['Alquiler'],
+            0,
+            5,
+            []
+        );
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString('Alquiler', $data['respuesta']);
+    }
+
+    public function test_solicitar_confirmacion_intencion_con_hint_token_vacio(): void
+    {
+        $hint = ['token' => '', 'sugerencias' => []];
+        
+        $resultado = $this->builder->solicitarConfirmacionIntencion(
+            'Alquiler',
+            ['Alquiler'],
+            0,
+            5,
+            $hint
+        );
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString('Alquiler', $data['respuesta']);
+    }
+
+    public function test_responder_opciones_sin_dias(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Test', 'precio' => 100, 'nombre_servicio' => 'Servicio1'],
+        ]);
+        
+        $resultado = $this->builder->responderOpciones('Mensaje', $items, null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertNull($data['days']);
+    }
+
+    public function test_construir_detalle_cotizacion_un_dia_sin_mostrar_total(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 100],
+        ]);
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 1, false);
+        
+        $this->assertStringContainsString('1 día', $detalle['mensaje']);
+        $this->assertStringNotContainsString('Total:', $detalle['mensaje']);
+    }
+
+    public function test_construir_detalle_cotizacion_multiples_dias_sin_mostrar_dias_siempre(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 100],
+        ]);
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 3, false);
+        
+        $this->assertStringContainsString('Total:', $detalle['mensaje']);
+    }
+
+    public function test_mostrar_catalogo_json_con_selecciones(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Alquiler']);
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => self::NOMBRE_EQUIPO_1,
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->builder->mostrarCatalogoJson('Mensaje', 5, [1]);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertEquals([1], $data['seleccionesPrevias']);
+    }
+
+    public function test_formatear_opciones_con_items_vacios(): void
+    {
+        $items = collect([]);
+        
+        $resultado = $this->builder->responderOpciones('Mensaje', $items, null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertIsArray($data['optionGroups']);
+        $this->assertEmpty($data['optionGroups']);
+    }
+
+    public function test_formatear_opciones_con_multiple_servicios(): void
+    {
+        $servicio1 = Servicios::create(['nombre_servicio' => 'Alquiler']);
+        $servicio2 = Servicios::create(['nombre_servicio' => 'Animación']);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio1->id,
+            'nombre' => self::NOMBRE_EQUIPO_1,
+            'precio' => 100
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio2->id,
+            'nombre' => 'DJ',
+            'precio' => 200
+        ]);
+
+        $items = $this->builder->subServiciosQuery()->get();
+        $resultado = $this->builder->responderOpciones('Mensaje', $items, null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertGreaterThanOrEqual(2, count($data['optionGroups']));
+    }
+
+    public function test_responder_cotizacion_con_items_array(): void
+    {
+        $items = [
+            ['id' => 1, 'nombre' => 'Item1', 'precio' => 100],
+            ['id' => 2, 'nombre' => 'Item2', 'precio' => 200],
+        ];
+        
+        $resultado = $this->builder->responderCotizacion($items, 2, [1, 2], false);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertEquals(600, $data['cotizacion']['total']);
     }
 }
 
