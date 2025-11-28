@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1764343048">
-  <project timestamp="1764343048" name="Clover Coverage">
+<coverage generated="1764348181">
+  <project timestamp="1764348181" name="Clover Coverage">
     <package name="App\Exceptions">
-      <file name="C:\laragon\www\Pro-Audio\app\Exceptions\InventarioNotFoundException.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Exceptions\InventarioNotFoundException.php">
         <class name="App\Exceptions\InventarioNotFoundException" namespace="App\Exceptions">
           <metrics complexity="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
         </class>
@@ -10,13 +10,13 @@
         <line num="11" type="stmt" count="0"/>
         <metrics loc="15" ncloc="15" classes="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Exceptions\ServiceCreationException.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Exceptions\ServiceCreationException.php">
         <class name="App\Exceptions\ServiceCreationException" namespace="App\Exceptions">
           <metrics complexity="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
         </class>
         <metrics loc="13" ncloc="13" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Exceptions\StockInsuficienteException.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Exceptions\StockInsuficienteException.php">
         <class name="App\Exceptions\StockInsuficienteException" namespace="App\Exceptions">
           <metrics complexity="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="3" coveredelements="0"/>
         </class>
@@ -27,7 +27,7 @@
       </file>
     </package>
     <package name="App\Http\Controllers">
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\AjustesController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\AjustesController.php">
         <class name="App\Http\Controllers\AjustesController" namespace="App\Http\Controllers">
           <metrics complexity="10" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="85" coveredstatements="0" elements="88" coveredelements="0"/>
         </class>
@@ -121,7 +121,7 @@
         <line num="121" type="stmt" count="0"/>
         <metrics loc="124" ncloc="120" classes="1" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="85" coveredstatements="0" elements="88" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\BusquedaController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\BusquedaController.php">
         <class name="App\Http\Controllers\BusquedaController" namespace="App\Http\Controllers">
           <metrics complexity="7" methods="2" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="40" coveredstatements="11" elements="42" coveredelements="12"/>
         </class>
@@ -169,7 +169,7 @@
         <line num="84" type="stmt" count="8"/>
         <metrics loc="87" ncloc="73" classes="1" methods="2" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="40" coveredstatements="11" elements="42" coveredelements="12"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\CalendarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\CalendarioController.php">
         <class name="App\Http\Controllers\CalendarioController" namespace="App\Http\Controllers">
           <metrics complexity="44" methods="16" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="198" coveredstatements="0" elements="214" coveredelements="0"/>
         </class>
@@ -389,7 +389,7 @@
         <line num="400" type="stmt" count="0"/>
         <metrics loc="403" ncloc="376" classes="1" methods="16" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="198" coveredstatements="0" elements="214" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\ChatbotController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\ChatbotController.php">
         <class name="App\Http\Controllers\ChatbotController" namespace="App\Http\Controllers">
           <metrics complexity="44" methods="13" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="138" coveredstatements="7" elements="151" coveredelements="8"/>
         </class>
@@ -546,13 +546,13 @@
         <line num="259" type="stmt" count="0"/>
         <metrics loc="266" ncloc="257" classes="1" methods="13" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="138" coveredstatements="7" elements="151" coveredelements="8"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\Controller.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\Controller.php">
         <class name="App\Http\Controllers\Controller" namespace="App\Http\Controllers">
           <metrics complexity="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
         </class>
         <metrics loc="9" ncloc="8" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\HistorialController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\HistorialController.php">
         <class name="App\Http\Controllers\HistorialController" namespace="App\Http\Controllers">
           <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="8" coveredstatements="0" elements="10" coveredelements="0"/>
         </class>
@@ -568,7 +568,7 @@
         <line num="25" type="stmt" count="0"/>
         <metrics loc="30" ncloc="30" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="8" coveredstatements="0" elements="10" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\InventarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\InventarioController.php">
         <class name="App\Http\Controllers\InventarioController" namespace="App\Http\Controllers">
           <metrics complexity="4" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="32" coveredstatements="0" elements="36" coveredelements="0"/>
         </class>
@@ -610,7 +610,7 @@
         <line num="72" type="stmt" count="0"/>
         <metrics loc="75" ncloc="63" classes="1" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="32" coveredstatements="0" elements="36" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\MovimientosInventarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\MovimientosInventarioController.php">
         <class name="App\Http\Controllers\MovimientosInventarioController" namespace="App\Http\Controllers">
           <metrics complexity="10" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="77" coveredstatements="0" elements="81" coveredelements="0"/>
         </class>
@@ -697,7 +697,7 @@
         <line num="141" type="stmt" count="0"/>
         <metrics loc="144" ncloc="127" classes="1" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="77" coveredstatements="0" elements="81" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\ReservaController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\ReservaController.php">
         <class name="App\Http\Controllers\ReservaController" namespace="App\Http\Controllers">
           <metrics complexity="23" methods="5" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="174" coveredstatements="0" elements="179" coveredelements="0"/>
         </class>
@@ -882,7 +882,7 @@
         <line num="253" type="stmt" count="0"/>
         <metrics loc="258" ncloc="256" classes="1" methods="5" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="174" coveredstatements="0" elements="179" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\RoleAdminController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\RoleAdminController.php">
         <class name="App\Http\Controllers\RoleAdminController" namespace="App\Http\Controllers">
           <metrics complexity="14" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="68" coveredstatements="0" elements="70" coveredelements="0"/>
         </class>
@@ -958,7 +958,7 @@
         <line num="107" type="stmt" count="0"/>
         <metrics loc="111" ncloc="105" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="68" coveredstatements="0" elements="70" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\RoleController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\RoleController.php">
         <class name="App\Http\Controllers\RoleController" namespace="App\Http\Controllers">
           <metrics complexity="14" methods="5" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="38" coveredstatements="0" elements="43" coveredelements="0"/>
         </class>
@@ -1007,7 +1007,7 @@
         <line num="77" type="stmt" count="0"/>
         <metrics loc="82" ncloc="81" classes="1" methods="5" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="38" coveredstatements="0" elements="43" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\ServiciosViewController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\ServiciosViewController.php">
         <class name="App\Http\Controllers\ServiciosViewController" namespace="App\Http\Controllers">
           <metrics complexity="9" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="21" coveredstatements="0" elements="25" coveredelements="0"/>
         </class>
@@ -1038,7 +1038,7 @@
         <line num="67" type="stmt" count="0"/>
         <metrics loc="70" ncloc="56" classes="1" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="21" coveredstatements="0" elements="25" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\SubServiciosController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\SubServiciosController.php">
         <class name="App\Http\Controllers\SubServiciosController" namespace="App\Http\Controllers">
           <metrics complexity="28" methods="10" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="92" coveredstatements="0" elements="102" coveredelements="0"/>
         </class>
@@ -1146,7 +1146,7 @@
         <line num="207" type="stmt" count="0"/>
         <metrics loc="211" ncloc="176" classes="1" methods="10" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="92" coveredstatements="0" elements="102" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\UsuarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\UsuarioController.php">
         <class name="App\Http\Controllers\UsuarioController" namespace="App\Http\Controllers">
           <metrics complexity="22" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="100" coveredstatements="0" elements="108" coveredelements="0"/>
         </class>
@@ -1260,7 +1260,7 @@
         <line num="198" type="stmt" count="0"/>
         <metrics loc="202" ncloc="181" classes="1" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="100" coveredstatements="0" elements="108" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Controllers\serviciosController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\serviciosController.php">
         <class name="App\Http\Controllers\ServiciosController" namespace="App\Http\Controllers">
           <metrics complexity="29" methods="12" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="117" coveredstatements="0" elements="129" coveredelements="0"/>
         </class>
@@ -1397,7 +1397,7 @@
       </file>
     </package>
     <package name="App\Http\Middleware">
-      <file name="C:\laragon\www\Pro-Audio\app\Http\Middleware\RoleMiddleware.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Middleware\RoleMiddleware.php">
         <class name="App\Http\Middleware\RoleMiddleware" namespace="App\Http\Middleware">
           <metrics complexity="5" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="31" coveredstatements="0" elements="32" coveredelements="0"/>
         </class>
@@ -1437,7 +1437,7 @@
       </file>
     </package>
     <package name="App\Models">
-      <file name="C:\laragon\www\Pro-Audio\app\Models\Calendario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Calendario.php">
         <class name="App\Models\Calendario" namespace="App\Models">
           <metrics complexity="3" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="0" elements="6" coveredelements="0"/>
         </class>
@@ -1449,7 +1449,7 @@
         <line num="38" type="stmt" count="0"/>
         <metrics loc="41" ncloc="41" classes="1" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="0" elements="6" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\CalendarioItem.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\CalendarioItem.php">
         <class name="App\Models\CalendarioItem" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
         </class>
@@ -1459,7 +1459,7 @@
         <line num="27" type="stmt" count="0"/>
         <metrics loc="31" ncloc="31" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\Cotizacion.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Cotizacion.php">
         <class name="App\Models\Cotizacion" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
         </class>
@@ -1469,7 +1469,7 @@
         <line num="41" type="stmt" count="0"/>
         <metrics loc="44" ncloc="38" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\Historial.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Historial.php">
         <class name="App\Models\Historial" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
         </class>
@@ -1477,7 +1477,7 @@
         <line num="26" type="stmt" count="0"/>
         <metrics loc="31" ncloc="31" classes="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\Inventario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Inventario.php">
         <class name="App\Models\Inventario" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
         </class>
@@ -1485,7 +1485,7 @@
         <line num="24" type="stmt" count="0"/>
         <metrics loc="27" ncloc="25" classes="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\MovimientosInventario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\MovimientosInventario.php">
         <class name="App\Models\MovimientosInventario" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
         </class>
@@ -1493,7 +1493,7 @@
         <line num="27" type="stmt" count="0"/>
         <metrics loc="30" ncloc="28" classes="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\Reserva.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Reserva.php">
         <class name="App\Models\Reserva" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
         </class>
@@ -1503,7 +1503,7 @@
         <line num="39" type="stmt" count="0"/>
         <metrics loc="43" ncloc="43" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\ReservaItem.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\ReservaItem.php">
         <class name="App\Models\ReservaItem" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
         </class>
@@ -1513,7 +1513,7 @@
         <line num="27" type="stmt" count="0"/>
         <metrics loc="31" ncloc="31" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\Servicios.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Servicios.php">
         <class name="App\Models\Servicios" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
         </class>
@@ -1523,7 +1523,7 @@
         <line num="46" type="stmt" count="0"/>
         <metrics loc="49" ncloc="32" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\SubServicios.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\SubServicios.php">
         <class name="App\Models\SubServicios" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
         </class>
@@ -1531,7 +1531,7 @@
         <line num="27" type="stmt" count="0"/>
         <metrics loc="30" ncloc="28" classes="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\User.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\User.php">
         <class name="App\Models\User" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="5" coveredstatements="0" elements="7" coveredelements="0"/>
         </class>
@@ -1544,7 +1544,7 @@
         <line num="59" type="stmt" count="0"/>
         <metrics loc="63" ncloc="41" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="5" coveredstatements="0" elements="7" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Models\Usuario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Usuario.php">
         <class name="App\Models\Usuario" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="0" elements="2" coveredelements="0"/>
         </class>
@@ -1554,7 +1554,7 @@
       </file>
     </package>
     <package name="App\Providers">
-      <file name="C:\laragon\www\Pro-Audio\app\Providers\AppServiceProvider.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Providers\AppServiceProvider.php">
         <class name="App\Providers\AppServiceProvider" namespace="App\Providers">
           <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
         </class>
@@ -1566,7 +1566,7 @@
       </file>
     </package>
     <package name="App\Services">
-      <file name="C:\laragon\www\Pro-Audio\app\Services\CalendarioDataService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioDataService.php">
         <class name="App\Services\CalendarioDataService" namespace="App\Services">
           <metrics complexity="18" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="62" coveredstatements="0" elements="70" coveredelements="0"/>
         </class>
@@ -1642,7 +1642,7 @@
         <line num="149" type="stmt" count="0"/>
         <metrics loc="153" ncloc="129" classes="1" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="62" coveredstatements="0" elements="70" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\CalendarioEventService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioEventService.php">
         <class name="App\Services\CalendarioEventService" namespace="App\Services">
           <metrics complexity="18" methods="5" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="73" coveredstatements="0" elements="78" coveredelements="0"/>
         </class>
@@ -1726,7 +1726,7 @@
         <line num="146" type="stmt" count="0"/>
         <metrics loc="150" ncloc="135" classes="1" methods="5" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="73" coveredstatements="0" elements="78" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\CalendarioItemService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioItemService.php">
         <class name="App\Services\CalendarioItemService" namespace="App\Services">
           <metrics complexity="7" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="44" coveredstatements="0" elements="47" coveredelements="0"/>
         </class>
@@ -1779,7 +1779,7 @@
         <line num="86" type="stmt" count="0"/>
         <metrics loc="90" ncloc="81" classes="1" methods="3" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="44" coveredstatements="0" elements="47" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\CalendarioValidationService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioValidationService.php">
         <class name="App\Services\CalendarioValidationService" namespace="App\Services">
           <metrics complexity="18" methods="12" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="108" coveredstatements="0" elements="120" coveredelements="0"/>
         </class>
@@ -1905,7 +1905,7 @@
         <line num="233" type="stmt" count="0"/>
         <metrics loc="237" ncloc="195" classes="1" methods="12" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="108" coveredstatements="0" elements="120" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ChatbotIntentionDetector.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotIntentionDetector.php">
         <class name="App\Services\ChatbotIntentionDetector" namespace="App\Services">
           <metrics complexity="57" methods="16" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="171" coveredstatements="119" elements="187" coveredelements="127"/>
         </class>
@@ -2098,7 +2098,7 @@
         <line num="301" type="stmt" count="0"/>
         <metrics loc="304" ncloc="300" classes="1" methods="16" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="171" coveredstatements="119" elements="187" coveredelements="127"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ChatbotMessageProcessor.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotMessageProcessor.php">
         <class name="App\Services\ChatbotMessageProcessor" namespace="App\Services">
           <metrics complexity="69" methods="16" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="151" coveredstatements="0" elements="167" coveredelements="0"/>
         </class>
@@ -2271,7 +2271,7 @@
         <line num="277" type="stmt" count="0"/>
         <metrics loc="281" ncloc="280" classes="1" methods="16" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="151" coveredstatements="0" elements="167" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ChatbotResponseBuilder.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotResponseBuilder.php">
         <class name="App\Services\ChatbotResponseBuilder" namespace="App\Services">
           <metrics complexity="26" methods="10" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="97" coveredstatements="0" elements="107" coveredelements="0"/>
         </class>
@@ -2384,7 +2384,7 @@
         <line num="147" type="stmt" count="0"/>
         <metrics loc="151" ncloc="151" classes="1" methods="10" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="97" coveredstatements="0" elements="107" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ChatbotSessionManager.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotSessionManager.php">
         <class name="App\Services\ChatbotSessionManager" namespace="App\Services">
           <metrics complexity="16" methods="4" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="35" coveredstatements="18" elements="39" coveredelements="20"/>
         </class>
@@ -2429,7 +2429,7 @@
         <line num="71" type="stmt" count="4"/>
         <metrics loc="75" ncloc="75" classes="1" methods="4" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="35" coveredstatements="18" elements="39" coveredelements="20"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ChatbotSubServicioService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotSubServicioService.php">
         <class name="App\Services\ChatbotSubServicioService" namespace="App\Services">
           <metrics complexity="9" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="30" coveredstatements="0" elements="34" coveredelements="0"/>
         </class>
@@ -2469,7 +2469,7 @@
         <line num="62" type="stmt" count="0"/>
         <metrics loc="66" ncloc="66" classes="1" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="30" coveredstatements="0" elements="34" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ChatbotSuggestionGenerator.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotSuggestionGenerator.php">
         <class name="App\Services\ChatbotSuggestionGenerator" namespace="App\Services">
           <metrics complexity="50" methods="12" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="112" coveredstatements="0" elements="124" coveredelements="0"/>
         </class>
@@ -2599,7 +2599,7 @@
         <line num="206" type="stmt" count="0"/>
         <metrics loc="210" ncloc="209" classes="1" methods="12" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="112" coveredstatements="0" elements="124" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ChatbotTextProcessor.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotTextProcessor.php">
         <class name="App\Services\ChatbotTextProcessor" namespace="App\Services">
           <metrics complexity="49" methods="13" coveredmethods="12" conditionals="0" coveredconditionals="0" statements="148" coveredstatements="139" elements="161" coveredelements="151"/>
         </class>
@@ -2766,7 +2766,7 @@
         <line num="245" type="stmt" count="5"/>
         <metrics loc="249" ncloc="248" classes="1" methods="13" coveredmethods="12" conditionals="0" coveredconditionals="0" statements="148" coveredstatements="139" elements="161" coveredelements="151"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\RagServices.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\RagServices.php">
         <class name="App\Services\RagService" namespace="App\Services">
           <metrics complexity="3" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="0" elements="12" coveredelements="0"/>
         </class>
@@ -2784,7 +2784,7 @@
         <line num="32" type="stmt" count="0"/>
         <metrics loc="35" ncloc="29" classes="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="0" elements="12" coveredelements="0"/>
       </file>
-      <file name="C:\laragon\www\Pro-Audio\app\Services\ReservaService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ReservaService.php">
         <class name="App\Services\ReservaService" namespace="App\Services">
           <metrics complexity="5" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="29" coveredstatements="0" elements="31" coveredelements="0"/>
         </class>
