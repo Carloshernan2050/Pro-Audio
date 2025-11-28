@@ -16,6 +16,7 @@ class ChatbotResponseBuilderTest extends TestCase
     use RefreshDatabase;
 
     private const NOMBRE_EQUIPO_1 = 'Equipo 1';
+    private const DESC_EQUIPO = 'Descripción de equipo';
 
     protected ChatbotResponseBuilder $builder;
 
@@ -324,11 +325,13 @@ class ChatbotResponseBuilderTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_1,
+            'descripcion' => self::DESC_EQUIPO,
             'precio' => 100
         ]);
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo 2',
+            'descripcion' => 'Descripción de equipo 2',
             'precio' => 200
         ]);
 
@@ -461,6 +464,7 @@ class ChatbotResponseBuilderTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_1,
+            'descripcion' => self::DESC_EQUIPO,
             'precio' => 100
         ]);
         
@@ -489,12 +493,14 @@ class ChatbotResponseBuilderTest extends TestCase
         SubServicios::create([
             'servicios_id' => $servicio1->id,
             'nombre' => self::NOMBRE_EQUIPO_1,
+            'descripcion' => self::DESC_EQUIPO,
             'precio' => 100
         ]);
         
         SubServicios::create([
             'servicios_id' => $servicio2->id,
             'nombre' => 'DJ',
+            'descripcion' => 'Servicio de DJ',
             'precio' => 200
         ]);
 

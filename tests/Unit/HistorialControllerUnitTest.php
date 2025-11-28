@@ -35,8 +35,12 @@ class HistorialControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => '1234567890',
             'correo' => 'test@test.com',
-            'contrasena' => 'password'
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         $reserva = Reserva::create([
@@ -59,8 +63,12 @@ class HistorialControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => '1234567890',
             'correo' => 'test@test.com',
-            'contrasena' => 'password'
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         $reserva = Reserva::create([
