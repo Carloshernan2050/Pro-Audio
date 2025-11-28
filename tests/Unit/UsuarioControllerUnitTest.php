@@ -7,7 +7,7 @@ use App\Http\Controllers\UsuarioController;
 
 /**
  * Tests Unitarios para UsuarioController
- * 
+ *
  * Tests para validaciones y estructura
  */
 class UsuarioControllerUnitTest extends TestCase
@@ -112,9 +112,9 @@ class UsuarioControllerUnitTest extends TestCase
     public function test_foto_perfil_max_tamaño(): void
     {
         // El tamaño máximo es 5120 KB (5MB)
-        $maxTamaño = 5120;
+        $maxTamano = 5120;
         
-        $this->assertEquals(5120, $maxTamaño);
+        $this->assertEquals(5120, $maxTamano);
     }
 
     // ============================================

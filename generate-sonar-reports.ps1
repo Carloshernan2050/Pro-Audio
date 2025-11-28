@@ -5,6 +5,43 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
+# Verificar y configurar PHP en el PATH si no está disponible
+Write-Host "Verificando PHP..." -ForegroundColor Yellow
+try {
+    $null = & php --version 2>&1
+    Write-Host "[OK] PHP encontrado en el PATH" -ForegroundColor Green
+} catch {
+    # Buscar PHP en ubicaciones comunes
+    $phpPaths = @(
+        "C:\xampp\php",
+        "C:\wamp64\bin\php",
+        "C:\laragon\bin\php",
+        "C:\php",
+        "$env:ProgramFiles\PHP",
+        "$env:ProgramFiles(x86)\PHP"
+    )
+    
+    $phpFound = $false
+    foreach ($phpPath in $phpPaths) {
+        if (Test-Path "$phpPath\php.exe") {
+            $env:Path += ";$phpPath"
+            Write-Host "[OK] PHP encontrado en: $phpPath" -ForegroundColor Green
+            Write-Host "     Agregado al PATH para esta sesion." -ForegroundColor Gray
+            $phpFound = $true
+            break
+        }
+    }
+    
+    if (-not $phpFound) {
+        Write-Host "ERROR: PHP no encontrado. Por favor:" -ForegroundColor Red
+        Write-Host "  1. Instala PHP o XAMPP/WAMP/Laragon" -ForegroundColor Yellow
+        Write-Host "  2. Agrega PHP al PATH del sistema" -ForegroundColor Yellow
+        Write-Host "  3. O ejecuta este script desde una terminal con PHP en el PATH" -ForegroundColor Yellow
+        exit 1
+    }
+}
+Write-Host ""
+
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Generando reportes para SonarQube..." -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
@@ -32,13 +69,13 @@ try {
     # Ejecutar PHPUnit con cobertura
     # Usamos --coverage-clover y --log-junit para generar los reportes explícitamente
     # PHPUnit deberia generar reportes incluso si algunos tests fallan
+    # NOTA: --coverage-html es opcional (solo para visualización local, no necesario para SonarQube)
     $phpunitArgs = @(
         "--coverage-clover",
         "tests\_coverage\coverage.xml",
         "--log-junit",
-        "tests\_coverage\test-reporter.xml",
-        "--coverage-html",
-        "tests\_coverage\html"
+        "tests\_coverage\test-reporter.xml"
+        # "--coverage-html", "tests\_coverage\html"  # Descomenta si quieres reporte HTML local
     )
     
     Write-Host "NOTA: Ejecutando todos los tests para generar reportes." -ForegroundColor Yellow

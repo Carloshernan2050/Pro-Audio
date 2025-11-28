@@ -27,7 +27,7 @@ class CalendarioController extends Controller
     private CalendarioItemService $itemService;
     private ReservaService $reservaService;
 
-    private const DEFAULT_EVENT_TITLE = 'Alquiler';
+    public const DEFAULT_EVENT_TITLE = 'Alquiler';
 
     public function __construct(
         CalendarioValidationService $validationService,

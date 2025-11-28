@@ -7,7 +7,7 @@ use App\Http\Controllers\RoleController;
 
 /**
  * Tests Unitarios para RoleController
- * 
+ *
  * Tests para verificar la estructura y validación de roles
  */
 class RoleControllerUnitTest extends TestCase
@@ -30,7 +30,7 @@ class RoleControllerUnitTest extends TestCase
         // Los roles permitidos según el controlador son:
         // Administrador, Cliente, Invitado
         $rolesPermitidos = ['Administrador', 'Cliente', 'Invitado'];
-        
+
         foreach ($rolesPermitidos as $rol) {
             $this->assertIsString($rol);
             $this->assertNotEmpty($rol);
@@ -42,7 +42,7 @@ class RoleControllerUnitTest extends TestCase
         // Verificar que la clave de administrador es válida
         // Según el código: 'ProAudio00'
         $adminKey = 'ProAudio00';
-        
+
         $this->assertIsString($adminKey);
         $this->assertNotEmpty($adminKey);
         $this->assertEquals('ProAudio00', $adminKey);
@@ -52,7 +52,7 @@ class RoleControllerUnitTest extends TestCase
     {
         // Verificar que los roles tienen la estructura correcta
         $rolesEsperados = ['Administrador', 'Cliente', 'Invitado'];
-        
+
         $this->assertCount(3, $rolesEsperados);
         $this->assertContains('Administrador', $rolesEsperados);
         $this->assertContains('Cliente', $rolesEsperados);

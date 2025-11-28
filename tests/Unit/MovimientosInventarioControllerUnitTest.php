@@ -7,7 +7,7 @@ use App\Http\Controllers\MovimientosInventarioController;
 
 /**
  * Tests Unitarios para MovimientosInventarioController
- * 
+ *
  * Tests para validaciones y lógica de movimientos
  */
 class MovimientosInventarioControllerUnitTest extends TestCase
@@ -31,7 +31,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
             'tipo_movimiento' => 'required|in:entrada,salida,alquilado,devuelto',
             'cantidad' => 'required|integer|min:1'
         ];
-        
+
         $this->assertArrayHasKey('inventario_id', $reglasEsperadas);
         $this->assertArrayHasKey('tipo_movimiento', $reglasEsperadas);
         $this->assertArrayHasKey('cantidad', $reglasEsperadas);
@@ -41,7 +41,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
     {
         // Los tipos válidos son: entrada, salida, alquilado, devuelto
         $tipos = ['entrada', 'salida', 'alquilado', 'devuelto'];
-        
+
         $this->assertCount(4, $tipos);
         $this->assertContains('entrada', $tipos);
         $this->assertContains('salida', $tipos);
@@ -53,7 +53,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
     {
         // Los tipos que incrementan stock son: entrada, devuelto
         $tiposIncrementan = ['entrada', 'devuelto'];
-        
+
         $this->assertCount(2, $tiposIncrementan);
         $this->assertContains('entrada', $tiposIncrementan);
         $this->assertContains('devuelto', $tiposIncrementan);
@@ -63,7 +63,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
     {
         // Los tipos que decrementan stock son: salida, alquilado
         $tiposDecrementan = ['salida', 'alquilado'];
-        
+
         $this->assertCount(2, $tiposDecrementan);
         $this->assertContains('salida', $tiposDecrementan);
         $this->assertContains('alquilado', $tiposDecrementan);
@@ -75,7 +75,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'cantidad' => 'required|integer|min:1'
         ];
-        
+
         $this->assertStringContainsString('min:1', $reglasEsperadas['cantidad']);
     }
 
@@ -84,7 +84,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'cantidad' => 'required|integer|min:1'
         ];
-        
+
         $this->assertStringContainsString('integer', $reglasEsperadas['cantidad']);
     }
 }
