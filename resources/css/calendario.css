@@ -116,15 +116,15 @@
 	background: #fff; /* filas blancas */
 }
 .descripcion-text { color: #555; }
-.acciones-buttons { display: flex; gap: 8px; align-items: center; }
+.acciones-buttons { display: flex; gap: 6px; align-items: center; }
 .acciones-buttons .btn-action {
 	width: auto;
 	height: auto;
-	padding: 6px 14px;
-	gap: 6px;
-	font-size: 0.85rem;
+	padding: 4px 10px;
+	gap: 4px;
+	font-size: 0.75rem;
 }
-.acciones-buttons .btn-action i { margin-right: 6px; }
+.acciones-buttons .btn-action i { margin-right: 4px; font-size: 0.7rem; }
 .acciones-buttons .btn-success {
 	background: rgba(34,197,94,0.85);
 	border: 1px solid rgba(34,197,94,1);

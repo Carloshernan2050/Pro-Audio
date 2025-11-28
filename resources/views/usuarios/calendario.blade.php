@@ -127,13 +127,13 @@
             background-color: #e91c1c;
             color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 6px 16px;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 100px;
+            min-width: 80px;
         }
 
         .custom-btn-accept:hover {
@@ -146,13 +146,13 @@
             background-color: #2d2d2d;
             color: white;
             border: 1px solid #6c757d;
-            padding: 10px 24px;
+            padding: 6px 16px;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 100px;
+            min-width: 80px;
         }
 
         .custom-btn-cancel:hover {
