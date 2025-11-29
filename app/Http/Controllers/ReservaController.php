@@ -53,55 +53,6 @@ class ReservaController extends Controller
             'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
         ]);
 
-        $personasId = session('usuario_id');
-        $servicio = $request->input('servicio');
-        $fechaInicio = $request->fecha_inicio;
-        $fechaFin = $request->fecha_fin;
-        $descripcionEvento = $request->descripcion_evento ?? '';
-
-        // Verificar si ya existe una reserva pendiente con la misma configuración
-        $existingReserva = Reserva::with('items')
-            ->where('estado', 'pendiente')
-            ->where('personas_id', $personasId)
-            ->where('servicio', $servicio)
-            ->where('fecha_inicio', $fechaInicio)
-            ->where('fecha_fin', $fechaFin)
-            ->where('descripcion_evento', $descripcionEvento)
-            ->first();
-
-        if ($existingReserva) {
-            $existingSignature = $existingReserva->items
-                ->map(function ($item) {
-                    return [
-                        'inventario_id' => (int) $item->inventario_id,
-                        'cantidad' => (int) $item->cantidad,
-                    ];
-                })
-                ->sortBy('inventario_id')
-                ->values()
-                ->toArray();
-
-            $incomingSignature = collect($items)
-                ->map(function ($item) {
-                    return [
-                        'inventario_id' => (int) ($item['inventario_id'] ?? 0),
-                        'cantidad' => (int) ($item['cantidad'] ?? 0),
-                    ];
-                })
-                ->sortBy('inventario_id')
-                ->values()
-                ->toArray();
-
-            if ($existingSignature === $incomingSignature) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'La reserva ya se encontraba registrada.',
-                    'reserva_id' => $existingReserva->id,
-                    'duplicated' => true,
-                ], 200);
-            }
-        }
-
         // Validar que la cantidad solicitada no supere el stock actual
         foreach ($items as $item) {
             $inventario = Inventario::findOrFail($item['inventario_id']);
