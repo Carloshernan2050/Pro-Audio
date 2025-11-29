@@ -21,6 +21,7 @@ class RoleAdminControllerUnitTest extends TestCase
     private const TEST_EMAIL = 'test@test.com';
     private const ROUTE_ADMIN_ROLES_UPDATE = '/admin/roles/update';
     private const ROL_CLIENTE = 'Cliente';
+    private const TELEFONO_PRUEBA = '1234567890';
 
     protected $controller;
 
@@ -102,8 +103,12 @@ class RoleAdminControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TELEFONO_PRUEBA,
             'correo' => self::TEST_EMAIL,
-            'contrasena' => 'password'
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         // Crear roles
@@ -126,8 +131,12 @@ class RoleAdminControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TELEFONO_PRUEBA,
             'correo' => self::TEST_EMAIL,
-            'contrasena' => 'password'
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
@@ -156,8 +165,12 @@ class RoleAdminControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TELEFONO_PRUEBA,
             'correo' => self::TEST_EMAIL,
-            'contrasena' => 'password'
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
@@ -190,8 +203,12 @@ class RoleAdminControllerUnitTest extends TestCase
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TELEFONO_PRUEBA,
             'correo' => self::TEST_EMAIL,
-            'contrasena' => 'password'
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
