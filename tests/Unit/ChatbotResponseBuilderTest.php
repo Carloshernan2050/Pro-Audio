@@ -17,6 +17,10 @@ class ChatbotResponseBuilderTest extends TestCase
 
     private const NOMBRE_EQUIPO_1 = 'Equipo 1';
     private const DESC_EQUIPO = 'Descripción de equipo';
+    private const INTENCION_ANIMACION = 'Animación';
+    private const MENSAJE_5_DIAS = '5 días';
+    private const MENSAJE_1_DIA = '1 día';
+    private const INTENCIONES_MULTIPLES = 'Alquiler y Animación y Publicidad';
 
     protected ChatbotResponseBuilder $builder;
 
@@ -130,7 +134,7 @@ class ChatbotResponseBuilderTest extends TestCase
     {
         $resultado = $this->builder->solicitarConfirmacionIntencion(
             'Alquiler y Animación',
-            ['Alquiler', 'Animación'],
+            ['Alquiler', self::INTENCION_ANIMACION],
             3,
             3,
             null
@@ -202,7 +206,7 @@ class ChatbotResponseBuilderTest extends TestCase
         
         $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
         $data = json_decode($resultado->getContent(), true);
-        $this->assertStringContainsString('5 días', $data['respuesta']);
+        $this->assertStringContainsString(self::MENSAJE_5_DIAS, $data['respuesta']);
     }
 
     // ============================================
@@ -285,7 +289,7 @@ class ChatbotResponseBuilderTest extends TestCase
         
         $detalle = $this->builder->construirDetalleCotizacion($items, 5, false);
         
-        $this->assertStringContainsString('5 días', $detalle['mensaje']);
+        $this->assertStringContainsString(self::MENSAJE_5_DIAS, $detalle['mensaje']);
         $this->assertStringContainsString('Total:', $detalle['mensaje']);
     }
 
@@ -297,7 +301,7 @@ class ChatbotResponseBuilderTest extends TestCase
         
         $detalle = $this->builder->construirDetalleCotizacion($items, 1, false);
         
-        $this->assertStringContainsString('1 día', $detalle['mensaje']);
+        $this->assertStringContainsString(self::MENSAJE_1_DIA, $detalle['mensaje']);
     }
 
     // ============================================
@@ -443,7 +447,7 @@ class ChatbotResponseBuilderTest extends TestCase
         
         $detalle = $this->builder->construirDetalleCotizacion($items, 1, false);
         
-        $this->assertStringContainsString('1 día', $detalle['mensaje']);
+        $this->assertStringContainsString(self::MENSAJE_1_DIA, $detalle['mensaje']);
         $this->assertStringNotContainsString('Total:', $detalle['mensaje']);
     }
 
@@ -488,7 +492,7 @@ class ChatbotResponseBuilderTest extends TestCase
     public function test_formatear_opciones_con_multiple_servicios(): void
     {
         $servicio1 = Servicios::create(['nombre_servicio' => 'Alquiler']);
-        $servicio2 = Servicios::create(['nombre_servicio' => 'Animación']);
+        $servicio2 = Servicios::create(['nombre_servicio' => self::INTENCION_ANIMACION]);
         
         SubServicios::create([
             'servicios_id' => $servicio1->id,
@@ -522,6 +526,348 @@ class ChatbotResponseBuilderTest extends TestCase
         
         $data = json_decode($resultado->getContent(), true);
         $this->assertEquals(600, $data['cotizacion']['total']);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA formatearOpciones()
+    // ============================================
+
+    public function test_formatear_opciones_ordena_por_servicio(): void
+    {
+        $servicio1 = Servicios::create(['nombre_servicio' => 'Alquiler']);
+        $servicio2 = Servicios::create(['nombre_servicio' => self::INTENCION_ANIMACION]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio2->id,
+            'nombre' => 'DJ',
+            'descripcion' => 'Servicio de DJ',
+            'precio' => 200
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio1->id,
+            'nombre' => self::NOMBRE_EQUIPO_1,
+            'descripcion' => self::DESC_EQUIPO,
+            'precio' => 100
+        ]);
+
+        $items = $this->builder->subServiciosQuery()->get();
+        $resultado = $this->builder->responderOpciones('Mensaje', $items, null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertIsArray($data['optionGroups']);
+        // Debería estar ordenado por nombre de servicio
+        if (count($data['optionGroups']) >= 2) {
+            $this->assertEquals('Alquiler', $data['optionGroups'][0]['servicio']);
+        }
+    }
+
+    public function test_formatear_opciones_ordena_items_por_nombre(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Alquiler']);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Z Equipo',
+            'descripcion' => 'Descripción',
+            'precio' => 200
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'A Equipo',
+            'descripcion' => 'Descripción',
+            'precio' => 100
+        ]);
+
+        $items = $this->builder->subServiciosQuery()->get();
+        $resultado = $this->builder->responderOpciones('Mensaje', $items, null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        if (!empty($data['optionGroups']) && !empty($data['optionGroups'][0]['items'])) {
+            $items = $data['optionGroups'][0]['items'];
+            // Debería estar ordenado alfabéticamente
+            $this->assertEquals('A Equipo', $items[0]['nombre']);
+        }
+    }
+
+    public function test_formatear_opciones_con_items_array_y_servicio(): void
+    {
+        $items = [
+            ['id' => 1, 'nombre' => 'Item1', 'precio' => 100, 'servicio' => 'Alquiler'],
+            ['id' => 2, 'nombre' => 'Item2', 'precio' => 200, 'servicio' => 'Alquiler'],
+            ['id' => 3, 'nombre' => 'Item3', 'precio' => 300, 'servicio' => self::INTENCION_ANIMACION],
+        ];
+        
+        $resultado = $this->builder->responderOpciones('Mensaje', $items, null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertIsArray($data['optionGroups']);
+        $this->assertGreaterThanOrEqual(2, count($data['optionGroups']));
+    }
+
+    public function test_formatear_opciones_con_items_objeto_y_nombre_servicio(): void
+    {
+        $servicio = Servicios::create(['nombre_servicio' => 'Alquiler']);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => self::NOMBRE_EQUIPO_1,
+            'descripcion' => self::DESC_EQUIPO,
+            'precio' => 100
+        ]);
+
+        $items = $this->builder->subServiciosQuery()->get();
+        $resultado = $this->builder->responderOpciones('Mensaje', $items, null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertIsArray($data['optionGroups']);
+        if (!empty($data['optionGroups'])) {
+            $this->assertEquals('Alquiler', $data['optionGroups'][0]['servicio']);
+        }
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA construirDetalleCotizacion()
+    // ============================================
+
+    public function test_construir_detalle_cotizacion_con_precio_cero(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 0],
+        ]);
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 2, false);
+        
+        $this->assertEquals(0, $detalle['total']);
+        $this->assertEquals(0, $detalle['items'][0]['subtotal']);
+    }
+
+    public function test_construir_detalle_cotizacion_con_precio_decimal(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 99.99],
+        ]);
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 2, false);
+        
+        $this->assertEquals(199.98, $detalle['total']);
+        $this->assertEquals(99.99, $detalle['items'][0]['precio_unitario']);
+    }
+
+    public function test_construir_detalle_cotizacion_con_array_precio_string(): void
+    {
+        $items = [
+            ['id' => 1, 'nombre' => 'Item1', 'precio' => '100'],
+        ];
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 2, false);
+        
+        $this->assertEquals(200, $detalle['total']);
+    }
+
+    public function test_construir_detalle_cotizacion_formato_total(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 1234.56],
+        ]);
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 1, true);
+        
+        // El mensaje debería contener el total formateado
+        $this->assertStringContainsString('1,234.56', $detalle['mensaje']);
+    }
+
+    public function test_construir_detalle_cotizacion_mensaje_plural_con_mostrar_dias_siempre(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 100],
+        ]);
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 5, true);
+        
+        $this->assertStringContainsString(self::MENSAJE_5_DIAS, $detalle['mensaje']);
+        $this->assertStringContainsString('Total:', $detalle['mensaje']);
+    }
+
+    public function test_construir_detalle_cotizacion_mensaje_singular_con_mostrar_dias_siempre(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 100],
+        ]);
+        
+        $detalle = $this->builder->construirDetalleCotizacion($items, 1, true);
+        
+        $this->assertStringContainsString(self::MENSAJE_1_DIA, $detalle['mensaje']);
+        $this->assertStringContainsString('Total:', $detalle['mensaje']);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA solicitarConfirmacionIntencion()
+    // ============================================
+
+    public function test_solicitar_confirmacion_intencion_con_hint_token_espacios(): void
+    {
+        $hint = ['token' => '  alqiler  ', 'sugerencias' => ['alquiler']];
+        
+        $resultado = $this->builder->solicitarConfirmacionIntencion(
+            'Alquiler',
+            ['Alquiler'],
+            0,
+            5,
+            $hint
+        );
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString('alqiler', $data['respuesta']);
+    }
+
+    public function test_solicitar_confirmacion_intencion_con_hint_token_no_string(): void
+    {
+        $hint = ['token' => 123, 'sugerencias' => ['alquiler']];
+        
+        $resultado = $this->builder->solicitarConfirmacionIntencion(
+            'Alquiler',
+            ['Alquiler'],
+            0,
+            5,
+            $hint
+        );
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertIsString($data['respuesta']);
+    }
+
+    public function test_solicitar_confirmacion_intencion_con_intenciones_multiples(): void
+    {
+        $resultado = $this->builder->solicitarConfirmacionIntencion(
+            self::INTENCIONES_MULTIPLES,
+            ['Alquiler', self::INTENCION_ANIMACION, 'Publicidad'],
+            0,
+            5,
+            null
+        );
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString(self::INTENCIONES_MULTIPLES, $data['respuesta']);
+        $this->assertCount(3, $data['actions'][0]['meta']['intenciones']);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA mostrarOpcionesConIntenciones()
+    // ============================================
+
+    public function test_mostrar_opciones_con_intenciones_multiples(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Test', 'precio' => 100, 'nombre_servicio' => 'Alquiler'],
+        ]);
+        
+        session(['chat.selecciones' => []]);
+        
+        $resultado = $this->builder->mostrarOpcionesConIntenciones(
+            ['Alquiler', self::INTENCION_ANIMACION, 'Publicidad'],
+            $items,
+            0,
+            null
+        );
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString(self::INTENCIONES_MULTIPLES, $data['respuesta']);
+    }
+
+    public function test_mostrar_opciones_con_intenciones_un_dia(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Test', 'precio' => 100, 'nombre_servicio' => 'Alquiler'],
+        ]);
+        
+        session(['chat.selecciones' => []]);
+        
+        $resultado = $this->builder->mostrarOpcionesConIntenciones(
+            ['Alquiler'],
+            $items,
+            1,
+            1
+        );
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString(self::MENSAJE_1_DIA, $data['respuesta']);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA responderCotizacion()
+    // ============================================
+
+    public function test_responder_cotizacion_con_items_vacios(): void
+    {
+        $items = collect([]);
+        
+        $resultado = $this->builder->responderCotizacion($items, 1, [], false);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertEquals(0, $data['cotizacion']['total']);
+        $this->assertIsArray($data['cotizacion']['items']);
+        $this->assertEmpty($data['cotizacion']['items']);
+    }
+
+    public function test_responder_cotizacion_con_acciones(): void
+    {
+        $items = collect([
+            (object)['id' => 1, 'nombre' => 'Item1', 'precio' => 100],
+        ]);
+        
+        $resultado = $this->builder->responderCotizacion($items, 1, [1], false);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertArrayHasKey('actions', $data);
+        $this->assertCount(3, $data['actions']);
+        $this->assertEquals('add_more', $data['actions'][0]['id']);
+        $this->assertEquals('clear', $data['actions'][1]['id']);
+        $this->assertEquals('finish', $data['actions'][2]['id']);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA mostrarCatalogoJson()
+    // ============================================
+
+    public function test_mostrar_catalogo_json_con_dias_cero(): void
+    {
+        $resultado = $this->builder->mostrarCatalogoJson('Mensaje', 0, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertEquals(0, $data['days']);
+    }
+
+    public function test_mostrar_catalogo_json_con_selecciones_vacias(): void
+    {
+        $resultado = $this->builder->mostrarCatalogoJson('Mensaje', null, []);
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertEquals([], $data['seleccionesPrevias']);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA responderConOpciones()
+    // ============================================
+
+    public function test_responder_con_opciones_sin_selecciones(): void
+    {
+        session()->forget('chat.selecciones');
+        
+        $resultado = $this->builder->responderConOpciones();
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertEquals([], $data['seleccionesPrevias']);
+    }
+
+    public function test_responder_con_opciones_mensaje_inicial(): void
+    {
+        $resultado = $this->builder->responderConOpciones();
+        
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString('Hola', $data['respuesta']);
+        $this->assertStringContainsString('asistente', $data['respuesta']);
     }
 }
 

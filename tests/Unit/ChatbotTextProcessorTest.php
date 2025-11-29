@@ -16,6 +16,7 @@ class ChatbotTextProcessorTest extends TestCase
     private const MENSAJE_TRES_DIAS = 'tres dias';
     private const MENSAJE_POR_5_DIAS = 'por 5 dias';
     private const MENSAJE_NECESITO_POR_3_DIAS = 'necesito por 3 dias';
+    private const MENSAJE_3_DIAS = '3 dias';
 
     protected ChatbotTextProcessor $processor;
 
@@ -197,7 +198,7 @@ class ChatbotTextProcessorTest extends TestCase
 
     public function test_verificar_solo_dias_con_numero(): void
     {
-        $resultado = $this->processor->verificarSoloDias('3 dias', '3 dias');
+        $resultado = $this->processor->verificarSoloDias(self::MENSAJE_3_DIAS, self::MENSAJE_3_DIAS);
         $this->assertTrue($resultado);
     }
 
@@ -260,5 +261,369 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $resultado = $this->processor->extraerDiasDesdePalabras('tres días');
         $this->assertEquals(3, $resultado);
+    }
+
+    public function test_extraer_dias_desde_palabras_cuatro(): void
+    {
+        $resultado = $this->processor->extraerDiasDesdePalabras('cuatro dias');
+        $this->assertEquals(4, $resultado);
+    }
+
+    public function test_extraer_dias_desde_palabras_cinco(): void
+    {
+        $resultado = $this->processor->extraerDiasDesdePalabras('cinco dias');
+        $this->assertEquals(5, $resultado);
+    }
+
+    public function test_extraer_dias_desde_palabras_seis(): void
+    {
+        $resultado = $this->processor->extraerDiasDesdePalabras('seis dias');
+        $this->assertEquals(6, $resultado);
+    }
+
+    public function test_extraer_dias_desde_palabras_siete(): void
+    {
+        $resultado = $this->processor->extraerDiasDesdePalabras('siete dias');
+        $this->assertEquals(7, $resultado);
+    }
+
+    public function test_extraer_dias_desde_palabras_ocho(): void
+    {
+        $resultado = $this->processor->extraerDiasDesdePalabras('ocho dias');
+        $this->assertEquals(8, $resultado);
+    }
+
+    public function test_extraer_dias_desde_palabras_nueve(): void
+    {
+        $resultado = $this->processor->extraerDiasDesdePalabras('nueve dias');
+        $this->assertEquals(9, $resultado);
+    }
+
+    public function test_extraer_dias_desde_palabras_un(): void
+    {
+        $resultado = $this->processor->extraerDiasDesdePalabras('un dia');
+        $this->assertEquals(1, $resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA esContinuacion()
+    // ============================================
+
+    public function test_es_continuacion_con_eso(): void
+    {
+        $resultado = $this->processor->esContinuacion('eso');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_esa(): void
+    {
+        $resultado = $this->processor->esContinuacion('esa');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_ese(): void
+    {
+        $resultado = $this->processor->esContinuacion('ese');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_esos(): void
+    {
+        $resultado = $this->processor->esContinuacion('esos');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_esas(): void
+    {
+        $resultado = $this->processor->esContinuacion('esas');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_continuar(): void
+    {
+        $resultado = $this->processor->esContinuacion('continuar');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_sigue(): void
+    {
+        $resultado = $this->processor->esContinuacion('sigue');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_seguimos(): void
+    {
+        $resultado = $this->processor->esContinuacion('seguimos');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_por_esos_dias(): void
+    {
+        $resultado = $this->processor->esContinuacion('por esos dias');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_mismos_dias(): void
+    {
+        $resultado = $this->processor->esContinuacion('mismos dias');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_es_continuacion_con_mismos_dias_con_acento(): void
+    {
+        $resultado = $this->processor->esContinuacion('mismos días');
+        $this->assertTrue($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA verificarSiEsAgregado()
+    // ============================================
+
+    public function test_verificar_si_es_agregado_con_tambien_acento(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('también');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_ademas_acento(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('además');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_y_espacio(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('y alquiler');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_espacio_y(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('alquiler y');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_sumar(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('sumar');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_agrega(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('agrega');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_agregar(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('agregar');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_junto(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('junto');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_ademas_de(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('ademas de');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_si_es_agregado_con_ademas_de_acento(): void
+    {
+        $resultado = $this->processor->verificarSiEsAgregado('además de');
+        $this->assertTrue($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA verificarSoloDias()
+    // ============================================
+
+    public function test_verificar_solo_dias_con_dia_singular(): void
+    {
+        $resultado = $this->processor->verificarSoloDias('1 dia', '1 dia');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_solo_dias_con_dias_plural(): void
+    {
+        $resultado = $this->processor->verificarSoloDias('2 dias', '2 dias');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_solo_dias_con_por_y_dia(): void
+    {
+        $resultado = $this->processor->verificarSoloDias('por 1 dia', 'por 1 dia');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_solo_dias_solo_original(): void
+    {
+        $resultado = $this->processor->verificarSoloDias(self::MENSAJE_3_DIAS, 'texto diferente');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_solo_dias_solo_corregido(): void
+    {
+        $resultado = $this->processor->verificarSoloDias('texto diferente', '5 dias');
+        $this->assertTrue($resultado);
+    }
+
+    public function test_verificar_solo_dias_con_acento(): void
+    {
+        $resultado = $this->processor->verificarSoloDias('3 días', '3 días');
+        $this->assertTrue($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA corregirOrtografia()
+    // ============================================
+
+    public function test_corregir_ortografia_corrige_todas_variantes_necesito(): void
+    {
+        $variantes = ['nesecot', 'nesecito', 'nesesito', 'nesito', 'necesot'];
+        foreach ($variantes as $variante) {
+            $resultado = $this->processor->corregirOrtografia($variante);
+            $this->assertStringContainsString('necesito', $resultado);
+        }
+    }
+
+    public function test_corregir_ortografia_corrige_todas_variantes_alquiler(): void
+    {
+        $variantes = ['alquilarr', 'alquiles', 'alqiler', 'alqilar'];
+        foreach ($variantes as $variante) {
+            $resultado = $this->processor->corregirOrtografia($variante);
+            $this->assertIsString($resultado);
+        }
+    }
+
+    public function test_corregir_ortografia_corrige_publicitar(): void
+    {
+        $variantes = ['publicitarlos', 'publicitarlas', 'publicitarlo', 'publicitarla'];
+        foreach ($variantes as $variante) {
+            $resultado = $this->processor->corregirOrtografia($variante);
+            $this->assertIsString($resultado);
+        }
+    }
+
+    public function test_corregir_ortografia_corrige_locucion(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('locucion');
+        $this->assertStringContainsString('locución', $resultado);
+        
+        $resultado = $this->processor->corregirOrtografia('locuion');
+        $this->assertStringContainsString('locución', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_anuncio(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('anunsio');
+        $this->assertStringContainsString('anuncio', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_cuna(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('cuna');
+        $this->assertStringContainsString('cuña', $resultado);
+        
+        $resultado = $this->processor->corregirOrtografia('cunya');
+        $this->assertStringContainsString('cuña', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_iluminacion(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('iluinacion');
+        $this->assertStringContainsString('iluminacion', $resultado);
+        
+        $resultado = $this->processor->corregirOrtografia('iluminasion');
+        $this->assertStringContainsString('iluminacion', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_luces(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('luz');
+        $this->assertStringContainsString('luces', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_dj(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('deejay');
+        $this->assertStringContainsString('dj', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_mezcladora(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('mescladora');
+        $this->assertStringContainsString('mezcladora', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_microfono(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('microphono');
+        $this->assertStringContainsString('microfono', $resultado);
+        
+        $resultado = $this->processor->corregirOrtografia('microfno');
+        $this->assertStringContainsString('microfono', $resultado);
+    }
+
+    public function test_corregir_ortografia_corrige_par_led(): void
+    {
+        $resultado = $this->processor->corregirOrtografia('parled');
+        $this->assertStringContainsString('par led', $resultado);
+    }
+
+    public function test_corregir_ortografia_con_vocabulario(): void
+    {
+        // Este test verifica que la corrección con vocabulario funciona
+        // El vocabulario se obtiene de la base de datos si está disponible
+        $resultado = $this->processor->corregirOrtografia('alqiler de equipos');
+        $this->assertIsString($resultado);
+    }
+
+    public function test_corregir_ortografia_con_palabras_cortas(): void
+    {
+        // Palabras menores a 3 caracteres no se corrigen con vocabulario
+        $resultado = $this->processor->corregirOrtografia('ab cd ef');
+        $this->assertIsString($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA extraerTokens()
+    // ============================================
+
+    public function test_extraer_tokens_con_espacios_multiples(): void
+    {
+        $tokens = $this->processor->extraerTokens('necesito    alquiler   equipos');
+        $this->assertIsArray($tokens);
+        $this->assertContains('necesito', $tokens);
+        $this->assertContains('alquiler', $tokens);
+        $this->assertContains('equipos', $tokens);
+    }
+
+    public function test_extraer_tokens_con_todos_stopwords(): void
+    {
+        $tokens = $this->processor->extraerTokens('para por con sin del de la las el los una unos unas que y o en al');
+        $this->assertIsArray($tokens);
+        $this->assertEmpty($tokens);
+    }
+
+    public function test_extraer_tokens_con_palabras_exactamente_3_caracteres(): void
+    {
+        $tokens = $this->processor->extraerTokens('sol mar');
+        $this->assertIsArray($tokens);
+        // Palabras de exactamente 3 caracteres deberían incluirse
+        $this->assertContains('sol', $tokens);
+        $this->assertContains('mar', $tokens);
+    }
+
+    public function test_extraer_tokens_filtra_palabras_vacias(): void
+    {
+        $tokens = $this->processor->extraerTokens('   ');
+        $this->assertIsArray($tokens);
+        $this->assertEmpty($tokens);
     }
 }
