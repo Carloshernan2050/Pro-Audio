@@ -167,7 +167,16 @@
                 body: JSON.stringify(bodyData)
             });
 
-            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                throw new Error('Error al parsear la respuesta del servidor');
+            }
             typing.remove();
 
             try {
@@ -195,6 +204,9 @@
                     if (Array.isArray(data.actions) && data.actions.length) {
                         try { renderActions(data.actions); } catch (e) { console.error('renderActions error', e); }
                     }
+                    if (data.cotizacion && data.cotizacion.items) {
+                        try { renderCotizacion(data.cotizacion); } catch (e) { console.error('renderCotizacion error', e); }
+                    }
                     saveChatState();
                 } else {
                     contenedor.innerHTML += `
@@ -217,10 +229,15 @@
 
         } catch (error) {
             typing.remove();
+            console.error('Error en enviarMensaje:', error);
+            let errorMessage = 'Error al conectar con el servidor.';
+            if (error.message) {
+                errorMessage += ` (${error.message})`;
+            }
             contenedor.innerHTML += `
                 <div class="message-wrapper incoming">
                     <i class="fas fa-robot chat-avatar"></i>
-                    <div class="message-bubble text-red-500">Error al conectar con el servidor.</div>
+                    <div class="message-bubble text-red-500">${errorMessage}</div>
                 </div>
             `;
             saveChatState();
@@ -285,6 +302,62 @@
         wrap.appendChild(avatar);
         wrap.appendChild(bubble);
         contenedor.appendChild(wrap);
+        contenedor.scrollTop = contenedor.scrollHeight;
+        saveChatState();
+    }
+
+    // Renderizar cotización
+    function renderCotizacion(cotizacion) {
+        const contenedor = document.getElementById('messages-container');
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('message-wrapper', 'incoming');
+        const avatar = document.createElement('i');
+        avatar.classList.add('fas', 'fa-robot', 'chat-avatar');
+        const bubble = document.createElement('div');
+        bubble.classList.add('message-bubble');
+
+        if (!cotizacion || !Array.isArray(cotizacion.items) || cotizacion.items.length === 0) {
+            return;
+        }
+
+        const dias = Number(cotizacion.dias) || 1;
+        const total = Number(cotizacion.total) || 0;
+
+        let itemsHtml = '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">';
+        cotizacion.items.forEach(item => {
+            const nombre = item.nombre || 'Sin nombre';
+            const precioUnitario = Number(item.precio_unitario) || 0;
+            const subtotal = Number(item.subtotal) || precioUnitario * dias;
+            
+            itemsHtml += `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                    <div>
+                        <div style="font-weight: 500;">${nombre}</div>
+                        <div style="font-size: 0.875rem; color: #6b7280;">
+                            $${precioUnitario.toLocaleString('es-CO')} ${dias > 1 ? `× ${dias} días` : ''}
+                        </div>
+                    </div>
+                    <div style="font-weight: 600; color: #059669;">
+                        $${subtotal.toLocaleString('es-CO')}
+                    </div>
+                </div>
+            `;
+        });
+        itemsHtml += '</div>';
+
+        itemsHtml += `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #000; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-weight: 700; font-size: 1.125rem;">Total:</div>
+                <div style="font-weight: 700; font-size: 1.25rem; color: #059669;">
+                    $${total.toLocaleString('es-CO')}
+                </div>
+            </div>
+        `;
+
+        bubble.innerHTML = itemsHtml;
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(bubble);
+        contenedor.appendChild(wrapper);
         contenedor.scrollTop = contenedor.scrollHeight;
         saveChatState();
     }
@@ -448,7 +521,12 @@
                         </div>
                     `;
                     if (Number.isInteger(data.days) && data.days > 0) { window.currentDays = data.days; }
-                    if (Array.isArray(data.actions)) { renderActions(data.actions); }
+                    if (data.cotizacion && data.cotizacion.items) {
+                        try { renderCotizacion(data.cotizacion); } catch (e) { console.error('renderCotizacion error', e); }
+                    }
+                    if (Array.isArray(data.actions) && data.actions.length) {
+                        try { renderActions(data.actions); } catch (e) { console.error('renderActions error', e); }
+                    }
                     saveChatState();
                 }
             } catch (_) {
