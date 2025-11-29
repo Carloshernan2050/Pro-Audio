@@ -72,7 +72,7 @@ Route::get('/usuarios/ajustes/subservicios', [AjustesController::class, 'getSubs
 
 // Chatbot
 Route::get('/usuarios/chatbot', [ChatbotController::class, 'index'])->name('usuarios.chatbot')->middleware('role:Superadmin,Admin,Usuario');
-Route::post('/chat/enviar', [ChatbotController::class, 'enviar'])->name('chat.enviar');
+Route::post('/chat/enviar', [ChatbotController::class, 'enviar'])->name('chat.enviar')->middleware('web');
 
 // CRUD de servicios
 Route::resource('servicios', ServiciosController::class)->middleware('role:Superadmin,Admin');

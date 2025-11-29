@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "checkJs": false,
+    "noLib": true,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "**/*.blade.php",
+    "node_modules",
+    "vendor",
+    "storage",
+    "bootstrap/cache"
+  ],
+  "include": [
+    "resources/js/**/*"
+  ]
+}
+

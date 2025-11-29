@@ -119,7 +119,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3 id="modalTitle">Agregar Nuevo Subservicio</h3>
-                        <span class="close-btn" onclick="closeModal()">&times;</span>
+                        <button type="button" class="close-btn" onclick="closeModal()" aria-label="Cerrar modal">&times;</button>
                     </div>
                     <form id="subservicioForm" method="POST" enctype="multipart/form-data">
                         @csrf
@@ -160,7 +160,7 @@
                             </div>
                             <div id="imagen-actual" style="margin-top: 10px; display: none;">
                                 <p style="margin: 5px 0; color: #666;">Imagen actual:</p>
-                                <img id="imagen-actual-img" src="" alt="Imagen actual" style="max-width: 200px; max-height: 200px; border-radius: 4px;">
+                                <img id="imagen-actual-img" src="" alt="Actual" style="max-width: 200px; max-height: 200px; border-radius: 4px;">
                             </div>
                         </div>
                         

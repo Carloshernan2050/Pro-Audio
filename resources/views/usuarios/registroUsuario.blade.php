@@ -32,53 +32,53 @@
 
                 <div class="grupo-flex">
                     <div class="input-grupo">
-                        <label>Primer nombre:</label>
-                        <input type="text" name="primer_nombre" value="{{ old('primer_nombre') }}" required>
+                        <label for="primer_nombre">Primer nombre:</label>
+                        <input type="text" id="primer_nombre" name="primer_nombre" value="{{ old('primer_nombre') }}" required>
                     </div>
 
                     <div class="input-grupo">
-                        <label>Segundo nombre:</label>
-                        <input type="text" name="segundo_nombre" value="{{ old('segundo_nombre') }}">
+                        <label for="segundo_nombre">Segundo nombre:</label>
+                        <input type="text" id="segundo_nombre" name="segundo_nombre" value="{{ old('segundo_nombre') }}">
                     </div>
                 </div>
 
                 <div class="grupo-flex">
                     <div class="input-grupo">
-                        <label>Primer apellido:</label>
-                        <input type="text" name="primer_apellido" value="{{ old('primer_apellido') }}" required>
+                        <label for="primer_apellido">Primer apellido:</label>
+                        <input type="text" id="primer_apellido" name="primer_apellido" value="{{ old('primer_apellido') }}" required>
                     </div>
 
                     <div class="input-grupo">
-                        <label>Segundo apellido:</label>
-                        <input type="text" name="segundo_apellido" value="{{ old('segundo_apellido') }}">
+                        <label for="segundo_apellido">Segundo apellido:</label>
+                        <input type="text" id="segundo_apellido" name="segundo_apellido" value="{{ old('segundo_apellido') }}">
                     </div>
                 </div>
 
                 <div class="input-grupo">
-                    <label>Correo:</label>
-                    <input type="email" name="correo" value="{{ old('correo') }}" required>
+                    <label for="correo">Correo:</label>
+                    <input type="email" id="correo" name="correo" value="{{ old('correo') }}" required>
                 </div>
                 
                 <div class="input-grupo">
-                    <label>Teléfono:</label>
-                    <input type="text" name="telefono" value="{{ old('telefono') }}">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" name="telefono" value="{{ old('telefono') }}">
                 </div>
 
                 <div class="input-grupo">
-                    <label>Dirección:</label>
-                    <input type="text" name="direccion" value="{{ old('direccion') }}">
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" id="direccion" name="direccion" value="{{ old('direccion') }}">
                 </div>
 
                 {{-- Agregamos los campos para la contraseña y su confirmación --}}
                 <div class="input-grupo">
-                    <label>Contraseña:</label>
-                    <input type="password" name="contrasena" required>
+                    <label for="contrasena">Contraseña:</label>
+                    <input type="password" id="contrasena" name="contrasena" required>
                 </div>
 
                 <div class="input-grupo">
-                    <label>Confirmar Contraseña:</label>
+                    <label for="contrasena_confirmation">Confirmar Contraseña:</label>
                     {{-- Este campo debe llamarse "contrasena_confirmation" para que la regla "confirmed" funcione --}}
-                    <input type="password" name="contrasena_confirmation" required>
+                    <input type="password" id="contrasena_confirmation" name="contrasena_confirmation" required>
                 </div>
                 
                 <button type="submit" class="boton-registro">REGISTRARSE</button>

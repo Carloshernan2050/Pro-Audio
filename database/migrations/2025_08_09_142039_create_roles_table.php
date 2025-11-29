@@ -48,6 +48,7 @@ return new class extends Migration
                     }
                 });
             } catch (\Throwable $e) {
+                // Ignorar si no existe la FK o hay algún error al eliminarla
             }
             // no siempre se elimina esta tabla aquí, pero si existe la quitamos para poder soltar roles
             Schema::dropIfExists('role_has_permissions');
