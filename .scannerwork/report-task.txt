@@ -2,5 +2,5 @@ projectKey=pro-audio
 serverUrl=https://sonarqube.dataguaviare.com.co
 serverVersion=25.11.0.114957
 dashboardUrl=https://sonarqube.dataguaviare.com.co/dashboard?id=pro-audio
-ceTaskId=003bbd4d-5432-4be3-b6eb-b2835e710e20
-ceTaskUrl=https://sonarqube.dataguaviare.com.co/api/ce/task?id=003bbd4d-5432-4be3-b6eb-b2835e710e20
+ceTaskId=44733eac-c02e-49dd-b129-4344ff927046
+ceTaskUrl=https://sonarqube.dataguaviare.com.co/api/ce/task?id=44733eac-c02e-49dd-b129-4344ff927046

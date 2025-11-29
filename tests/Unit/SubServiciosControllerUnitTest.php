@@ -282,7 +282,7 @@ class SubServiciosControllerUnitTest extends TestCase
         
         $this->assertNotNull($response);
         
-        Storage::disk('public')->assertMissing('subservicios/test_image.jpg');
+        $this->assertFalse(Storage::disk('public')->exists('subservicios/test_image.jpg'));
     }
 }
 

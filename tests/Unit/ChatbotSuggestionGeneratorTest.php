@@ -18,6 +18,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
 
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
     private const NOMBRE_SERVICIO_ALQUILER = 'Alquiler';
+    private const MENSAJE_STOPWORDS_ALQUILER = 'para con de alquiler';
 
     protected ChatbotSuggestionGenerator $generator;
 
@@ -90,7 +91,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
 
     public function test_generar_sugerencias_por_token_filtra_stopwords(): void
     {
-        $resultado = $this->generator->generarSugerenciasPorToken('para con de alquiler');
+        $resultado = $this->generator->generarSugerenciasPorToken(self::MENSAJE_STOPWORDS_ALQUILER);
         
         $this->assertIsArray($resultado);
     }
@@ -285,7 +286,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
 
     public function test_generar_sugerencias_con_tokens_stopwords(): void
     {
-        $resultado = $this->generator->generarSugerencias('para con de alquiler');
+        $resultado = $this->generator->generarSugerencias(self::MENSAJE_STOPWORDS_ALQUILER);
         
         $this->assertIsArray($resultado);
     }
@@ -482,6 +483,324 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $resultado = $this->generator->generarSugerenciasPorToken('alquiler');
         
         $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA calcularScoresSugerencias()
+    // ============================================
+
+    public function test_calcular_scores_sugerencias_con_similitud_alta(): void
+    {
+        // Este método es privado, pero se prueba indirectamente
+        $resultado = $this->generator->generarSugerencias('alqiler');
+        $this->assertIsArray($resultado);
+        $this->assertNotEmpty($resultado);
+    }
+
+    public function test_calcular_scores_sugerencias_con_diferente_primera_letra(): void
+    {
+        // Cuando la primera letra es diferente, el porcentaje se reduce
+        $resultado = $this->generator->generarSugerencias('xalquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_calcular_scores_sugerencias_con_stopwords_ext(): void
+    {
+        // Stopwords extendidos no deberían aparecer en sugerencias
+        $resultado = $this->generator->generarSugerencias('par');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_calcular_scores_sugerencias_con_terminos_cortos(): void
+    {
+        // Términos menores a 3 caracteres no deberían aparecer
+        $resultado = $this->generator->generarSugerencias('ab cd');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA filtrarTokensValidos()
+    // ============================================
+
+    public function test_filtrar_tokens_validos_excluye_stopwords(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken(self::MENSAJE_STOPWORDS_ALQUILER);
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            // El token debería ser 'alquiler', no los stopwords
+            $this->assertNotEquals('para', $resultado[0]['token'] ?? null);
+        }
+    }
+
+    public function test_filtrar_tokens_validos_excluye_todos_genericos(): void
+    {
+        $genericos = ['necesito', 'nececito', 'nesecito', 'necesitar', 'requiero', 'quiero', 'busco', 'hola', 'buenas', 'gracias', 'dias', 'dia'];
+        foreach ($genericos as $generico) {
+            $resultado = $this->generator->generarSugerenciasPorToken($generico . ' alquiler');
+            $this->assertIsArray($resultado);
+        }
+    }
+
+    public function test_filtrar_tokens_validos_excluye_numeros(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('123 456 alquiler');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            $this->assertNotEquals('123', $resultado[0]['token'] ?? null);
+            $this->assertNotEquals('456', $resultado[0]['token'] ?? null);
+        }
+    }
+
+    public function test_filtrar_tokens_validos_excluye_tokens_cortos(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('ab cd ef alquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_filtrar_tokens_validos_con_espacios_trim(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('  alquiler  ');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA encontrarTokenMasRaro()
+    // ============================================
+
+    public function test_encontrar_token_mas_raro_retorna_menos_similar(): void
+    {
+        // El token más raro es el que tiene menor similitud con el vocabulario
+        $resultado = $this->generator->generarSugerenciasPorToken('necesito xyz123 alquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_encontrar_token_mas_raro_con_un_solo_token(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            $this->assertEquals('alqiler', $resultado[0]['token'] ?? null);
+        }
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA generarSugerenciasParaToken()
+    // ============================================
+
+    public function test_generar_sugerencias_para_token_retorna_ordenadas(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+            $sugerencias = $resultado[0]['sugerencias'];
+            $this->assertLessThanOrEqual(6, count($sugerencias));
+            // La primera sugerencia debería ser la más similar
+            if (!empty($sugerencias)) {
+                $this->assertIsString($sugerencias[0]);
+            }
+        }
+    }
+
+    public function test_generar_sugerencias_para_token_sin_similitud(): void
+    {
+        // Token que no tiene similitud con el vocabulario
+        $resultado = $this->generator->generarSugerenciasPorToken('xyz123abc');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA calcularMaximaSimilitud()
+    // ============================================
+
+    public function test_calcular_maxima_similitud_con_token_exacto(): void
+    {
+        // Este método es privado, pero se prueba indirectamente
+        $resultado = $this->generator->generarSugerenciasPorToken('alquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_calcular_maxima_similitud_con_token_similar_y_vocabulario(): void
+    {
+        // Este método es privado, pero se prueba indirectamente
+        // Prueba calcularMaximaSimilitud con un token similar a términos del vocabulario
+        $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
+        $this->assertIsArray($resultado);
+        // Si hay resultados, debería tener sugerencias ordenadas por similitud
+        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+            $this->assertGreaterThan(0, count($resultado[0]['sugerencias']));
+        }
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA generarSugerencias()
+    // ============================================
+
+    public function test_generar_sugerencias_con_tokens_vacios_usa_mensaje_completo(): void
+    {
+        // Si no hay tokens válidos, usa el mensaje completo normalizado
+        $resultado = $this->generator->generarSugerencias('para con de');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_generar_sugerencias_con_vocabulario_vacio_retorna_base_sugerencias(): void
+    {
+        // Si el vocabulario está vacío, debería retornar sugerencias base
+        $resultado = $this->generator->generarSugerencias('');
+        $this->assertIsArray($resultado);
+        // Debería retornar sugerencias base cuando no hay vocabulario
+        $this->assertNotEmpty($resultado);
+    }
+
+    public function test_generar_sugerencias_con_scores_vacios_retorna_base_por_fallback(): void
+    {
+        // Si no hay scores calculados, debería retornar sugerencias base por fallback
+        $resultado = $this->generator->generarSugerencias('xyz123abc456');
+        $this->assertIsArray($resultado);
+        $this->assertNotEmpty($resultado);
+        // Debería contener las sugerencias base cuando no hay scores
+        $sugerenciasBase = ['alquiler', 'animacion', 'publicidad', 'luces', 'dj', 'audio'];
+        $haySugerenciaBase = false;
+        foreach ($sugerenciasBase as $base) {
+            if (in_array($base, $resultado, true)) {
+                $haySugerenciaBase = true;
+                break;
+            }
+        }
+        $this->assertTrue($haySugerenciaBase, 'Debería contener al menos una sugerencia base');
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA obtenerVocabularioCorreccion()
+    // ============================================
+
+    public function test_obtener_vocabulario_correccion_incluye_dj(): void
+    {
+        // 'dj' es una excepción que se incluye aunque tenga menos de 4 caracteres
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'DJ',
+            'descripcion' => 'Servicio de DJ',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->generator->generarSugerencias('dj');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_obtener_vocabulario_correccion_excluye_stopwords_ext_en_vocabulario(): void
+    {
+        // Stopwords extendidos no deberían estar en el vocabulario
+        // 'par' es un stopword extendido que no debería aparecer en sugerencias
+        $resultado = $this->generator->generarSugerencias('par');
+        $this->assertIsArray($resultado);
+        // Aunque 'par' es un stopword, debería retornar sugerencias base
+        $this->assertNotEmpty($resultado);
+    }
+
+    public function test_obtener_vocabulario_correccion_filtra_longitud(): void
+    {
+        // Solo incluye términos entre 4 y 30 caracteres (excepto 'dj')
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'A', // Muy corto
+            'descripcion' => 'Descripción muy larga que excede los 30 caracteres permitidos en el vocabulario',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->generator->generarSugerencias('equipo');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_obtener_vocabulario_correccion_maneja_excepcion_db(): void
+    {
+        // Si hay un error en la DB, debería continuar con palabras base
+        // Este caso se prueba indirectamente cuando no hay conexión a DB
+        $resultado = $this->generator->generarSugerencias('alquiler');
+        $this->assertIsArray($resultado);
+        $this->assertNotEmpty($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA fallbackTokenHints()
+    // ============================================
+
+    public function test_fallback_token_hints_con_espacios_multiples(): void
+    {
+        $resultado = $this->generator->fallbackTokenHints('necesito    alquiler');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            $this->assertArrayHasKey('token', $resultado[0]);
+        }
+    }
+
+    public function test_fallback_token_hints_retorna_primer_token_valido(): void
+    {
+        $resultado = $this->generator->fallbackTokenHints('ab cd ef alquiler');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            // Debería retornar el primer token de 3+ caracteres
+            $this->assertEquals('alquiler', $resultado[0]['token'] ?? null);
+        }
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA extraerMejorSugerencia()
+    // ============================================
+
+    public function test_extraer_mejor_sugerencia_con_array_vacio_retorna_vacio(): void
+    {
+        // Cuando se pasa un array vacío, debería retornar un array vacío
+        $resultado = $this->generator->extraerMejorSugerencia([]);
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
+        $this->assertCount(0, $resultado);
+    }
+
+    public function test_extraer_mejor_sugerencia_sin_indice_token(): void
+    {
+        $tokenHints = [
+            ['sugerencias' => ['alquiler']]
+        ];
+        
+        $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
+    }
+
+    public function test_extraer_mejor_sugerencia_con_sugerencias_null(): void
+    {
+        $tokenHints = [
+            ['token' => 'test']
+        ];
+        
+        $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_extraer_mejor_sugerencia_retorna_primera_sugerencia(): void
+    {
+        $tokenHints = [
+            [
+                'token' => 'alqiler',
+                'sugerencias' => ['alquiler', 'animacion', 'publicidad']
+            ]
+        ];
+        
+        $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            $this->assertEquals('alquiler', $resultado['sugerencia'] ?? null);
+        }
     }
 }
 

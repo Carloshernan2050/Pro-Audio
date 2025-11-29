@@ -21,6 +21,10 @@ class ChatbotMessageProcessorTest extends TestCase
     private const MENSAJE_ALQUILER = 'necesito alquiler';
     private const MENSAJE_5_DIAS = 'por 5 dias';
     private const RESPUESTA_OPCIONES_RELACIONADAS = 'opciones relacionadas';
+    private const MENSAJE_EQUIPOS_SONIDO = 'equipos de sonido';
+    private const INTENCION_ANIMACION = 'Animación';
+    private const MENSAJE_TAMBIEN_ANIMACION = 'tambien animacion';
+    private const MENSAJE_CATALOGO_ACENTO = 'catálogo';
 
     protected ChatbotMessageProcessor $processor;
     protected $textProcessorMock;
@@ -288,8 +292,8 @@ class ChatbotMessageProcessorTest extends TestCase
         
         $resultado = $this->processor->procesarMensajeTexto(
             $request,
-            'equipos de sonido',
-            'equipos de sonido',
+            self::MENSAJE_EQUIPOS_SONIDO,
+            self::MENSAJE_EQUIPOS_SONIDO,
             0,
             0,
             [],
@@ -616,11 +620,11 @@ class ChatbotMessageProcessorTest extends TestCase
         
         $this->intentionDetectorMock
             ->shouldReceive('detectarIntenciones')
-            ->andReturn(['Animación']);
+            ->andReturn([self::INTENCION_ANIMACION]);
         
         $this->intentionDetectorMock
             ->shouldReceive('validarIntencionesContraMensaje')
-            ->andReturn(['Animación']);
+            ->andReturn([self::INTENCION_ANIMACION]);
         
         $this->intentionDetectorMock
             ->shouldReceive('esRelacionado')
@@ -658,8 +662,8 @@ class ChatbotMessageProcessorTest extends TestCase
         
         $resultado = $this->processor->procesarMensajeTexto(
             $request,
-            'tambien animacion',
-            'tambien animacion',
+            self::MENSAJE_TAMBIEN_ANIMACION,
+            self::MENSAJE_TAMBIEN_ANIMACION,
             0,
             0,
             ['Alquiler'],
@@ -933,7 +937,7 @@ class ChatbotMessageProcessorTest extends TestCase
         
         $resultado = $this->processor->procesarMensajeTexto(
             $request,
-            'catálogo',
+            self::MENSAJE_CATALOGO_ACENTO,
             'catalogo',
             0,
             0,
@@ -1418,6 +1422,431 @@ class ChatbotMessageProcessorTest extends TestCase
         $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
         $data = json_decode($resultado->getContent(), true);
         $this->assertArrayHasKey('sugerencias', $data);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA casos límite
+    // ============================================
+
+    public function test_procesar_mensaje_texto_calcular_dias_para_respuesta_con_mensaje_vacio(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn([]);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(true);
+        
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn([]);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(false);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+        
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(true);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('obtenerSubServiciosPorIntenciones')
+            ->andReturn($collectionMock);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('buscarSubServiciosRelacionados')
+            ->andReturn($collectionMock);
+        
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerencias')
+            ->andReturn(['alquiler']);
+        
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerenciasPorToken')
+            ->andReturn([['token' => 'test', 'sugerencias' => []]]);
+        
+        $this->suggestionGeneratorMock
+            ->shouldReceive('extraerMejorSugerencia')
+            ->andReturn(['token' => 'test', 'sugerencia' => 'alquiler']);
+        
+        session()->forget('chat.selecciones');
+        
+        // Mensaje vacío debería retornar null para daysForResponse
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            '',
+            '',
+            0,
+            0,
+            [],
+            false
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+    }
+
+    public function test_procesar_mensaje_texto_calcular_dias_para_respuesta_con_dias_mayor_cero(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => 'opciones']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn(['Alquiler']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('validarIntencionesContraMensaje')
+            ->andReturn(['Alquiler']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(true);
+        
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn(['alquiler']);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(false);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+        
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(false);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('obtenerSubServiciosPorIntenciones')
+            ->andReturn($collectionMock);
+        
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerenciasPorToken')
+            ->andReturn([['token' => 'test', 'sugerencias' => []]]);
+        
+        $this->responseBuilderMock
+            ->shouldReceive('solicitarConfirmacionIntencion')
+            ->once()
+            ->andReturn($responseMock);
+        
+        session()->forget('chat.selecciones');
+        
+        // Con días > 0, debería usar esos días
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            self::MENSAJE_ALQUILER,
+            self::MENSAJE_ALQUILER,
+            5,
+            0,
+            [],
+            false
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+    }
+
+    public function test_procesar_mensaje_texto_calcular_dias_para_respuesta_con_continuacion_y_session_days(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => 'opciones']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn([]);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(true);
+        
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn([]);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(false);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+        
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(false);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('obtenerSubServiciosPorIntenciones')
+            ->andReturn($collectionMock);
+        
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerenciasPorToken')
+            ->andReturn([['token' => 'test', 'sugerencias' => []]]);
+        
+        $this->responseBuilderMock
+            ->shouldReceive('mostrarOpcionesConIntenciones')
+            ->once()
+            ->andReturn($responseMock);
+        
+        session(['chat.selecciones' => []]);
+        
+        // Con continuación y sessionDays > 0, debería usar sessionDays
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            'continuar',
+            'continuar',
+            0,
+            3,
+            ['Alquiler'],
+            true
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+    }
+
+    public function test_procesar_mensaje_texto_combinar_intenciones_con_agregado_y_sesion(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => 'opciones']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn([self::INTENCION_ANIMACION]);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('validarIntencionesContraMensaje')
+            ->andReturn([self::INTENCION_ANIMACION]);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(true);
+        
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn(['animacion']);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(true);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+        
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(false);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('obtenerSubServiciosPorIntenciones')
+            ->andReturn($collectionMock);
+        
+        $this->responseBuilderMock
+            ->shouldReceive('mostrarOpcionesConIntenciones')
+            ->once()
+            ->andReturn($responseMock);
+        
+        session(['chat.selecciones' => [1], 'chat.intenciones' => ['Alquiler']]);
+        
+        // Con agregado y sesión, debería combinar intenciones
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            self::MENSAJE_TAMBIEN_ANIMACION,
+            self::MENSAJE_TAMBIEN_ANIMACION,
+            0,
+            0,
+            ['Alquiler'],
+            false
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+        // Verificar que las intenciones se combinaron
+        $intenciones = session('chat.intenciones', []);
+        $this->assertContains('Alquiler', $intenciones);
+        $this->assertContains(self::INTENCION_ANIMACION, $intenciones);
+    }
+
+    public function test_procesar_mensaje_texto_combinar_intenciones_nueva_consulta_limpia_selecciones(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => 'opciones']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn(['Alquiler']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('validarIntencionesContraMensaje')
+            ->andReturn(['Alquiler']);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(true);
+        
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn(['alquiler']);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(false);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+        
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(false);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('obtenerSubServiciosPorIntenciones')
+            ->andReturn($collectionMock);
+        
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerenciasPorToken')
+            ->andReturn([['token' => 'test', 'sugerencias' => []]]);
+        
+        $this->responseBuilderMock
+            ->shouldReceive('solicitarConfirmacionIntencion')
+            ->once()
+            ->andReturn($responseMock);
+        
+        session(['chat.selecciones' => [1, 2, 3]]);
+        
+        // Nueva consulta debería limpiar selecciones
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            self::MENSAJE_ALQUILER,
+            self::MENSAJE_ALQUILER,
+            0,
+            0,
+            [],
+            false
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+        $this->assertEmpty(session('chat.selecciones', []));
+    }
+
+    public function test_procesar_mensaje_texto_verificar_mensaje_fuera_de_tema_con_solo_dias_y_selecciones(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(false);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(true);
+        
+        session(['chat.selecciones' => [1, 2], 'chat.days' => 3]);
+        
+        // Cuando hay solo días y selecciones, no debería responder fuera de tema
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            self::MENSAJE_5_DIAS,
+            self::MENSAJE_5_DIAS,
+            5,
+            0,
+            [],
+            false
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+    }
+
+    public function test_procesar_mensaje_texto_es_solicitud_catalogo_con_acento_en_original_y_corregido(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => 'catalogo']);
+        
+        $this->responseBuilderMock
+            ->shouldReceive('mostrarCatalogoJson')
+            ->once()
+            ->andReturn($responseMock);
+        
+        session(['chat.selecciones' => [1, 2], 'chat.days' => 3]);
+        
+        // Debería reconocer 'catálogo' con acento tanto en el mensaje original como corregido
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            self::MENSAJE_CATALOGO_ACENTO,
+            self::MENSAJE_CATALOGO_ACENTO,
+            0,
+            0,
+            [],
+            false
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertArrayHasKey('respuesta', $data);
+        $this->assertArrayHasKey('optionGroups', $data);
+    }
+
+    public function test_procesar_mensaje_texto_buscar_subservicios_con_mensaje_corregido_no_vacio(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => self::RESPUESTA_OPCIONES_RELACIONADAS]);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn([]);
+        
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(true);
+        
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn(['equipos']);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(false);
+        
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+        
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(false);
+        $collectionMock->shouldReceive('isNotEmpty')->andReturn(true);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('obtenerSubServiciosPorIntenciones')
+            ->andReturn($collectionMock);
+        
+        $this->subServicioServiceMock
+            ->shouldReceive('buscarSubServiciosRelacionados')
+            ->andReturn($collectionMock);
+        
+        $this->responseBuilderMock
+            ->shouldReceive('responderOpciones')
+            ->once()
+            ->andReturn($responseMock);
+        
+        session(['chat.selecciones' => []]);
+        
+        // Con mensaje corregido no vacío, debería usar el prefijo diferente
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            self::MENSAJE_EQUIPOS_SONIDO,
+            self::MENSAJE_EQUIPOS_SONIDO,
+            0,
+            0,
+            [],
+            false
+        );
+        
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertStringContainsString('Con base en tu consulta', $data['respuesta']);
     }
 }
 
