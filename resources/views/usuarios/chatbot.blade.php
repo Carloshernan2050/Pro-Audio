@@ -172,8 +172,8 @@
 
             try {
                 if (data && data.respuesta !== undefined && data.respuesta !== null) {
-                    const safeRespuesta = (typeof data.respuesta === 'string') 
-                        ? data.respuesta 
+                    const safeRespuesta = (typeof data.respuesta === 'string')
+                        ? data.respuesta
                         : (() => { try { return JSON.stringify(data.respuesta); } catch(_) { return String(data.respuesta); } })();
                     contenedor.innerHTML += `
                         <div class="message-wrapper incoming">
@@ -295,8 +295,8 @@
         wrapper.classList.add('message-wrapper', 'incoming');
         const d = window.currentDays && Number(window.currentDays) > 0 ? Number(window.currentDays) : 1;
         // Convertir seleccionesPrevias a array de números si no lo es
-        const seleccionesIds = Array.isArray(seleccionesPrevias) 
-            ? seleccionesPrevias.map(id => Number(id)) 
+        const seleccionesIds = Array.isArray(seleccionesPrevias)
+            ? seleccionesPrevias.map(id => Number(id))
             : [];
         const groupsHtml = groups.map(g => `
             <div style="margin-bottom:8px;">

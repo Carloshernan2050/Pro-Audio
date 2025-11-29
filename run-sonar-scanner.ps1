@@ -102,7 +102,38 @@ Write-Host ""
 # Ejecutar el scanner con el token
 Write-Host "Iniciando análisis..." -ForegroundColor Cyan
 Write-Host ""
-& $scannerExe -D"sonar.token=$token"
+
+# Verificar conectividad antes de ejecutar
+Write-Host "Verificando conectividad con el servidor..." -ForegroundColor Yellow
+try {
+    $testUrl = "https://sonarqube.dataguaviare.com.co/api/system/status"
+    $testResponse = Invoke-WebRequest -Uri $testUrl -TimeoutSec 15 -UseBasicParsing -ErrorAction Stop
+    Write-Host "[OK] Servidor SonarQube está accesible" -ForegroundColor Green
+} catch {
+    Write-Host "[ERROR] No se puede conectar al servidor SonarQube" -ForegroundColor Red
+    Write-Host "  Error: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Posibles soluciones:" -ForegroundColor Cyan
+    Write-Host "  1. Verifica tu conexión a internet" -ForegroundColor Gray
+    Write-Host "  2. Verifica que el servidor esté en línea: https://sonarqube.dataguaviare.com.co" -ForegroundColor Gray
+    Write-Host "  3. Verifica si hay un firewall bloqueando la conexión" -ForegroundColor Gray
+    Write-Host "  4. Intenta nuevamente en unos minutos (el servidor puede estar sobrecargado)" -ForegroundColor Gray
+    Write-Host ""
+    exit 1
+}
+Write-Host ""
+
+# Ejecutar el scanner con el token y opciones de timeout aumentadas
+# Agregar opciones para aumentar timeout y mejorar la conexión
+$scannerArgs = @(
+    "-Dsonar.token=$token",
+    "-Dsonar.ws.timeout=120",  # Timeout de 120 segundos para conexiones web
+    "-Dsonar.forceAuthentication=true"
+)
+
+Write-Host "Ejecutando: $scannerExe $($scannerArgs -join ' ')" -ForegroundColor Gray
+Write-Host ""
+& $scannerExe $scannerArgs
 
 # Verificar el resultado
 if ($LASTEXITCODE -eq 0) {

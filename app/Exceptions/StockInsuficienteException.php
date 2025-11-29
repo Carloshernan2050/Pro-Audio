@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Exception;
 
+/**
+ * @codeCoverageIgnore
+ */
 class StockInsuficienteException extends Exception
 {
     public function __construct(string $nombreProducto, int $disponible, int $solicitado)

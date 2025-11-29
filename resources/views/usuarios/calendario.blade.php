@@ -485,7 +485,7 @@
                         <div class="modal-body" style="overflow-y: auto; overflow-x: hidden; flex: 1 1 auto; min-height: 0; max-height: none;">
                                                         <div id="alertEditar{{ $r->id }}" class="alert alert-danger" style="display: none;"></div>
                                                         <div class="mb-3">
-                                                            <label class="form-label">Servicio *</label>
+                                                            <label class="form-label" for="servicio_editar{{ $r->id }}">Servicio *</label>
                                                             @php
                                                                 $servicioSeleccionado = optional($r->reserva)->servicio ?? '';
                                                             @endphp
@@ -498,7 +498,7 @@
                                                         </div>
                             @if(!$tieneItems)
                                                         <div class="mb-3">
-                                                            <label class="form-label">Subservicio / Producto *</label>
+                                                            <label class="form-label" for="movimiento_editar{{ $r->id }}">Subservicio / Producto *</label>
                                                             <select name="movimientos_inventario_id" id="movimiento_editar{{ $r->id }}" class="form-select" required>
                                                                 <option value="">Seleccione un producto</option>
                                                                 @foreach($movimientos ?? [] as $movimiento)
@@ -507,7 +507,7 @@
                                                                     $serv = (stripos($desc,'publi')!==false) ? 'Publicidad' : ((stripos($desc,'anim')!==false) ? 'Animación' : 'Alquiler');
                                                                 @endphp
                                                                 <option value="{{ $movimiento->id }}" data-inv="{{ $movimiento->inventario_id }}" data-stock="{{ $inventarios[$movimiento->inventario_id]->stock ?? '' }}" data-servicio="{{ $serv }}" {{ $movimiento->id == $r->movimientos_inventario_id ? 'selected' : '' }}>
-                                                                    {{ $desc ?: 'Sin descripción' }} 
+                                                                    {{ $desc ?: 'Sin descripción' }}
                                                                 </option>
                                                                 @endforeach
                                                             </select>
@@ -515,7 +515,7 @@
                                                         </div>
                             @else
                             <div class="mb-3">
-                                <label class="form-label">Productos de la Reserva *</label>
+                                <label class="form-label" for="select_producto_editar{{ $r->id }}">Productos de la Reserva *</label>
                                 <div id="productos_editar{{ $r->id }}" class="table-container" style="max-height:280px;overflow:auto;padding:10px;">
                                     <div style="position:relative;">
                                         <select id="select_producto_editar{{ $r->id }}" class="form-select form-control" style="width:100%;">
@@ -553,8 +553,8 @@
                                                     <button type="button" class="btn btn-sm btn-secondary btn-remove-item" data-inv-id="{{ $invId }}" style="flex-shrink:0;"><i class="fas fa-times"></i></button>
                                                 </div>
                                                 <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
-                                                    <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                                                    <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="{{ $stock }}" name="items[{{ $loop->index }}][cantidad]" value="{{ $item->cantidad }}" placeholder="Cantidad (máx {{ $stock }})" required style="width:100%;">
+                                                    <label style="font-size:.85em;opacity:.9;margin-bottom:4px;" for="cantidad_item_{{ $loop->index }}">Cantidad:</label>
+                                                    <input type="number" id="cantidad_item_{{ $loop->index }}" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="{{ $stock }}" name="items[{{ $loop->index }}][cantidad]" value="{{ $item->cantidad }}" placeholder="Cantidad (máx {{ $stock }})" required style="width:100%;">
                                                     <small class="field-error" style="display:none;"></small>
                                                 </div>
                                                 <input type="hidden" name="items[{{ $loop->index }}][inventario_id]" value="{{ $invId }}">
@@ -567,24 +567,24 @@
                             @endif
 
                                                         <div class="mb-3">
-                                                            <label class="form-label">Fecha inicio *</label>
+                                                            <label class="form-label" for="fecha_inicio_editar{{ $r->id }}">Fecha inicio *</label>
                                                             <input type="datetime-local" name="fecha_inicio" id="fecha_inicio_editar{{ $r->id }}" value="{{ $r->fecha_inicio ? \Carbon\Carbon::parse($r->fecha_inicio)->format('Y-m-d\TH:i') : '' }}" class="form-control" required>
                                                         </div>
 
                                                         <div class="mb-3">
-                                                            <label class="form-label">Fecha fin *</label>
+                                                            <label class="form-label" for="fecha_fin_editar{{ $r->id }}">Fecha fin *</label>
                                                             <input type="datetime-local" name="fecha_fin" id="fecha_fin_editar{{ $r->id }}" value="{{ $r->fecha_fin ? \Carbon\Carbon::parse($r->fecha_fin)->format('Y-m-d\TH:i') : '' }}" class="form-control" required>
                                                         </div>
 
                             @if(!$tieneItems)
                                                         <div class="mb-3">
-                                                            <label class="form-label">Cantidad *</label>
+                                                            <label class="form-label" for="cantidad_editar{{ $r->id }}">Cantidad *</label>
                                 <input type="number" name="cantidad" id="cantidad_editar{{ $r->id }}" class="form-control" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" value="{{ $r->cantidad ?? 1 }}" required>
                                                         </div>
                             @endif
 
                                                         <div class="mb-3">
-                                                            <label class="form-label">Descripción *</label>
+                                                            <label class="form-label" for="descripcion_editar{{ $r->id }}">Descripción *</label>
                                                             <textarea name="descripcion_evento" id="descripcion_editar{{ $r->id }}" class="form-control" rows="3" required>{{ $r->descripcion_evento }}</textarea>
                                                         </div>
                                                     </div>
@@ -613,7 +613,7 @@
                     <div class="modal-body alquiler-box" style="overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; max-height: calc(90vh - 120px);">
                         <div id="alertCrear" class="alert alert-danger" style="display: none;"></div>
                         <div class="mb-2">
-                            <label>Servicio *</label>
+                            <label for="servicio_crear">Servicio *</label>
                             <select id="servicio_crear" name="servicio" class="form-control" required>
                                 <option value="">Seleccione un servicio</option>
                                 <option value="Publicidad" {{ old('servicio') === 'Publicidad' ? 'selected' : '' }}>Publicidad</option>
@@ -622,7 +622,7 @@
                             </select>
                         </div>
                         <div class="mb-2">
-                            <label>Subservicios / Productos *</label>
+                            <label for="select_producto">Subservicios / Productos *</label>
                             <div id="productos_crear" class="table-container" style="max-height:280px;overflow:auto;padding:10px;">
                                 <div style="position:relative;">
                                     <select id="select_producto" class="form-select form-control" style="width:100%;">
@@ -643,15 +643,15 @@
                         </div>
                         <!-- Cantidades por producto arriba -->
                         <div class="mb-2">
-                            <label>Fecha inicio *</label>
+                            <label for="fecha_inicio_crear">Fecha inicio *</label>
                             <input type="datetime-local" name="fecha_inicio" id="fecha_inicio_crear" class="form-control" required>
                         </div>
                         <div class="mb-2">
-                            <label>Fecha fin *</label>
+                            <label for="fecha_fin_crear">Fecha fin *</label>
                             <input type="datetime-local" name="fecha_fin" id="fecha_fin_crear" class="form-control" required>
                         </div>
                         <div class="mb-2">
-                            <label>Descripción *</label>
+                            <label for="descripcion_crear">Descripción *</label>
                             <textarea name="descripcion_evento" id="descripcion_crear" class="form-control" required></textarea>
                         </div>
                     </div>
@@ -768,8 +768,8 @@
                                         </div>
                                     `;
                                 });
-                                
-                                const descripcionHTML = registro.descripcion_evento 
+
+                                const descripcionHTML = registro.descripcion_evento
                                     ? `<div class="registro-descripcion">
                                         <i class="fas fa-info-circle"></i>
                                         <span>${window.escapeHtml(registro.descripcion_evento.length > 100 ? registro.descripcion_evento.substring(0, 100) + '...' : registro.descripcion_evento)}</span>
@@ -1831,8 +1831,8 @@
                                     <button type="button" class="btn btn-sm btn-secondary btn-remove-item" data-inv-id="${inventarioId}" style="flex-shrink:0;"><i class="fas fa-times"></i></button>
                                 </div>
                                 <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
-                                    <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                                    <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${stock}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${stock})" required style="width:100%;">
+                                    <label style="font-size:.85em;opacity:.9;margin-bottom:4px;" for="cantidad_item_crear_${itemIndex}">Cantidad:</label>
+                                    <input type="number" id="cantidad_item_crear_${itemIndex}" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${stock}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${stock})" required style="width:100%;">
                                     <small class="field-error" style="display:none;"></small>
                                 </div>
                                 <input type="hidden" name="items[${itemIndex}][inventario_id]" value="${inventarioId}">
@@ -2178,10 +2178,10 @@
                             // Verificar si el inventario está en el array de inventarioIds o en el campo único (formato antiguo)
                             const inventarioIds = ev.inventarioIds || [];
                             const inventarioIdUnico = ev.inventarioId || ev.inventarioid;
-                            const tieneInventario = Array.isArray(inventarioIds) 
+                            const tieneInventario = Array.isArray(inventarioIds)
                                 ? inventarioIds.includes(inventarioId)
                                 : (inventarioIdUnico == inventarioId);
-                            
+
                             if (tieneInventario) {
                                 const es = new Date(ev.start); const ef = ev.end ? new Date(ev.end) : new Date(ev.start);
                                 // Lógica de solapamiento coherente con backend:
@@ -2259,8 +2259,8 @@
                             <button type="button" class="btn btn-sm btn-secondary" data-remove="${it.inventario_id}" style="flex-shrink:0;"><i class="fas fa-times"></i></button>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
-                            <label style="font-size:.85em;opacity:.9;margin-bottom:4px;">Cantidad:</label>
-                            <input type="number" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${disp}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${disp})" required style="width:100%;">
+                            <label style="font-size:.85em;opacity:.9;margin-bottom:4px;" for="cantidad_item_editar_${itemIndex}">Cantidad:</label>
+                            <input type="number" id="cantidad_item_editar_${itemIndex}" min="1" inputmode="numeric" pattern="[0-9]*" data-only-numeric="true" class="form-control form-control-sm" data-stock="${disp}" name="items[${itemIndex}][cantidad]" placeholder="Cantidad (máx ${disp})" required style="width:100%;">
                             <small class="field-error" style="display:none;"></small>
                         </div>
                         <input type="hidden" name="items[${itemIndex}][inventario_id]" value="${it.inventario_id}">
@@ -2592,41 +2592,41 @@
                                     errorMessages.push('Error de validación. Por favor, revise los datos ingresados.');
                                 }
                             }
-                            
-                            const mensajeCompleto = errorMessages.length > 0 
-                                ? errorMessages.join('\n') 
+
+                            const mensajeCompleto = errorMessages.length > 0
+                                ? errorMessages.join('\n')
                                 : 'Error de validación. Por favor, revise los datos ingresados.';
-                            
+
                             // Mostrar el primer error en el toast y todos en el alert
                             showToast(errorMessages[0] || 'Error de validación', 'error');
-                            if (alertBox) { 
-                                alertBox.innerHTML = mensajeCompleto.replace(/\n/g, '<br>'); 
-                                alertBox.style.display = 'block'; 
+                            if (alertBox) {
+                                alertBox.innerHTML = mensajeCompleto.replace(/\n/g, '<br>');
+                                alertBox.style.display = 'block';
                             }
                         } else if (resp.status === 400 || resp.status === 500) {
                             // Error del servidor
                             const errorMsg = data?.message || data?.error || 'Error del servidor al procesar la solicitud';
                             showToast(errorMsg, 'error');
-                            if (alertBox) { 
-                                alertBox.textContent = errorMsg; 
-                                alertBox.style.display = 'block'; 
+                            if (alertBox) {
+                                alertBox.textContent = errorMsg;
+                                alertBox.style.display = 'block';
                             }
                         } else {
                             // Otros errores
                             const errorMsg = data?.message || data?.error || `Error al guardar (código: ${resp.status})`;
                             showToast(errorMsg, 'error');
-                            if (alertBox) { 
-                                alertBox.textContent = errorMsg; 
-                                alertBox.style.display = 'block'; 
+                            if (alertBox) {
+                                alertBox.textContent = errorMsg;
+                                alertBox.style.display = 'block';
                             }
                         }
                     } catch (err) {
                         console.error('Error completo:', err);
                         const errorMsg = err.message || 'Ocurrió un error de conexión. Por favor, intente nuevamente';
                         showToast(errorMsg, 'error');
-                        if (alertBox) { 
-                            alertBox.textContent = errorMsg; 
-                            alertBox.style.display = 'block'; 
+                        if (alertBox) {
+                            alertBox.textContent = errorMsg;
+                            alertBox.style.display = 'block';
                         }
                     } finally {
                         isSubmitting = false;

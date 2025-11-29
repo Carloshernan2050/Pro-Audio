@@ -4,7 +4,7 @@
 
 @section('content')
        <main class="main-content">
-            <h2 class="page-title">Animación de Eventos</h2>
+            <h2 class="page-title">Servicio Actualizado</h2>
             <p class="page-subtitle"></p>
             
             <section class="productos-servicio">
@@ -27,7 +27,7 @@
                         </div>
                     @empty
                         <div class="no-services">
-                            <p>No hay sub-servicios disponibles para animación en este momento.</p>
+                            <p>No hay sub-servicios disponibles para Servicio Actualizado en este momento.</p>
                         </div>
                     @endforelse
                 </div>

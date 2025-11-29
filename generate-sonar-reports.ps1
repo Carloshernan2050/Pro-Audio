@@ -94,11 +94,28 @@ try {
         # "--coverage-html", "tests\_coverage\html"  # Descomenta si quieres reporte HTML local
     )
     
-    Write-Host "NOTA: Ejecutando todos los tests para generar reportes." -ForegroundColor Yellow
+    Write-Host "NOTA: Ejecutando todos los tests (Unit + Feature) para generar reportes." -ForegroundColor Yellow
     Write-Host "  PHPUnit generara reportes incluso si algunos tests tienen errores." -ForegroundColor Yellow
     Write-Host ""
 
+    # Verificar que ambos testsuites estén configurados
+    Write-Host "Verificando testsuites configurados..." -ForegroundColor Yellow
+    $unitTests = 0
+    $featureTests = 0
+    
+    if (Test-Path "tests\Unit") {
+        $unitTests = (Get-ChildItem -Path "tests\Unit\*.php" -ErrorAction SilentlyContinue | Measure-Object).Count
+    }
+    if (Test-Path "tests\Feature") {
+        $featureTests = (Get-ChildItem -Path "tests\Feature\*.php" -ErrorAction SilentlyContinue | Measure-Object).Count
+    }
+    
+    Write-Host "  Tests Unit encontrados: $unitTests" -ForegroundColor Cyan
+    Write-Host "  Tests Feature encontrados: $featureTests" -ForegroundColor Cyan
+    Write-Host ""
+
     Write-Host "Comando: vendor\bin\phpunit.bat $($phpunitArgs -join ' ')" -ForegroundColor Gray
+    Write-Host "  (Esto ejecutará TODOS los testsuites: Unit y Feature)" -ForegroundColor Gray
     Write-Host ""
 
     # Verificar si existe extensión de cobertura (Xdebug o PCOV)
@@ -145,15 +162,24 @@ try {
         if ($phpInfo -match "xdebug") {
             Write-Host "[OK] Xdebug detectado y cargado" -ForegroundColor Green
             # Verificar configuración de modo
-            $phpIniContent = & php --ini 2>&1 | Select-String "Loaded Configuration File" | ForEach-Object { $_.ToString() -replace ".*:\s*", "" }
-            if ($phpIniContent -and (Test-Path $phpIniContent)) {
-                $iniContent = Get-Content $phpIniContent -Raw
-                if ($iniContent -match "xdebug\.mode\s*=\s*coverage") {
-                    Write-Host "[OK] Xdebug configurado para coverage" -ForegroundColor Green
-                } else {
-                    Write-Host "[ADVERTENCIA] Xdebug no tiene modo coverage configurado" -ForegroundColor Yellow
-                    Write-Host "  Agrega 'xdebug.mode=coverage' en php.ini" -ForegroundColor Gray
+            try {
+                $phpIniOutput = & php --ini 2>&1
+                $phpIniContent = $phpIniOutput | Select-String "Loaded Configuration File" | ForEach-Object { 
+                    if ($_ -match ":\s*(.+)") {
+                        $matches[1].Trim()
+                    }
                 }
+                if ($phpIniContent -and [string]::IsNullOrWhiteSpace($phpIniContent) -eq $false -and (Test-Path $phpIniContent)) {
+                    $iniContent = Get-Content $phpIniContent -Raw
+                    if ($iniContent -match "xdebug\.mode\s*=\s*coverage") {
+                        Write-Host "[OK] Xdebug configurado para coverage" -ForegroundColor Green
+                    } else {
+                        Write-Host "[ADVERTENCIA] Xdebug no tiene modo coverage configurado" -ForegroundColor Yellow
+                        Write-Host "  Agrega 'xdebug.mode=coverage' en php.ini" -ForegroundColor Gray
+                    }
+                }
+            } catch {
+                Write-Host "[INFO] No se pudo verificar configuración de php.ini" -ForegroundColor Gray
             }
         }
         if ($phpInfo -match "pcov") {
@@ -162,7 +188,37 @@ try {
     }
     Write-Host ""
 
+    # Ejecutar PHPUnit - esto ejecutará TODOS los testsuites configurados en phpunit.xml
+    Write-Host "Ejecutando PHPUnit (esto puede tardar varios minutos)..." -ForegroundColor Cyan
+    Write-Host ""
+    
     & vendor\bin\phpunit.bat @phpunitArgs
+    
+    Write-Host ""
+    Write-Host "Verificando qué tests se ejecutaron..." -ForegroundColor Yellow
+    
+    # Verificar el reporte generado
+    if (Test-Path $testReportFile) {
+        $reportContent = Get-Content $testReportFile -Raw
+        if ($reportContent -match 'tests="(\d+)"') {
+            $totalTests = $matches[1]
+            Write-Host "  Total de tests ejecutados: $totalTests" -ForegroundColor Cyan
+            
+            if ($reportContent -match '<testsuite name="Unit"') {
+                Write-Host "  [OK] Tests Unit ejecutados" -ForegroundColor Green
+            } else {
+                Write-Host "  [ADVERTENCIA] Tests Unit NO ejecutados" -ForegroundColor Yellow
+                Write-Host "    Esto puede causar baja cobertura. Verifica errores arriba." -ForegroundColor Yellow
+            }
+            
+            if ($reportContent -match '<testsuite name="Feature"') {
+                Write-Host "  [OK] Tests Feature ejecutados" -ForegroundColor Green
+            } else {
+                Write-Host "  [ADVERTENCIA] Tests Feature NO ejecutados" -ForegroundColor Yellow
+            }
+        }
+    }
+    Write-Host ""
     
     # PHPUnit puede generar reportes incluso si hay errores en algunos tests
     # Verificamos si los reportes se generaron independientemente del código de salida
