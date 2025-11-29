@@ -6,14 +6,14 @@
        <main class="main-content">
             <h2 class="page-title">FOOD</h2>
             <p class="page-subtitle">NO</p>
-            
+
             <section class="productos-servicio">
                 <div class="productos-grid">
                     @forelse($subServicios as $subServicio)
                         <div class="producto-item">
                             @if($subServicio->imagen)
-                                <img src="{{ asset('storage/subservicios/' . $subServicio->imagen) }}" 
-                                     alt="{{ $subServicio->nombre }}" 
+                                <img src="{{ asset('storage/subservicios/' . $subServicio->imagen) }}"
+                                     alt="{{ $subServicio->nombre }}"
                                      class="producto-imagen">
                             @else
                                 <div class="producto-imagen-placeholder">

@@ -12,8 +12,8 @@
                     @forelse($subServicios as $subServicio)
                         <div class="producto-item">
                             @if($subServicio->imagen)
-                                <img src="{{ asset('storage/subservicios/' . $subServicio->imagen) }}" 
-                                     alt="{{ $subServicio->nombre }}" 
+                                <img src="{{ asset('storage/subservicios/' . $subServicio->imagen) }}"
+                                     alt="{{ $subServicio->nombre }}"
                                      class="producto-imagen">
                             @else
                                 <div class="producto-imagen-placeholder">

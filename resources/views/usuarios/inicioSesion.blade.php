@@ -32,14 +32,14 @@
                 @csrf
 
                 <div class="input-grupo">
-                    <label>Correo:</label>
-                    <input type="email" name="correo" value="{{ old('correo') }}" required>
+                    <label for="correo">Correo:</label>
+                    <input type="email" id="correo" name="correo" value="{{ old('correo') }}" required>
                 </div>
 
                 {{-- Aquí está la corrección: el nombre del campo debe ser "contrasena" --}}
                 <div class="input-grupo">
-                    <label>Contraseña:</label>
-                    <input type="password" name="contrasena" required>
+                    <label for="contrasena">Contraseña:</label>
+                    <input type="password" id="contrasena" name="contrasena" required>
                 </div>
 
                 <button type="submit" class="boton-registro">INICIAR SESIÓN</button>

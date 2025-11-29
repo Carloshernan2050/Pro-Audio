@@ -76,6 +76,11 @@ class ChatbotResponseBuilder
                 'dias' => $diasCalculo,
             ],
             'selecciones' => $selecciones,
+            'actions' => [
+                ['id' => 'add_more', 'label' => 'Agregar más servicios'],
+                ['id' => 'clear', 'label' => 'Limpiar cotización'],
+                ['id' => 'finish', 'label' => 'Terminar cotización'],
+            ],
         ]);
     }
 

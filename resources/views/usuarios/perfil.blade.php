@@ -22,11 +22,11 @@
                     in_array('Usuario', (array)session('roles'))
                 ))
                     <div class="profile-details">
-                        <p><strong>Nombres:</strong> 
+                        <p><strong>Nombres:</strong>
                             {{ ucfirst(strtolower($usuario->primer_nombre ?? '')) }}
                             {{ $usuario->segundo_nombre ? ucfirst(strtolower($usuario->segundo_nombre)) : '' }}
                         </p>
-                        <p><strong>Apellidos:</strong> 
+                        <p><strong>Apellidos:</strong>
                             {{ ucfirst(strtolower($usuario->primer_apellido ?? '')) }}
                             {{ $usuario->segundo_apellido ? ucfirst(strtolower($usuario->segundo_apellido)) : '' }}
                         </p>

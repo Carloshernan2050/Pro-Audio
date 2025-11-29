@@ -6,7 +6,7 @@
         "build": "vite build",
         "dev": "vite",
         "serve": "php artisan serve",
-        "dev:all": "concurrently -n VITE,PHP -c green,cyan \"npm:dev\" \"php artisan serve\""
+        "dev:all": "npx concurrently -n VITE,PHP -c green,cyan \"npm:dev\" \"php artisan serve\""
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

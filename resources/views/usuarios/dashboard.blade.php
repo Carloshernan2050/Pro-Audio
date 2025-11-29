@@ -51,7 +51,7 @@
                     
                     {{-- Bloque de Presentación de la Empresa (Imagen destacada) --}}
                     <div class="featured-image-container">
-                        <img src="/images/carro.jpg" alt="Imagen del carro" class="presentacion-img-grande">
+                        <img src="/images/carro.jpg" alt="Carro" class="presentacion-img-grande">
                     </div>
 
                     <div class="content-card about-us">
@@ -66,7 +66,7 @@
                         <h3>Nuestra Misión</h3>
                         <div class="presentacion-bloque row">
                             <div class="presentacion-bloque-media">
-                                <img src="/images/consola.jpg" alt="Imagen de Consola de Sonido" class="presentacion-img-pequena">
+                                <img src="/images/consola.jpg" alt="Consola de Sonido" class="presentacion-img-pequena">
                             </div>
                             <div class="presentacion-bloque-texto">
                                 <p>
@@ -140,6 +140,8 @@
                         <div class="presentacion-bloque-media video-destacado">
                             <video class="presentacion-video" controls>
                                 <source src="/videos/evento_v.mp4" type="video/mp4">
+                                <track kind="subtitles" src="/videos/evento_v.vtt" srclang="es" label="Español" default>
+                                <track kind="descriptions" src="/videos/evento_v_desc.vtt" srclang="es" label="Descripción">
                                 Tu navegador no soporta el video.
                             </video>
                         </div>
