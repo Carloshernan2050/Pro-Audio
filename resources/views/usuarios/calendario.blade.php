@@ -1998,6 +1998,9 @@
                 })->values()->all();
             @endphp
             let reservasPendientesData = @json($reservasPendientesJs);
+            
+            // Variable global para prevenir múltiples envíos
+            let isSubmittingCrear = false;
 
             function initCrearUI() {
                 function inferirServicio(descripcion) {
@@ -2420,15 +2423,25 @@
                 document.getElementById('fecha_fin_crear')?.addEventListener('change', recomputeAvailability);
 
                 // Validar antes de enviar - PREVENIR DOBLE ENVÍO
-                let isSubmitting = false; // Flag para prevenir doble envío
-                formCrear?.addEventListener('submit', async function(e){
-                    e.preventDefault();
-                    
-                    // Prevenir doble envío
-                    if (isSubmitting) {
-                        showToast('Ya se está procesando la solicitud, por favor espere...', 'warning');
-                        return false;
+                // Remover listener anterior si existe para evitar múltiples listeners
+                const formCrearNew = document.getElementById('formCrear');
+                if (formCrearNew) {
+                    // Remover listener anterior si existe
+                    if (formCrearNew._submitHandler) {
+                        formCrearNew.removeEventListener('submit', formCrearNew._submitHandler);
                     }
+                    
+                    // Crear handler nombrado
+                    formCrearNew._submitHandler = async function(e){
+                        e.preventDefault();
+                        e.stopImmediatePropagation(); // Prevenir que otros listeners se ejecuten
+                        e.stopPropagation();
+                        
+                        // Prevenir doble envío
+                        if (isSubmittingCrear) {
+                            showToast('Ya se está procesando la solicitud, por favor espere...', 'warning');
+                            return false;
+                        }
                     
                     const alertBox = document.getElementById('alertCrear');
                     if (alertBox) { alertBox.style.display = 'none'; alertBox.textContent = ''; }
@@ -2451,27 +2464,28 @@
                     }
                     
                     // Marcar como enviando y deshabilitar botón
-                    isSubmitting = true;
+                    isSubmittingCrear = true;
                     let originalText = '';
-                    if (saveBtn) {
-                        originalText = saveBtn.innerHTML;
-                        saveBtn.disabled = true;
-                        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                    const saveBtnNew = document.getElementById('btn_guardar_crear');
+                    if (saveBtnNew) {
+                        originalText = saveBtnNew.innerHTML;
+                        saveBtnNew.disabled = true;
+                        saveBtnNew.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
                         
                         // Rehabilitar después de un tiempo por si acaso
                         setTimeout(() => {
-                            if (isSubmitting) {
-                                isSubmitting = false;
-                                saveBtn.disabled = false;
-                                saveBtn.innerHTML = originalText;
+                            if (isSubmittingCrear) {
+                                isSubmittingCrear = false;
+                                saveBtnNew.disabled = false;
+                                saveBtnNew.innerHTML = originalText;
                             }
                         }, 10000);
                     }
                     
-                    const fd = new FormData(formCrear);
+                    const fd = new FormData(formCrearNew);
                     // Señalamos ajax/json
-                    const url = formCrear.getAttribute('action');
-                    const token = formCrear.querySelector('input[name="_token"]').value;
+                    const url = formCrearNew.getAttribute('action');
+                    const token = formCrearNew.querySelector('input[name="_token"]').value;
                     try {
                         const resp = await fetch(url, {
                             method: 'POST',
@@ -2506,7 +2520,8 @@
                                 const inst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
                                 inst.hide();
                             }
-                            formCrear.reset();
+                            const formCrearReset = document.getElementById('formCrear');
+                            if (formCrearReset) formCrearReset.reset();
                             contSeleccionados.innerHTML = '';
                             seleccionadosMap.clear();
                             if (badgeCount) badgeCount.textContent = '0';
@@ -2629,14 +2644,19 @@
                             alertBox.style.display = 'block';
                         }
                     } finally {
-                        isSubmitting = false;
-                        if (saveBtn) {
-                            saveBtn.disabled = false;
-                            saveBtn.innerHTML = originalText || 'Guardar';
+                        isSubmittingCrear = false;
+                        const saveBtnFinal = document.getElementById('btn_guardar_crear');
+                        if (saveBtnFinal) {
+                            saveBtnFinal.disabled = false;
+                            saveBtnFinal.innerHTML = originalText || 'Guardar';
                         }
                     }
                     return false;
-                });
+                    };
+                    
+                    // Agregar el listener
+                    formCrearNew.addEventListener('submit', formCrearNew._submitHandler);
+                }
 
                 // Toasts
                 function showToast(msg, type) {
@@ -2665,6 +2685,12 @@
                 });
                 modalCrearEl.addEventListener('hidden.bs.modal', function(){
                     limpiarBackdrops();
+                    // Resetear flag de envío al cerrar el modal
+                    isSubmittingCrear = false;
+                    const saveBtnReset = document.getElementById('btn_guardar_crear');
+                    if (saveBtnReset) {
+                        saveBtnReset.disabled = false;
+                    }
                 });
             }
             
