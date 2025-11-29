@@ -429,8 +429,8 @@
             <div id="serviceModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 id="modalTitle"></h3>
-                        <span class="close-btn" onclick="closeModal()">&times;</span>
+                        <h3 id="modalTitle" aria-label="Detalles del servicio">Servicio</h3>
+                        <button type="button" class="close-btn" onclick="closeModal()" aria-label="Cerrar">&times;</button>
                     </div>
                     <form id="serviceForm" method="POST">
                         @csrf
@@ -466,15 +466,15 @@
             <div id="inventarioModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 id="inventarioModalTitle"></h3>
-                        <span class="close-btn" onclick="closeInventarioModal()">&times;</span>
+                        <h3 id="inventarioModalTitle" aria-label="Detalles del inventario">Inventario</h3>
+                        <button type="button" class="close-btn" onclick="closeInventarioModal()" aria-label="Cerrar">&times;</button>
                     </div>
                     <form id="inventarioForm" method="POST">
                         @csrf
                         <input type="hidden" name="_method" id="inventarioFormMethod">
                         <div class="form-group">
-                            <label for="descripcion">Descripción:</label>
-                            <input type="text" id="descripcion" name="descripcion" required>
+                            <label for="descripcion_inventario">Descripción:</label>
+                            <input type="text" id="descripcion_inventario" name="descripcion" required>
                         </div>
                         <div class="form-group">
                             <label for="stock">Stock:</label>
@@ -489,8 +489,8 @@
             <div id="movimientoModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 id="movimientoModalTitle"></h3>
-                        <span class="close-btn" onclick="closeMovimientoModal()">&times;</span>
+                        <h3 id="movimientoModalTitle" aria-label="Detalles del movimiento">Movimiento</h3>
+                        <button type="button" class="close-btn" onclick="closeMovimientoModal()" aria-label="Cerrar">&times;</button>
                     </div>
                     <form id="movimientoForm" method="POST">
                         @csrf
@@ -524,8 +524,8 @@
             <div id="subservicioModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 id="subservicioModalTitle"></h3>
-                        <span class="close-btn" onclick="closeSubservicioModal()">&times;</span>
+                        <h3 id="subservicioModalTitle" aria-label="Detalles del subservicio">Subservicio</h3>
+                        <button type="button" class="close-btn" onclick="closeSubservicioModal()" aria-label="Cerrar">&times;</button>
                     </div>
                     <form id="subservicioForm" method="POST" enctype="multipart/form-data">
                         @csrf
@@ -560,7 +560,7 @@
                             </div>
                             <div id="imagen-actual-subservicio" style="margin-top: 10px; display: none;">
                                 <p style="margin: 5px 0; color: #666;">Imagen actual:</p>
-                                <img id="imagen-actual-img-subservicio" src="" alt="Imagen actual" style="max-width: 200px; max-height: 200px; border-radius: 4px;">
+                                <img id="imagen-actual-img-subservicio" src="" alt="Actual" style="max-width: 200px; max-height: 200px; border-radius: 4px;">
                             </div>
                         </div>
                         <button type="submit" class="btn-submit">Guardar</button>
@@ -853,7 +853,7 @@
                     const descripcionAttr = escapeHtml(sub.descripcion || '');
                     const precio = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sub.precio || 0);
                     const imagenUrl = sub.imagen ? `/storage/subservicios/${sub.imagen}` : '';
-                    const imagenHtml = sub.imagen 
+                    const imagenHtml = sub.imagen
                         ? `<img src="${imagenUrl}" alt="${nombreAttr}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`
                         : '<span style="color: #999;">Sin imagen</span>';
                     
@@ -902,8 +902,8 @@
                 const formData = new FormData();
                 formData.append('_method', 'DELETE');
 
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                 document.querySelector('input[name="_token"]')?.value || 
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                                 document.querySelector('input[name="_token"]')?.value ||
                                  '{{ csrf_token() }}';
 
                 fetch(url, {
@@ -949,14 +949,14 @@
                 inventarioForm.action = "{{ route('inventario.store') }}";
                 inventarioFormMethod.name = '_method';
                 inventarioFormMethod.value = 'POST';
-                document.getElementById('descripcion').value = '';
+                document.getElementById('descripcion_inventario').value = '';
                 document.getElementById('stock').value = '';
             } else if (mode === 'edit') {
                 inventarioModalTitle.textContent = 'Editar Item';
                 inventarioForm.action = `{{ url('inventario') }}/${id}`;
                 inventarioFormMethod.name = '_method';
                 inventarioFormMethod.value = 'PUT';
-                document.getElementById('descripcion').value = descripcion;
+                document.getElementById('descripcion_inventario').value = descripcion;
                 document.getElementById('stock').value = stock;
             }
             inventarioModal.style.display = 'flex';
@@ -1386,8 +1386,8 @@
                         formData.append('_token', csrfInput.value);
                     }
 
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                     csrfInput?.value || 
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                                     csrfInput?.value ||
                                      '{{ csrf_token() }}';
                     
                     fetch(url, {

@@ -43,10 +43,10 @@
                                 $servicioPath = strtolower(str_replace(' ', '_', $servicioNombre));
                             @endphp
                             <div class="producto-item">
-                                <img src="/images/{{ $servicioPath }}/{{ $imagenPath }}.jpg" 
-                                     alt="{{ $nombre }}" 
+                                <img src="/images/{{ $servicioPath }}/{{ $imagenPath }}.jpg"
+                                     alt="{{ $nombre }}"
                                      class="producto-imagen"
-                                     onerror="this.src='/images/default.jpg'">
+                                     data-fallback="/images/default.jpg">
                                 <h4 class="producto-nombre">{{ $nombre }}</h4>
                                 {{-- Precio oculto en la búsqueda --}}
                                 @if($descripcion)
@@ -73,5 +73,18 @@
             </div>
         @endif
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.producto-imagen[data-fallback]');
+            images.forEach(function(img) {
+                img.addEventListener('error', function() {
+                    if (this.dataset.fallback) {
+                        this.src = this.dataset.fallback;
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
 
