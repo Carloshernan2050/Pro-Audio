@@ -577,7 +577,7 @@ class ChatbotTest extends TestCase
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'necesito alquiler',
+            'mensaje' => self::MENSAJE_NECESITO_ALQUILER,
             'dias' => 5
         ]);
 
@@ -697,7 +697,7 @@ class ChatbotTest extends TestCase
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'necesito alquiler',
+            'mensaje' => self::MENSAJE_NECESITO_ALQUILER,
             'dias' => 7
         ]);
 

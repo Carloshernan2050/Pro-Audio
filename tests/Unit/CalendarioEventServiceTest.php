@@ -20,6 +20,7 @@ class CalendarioEventServiceTest extends TestCase
     private const PRODUCTO_TEST = 'Producto Test';
     private const FECHA_INICIO = '2024-01-01';
     private const FECHA_FIN = '2024-01-05';
+    private const MOVIMIENTO_DE_PRUEBA = 'Movimiento de prueba';
 
     private CalendarioEventService $service;
     private Usuario $persona;
@@ -55,7 +56,7 @@ class CalendarioEventServiceTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -100,7 +101,7 @@ class CalendarioEventServiceTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -222,7 +223,7 @@ class CalendarioEventServiceTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -263,7 +264,7 @@ class CalendarioEventServiceTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -377,7 +378,7 @@ class CalendarioEventServiceTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -413,7 +414,7 @@ class CalendarioEventServiceTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([

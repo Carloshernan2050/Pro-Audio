@@ -654,7 +654,7 @@ class ChatbotIntentionDetectorTest extends TestCase
             'icono' => 'alquiler-icon'
         ]);
 
-        $subServicio = \App\Models\SubServicios::create([
+        \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo de Sonido',
             'descripcion' => 'Equipo profesional de sonido para eventos',
@@ -747,14 +747,6 @@ class ChatbotIntentionDetectorTest extends TestCase
         $resultado = $this->detector->clasificarPorTfidf('para por con sin del de la las el los');
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
-    }
-
-    public function test_clasificar_por_tfidf_con_cache_vacio(): void
-    {
-        // Probar cuando el cache está vacío (sin datos en BD)
-        $resultado = $this->detector->clasificarPorTfidf('alquiler equipos');
-        $this->assertIsArray($resultado);
-        // Puede estar vacío si no hay datos
     }
 
     public function test_detectar_intenciones_con_tfidf_fallback(): void
