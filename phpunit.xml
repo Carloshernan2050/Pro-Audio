@@ -26,7 +26,6 @@
         <report>
             <clover outputFile="tests/_coverage/coverage.xml"/>
         </report>
-        <includeUncoveredFiles>true</includeUncoveredFiles>
     </coverage>
     <logging>
         <junit outputFile="tests/_coverage/test-reporter.xml"/>

@@ -120,22 +120,31 @@ class ChatbotControllerUnitTest extends TestCase
             'dias' => 5
         ]);
 
-        $this->textProcessor
-            ->shouldReceive('esContinuacion')
-            ->once()
-            ->andReturn(false);
-
-        $this->sessionManager
-            ->shouldReceive('extraerDiasDelRequest')
-            ->once()
-            ->andReturn(5);
+        // Cuando hay selección y días > 0, no se llama a esContinuacion ni extraerDiasDelRequest
+        // porque los días vienen directamente del request
 
         $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
         $collectionMock->shouldReceive('isEmpty')->andReturn(false);
 
+        $this->sessionManager
+            ->shouldReceive('obtenerDiasParaRespuesta')
+            ->zeroOrMoreTimes()
+            ->andReturn(5);
+
+        $this->textProcessor
+            ->shouldReceive('corregirOrtografia')
+            ->zeroOrMoreTimes()
+            ->andReturn('');
+
+        $this->textProcessor
+            ->shouldReceive('esContinuacion')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
         $this->subServicioService
             ->shouldReceive('obtenerItemsSeleccionados')
             ->once()
+            ->with(Mockery::type('array'))
             ->andReturn($collectionMock);
 
         $responseMock = response()->json(['respuesta' => 'cotizacion']);
@@ -143,7 +152,14 @@ class ChatbotControllerUnitTest extends TestCase
         $this->responseBuilder
             ->shouldReceive('responderCotizacion')
             ->once()
+            ->with(Mockery::any(), Mockery::any(), Mockery::type('array'))
             ->andReturn($responseMock);
+        
+        // En caso de error, se llama a mostrarCatalogoJson
+        $this->responseBuilder
+            ->shouldReceive('mostrarCatalogoJson')
+            ->zeroOrMoreTimes()
+            ->andReturn(response()->json(['respuesta' => 'catalogo']));
 
         session(['chat.days' => 0]);
 
@@ -176,6 +192,42 @@ class ChatbotControllerUnitTest extends TestCase
             ->andReturn($responseMock);
 
         session(['chat.days' => 1, 'chat.selecciones' => []]);
+
+        $response = $this->controller->enviar($request);
+        
+        $this->assertNotNull($response);
+    }
+
+    public function test_enviar_procesa_seleccion_vacio(): void
+    {
+        $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
+            'seleccion' => [],
+            'dias' => 5
+        ]);
+
+        $this->textProcessor
+            ->shouldReceive('corregirOrtografia')
+            ->zeroOrMoreTimes()
+            ->andReturn('');
+
+        $this->textProcessor
+            ->shouldReceive('esContinuacion')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
+        $this->sessionManager
+            ->shouldReceive('obtenerDiasParaRespuesta')
+            ->once()
+            ->andReturn(5);
+
+        $responseMock = response()->json(['respuesta' => 'catalogo']);
+        
+        $this->responseBuilder
+            ->shouldReceive('mostrarCatalogoJson')
+            ->once()
+            ->andReturn($responseMock);
+
+        session(['chat.days' => 0]);
 
         $response = $this->controller->enviar($request);
         

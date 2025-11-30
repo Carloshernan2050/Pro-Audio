@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('historial', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('calendario_id')->constrained('calendario');
+            $table->foreignId('calendario_id')->nullable()->constrained('calendario')->onDelete('cascade');
+            $table->unsignedBigInteger('reserva_id')->nullable();
+            $table->string('accion')->nullable();
+            $table->dateTime('confirmado_en')->nullable();
+            $table->text('observaciones')->nullable();
         });
 
     }

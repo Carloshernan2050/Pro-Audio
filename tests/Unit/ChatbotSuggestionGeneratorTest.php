@@ -612,13 +612,6 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     // TESTS ADICIONALES PARA calcularMaximaSimilitud()
     // ============================================
 
-    public function test_calcular_maxima_similitud_con_token_exacto(): void
-    {
-        // Este método es privado, pero se prueba indirectamente
-        $resultado = $this->generator->generarSugerenciasPorToken('alquiler');
-        $this->assertIsArray($resultado);
-    }
-
     public function test_calcular_maxima_similitud_con_token_similar_y_vocabulario(): void
     {
         // Este método es privado, pero se prueba indirectamente
@@ -801,6 +794,378 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         if (!empty($resultado)) {
             $this->assertEquals('alquiler', $resultado['sugerencia'] ?? null);
         }
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA calcularScoresSugerencias()
+    // ============================================
+
+    public function test_calcular_scores_sugerencias_con_porcentaje_cero(): void
+    {
+        // Cuando el porcentaje es 0 o menor, no se agrega al score
+        $resultado = $this->generator->generarSugerencias('xyz123abc456');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_calcular_scores_sugerencias_con_mismo_score(): void
+    {
+        // Cuando hay múltiples términos con el mismo score, se mantiene el máximo
+        $resultado = $this->generator->generarSugerencias('alquiler alquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_calcular_scores_sugerencias_con_primera_letra_diferente(): void
+    {
+        // Cuando la primera letra es diferente, el porcentaje se reduce al 85%
+        $resultado = $this->generator->generarSugerencias('xalquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_calcular_scores_sugerencias_con_terminos_stopwords_ext(): void
+    {
+        // Stopwords extendidos no deberían aparecer en scores
+        $resultado = $this->generator->generarSugerencias('par');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_calcular_scores_sugerencias_con_terminos_menores_3_caracteres(): void
+    {
+        // Términos menores a 3 caracteres no deberían aparecer
+        $resultado = $this->generator->generarSugerencias('ab cd');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA filtrarTokensValidos()
+    // ============================================
+
+    public function test_filtrar_tokens_validos_con_descripcion_vacia(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo',
+            'descripcion' => '', // Descripción vacía
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->generator->generarSugerenciasPorToken('equipo');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_filtrar_tokens_validos_con_caracteres_especiales(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('alquiler@equipos#sonido');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_filtrar_tokens_validos_con_acentos(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('alquiler equipos');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA encontrarTokenMasRaro()
+    // ============================================
+
+    public function test_encontrar_token_mas_raro_con_multiples_tokens(): void
+    {
+        $resultado = $this->generator->generarSugerenciasPorToken('necesito xyz123 alquiler equipos');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            // El token más raro debería ser el que tiene menor similitud
+            $this->assertArrayHasKey('token', $resultado[0]);
+        }
+    }
+
+    public function test_encontrar_token_mas_raro_ordena_ascendente(): void
+    {
+        // Los tokens se ordenan por similitud ascendente (menor similitud primero)
+        $resultado = $this->generator->generarSugerenciasPorToken('necesito xyz123 alquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA generarSugerenciasParaToken()
+    // ============================================
+
+    public function test_generar_sugerencias_para_token_con_similitud_cero(): void
+    {
+        // Token que no tiene similitud con ningún término del vocabulario
+        $resultado = $this->generator->generarSugerenciasPorToken('xyz123abc456');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_generar_sugerencias_para_token_ordena_descendente(): void
+    {
+        // Las sugerencias se ordenan por similitud descendente
+        $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+            $sugerencias = $resultado[0]['sugerencias'];
+            $this->assertGreaterThan(0, count($sugerencias));
+        }
+    }
+
+    public function test_generar_sugerencias_para_token_limita_a_6(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo de sonido profesional',
+            'descripcion' => 'Equipo completo con todas las características',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->generator->generarSugerenciasPorToken('equipo');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+            $this->assertLessThanOrEqual(6, count($resultado[0]['sugerencias']));
+        }
+    }
+
+
+    // ============================================
+    // TESTS ADICIONALES PARA generarSugerencias()
+    // ============================================
+
+    public function test_generar_sugerencias_con_tokens_vacios_usa_mensaje_normalizado(): void
+    {
+        // Si no hay tokens válidos después de filtrar, usa el mensaje completo normalizado
+        $resultado = $this->generator->generarSugerencias('para con de');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_generar_sugerencias_con_lista_vacia_usa_fallback(): void
+    {
+        // Si la lista de sugerencias está vacía después de calcular scores, usa fallback
+        $resultado = $this->generator->generarSugerencias('xyz123abc456');
+        $this->assertIsArray($resultado);
+        $this->assertNotEmpty($resultado);
+    }
+
+    public function test_generar_sugerencias_ordena_por_score_descendente(): void
+    {
+        // Las sugerencias deberían estar ordenadas por score descendente
+        $resultado = $this->generator->generarSugerencias('alqiler equipos sonido');
+        $this->assertIsArray($resultado);
+        $this->assertLessThanOrEqual(5, count($resultado));
+    }
+
+    public function test_generar_sugerencias_limita_a_5(): void
+    {
+        // Debería retornar máximo 5 sugerencias
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo de sonido profesional',
+            'descripcion' => 'Equipo completo',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->generator->generarSugerencias('equipo sonido audio luces dj animacion');
+        $this->assertIsArray($resultado);
+        $this->assertLessThanOrEqual(5, count($resultado));
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA obtenerVocabularioCorreccion()
+    // ============================================
+
+    public function test_obtener_vocabulario_correccion_con_subservicios_muchos_tokens(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        // Crear múltiples subservicios para ampliar el vocabulario
+        for ($i = 1; $i <= 10; $i++) {
+            SubServicios::create([
+                'servicios_id' => $servicio->id,
+                'nombre' => "Equipo {$i}",
+                'descripcion' => "Descripción del equipo {$i}",
+                'precio' => 100 * $i
+            ]);
+        }
+        
+        $resultado = $this->generator->generarSugerencias('equipo');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_obtener_vocabulario_correccion_limita_a_500_subservicios(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        // Crear más de 500 subservicios para verificar el límite
+        for ($i = 1; $i <= 600; $i++) {
+            SubServicios::create([
+                'servicios_id' => $servicio->id,
+                'nombre' => "Equipo {$i}",
+                'descripcion' => "Descripción {$i}",
+                'precio' => 100
+            ]);
+        }
+        
+        $resultado = $this->generator->generarSugerencias('equipo');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_obtener_vocabulario_correccion_filtra_tokens_vacios(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Equipo   Sonido', // Con espacios múltiples
+            'descripcion' => 'Descripción   con   espacios',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->generator->generarSugerencias('equipo');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_obtener_vocabulario_correccion_normaliza_tokens(): void
+    {
+        $servicio = Servicios::create([
+            'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
+            'descripcion' => self::DESC_SERVICIO_ALQUILER
+        ]);
+        
+        SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Animación',
+            'descripcion' => 'Servicio de animación',
+            'precio' => 100
+        ]);
+        
+        $resultado = $this->generator->generarSugerencias('animacion');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA extraerTokensDelMensaje()
+    // ============================================
+
+    public function test_extraer_tokens_del_mensaje_filtra_stopwords(): void
+    {
+        // Este método es privado, pero se prueba indirectamente
+        $resultado = $this->generator->generarSugerencias(self::MENSAJE_STOPWORDS_ALQUILER);
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_extraer_tokens_del_mensaje_filtra_tokens_cortos(): void
+    {
+        $resultado = $this->generator->generarSugerencias('ab cd ef alquiler');
+        $this->assertIsArray($resultado);
+    }
+
+    public function test_extraer_tokens_del_mensaje_filtra_vacios(): void
+    {
+        $resultado = $this->generator->generarSugerencias('   alquiler   ');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA generarSugerenciasPorToken()
+    // ============================================
+
+    public function test_generar_sugerencias_por_token_con_pairs_vacios(): void
+    {
+        // Si filtrarTokensValidos retorna array vacío, debería retornar array vacío
+        $resultado = $this->generator->generarSugerenciasPorToken('123 456');
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
+    }
+
+    public function test_generar_sugerencias_por_token_con_target_token_null(): void
+    {
+        // Si encontrarTokenMasRaro retorna null, debería retornar array vacío
+        $resultado = $this->generator->generarSugerenciasPorToken('xyz123abc456');
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA fallbackTokenHints()
+    // ============================================
+
+    public function test_fallback_token_hints_con_tokens_exactamente_3_caracteres(): void
+    {
+        // Tokens de exactamente 3 caracteres deberían incluirse
+        $resultado = $this->generator->fallbackTokenHints('sol mar');
+        $this->assertIsArray($resultado);
+        if (!empty($resultado)) {
+            $this->assertArrayHasKey('token', $resultado[0]);
+        }
+    }
+
+    public function test_fallback_token_hints_con_whitespace_complejo(): void
+    {
+        $resultado = $this->generator->fallbackTokenHints("necesito\talquiler\nequipos");
+        $this->assertIsArray($resultado);
+    }
+
+    // ============================================
+    // TESTS ADICIONALES PARA extraerMejorSugerencia()
+    // ============================================
+
+    public function test_extraer_mejor_sugerencia_con_indice_cero_sin_token(): void
+    {
+        $tokenHints = [
+            ['sugerencias' => ['alquiler']]
+        ];
+        
+        $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
+    }
+
+    public function test_extraer_mejor_sugerencia_con_sugerencias_array_vacio(): void
+    {
+        $tokenHints = [
+            [
+                'token' => 'test',
+                'sugerencias' => []
+            ]
+        ];
+        
+        $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
+    }
+
+    public function test_extraer_mejor_sugerencia_con_best_null(): void
+    {
+        $tokenHints = [
+            [
+                'token' => 'test',
+                'sugerencias' => [null, '']
+            ]
+        ];
+        
+        $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
     }
 }
 

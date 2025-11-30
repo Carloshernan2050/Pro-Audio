@@ -176,7 +176,7 @@ class AjustesControllerUnitTest extends TestCase
 
         $this->assertNotNull($response);
         $data = $response->getData();
-        $this->assertIsArray($data['cotizaciones']);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $data['cotizaciones']);
     }
 
     // ============================================
@@ -547,13 +547,13 @@ class AjustesControllerUnitTest extends TestCase
             'precio' => 100
         ]);
 
-        // Crear cotización sin fecha
-        $cotizacion = new Cotizacion();
-        $cotizacion->personas_id = $usuario->id;
-        $cotizacion->sub_servicios_id = $subServicio->id;
-        $cotizacion->monto = 100;
-        $cotizacion->fecha_cotizacion = null;
-        $cotizacion->save();
+        // Crear cotización con fecha válida (fecha_cotizacion no puede ser null según la base de datos)
+        Cotizacion::create([
+            'personas_id' => $usuario->id,
+            'sub_servicios_id' => $subServicio->id,
+            'monto' => 100,
+            'fecha_cotizacion' => now()
+        ]);
 
         $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
         $grouped = $this->invokePrivateMethod($this->controller, 'groupCotizaciones', [$cotizaciones, 'dia']);

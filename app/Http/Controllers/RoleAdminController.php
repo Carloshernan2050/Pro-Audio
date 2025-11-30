@@ -9,13 +9,27 @@ class RoleAdminController extends Controller
 {
     public function index()
     {
-        $usuarios = DB::table('personas as p')
-            ->leftJoin('personas_roles as pr', 'pr.personas_id', '=', 'p.id')
-            ->leftJoin('roles as r', 'r.id', '=', 'pr.roles_id')
-            ->select('p.id','p.primer_nombre','p.primer_apellido','p.correo', DB::raw('GROUP_CONCAT(DISTINCT COALESCE(r.name, r.nombre_rol) ORDER BY COALESCE(r.name, r.nombre_rol) SEPARATOR ",") as roles'))
-            ->groupBy('p.id','p.primer_nombre','p.primer_apellido','p.correo')
-            ->orderBy('p.id','desc')
-            ->get()
+        // Usar sintaxis compatible con SQLite (no soporta SEPARATOR)
+        $connection = DB::getDriverName();
+        if ($connection === 'sqlite') {
+            $usuarios = DB::table('personas as p')
+                ->leftJoin('personas_roles as pr', 'pr.personas_id', '=', 'p.id')
+                ->leftJoin('roles as r', 'r.id', '=', 'pr.roles_id')
+                ->select('p.id','p.primer_nombre','p.primer_apellido','p.correo', DB::raw('GROUP_CONCAT(DISTINCT COALESCE(r.name, r.nombre_rol)) as roles'))
+                ->groupBy('p.id','p.primer_nombre','p.primer_apellido','p.correo')
+                ->orderBy('p.id','desc')
+                ->get();
+        } else {
+            $usuarios = DB::table('personas as p')
+                ->leftJoin('personas_roles as pr', 'pr.personas_id', '=', 'p.id')
+                ->leftJoin('roles as r', 'r.id', '=', 'pr.roles_id')
+                ->select('p.id','p.primer_nombre','p.primer_apellido','p.correo', DB::raw('GROUP_CONCAT(DISTINCT COALESCE(r.name, r.nombre_rol) ORDER BY COALESCE(r.name, r.nombre_rol) SEPARATOR ",") as roles'))
+                ->groupBy('p.id','p.primer_nombre','p.primer_apellido','p.correo')
+                ->orderBy('p.id','desc')
+                ->get();
+        }
+        
+        $usuarios = $usuarios
             ->map(function($usuario) {
                 // Normalizar roles: convertir "Usuario" a "Cliente" y eliminar duplicados
                 if ($usuario->roles) {

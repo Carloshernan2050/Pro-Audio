@@ -188,6 +188,10 @@ try {
     }
     Write-Host ""
 
+    # Definir rutas de archivos de reporte
+    $testReportFile = "tests\_coverage\test-reporter.xml"
+    $coverageFile = "tests\_coverage\coverage.xml"
+    
     # Ejecutar PHPUnit - esto ejecutará TODOS los testsuites configurados en phpunit.xml
     Write-Host "Ejecutando PHPUnit (esto puede tardar varios minutos)..." -ForegroundColor Cyan
     Write-Host ""
@@ -226,9 +230,7 @@ try {
     Write-Host "Verificando reportes generados..." -ForegroundColor Yellow
     Write-Host ""
     
-    # Verificar que los archivos se generaron
-    $coverageFile = "tests\_coverage\coverage.xml"
-    $testReportFile = "tests\_coverage\test-reporter.xml"
+    # Verificar que los archivos se generaron (las variables ya están definidas arriba)
     $reportsGenerated = $false
     $hasErrors = $LASTEXITCODE -ne 0
     

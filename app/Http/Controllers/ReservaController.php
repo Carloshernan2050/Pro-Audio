@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\DB;
 
 class ReservaController extends Controller
 {
+    private const ESTADO_PENDIENTE = 'pendiente';
+    private const ESTADO_CONFIRMADA = 'confirmada';
+    private const TIPO_MOVIMIENTO_ALQUILADO = 'alquilado';
+    private const EVENTO_RESERVA_CONFIRMADA = 'Reserva confirmada';
+    private const META_SOURCE_CALENDARIO = 'calendario';
+    private const ACCION_CONFIRMADA = 'confirmada';
+    private const MENSAJE_SOLO_PENDIENTES_CONFIRMAR = 'Solo se pueden confirmar reservas pendientes.';
+    private const MENSAJE_SOLO_PENDIENTES_CANCELAR = 'Solo se pueden cancelar reservas pendientes.';
+    private const MENSAJE_INVENTARIO_NO_ENCONTRADO = 'Inventario asociado no encontrado.';
+
     public function index()
     {
         $this->authorizeAdminLike();
@@ -73,9 +83,9 @@ class ReservaController extends Controller
                 'fecha_fin' => $request->fecha_fin,
                 'descripcion_evento' => $request->descripcion_evento,
                 'cantidad_total' => $cantidadTotal,
-                'estado' => 'pendiente',
+                'estado' => self::ESTADO_PENDIENTE,
                 'meta' => [
-                    'source' => 'calendario',
+                    'source' => self::META_SOURCE_CALENDARIO,
                 ],
             ]);
 
@@ -99,74 +109,21 @@ class ReservaController extends Controller
     {
         $this->authorizeAdminLike();
 
-        if ($reserva->estado !== 'pendiente') {
-            return response()->json(['error' => 'Solo se pueden confirmar reservas pendientes.'], 422);
+        if ($reserva->estado !== self::ESTADO_PENDIENTE) {
+            return response()->json(['error' => self::MENSAJE_SOLO_PENDIENTES_CONFIRMAR], 422);
         }
 
         return DB::transaction(function () use ($reserva) {
             $reserva->load('items.inventario');
 
-            foreach ($reserva->items as $item) {
-                $inventario = $item->inventario;
-                if (!$inventario) {
-                    return response()->json(['error' => 'Inventario asociado no encontrado.'], 422);
-                }
-
-                if ($inventario->stock < $item->cantidad) {
-                    return response()->json([
-                        'error' => "Stock insuficiente para '{$inventario->descripcion}'. Disponible: {$inventario->stock}, requerido: {$item->cantidad}"
-                    ], 422);
-                }
+            $validationError = $this->validateReservaItems($reserva);
+            if ($validationError) {
+                return $validationError;
             }
 
-            $calendario = Calendario::create([
-                'personas_id' => $reserva->personas_id,
-                'movimientos_inventario_id' => null,
-                'fecha' => now(),
-                'descripcion_evento' => $reserva->descripcion_evento,
-                'fecha_inicio' => $reserva->fecha_inicio,
-                'fecha_fin' => $reserva->fecha_fin,
-                'evento' => 'Reserva confirmada',
-                'cantidad' => $reserva->cantidad_total,
-            ]);
-
-            foreach ($reserva->items as $item) {
-                $inventario = $item->inventario;
-                if (!$inventario) {
-                    continue;
-                }
-
-                $inventario->decrement('stock', $item->cantidad);
-
-                $movimiento = MovimientosInventario::create([
-                    'inventario_id' => $inventario->id,
-                    'tipo_movimiento' => 'alquilado',
-                    'cantidad' => $item->cantidad,
-                    'fecha_movimiento' => now(),
-                    'descripcion' => 'Reserva confirmada #' . $reserva->id,
-                ]);
-
-                CalendarioItem::create([
-                    'calendario_id' => $calendario->id,
-                    'movimientos_inventario_id' => $movimiento->id,
-                    'cantidad' => $item->cantidad,
-                ]);
-            }
-
-            $reserva->update([
-                'estado' => 'confirmada',
-                'calendario_id' => $calendario->id,
-                'meta' => array_merge($reserva->meta ?? [], [
-                    'confirmada_en' => now()->toDateTimeString(),
-                    'calendario_id' => $calendario->id,
-                ]),
-            ]);
-
-            Historial::create([
-                'reserva_id' => $reserva->id,
-                'accion' => 'confirmada',
-                'confirmado_en' => now(),
-            ]);
+            $calendario = $this->createCalendarioFromReserva($reserva);
+            $this->processReservaItems($reserva, $calendario);
+            $this->updateReservaAndCreateHistorial($reserva, $calendario);
 
             return response()->json([
                 'success' => true,
@@ -176,12 +133,97 @@ class ReservaController extends Controller
         });
     }
 
+    private function validateReservaItems(Reserva $reserva)
+    {
+        if ($reserva->items->isEmpty()) {
+            return response()->json(['error' => 'La reserva no tiene items asociados.'], 422);
+        }
+
+        $errorMessage = null;
+        foreach ($reserva->items as $item) {
+            $inventario = $item->inventario;
+            if (!$inventario) {
+                $errorMessage = self::MENSAJE_INVENTARIO_NO_ENCONTRADO;
+                break;
+            }
+
+            if ($inventario->stock < $item->cantidad) {
+                $errorMessage = "Stock insuficiente para '{$inventario->descripcion}'. Disponible: {$inventario->stock}, requerido: {$item->cantidad}";
+                break;
+            }
+        }
+
+        if ($errorMessage) {
+            return response()->json(['error' => $errorMessage], 422);
+        }
+
+        return null;
+    }
+
+    private function createCalendarioFromReserva(Reserva $reserva): Calendario
+    {
+        return Calendario::create([
+            'personas_id' => $reserva->personas_id,
+            'movimientos_inventario_id' => null,
+            'fecha' => now(),
+            'descripcion_evento' => $reserva->descripcion_evento,
+            'fecha_inicio' => $reserva->fecha_inicio,
+            'fecha_fin' => $reserva->fecha_fin,
+            'evento' => self::EVENTO_RESERVA_CONFIRMADA,
+            'cantidad' => $reserva->cantidad_total,
+        ]);
+    }
+
+    private function processReservaItems(Reserva $reserva, Calendario $calendario): void
+    {
+        foreach ($reserva->items as $item) {
+            $inventario = $item->inventario;
+            if (!$inventario) {
+                continue;
+            }
+
+            $inventario->decrement('stock', $item->cantidad);
+
+            $movimiento = MovimientosInventario::create([
+                'inventario_id' => $inventario->id,
+                'tipo_movimiento' => self::TIPO_MOVIMIENTO_ALQUILADO,
+                'cantidad' => $item->cantidad,
+                'fecha_movimiento' => now(),
+                'descripcion' => self::EVENTO_RESERVA_CONFIRMADA . ' #' . $reserva->id,
+            ]);
+
+            CalendarioItem::create([
+                'calendario_id' => $calendario->id,
+                'movimientos_inventario_id' => $movimiento->id,
+                'cantidad' => $item->cantidad,
+            ]);
+        }
+    }
+
+    private function updateReservaAndCreateHistorial(Reserva $reserva, Calendario $calendario): void
+    {
+        $reserva->update([
+            'estado' => self::ESTADO_CONFIRMADA,
+            'calendario_id' => $calendario->id,
+            'meta' => array_merge($reserva->meta ?? [], [
+                'confirmada_en' => now()->toDateTimeString(),
+                'calendario_id' => $calendario->id,
+            ]),
+        ]);
+
+        Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => self::ACCION_CONFIRMADA,
+            'confirmado_en' => now(),
+        ]);
+    }
+
     public function destroy(Reserva $reserva)
     {
         $this->authorizeAdminLike();
 
-        if ($reserva->estado !== 'pendiente') {
-            return response()->json(['error' => 'Solo se pueden cancelar reservas pendientes.'], 422);
+        if ($reserva->estado !== self::ESTADO_PENDIENTE) {
+            return response()->json(['error' => self::MENSAJE_SOLO_PENDIENTES_CANCELAR], 422);
         }
 
         $reserva->delete();

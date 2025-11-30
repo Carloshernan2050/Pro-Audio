@@ -7,6 +7,9 @@ use App\Http\Controllers\HistorialController;
 use App\Models\Historial;
 use App\Models\Reserva;
 use App\Models\Usuario;
+use App\Models\Calendario;
+use App\Models\MovimientosInventario;
+use App\Models\Inventario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
@@ -43,13 +46,39 @@ class HistorialControllerUnitTest extends TestCase
             'estado' => true
         ]);
 
+        $inventario = Inventario::create([
+            'descripcion' => 'Test Inventario',
+            'stock' => 10
+        ]);
+
+        $movimiento = MovimientosInventario::create([
+            'inventario_id' => $inventario->id,
+            'tipo_movimiento' => 'salida',
+            'cantidad' => 1,
+            'fecha_movimiento' => now(),
+            'descripcion' => 'Test movimiento'
+        ]);
+
+        $calendario = Calendario::create([
+            'personas_id' => $usuario->id,
+            'movimientos_inventario_id' => $movimiento->id,
+            'fecha' => now()->toDateString(),
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'evento' => 'Test evento',
+            'descripcion_evento' => 'Test descripción'
+        ]);
+
         $reserva = Reserva::create([
             'personas_id' => $usuario->id,
+            'calendario_id' => $calendario->id,
             'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
             'estado' => 'pendiente'
         ]);
 
         Historial::create([
+            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada'
         ]);
@@ -71,13 +100,39 @@ class HistorialControllerUnitTest extends TestCase
             'estado' => true
         ]);
 
+        $inventario = Inventario::create([
+            'descripcion' => 'Test Inventario',
+            'stock' => 10
+        ]);
+
+        $movimiento = MovimientosInventario::create([
+            'inventario_id' => $inventario->id,
+            'tipo_movimiento' => 'salida',
+            'cantidad' => 1,
+            'fecha_movimiento' => now(),
+            'descripcion' => 'Test movimiento'
+        ]);
+
+        $calendario = Calendario::create([
+            'personas_id' => $usuario->id,
+            'movimientos_inventario_id' => $movimiento->id,
+            'fecha' => now()->toDateString(),
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'evento' => 'Test evento',
+            'descripcion_evento' => 'Test descripción'
+        ]);
+
         $reserva = Reserva::create([
             'personas_id' => $usuario->id,
+            'calendario_id' => $calendario->id,
             'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
             'estado' => 'pendiente'
         ]);
 
         Historial::create([
+            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada'
         ]);

@@ -121,9 +121,9 @@ class ChatbotIntentionDetector
                 'Publicidad' => ['anuncio','spot','cuña','locucion','jingle','radio']
             ],
             'relacionadas' => [
-                'alquiler','alquilar','arrendar','rentar','equipo',self::EQUIPO_SONIDO,'sonido','audio','bafle','parlante','altavoz','bocina','consola','mezcladora','mixer','microfono','luces','luz','lampara','iluminacion','rack',self::PAR_LED,
-                'animacion',self::ANIMACION,'animador','dj',self::MAESTRO_CEREMONIAS,'presentador','coordinador','fiesta','evento','cumpleanos',self::CUMPLEANOS,
-                'publicidad','publicitar','anuncio','spot','cuña','jingle','locucion',self::LOCUCION,'radio'
+                'alquiler','alquilar','arrendar','rentar','equipo',self::EQUIPO_SONIDO,'sonido','audio','bafle','bafles','parlante','parlantes','altavoz','altavoces','bocina','bocinas','consola','consolas','mezcladora','mezcladoras','mixer','microfono','microfonos','luces','luz','lampara','lamparas','iluminacion','rack',self::PAR_LED,
+                'animacion',self::ANIMACION,'animador','animadores','dj',self::MAESTRO_CEREMONIAS,'maestro','maestro ceremonias','presentador','presentadores','coordinador','coordinadores','fiesta','fiestas','evento','eventos','cumpleanos',self::CUMPLEANOS,
+                'publicidad','publicitar','anuncio','anuncios','spot','spots','cuña','cuñas','jingle','jingles','locucion',self::LOCUCION,'radio'
             ],
             'validacion' => [
                 'Alquiler' => ['alquiler','alquilar','rentar','arrendar','equipo','sonido','audio','parlante','altavoz','bafle','bocina','consola','mezcladora','mixer','microfono','luces','iluminacion',self::PAR_LED,'rack'],

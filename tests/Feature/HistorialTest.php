@@ -6,9 +6,11 @@ use Tests\TestCase;
 use App\Models\Historial;
 use App\Models\Reserva;
 use App\Models\Usuario;
+use App\Models\Calendario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Vite;
 
 /**
  * Tests de Integración para HistorialController
@@ -24,12 +26,21 @@ class HistorialTest extends TestCase
     private const TEST_NOMBRE = 'Juan';
     private const TEST_APELLIDO = 'Pérez';
     private const TEST_TELEFONO = '1234567890';
+    private const TEST_EVENTO = 'Test evento';
     private const ROUTE_HISTORIAL = '/historial';
     private const ROUTE_HISTORIAL_PDF = '/historial/pdf';
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Mock Vite para evitar errores de manifest
+        Vite::shouldReceive('__invoke')
+            ->zeroOrMoreTimes()
+            ->andReturn('<link rel="stylesheet" href="/build/assets/app.css">');
+        Vite::shouldReceive('asset')
+            ->zeroOrMoreTimes()
+            ->andReturn('/build/assets/app.css');
 
         // Crear rol Cliente si no existe (usando valor válido del ENUM)
         if (!DB::table('roles')->where('nombre_rol', 'Cliente')->exists()) {
@@ -73,10 +84,20 @@ class HistorialTest extends TestCase
 
     public function test_index_lista_historial(): void
     {
-        $this->crearUsuarioAutenticado();
+        $usuario = $this->crearUsuarioAutenticado();
+
+        $calendario = Calendario::create([
+            'personas_id' => $usuario->id,
+            'fecha' => now(),
+            'descripcion_evento' => self::TEST_EVENTO,
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'evento' => 'test',
+            'cantidad' => 1
+        ]);
 
         $reserva = Reserva::create([
-            'personas_id' => session('usuario_id'),
+            'personas_id' => $usuario->id,
             'fecha_reserva' => now(),
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
@@ -84,12 +105,13 @@ class HistorialTest extends TestCase
         ]);
 
         Historial::create([
+            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada',
             'fecha' => now()
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_HISTORIAL);
+        $response = $this->get(self::ROUTE_HISTORIAL);
 
         $response->assertStatus(200);
         $response->assertViewIs('usuarios.historial');
@@ -100,7 +122,7 @@ class HistorialTest extends TestCase
     {
         $this->crearUsuarioAutenticado();
 
-        $response = $this->withoutVite()->get(self::ROUTE_HISTORIAL);
+        $response = $this->get(self::ROUTE_HISTORIAL);
 
         $response->assertStatus(200);
         $response->assertViewIs('usuarios.historial');
@@ -108,10 +130,20 @@ class HistorialTest extends TestCase
 
     public function test_index_carga_relacion_reserva(): void
     {
-        $this->crearUsuarioAutenticado();
+        $usuario = $this->crearUsuarioAutenticado();
+
+        $calendario = Calendario::create([
+            'personas_id' => $usuario->id,
+            'fecha' => now(),
+            'descripcion_evento' => self::TEST_EVENTO,
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'evento' => 'test',
+            'cantidad' => 1
+        ]);
 
         $reserva = Reserva::create([
-            'personas_id' => session('usuario_id'),
+            'personas_id' => $usuario->id,
             'fecha_reserva' => now(),
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
@@ -119,12 +151,13 @@ class HistorialTest extends TestCase
         ]);
 
         Historial::create([
+            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada',
             'fecha' => now()
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_HISTORIAL);
+        $response = $this->get(self::ROUTE_HISTORIAL);
 
         $response->assertStatus(200);
         $items = $response->viewData('items');
@@ -140,10 +173,20 @@ class HistorialTest extends TestCase
 
     public function test_export_pdf_genera_descarga(): void
     {
-        $this->crearUsuarioAutenticado();
+        $usuario = $this->crearUsuarioAutenticado();
+
+        $calendario = Calendario::create([
+            'personas_id' => $usuario->id,
+            'fecha' => now(),
+            'descripcion_evento' => self::TEST_EVENTO,
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'evento' => 'test',
+            'cantidad' => 1
+        ]);
 
         $reserva = Reserva::create([
-            'personas_id' => session('usuario_id'),
+            'personas_id' => $usuario->id,
             'fecha_reserva' => now(),
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
@@ -151,6 +194,7 @@ class HistorialTest extends TestCase
         ]);
 
         Historial::create([
+            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada',
             'fecha' => now()

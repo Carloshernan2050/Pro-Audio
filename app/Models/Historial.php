@@ -11,6 +11,7 @@ class Historial extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'calendario_id',
         'reserva_id',
         'accion',
         'confirmado_en',

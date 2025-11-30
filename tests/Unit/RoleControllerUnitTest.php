@@ -6,7 +6,6 @@ use Tests\TestCase;
 use App\Http\Controllers\RoleController;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Route;
 
 /**
  * Tests Unitarios para RoleController
@@ -60,13 +59,9 @@ class RoleControllerUnitTest extends TestCase
             'role' => 'Administrador'
         ]);
 
-        try {
-            $response = $this->controller->set($request);
-            $this->assertNotNull($response);
-        } catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
-            // Si la ruta no existe, verificamos la lógica
-            $this->assertTrue(session()->has('pending_admin'));
-        }
+        $response = $this->controller->set($request);
+        $this->assertNotNull($response);
+        $this->assertTrue(session()->has('pending_admin'));
     }
 
     public function test_set_con_rol_cliente(): void
@@ -95,15 +90,9 @@ class RoleControllerUnitTest extends TestCase
 
     public function test_admin_key_form_sin_sesion(): void
     {
-        Route::shouldReceive('has')->with('role.select')->andReturn(true);
-        
-        try {
-            $response = $this->controller->adminKeyForm();
-            $this->assertNotNull($response);
-        } catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
-            // Si la ruta no existe, el test pasa porque verificamos la lógica
-            $this->assertTrue(true);
-        }
+        $response = $this->controller->adminKeyForm();
+        $this->assertNotNull($response);
+        $this->assertTrue($response->isRedirect());
     }
 
     public function test_admin_key_form_con_sesion(): void
@@ -145,19 +134,13 @@ class RoleControllerUnitTest extends TestCase
 
     public function test_admin_key_verify_sin_sesion(): void
     {
-        Route::shouldReceive('has')->with('role.select')->andReturn(true);
-        
         $request = Request::create(self::ROUTE_ADMIN_KEY_VERIFY, 'POST', [
             'admin_key' => 'ProAudio00'
         ]);
 
-        try {
-            $response = $this->controller->adminKeyVerify($request);
-            $this->assertNotNull($response);
-        } catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
-            // Si la ruta no existe, el test pasa porque verificamos la lógica
-            $this->assertTrue(true);
-        }
+        $response = $this->controller->adminKeyVerify($request);
+        $this->assertNotNull($response);
+        $this->assertTrue($response->isRedirect());
     }
 
     public function test_clear_limpia_rol(): void

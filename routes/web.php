@@ -104,6 +104,13 @@ Route::controller(CalendarioController::class)->group(function () {
     Route::delete('/calendario/{id}', 'eliminar')->name('calendario.eliminar')->middleware('role:Superadmin,Admin');
 });
 
+// Selección de Rol
+Route::get('/role/select', [RoleController::class, 'select'])->name('role.select');
+Route::post('/role/set', [RoleController::class, 'set'])->name('role.set');
+Route::get('/role/clear', [RoleController::class, 'clear'])->name('role.clear');
+Route::get('/admin/key/form', [RoleController::class, 'adminKeyForm'])->name('admin.key.form');
+Route::post('/role/admin-key/verify', [RoleController::class, 'adminKeyVerify'])->name('admin.key.verify');
+
 // Gestión de Roles (solo Superadmin)
 Route::get('/admin/roles', [RoleAdminController::class, 'index'])->name('admin.roles.index')->middleware('role:Superadmin');
 Route::post('/admin/roles', [RoleAdminController::class, 'update'])->name('admin.roles.update')->middleware('role:Superadmin');

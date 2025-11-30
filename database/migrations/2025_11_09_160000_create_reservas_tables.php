@@ -44,6 +44,12 @@ return new class extends Migration
                 if (!Schema::hasColumn('historial', 'accion')) {
                     $table->string('accion', 50)->nullable()->after('reserva_id');
                 }
+                if (!Schema::hasColumn('historial', 'confirmado_en')) {
+                    $table->dateTime('confirmado_en')->nullable()->after('accion');
+                }
+                if (!Schema::hasColumn('historial', 'observaciones')) {
+                    $table->text('observaciones')->nullable()->after('confirmado_en');
+                }
             });
         }
     }
@@ -55,6 +61,12 @@ return new class extends Migration
     {
         if (Schema::hasTable('historial')) {
             Schema::table('historial', function (Blueprint $table) {
+                if (Schema::hasColumn('historial', 'observaciones')) {
+                    $table->dropColumn('observaciones');
+                }
+                if (Schema::hasColumn('historial', 'confirmado_en')) {
+                    $table->dropColumn('confirmado_en');
+                }
                 if (Schema::hasColumn('historial', 'accion')) {
                     $table->dropColumn('accion');
                 }
