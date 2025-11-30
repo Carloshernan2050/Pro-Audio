@@ -32,6 +32,9 @@ class CalendarioControllerTest extends TestCase
     private const FECHA_INICIO = '2024-01-01';
     private const FECHA_FIN = '2024-01-05';
     private const DESCRIPCION_EVENTO = 'Evento de prueba';
+    private const PRODUCTO_TEST = 'Producto Test';
+    private const MOVIMIENTO_DE_PRUEBA = 'Movimiento de prueba';
+    private const EVENTO_ACTUALIZADO = 'Evento actualizado';
 
     protected function setUp(): void
     {
@@ -103,7 +106,7 @@ class CalendarioControllerTest extends TestCase
         $usuario = $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -112,10 +115,10 @@ class CalendarioControllerTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
-        $calendario = Calendario::create([
+        Calendario::create([
             'personas_id' => $usuario->id,
             'movimientos_inventario_id' => $movimiento->id,
             'fecha' => now(),
@@ -141,7 +144,7 @@ class CalendarioControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $calendario = Calendario::create([
+        Calendario::create([
             'personas_id' => session('usuario_id'),
             'movimientos_inventario_id' => null,
             'fecha' => now(),
@@ -170,7 +173,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -203,7 +206,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -227,7 +230,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -251,7 +254,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -286,7 +289,7 @@ class CalendarioControllerTest extends TestCase
         $response->assertStatus(422);
         // Puede validar items o movimientos_inventario_id dependiendo del formato usado
         $this->assertTrue(
-            $response->json('errors.items') !== null || 
+            $response->json('errors.items') !== null ||
             $response->json('errors.movimientos_inventario_id') !== null
         );
     }
@@ -296,7 +299,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 5,
         ]);
 
@@ -315,7 +318,7 @@ class CalendarioControllerTest extends TestCase
         // Puede retornar 422 (validación) o 500 (excepción)
         $this->assertContains($response->status(), [422, 500]);
         if ($response->status() === 422) {
-            $response->assertJsonValidationErrors();
+            $this->assertNotEmpty($response->json('errors'));
         }
     }
 
@@ -328,7 +331,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -337,7 +340,7 @@ class CalendarioControllerTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $response = $this->postJson(self::ROUTE_CALENDARIO, [
@@ -382,7 +385,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -391,7 +394,7 @@ class CalendarioControllerTest extends TestCase
             'tipo_movimiento' => 'alquilado',
             'cantidad' => 5,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -416,7 +419,7 @@ class CalendarioControllerTest extends TestCase
             'servicio' => 'Alquiler',
             'fecha_inicio' => '2024-01-02',
             'fecha_fin' => '2024-01-06',
-            'descripcion_evento' => 'Evento actualizado',
+            'descripcion_evento' => self::EVENTO_ACTUALIZADO,
             'items' => [
                 [
                     'inventario_id' => $inventario->id,
@@ -429,7 +432,7 @@ class CalendarioControllerTest extends TestCase
         $response->assertSessionHas('ok');
 
         $calendario->refresh();
-        $this->assertEquals('Evento actualizado', $calendario->descripcion_evento);
+        $this->assertEquals(self::EVENTO_ACTUALIZADO, $calendario->descripcion_evento);
     }
 
     // ============================================
@@ -441,7 +444,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -450,7 +453,7 @@ class CalendarioControllerTest extends TestCase
             'tipo_movimiento' => 'entrada',
             'cantidad' => 10,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -468,7 +471,7 @@ class CalendarioControllerTest extends TestCase
             'movimientos_inventario_id' => $movimiento->id,
             'fecha_inicio' => '2024-01-02',
             'fecha_fin' => '2024-01-06',
-            'descripcion_evento' => 'Evento actualizado',
+            'descripcion_evento' => self::EVENTO_ACTUALIZADO,
             'cantidad' => 5,
         ]);
 
@@ -476,7 +479,7 @@ class CalendarioControllerTest extends TestCase
         $response->assertSessionHas('ok');
 
         $calendario->refresh();
-        $this->assertEquals('Evento actualizado', $calendario->descripcion_evento);
+        $this->assertEquals(self::EVENTO_ACTUALIZADO, $calendario->descripcion_evento);
     }
 
     // ============================================
@@ -488,7 +491,7 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
@@ -497,7 +500,7 @@ class CalendarioControllerTest extends TestCase
             'tipo_movimiento' => 'alquilado',
             'cantidad' => 5,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([
@@ -537,16 +540,16 @@ class CalendarioControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $inventario = Inventario::create([
-            'descripcion' => 'Producto Test',
+            'descripcion' => self::PRODUCTO_TEST,
             'stock' => 10,
         ]);
 
-        $movimiento = MovimientosInventario::create([
+        MovimientosInventario::create([
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => 'alquilado',
             'cantidad' => 5,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento de prueba',
+            'descripcion' => self::MOVIMIENTO_DE_PRUEBA,
         ]);
 
         $calendario = Calendario::create([

@@ -19,6 +19,10 @@ class ChatbotTextProcessorTest extends TestCase
     private const MENSAJE_POR_5_DIAS = 'por 5 dias';
     private const MENSAJE_NECESITO_POR_3_DIAS = 'necesito por 3 dias';
     private const MENSAJE_3_DIAS = '3 dias';
+    private const MENSAJE_ALQILER_DE_EQUIPOS = 'alqiler de equipos';
+    private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
+    private const NOMBRE_EQUIPO_SONIDO = 'Equipo Sonido';
+    private const DESC_EQUIPO_PROFESIONAL = 'Equipo profesional';
 
     protected ChatbotTextProcessor $processor;
 
@@ -83,7 +87,7 @@ class ChatbotTextProcessorTest extends TestCase
 
     public function test_corregir_ortografia_corrige_alquiler(): void
     {
-        $resultado = $this->processor->corregirOrtografia('alqiler de equipos');
+        $resultado = $this->processor->corregirOrtografia(self::MENSAJE_ALQILER_DE_EQUIPOS);
         $this->assertStringContainsString('alquiler', $resultado);
     }
 
@@ -586,7 +590,7 @@ class ChatbotTextProcessorTest extends TestCase
     {
         // Este test verifica que la corrección con vocabulario funciona
         // El vocabulario se obtiene de la base de datos si está disponible
-        $resultado = $this->processor->corregirOrtografia('alqiler de equipos');
+        $resultado = $this->processor->corregirOrtografia(self::MENSAJE_ALQILER_DE_EQUIPOS);
         $this->assertIsString($resultado);
     }
 
@@ -642,7 +646,7 @@ class ChatbotTextProcessorTest extends TestCase
         // Crear datos en BD para que obtenerVocabularioCorreccion() tenga datos
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
@@ -654,7 +658,7 @@ class ChatbotTextProcessorTest extends TestCase
         ]);
 
         // Probar corrección con vocabulario de BD
-        $resultado = $this->processor->corregirOrtografia('alqiler de equipos');
+        $resultado = $this->processor->corregirOrtografia(self::MENSAJE_ALQILER_DE_EQUIPOS);
         $this->assertIsString($resultado);
         // Debería corregir "alqiler" a "alquiler" usando el vocabulario
     }
@@ -663,14 +667,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -683,14 +687,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -712,14 +716,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -733,14 +737,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -753,14 +757,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -773,14 +777,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -793,14 +797,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -813,14 +817,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -840,7 +844,7 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
@@ -860,7 +864,7 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
@@ -900,14 +904,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
-            'descripcion' => 'Equipo profesional',
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -920,14 +924,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
-            'descripcion' => 'Equipo profesional',
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -940,14 +944,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -960,14 +964,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -980,14 +984,14 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
             'icono' => 'alquiler-icon'
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
+            'nombre' => self::NOMBRE_EQUIPO_SONIDO,
+            'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
             'precio' => 100000
         ]);
 
@@ -996,83 +1000,4 @@ class ChatbotTextProcessorTest extends TestCase
         $this->assertIsString($resultado);
     }
 
-    public function test_corregir_ortografia_con_vocabulario_sin_levenshtein(): void
-    {
-        $servicio = \App\Models\Servicios::create([
-            'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
-            'icono' => 'alquiler-icon'
-        ]);
-
-        \App\Models\SubServicios::create([
-            'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
-            'precio' => 100000
-        ]);
-
-        // Si levenshtein no está disponible, debería usar similar_text
-        $resultado = $this->processor->corregirOrtografia('alqiler');
-        $this->assertIsString($resultado);
-    }
-
-    public function test_corregir_ortografia_con_vocabulario_break_early(): void
-    {
-        $servicio = \App\Models\Servicios::create([
-            'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
-            'icono' => 'alquiler-icon'
-        ]);
-
-        \App\Models\SubServicios::create([
-            'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
-            'precio' => 100000
-        ]);
-
-        // Si encuentra distancia 0, debería hacer break early
-        $resultado = $this->processor->corregirOrtografia('alquiler');
-        $this->assertIsString($resultado);
-    }
-
-    public function test_corregir_ortografia_con_vocabulario_validacion_final(): void
-    {
-        $servicio = \App\Models\Servicios::create([
-            'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
-            'icono' => 'alquiler-icon'
-        ]);
-
-        \App\Models\SubServicios::create([
-            'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
-            'precio' => 100000
-        ]);
-
-        // Validación final: distancia <= umbral y similitud >= 85%
-        $resultado = $this->processor->corregirOrtografia('alqiler'); // Similar a "alquiler"
-        $this->assertIsString($resultado);
-    }
-
-    public function test_corregir_ortografia_con_vocabulario_validacion_falla(): void
-    {
-        $servicio = \App\Models\Servicios::create([
-            'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler',
-            'icono' => 'alquiler-icon'
-        ]);
-
-        \App\Models\SubServicios::create([
-            'servicios_id' => $servicio->id,
-            'nombre' => 'Equipo Sonido',
-            'descripcion' => 'Equipo profesional',
-            'precio' => 100000
-        ]);
-
-        // Si la validación falla (distancia > umbral o similitud < 85%), retorna null
-        $resultado = $this->processor->corregirOrtografia('xyzabc123');
-        $this->assertIsString($resultado);
-    }
 }

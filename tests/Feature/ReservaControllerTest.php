@@ -23,6 +23,7 @@ class ReservaControllerTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_RESERVAS = '/reservas';
+    private const ROUTE_CONFIRMAR = '/confirmar';
     private const TEST_EMAIL = 'admin@example.com';
     private const TEST_PASSWORD = 'password123';
     private const TEST_NOMBRE = 'Admin';
@@ -119,7 +120,7 @@ class ReservaControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $reserva1 = Reserva::create([
+        Reserva::create([
             'personas_id' => session('usuario_id'),
             'servicio' => self::SERVICIO_TEST,
             'fecha_inicio' => self::FECHA_INICIO,
@@ -130,7 +131,7 @@ class ReservaControllerTest extends TestCase
             'created_at' => now()->subDay(),
         ]);
 
-        $reserva2 = Reserva::create([
+        Reserva::create([
             'personas_id' => session('usuario_id'),
             'servicio' => self::SERVICIO_TEST,
             'fecha_inicio' => self::FECHA_INICIO,
@@ -559,7 +560,7 @@ class ReservaControllerTest extends TestCase
             'cantidad' => 5,
         ]);
 
-        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . '/confirmar');
+        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . self::ROUTE_CONFIRMAR);
 
         // Nota: Este test puede fallar si la tabla historial no tiene las columnas necesarias
         // (reserva_id, accion, confirmado_en). El controlador intenta crear un registro de historial
@@ -611,7 +612,7 @@ class ReservaControllerTest extends TestCase
             'estado' => 'confirmada',
         ]);
 
-        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . '/confirmar');
+        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . self::ROUTE_CONFIRMAR);
 
         $response->assertStatus(422);
         $response->assertJson([
@@ -644,7 +645,7 @@ class ReservaControllerTest extends TestCase
             'cantidad' => 5,
         ]);
 
-        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . '/confirmar');
+        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . self::ROUTE_CONFIRMAR);
 
         $response->assertStatus(422);
         $response->assertJsonStructure(['error']);
@@ -681,7 +682,7 @@ class ReservaControllerTest extends TestCase
         // En su lugar, eliminamos el ReservaItem para simular que el inventario no se encuentra
         ReservaItem::where('reserva_id', $reserva->id)->delete();
 
-        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . '/confirmar');
+        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . self::ROUTE_CONFIRMAR);
 
         // Puede retornar 422 si detecta que no hay items, o 500 si falla por historial
         $this->assertContains($response->status(), [422, 500]);
@@ -723,7 +724,7 @@ class ReservaControllerTest extends TestCase
             'cantidad' => 3,
         ]);
 
-        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . '/confirmar');
+        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . self::ROUTE_CONFIRMAR);
 
         // Nota: Este test puede fallar si la tabla historial no tiene las columnas necesarias
         if ($response->status() === 200) {
@@ -774,7 +775,7 @@ class ReservaControllerTest extends TestCase
             'cantidad' => 5,
         ]);
 
-        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . '/confirmar');
+        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . self::ROUTE_CONFIRMAR);
 
         // Nota: Este test puede fallar si la tabla historial no tiene las columnas necesarias
         if ($response->status() === 200) {
@@ -813,7 +814,7 @@ class ReservaControllerTest extends TestCase
             'cantidad' => 5,
         ]);
 
-        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . '/confirmar');
+        $response = $this->postJson(self::ROUTE_RESERVAS . '/' . $reserva->id . self::ROUTE_CONFIRMAR);
 
         // Nota: Este test puede fallar si la tabla historial no tiene las columnas necesarias
         if ($response->status() === 200) {

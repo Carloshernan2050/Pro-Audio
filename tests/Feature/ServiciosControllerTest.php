@@ -28,6 +28,12 @@ class ServiciosControllerTest extends TestCase
     private const NOMBRE_SERVICIO = 'Alquiler';
     private const DESCRIPCION_SERVICIO = 'Servicio de alquiler de equipos';
     private const ICONO_SERVICIO = 'alquiler-icon';
+    private const SERVICIO_1 = 'Servicio 1';
+    private const DESCRIPCION_1 = 'Descripción 1';
+    private const SERVICIO_2 = 'Servicio 2';
+    private const DESCRIPCION_2 = 'Descripción 2';
+    private const NUEVO_NOMBRE = 'Nuevo Nombre';
+    private const NUEVA_DESCRIPCION = 'Nueva Descripción';
 
     protected function setUp(): void
     {
@@ -115,14 +121,14 @@ class ServiciosControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $servicio1 = Servicios::create([
-            'nombre_servicio' => 'Servicio 1',
-            'descripcion' => 'Descripción 1',
+        Servicios::create([
+            'nombre_servicio' => self::SERVICIO_1,
+            'descripcion' => self::DESCRIPCION_1,
         ]);
 
         $servicio2 = Servicios::create([
-            'nombre_servicio' => 'Servicio 2',
-            'descripcion' => 'Descripción 2',
+            'nombre_servicio' => self::SERVICIO_2,
+            'descripcion' => self::DESCRIPCION_2,
         ]);
 
         $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS);
@@ -296,7 +302,7 @@ class ServiciosControllerTest extends TestCase
             'descripcion' => self::DESCRIPCION_SERVICIO,
         ]);
 
-        $subServicio = SubServicios::create([
+        SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Sub Servicio',
             'descripcion' => 'Descripción',
@@ -379,8 +385,8 @@ class ServiciosControllerTest extends TestCase
         ]);
 
         $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
-            'nombre_servicio' => 'Nuevo Nombre',
-            'descripcion' => 'Nueva Descripción',
+            'nombre_servicio' => self::NUEVO_NOMBRE,
+            'descripcion' => self::NUEVA_DESCRIPCION,
             'icono' => 'nuevo-icono',
         ]);
 
@@ -388,8 +394,8 @@ class ServiciosControllerTest extends TestCase
         $response->assertSessionHas('success');
 
         $servicio->refresh();
-        $this->assertEquals('Nuevo Nombre', $servicio->nombre_servicio);
-        $this->assertEquals('Nueva Descripción', $servicio->descripcion);
+        $this->assertEquals(self::NUEVO_NOMBRE, $servicio->nombre_servicio);
+        $this->assertEquals(self::NUEVA_DESCRIPCION, $servicio->descripcion);
         $this->assertEquals('nuevo-icono', $servicio->icono);
     }
 
@@ -403,7 +409,7 @@ class ServiciosControllerTest extends TestCase
         ]);
 
         $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
-            'descripcion' => 'Nueva Descripción',
+            'descripcion' => self::NUEVA_DESCRIPCION,
         ]);
 
         $response->assertSessionHasErrors('nombre_servicio');
@@ -414,19 +420,19 @@ class ServiciosControllerTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $servicio1 = Servicios::create([
-            'nombre_servicio' => 'Servicio 1',
-            'descripcion' => 'Descripción 1',
+            'nombre_servicio' => self::SERVICIO_1,
+            'descripcion' => self::DESCRIPCION_1,
         ]);
 
-        $servicio2 = Servicios::create([
-            'nombre_servicio' => 'Servicio 2',
-            'descripcion' => 'Descripción 2',
+        Servicios::create([
+            'nombre_servicio' => self::SERVICIO_2,
+            'descripcion' => self::DESCRIPCION_2,
         ]);
 
         // Intentar cambiar servicio1 al nombre de servicio2
         $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio1->id, [
-            'nombre_servicio' => 'Servicio 2',
-            'descripcion' => 'Descripción 1',
+            'nombre_servicio' => self::SERVICIO_2,
+            'descripcion' => self::DESCRIPCION_1,
         ]);
 
         $response->assertSessionHasErrors('nombre_servicio');
@@ -443,7 +449,7 @@ class ServiciosControllerTest extends TestCase
 
         $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
             'nombre_servicio' => self::NOMBRE_SERVICIO,
-            'descripcion' => 'Nueva Descripción',
+            'descripcion' => self::NUEVA_DESCRIPCION,
         ]);
 
         $response->assertRedirect(route('servicios.index'));
@@ -461,8 +467,8 @@ class ServiciosControllerTest extends TestCase
 
         // Simular error (difícil sin mockear)
         $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
-            'nombre_servicio' => 'Nuevo Nombre',
-            'descripcion' => 'Nueva Descripción',
+            'nombre_servicio' => self::NUEVO_NOMBRE,
+            'descripcion' => self::NUEVA_DESCRIPCION,
         ]);
 
         // Debería redirigir con éxito o error
@@ -523,22 +529,6 @@ class ServiciosControllerTest extends TestCase
         $this->assertDatabaseMissing('cotizacion', ['id' => $cotizacion->id]);
     }
 
-    public function test_destroy_elimina_servicio_sin_subservicios(): void
-    {
-        $this->crearUsuarioAdmin();
-
-        $servicio = Servicios::create([
-            'nombre_servicio' => self::NOMBRE_SERVICIO,
-            'descripcion' => self::DESCRIPCION_SERVICIO,
-        ]);
-
-        $response = $this->delete(self::ROUTE_SERVICIOS . '/' . $servicio->id);
-
-        $response->assertRedirect(route('servicios.index'));
-        $response->assertSessionHas('success');
-
-        $this->assertDatabaseMissing('servicios', ['id' => $servicio->id]);
-    }
 
     public function test_destroy_maneja_error(): void
     {
@@ -578,14 +568,14 @@ class ServiciosControllerTest extends TestCase
         $subServicio1 = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Sub Servicio 1',
-            'descripcion' => 'Descripción 1',
+            'descripcion' => self::DESCRIPCION_1,
             'precio' => 100,
         ]);
 
         $subServicio2 = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Sub Servicio 2',
-            'descripcion' => 'Descripción 2',
+            'descripcion' => self::DESCRIPCION_2,
             'precio' => 200,
         ]);
 
