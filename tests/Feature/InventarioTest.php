@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Inventario;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para InventarioController
@@ -19,11 +19,17 @@ class InventarioTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROUTE_INVENTARIO = '/inventario';
+
     private const DESC_PRODUCTO = 'Producto de prueba';
 
     protected function setUp(): void
@@ -31,10 +37,10 @@ class InventarioTest extends TestCase
         parent::setUp();
 
         // Crear rol Administrador si no existe
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Administrador',
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -55,7 +61,7 @@ class InventarioTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -76,14 +82,14 @@ class InventarioTest extends TestCase
 
         Inventario::create([
             'descripcion' => self::DESC_PRODUCTO,
-            'stock' => 10
+            'stock' => 10,
         ]);
 
         $response = $this->get(self::ROUTE_INVENTARIO);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            '*' => ['id', 'descripcion', 'stock']
+            '*' => ['id', 'descripcion', 'stock'],
         ]);
     }
 
@@ -107,7 +113,7 @@ class InventarioTest extends TestCase
 
         $response = $this->postJson(self::ROUTE_INVENTARIO, [
             'descripcion' => self::DESC_PRODUCTO,
-            'stock' => 20
+            'stock' => 20,
         ]);
 
         $response->assertStatus(200);
@@ -115,7 +121,7 @@ class InventarioTest extends TestCase
 
         $this->assertDatabaseHas('inventario', [
             'descripcion' => self::DESC_PRODUCTO,
-            'stock' => 20
+            'stock' => 20,
         ]);
     }
 
@@ -124,7 +130,7 @@ class InventarioTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $response = $this->postJson(self::ROUTE_INVENTARIO, [
-            'stock' => 10
+            'stock' => 10,
         ]);
 
         $response->assertStatus(422);
@@ -136,7 +142,7 @@ class InventarioTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $response = $this->postJson(self::ROUTE_INVENTARIO, [
-            'descripcion' => self::DESC_PRODUCTO
+            'descripcion' => self::DESC_PRODUCTO,
         ]);
 
         $response->assertStatus(422);
@@ -149,7 +155,7 @@ class InventarioTest extends TestCase
 
         $response = $this->postJson(self::ROUTE_INVENTARIO, [
             'descripcion' => self::DESC_PRODUCTO,
-            'stock' => -5
+            'stock' => -5,
         ]);
 
         $response->assertStatus(422);
@@ -162,7 +168,7 @@ class InventarioTest extends TestCase
 
         $response = $this->postJson(self::ROUTE_INVENTARIO, [
             'descripcion' => str_repeat('a', 256),
-            'stock' => 10
+            'stock' => 10,
         ]);
 
         $response->assertStatus(422);
@@ -179,12 +185,12 @@ class InventarioTest extends TestCase
 
         $inventario = Inventario::create([
             'descripcion' => 'Producto Original',
-            'stock' => 10
+            'stock' => 10,
         ]);
 
-        $response = $this->putJson(self::ROUTE_INVENTARIO . "/{$inventario->id}", [
+        $response = $this->putJson(self::ROUTE_INVENTARIO."/{$inventario->id}", [
             'descripcion' => 'Producto Actualizado',
-            'stock' => 25
+            'stock' => 25,
         ]);
 
         $response->assertStatus(200);
@@ -193,7 +199,7 @@ class InventarioTest extends TestCase
         $this->assertDatabaseHas('inventario', [
             'id' => $inventario->id,
             'descripcion' => 'Producto Actualizado',
-            'stock' => 25
+            'stock' => 25,
         ]);
     }
 
@@ -201,9 +207,9 @@ class InventarioTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->putJson(self::ROUTE_INVENTARIO . '/99999', [
+        $response = $this->putJson(self::ROUTE_INVENTARIO.'/99999', [
             'descripcion' => self::DESC_PRODUCTO,
-            'stock' => 10
+            'stock' => 10,
         ]);
 
         $response->assertStatus(404);
@@ -215,11 +221,11 @@ class InventarioTest extends TestCase
 
         $inventario = Inventario::create([
             'descripcion' => self::DESC_PRODUCTO,
-            'stock' => 10
+            'stock' => 10,
         ]);
 
-        $response = $this->putJson(self::ROUTE_INVENTARIO . "/{$inventario->id}", [
-            'stock' => 20
+        $response = $this->putJson(self::ROUTE_INVENTARIO."/{$inventario->id}", [
+            'stock' => 20,
         ]);
 
         $response->assertStatus(422);
@@ -236,16 +242,16 @@ class InventarioTest extends TestCase
 
         $inventario = Inventario::create([
             'descripcion' => self::DESC_PRODUCTO,
-            'stock' => 10
+            'stock' => 10,
         ]);
 
-        $response = $this->deleteJson(self::ROUTE_INVENTARIO . "/{$inventario->id}");
+        $response = $this->deleteJson(self::ROUTE_INVENTARIO."/{$inventario->id}");
 
         $response->assertStatus(200);
         $response->assertJson(['success' => 'Artículo del inventario eliminado correctamente.']);
 
         $this->assertDatabaseMissing('inventario', [
-            'id' => $inventario->id
+            'id' => $inventario->id,
         ]);
     }
 
@@ -253,7 +259,7 @@ class InventarioTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->deleteJson(self::ROUTE_INVENTARIO . '/99999');
+        $response = $this->deleteJson(self::ROUTE_INVENTARIO.'/99999');
 
         $response->assertStatus(404);
     }
@@ -270,4 +276,3 @@ class InventarioTest extends TestCase
         $this->assertTrue($response->isRedirect() || $response->status() === 403);
     }
 }
-

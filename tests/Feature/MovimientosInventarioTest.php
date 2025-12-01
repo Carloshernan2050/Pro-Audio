@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\MovimientosInventario;
 use App\Models\Inventario;
+use App\Models\MovimientosInventario;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests Feature para MovimientosInventarioController
@@ -20,17 +20,29 @@ class MovimientosInventarioTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_MOVIMIENTOS = '/movimientos';
+
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const TIPO_ENTRADA = 'entrada';
+
     private const TIPO_SALIDA = 'salida';
+
     private const TIPO_ALQUILADO = 'alquilado';
+
     private const TIPO_DEVUELTO = 'devuelto';
+
     private const DESCRIPCION_MOVIMIENTO = 'Movimiento de prueba';
+
     private const PRODUCTO_TEST = 'Producto Test';
+
     private const MENSAJE_STOCK_INSUFICIENTE = 'No hay suficiente stock disponible para realizar esta operación.';
 
     protected function setUp(): void
@@ -38,10 +50,10 @@ class MovimientosInventarioTest extends TestCase
         parent::setUp();
 
         // Crear rol Administrador si no existe
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Administrador',
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -62,7 +74,7 @@ class MovimientosInventarioTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -105,8 +117,8 @@ class MovimientosInventarioTest extends TestCase
                 'cantidad',
                 'fecha_movimiento',
                 'descripcion',
-                'inventario'
-            ]
+                'inventario',
+            ],
         ]);
     }
 
@@ -146,7 +158,7 @@ class MovimientosInventarioTest extends TestCase
         ]);
         $response->assertJsonStructure([
             'success',
-            'movimiento_id'
+            'movimiento_id',
         ]);
 
         $inventario->refresh();
@@ -359,7 +371,7 @@ class MovimientosInventarioTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJson([
-            'error' => self::MENSAJE_STOCK_INSUFICIENTE
+            'error' => self::MENSAJE_STOCK_INSUFICIENTE,
         ]);
     }
 
@@ -380,7 +392,7 @@ class MovimientosInventarioTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJson([
-            'error' => self::MENSAJE_STOCK_INSUFICIENTE
+            'error' => self::MENSAJE_STOCK_INSUFICIENTE,
         ]);
     }
 
@@ -428,7 +440,7 @@ class MovimientosInventarioTest extends TestCase
 
         $inventario->refresh();
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS . '/' . $movimiento->id, [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimiento->id, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_ENTRADA,
             'cantidad' => 8,
@@ -436,7 +448,7 @@ class MovimientosInventarioTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJson([
-            'success' => 'Movimiento de inventario actualizado correctamente.'
+            'success' => 'Movimiento de inventario actualizado correctamente.',
         ]);
 
         $inventario->refresh();
@@ -463,7 +475,7 @@ class MovimientosInventarioTest extends TestCase
 
         $inventario->refresh();
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS . '/' . $movimiento->id, [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimiento->id, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_SALIDA,
             'cantidad' => 3,
@@ -501,7 +513,7 @@ class MovimientosInventarioTest extends TestCase
         $inventario1->refresh();
         $inventario2->refresh();
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS . '/' . $movimientoId, [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimientoId, [
             'inventario_id' => $inventario2->id,
             'tipo_movimiento' => self::TIPO_ENTRADA,
             'cantidad' => 5,
@@ -536,7 +548,7 @@ class MovimientosInventarioTest extends TestCase
 
         $inventario->refresh();
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS . '/' . $movimiento->id, [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimiento->id, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_SALIDA,
             'cantidad' => 20, // Más que el stock disponible (15)
@@ -544,7 +556,7 @@ class MovimientosInventarioTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJson([
-            'error' => self::MENSAJE_STOCK_INSUFICIENTE
+            'error' => self::MENSAJE_STOCK_INSUFICIENTE,
         ]);
     }
 
@@ -557,7 +569,7 @@ class MovimientosInventarioTest extends TestCase
             'stock' => 10,
         ]);
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS . '/999', [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/999', [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_ENTRADA,
             'cantidad' => 5,
@@ -589,11 +601,11 @@ class MovimientosInventarioTest extends TestCase
         $movimientoId = $response->json('movimiento_id');
         $inventario->refresh();
 
-        $response = $this->deleteJson(self::ROUTE_MOVIMIENTOS . '/' . $movimientoId);
+        $response = $this->deleteJson(self::ROUTE_MOVIMIENTOS.'/'.$movimientoId);
 
         $response->assertStatus(200);
         $response->assertJson([
-            'success' => 'Movimiento de inventario eliminado correctamente.'
+            'success' => 'Movimiento de inventario eliminado correctamente.',
         ]);
 
         $inventario->refresh();
@@ -601,7 +613,7 @@ class MovimientosInventarioTest extends TestCase
         $this->assertEquals(10, $inventario->stock);
 
         $this->assertDatabaseMissing('movimientos_inventario', [
-            'id' => $movimientoId
+            'id' => $movimientoId,
         ]);
     }
 
@@ -624,7 +636,7 @@ class MovimientosInventarioTest extends TestCase
         $movimientoId = $response->json('movimiento_id');
         $inventario->refresh();
 
-        $response = $this->deleteJson(self::ROUTE_MOVIMIENTOS . '/' . $movimientoId);
+        $response = $this->deleteJson(self::ROUTE_MOVIMIENTOS.'/'.$movimientoId);
 
         $response->assertStatus(200);
 
@@ -637,9 +649,8 @@ class MovimientosInventarioTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->deleteJson(self::ROUTE_MOVIMIENTOS . '/999');
+        $response = $this->deleteJson(self::ROUTE_MOVIMIENTOS.'/999');
 
         $response->assertStatus(404);
     }
 }
-

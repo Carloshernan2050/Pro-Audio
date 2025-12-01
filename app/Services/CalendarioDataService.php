@@ -21,7 +21,7 @@ class CalendarioDataService
         foreach ($registros as $registro) {
             $clave = $this->generarClaveUnicaRegistro($registro);
 
-            if (!isset($vistos[$clave])) {
+            if (! isset($vistos[$clave])) {
                 $vistos[$clave] = true;
                 $registrosUnicos[] = $registro;
             }
@@ -35,11 +35,11 @@ class CalendarioDataService
      */
     public function generarClaveUnicaRegistro($registro): string
     {
-        $itemsKey = $registro->items->map(function($item) {
-            return $item->movimientos_inventario_id . ':' . $item->cantidad;
+        $itemsKey = $registro->items->map(function ($item) {
+            return $item->movimientos_inventario_id.':'.$item->cantidad;
         })->sort()->implode(',');
 
-        return $registro->fecha_inicio . '|' . $registro->fecha_fin . '|' . $registro->descripcion_evento . '|' . $itemsKey;
+        return $registro->fecha_inicio.'|'.$registro->fecha_fin.'|'.$registro->descripcion_evento.'|'.$itemsKey;
     }
 
     /**
@@ -61,7 +61,7 @@ class CalendarioDataService
             'productos' => $productosLista,
             'cantidad_total' => $cantidadTotal,
             'descripcion_evento' => $registro->descripcion_evento,
-            'tiene_items' => $registro->items && $registro->items->count() > 0
+            'tiene_items' => $registro->items && $registro->items->count() > 0,
         ];
     }
 
@@ -87,13 +87,13 @@ class CalendarioDataService
 
         foreach ($registro->items as $item) {
             $mov = $movimientos->get($item->movimientos_inventario_id);
-            if (!$mov || !isset($inventarios[$mov->inventario_id])) {
+            if (! $mov || ! isset($inventarios[$mov->inventario_id])) {
                 continue;
             }
 
             $productosLista[] = [
                 'nombre' => $inventarios[$mov->inventario_id]->descripcion,
-                'cantidad' => $item->cantidad
+                'cantidad' => $item->cantidad,
             ];
             $cantidadTotal += $item->cantidad;
         }
@@ -109,7 +109,7 @@ class CalendarioDataService
         $productosLista = [];
         $cantidadTotal = 0;
 
-        $movimiento = collect($movimientos)->first(function($m) use ($registro) {
+        $movimiento = collect($movimientos)->first(function ($m) use ($registro) {
             return $m->id == $registro->movimientos_inventario_id;
         });
 
@@ -117,7 +117,7 @@ class CalendarioDataService
             $cant = $registro->cantidad ?? 1;
             $productosLista[] = [
                 'nombre' => $inventarios[$movimiento->inventario_id]->descripcion ?? self::DEFAULT_PRODUCT_LABEL,
-                'cantidad' => $cant
+                'cantidad' => $cant,
             ];
             $cantidadTotal = $cant;
         }
@@ -149,4 +149,3 @@ class CalendarioDataService
         return [$movimientos, $inventarios];
     }
 }
-

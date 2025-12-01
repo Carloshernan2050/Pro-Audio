@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\InventarioController;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Unitarios para InventarioController
@@ -17,7 +17,7 @@ class InventarioControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new InventarioController();
+        $this->controller = new InventarioController;
     }
 
     // ============================================
@@ -28,7 +28,7 @@ class InventarioControllerUnitTest extends TestCase
     {
         $reglasEsperadas = [
             'descripcion' => 'required|string|max:255',
-            'stock' => 'required|integer|min:0'
+            'stock' => 'required|integer|min:0',
         ];
 
         $this->assertArrayHasKey('descripcion', $reglasEsperadas);
@@ -40,7 +40,7 @@ class InventarioControllerUnitTest extends TestCase
     public function test_validacion_stock_estructura(): void
     {
         $reglasEsperadas = [
-            'stock' => 'required|integer|min:0'
+            'stock' => 'required|integer|min:0',
         ];
 
         $this->assertArrayHasKey('stock', $reglasEsperadas);
@@ -57,7 +57,7 @@ class InventarioControllerUnitTest extends TestCase
             'descripcion.max' => 'La descripción no puede exceder 255 caracteres.',
             'stock.required' => 'El stock es obligatorio.',
             'stock.integer' => 'El stock debe ser un número entero.',
-            'stock.min' => 'El stock no puede ser menor a 0.'
+            'stock.min' => 'El stock no puede ser menor a 0.',
         ];
 
         $this->assertCount(6, $mensajes);
@@ -83,4 +83,3 @@ class InventarioControllerUnitTest extends TestCase
         $this->assertIsInt($maxCaracteres);
     }
 }
-

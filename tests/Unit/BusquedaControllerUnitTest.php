@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\BusquedaController;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Unitarios para BusquedaController
@@ -17,7 +17,7 @@ class BusquedaControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new BusquedaController();
+        $this->controller = new BusquedaController;
     }
 
     // ============================================
@@ -77,4 +77,3 @@ class BusquedaControllerUnitTest extends TestCase
         $this->assertStringContainsString('alquiler', strtolower($resultado));
     }
 }
-

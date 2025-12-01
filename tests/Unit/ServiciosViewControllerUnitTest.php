@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\ServiciosViewController;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Unitarios para ServiciosViewController
@@ -18,7 +18,7 @@ class ServiciosViewControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new ServiciosViewController();
+        $this->controller = new ServiciosViewController;
     }
 
     // ============================================
@@ -68,4 +68,3 @@ class ServiciosViewControllerUnitTest extends TestCase
         }
     }
 }
-

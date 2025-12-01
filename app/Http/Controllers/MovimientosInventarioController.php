@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MovimientosInventario;
 use App\Models\Inventario;
+use App\Models\MovimientosInventario;
 use Illuminate\Http\Request;
 
 class MovimientosInventarioController extends Controller
@@ -14,6 +14,7 @@ class MovimientosInventarioController extends Controller
     public function index()
     {
         $movimientos = MovimientosInventario::with('inventario')->get();
+
         return response()->json($movimientos);
     }
 
@@ -25,7 +26,7 @@ class MovimientosInventarioController extends Controller
         $request->validate([
             'inventario_id' => 'required|exists:inventario,id',
             'tipo_movimiento' => 'required|in:entrada,salida,alquilado,devuelto',
-            'cantidad' => 'required|integer|min:1'
+            'cantidad' => 'required|integer|min:1',
         ], [
             'inventario_id.required' => 'Debe seleccionar un artículo del inventario.',
             'inventario_id.exists' => 'El artículo seleccionado no existe.',
@@ -33,7 +34,7 @@ class MovimientosInventarioController extends Controller
             'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada, salida, alquilado o devuelto.',
             'cantidad.required' => 'La cantidad es obligatoria.',
             'cantidad.integer' => 'La cantidad debe ser un número entero.',
-            'cantidad.min' => 'La cantidad debe ser mayor a 0.'
+            'cantidad.min' => 'La cantidad debe ser mayor a 0.',
         ]);
 
         $inventario = Inventario::findOrFail($request->inventario_id);
@@ -56,12 +57,12 @@ class MovimientosInventarioController extends Controller
             'tipo_movimiento' => $request->tipo_movimiento,
             'cantidad' => $request->cantidad,
             'fecha_movimiento' => now(),
-            'descripcion' => $request->descripcion ?? ''
+            'descripcion' => $request->descripcion ?? '',
         ]);
 
         return response()->json([
             'success' => 'Movimiento de inventario registrado correctamente.',
-            'movimiento_id' => $movimiento->id
+            'movimiento_id' => $movimiento->id,
         ]);
     }
 
@@ -73,7 +74,7 @@ class MovimientosInventarioController extends Controller
         $request->validate([
             'inventario_id' => 'required|exists:inventario,id',
             'tipo_movimiento' => 'required|in:entrada,salida,alquilado,devuelto',
-            'cantidad' => 'required|integer|min:1'
+            'cantidad' => 'required|integer|min:1',
         ], [
             'inventario_id.required' => 'Debe seleccionar un artículo del inventario.',
             'inventario_id.exists' => 'El artículo seleccionado no existe.',
@@ -81,7 +82,7 @@ class MovimientosInventarioController extends Controller
             'tipo_movimiento.in' => 'El tipo de movimiento debe ser entrada, salida, alquilado o devuelto.',
             'cantidad.required' => 'La cantidad es obligatoria.',
             'cantidad.integer' => 'La cantidad debe ser un número entero.',
-            'cantidad.min' => 'La cantidad debe ser mayor a 0.'
+            'cantidad.min' => 'La cantidad debe ser mayor a 0.',
         ]);
 
         $movimiento = MovimientosInventario::findOrFail($id);
@@ -113,7 +114,7 @@ class MovimientosInventarioController extends Controller
         $movimiento->update([
             'inventario_id' => $request->inventario_id,
             'tipo_movimiento' => $request->tipo_movimiento,
-            'cantidad' => $request->cantidad
+            'cantidad' => $request->cantidad,
         ]);
 
         return response()->json(['success' => 'Movimiento de inventario actualizado correctamente.']);

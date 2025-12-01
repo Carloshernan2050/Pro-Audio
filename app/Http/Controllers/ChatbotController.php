@@ -2,28 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ChatbotIntentionDetector;
+use App\Services\ChatbotMessageProcessor;
+use App\Services\ChatbotResponseBuilder;
+use App\Services\ChatbotSessionManager;
+use App\Services\ChatbotSubServicioService;
+use App\Services\ChatbotSuggestionGenerator;
+use App\Services\ChatbotTextProcessor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Models\SubServicios;
-use App\Models\Cotizacion;
-use App\Services\ChatbotTextProcessor;
-use App\Services\ChatbotIntentionDetector;
-use App\Services\ChatbotSuggestionGenerator;
-use App\Services\ChatbotResponseBuilder;
-use App\Services\ChatbotMessageProcessor;
-use App\Services\ChatbotSubServicioService;
-use App\Services\ChatbotSessionManager;
 
 class ChatbotController extends Controller
 {
     private ChatbotTextProcessor $textProcessor;
-    private ChatbotIntentionDetector $intentionDetector;
-    private ChatbotSuggestionGenerator $suggestionGenerator;
-    private ChatbotResponseBuilder $responseBuilder;
-    private ChatbotMessageProcessor $messageProcessor;
-    private ChatbotSubServicioService $subServicioService;
-    private ChatbotSessionManager $sessionManager;
 
+    private ChatbotIntentionDetector $intentionDetector;
+
+    private ChatbotSuggestionGenerator $suggestionGenerator;
+
+    private ChatbotResponseBuilder $responseBuilder;
+
+    private ChatbotMessageProcessor $messageProcessor;
+
+    private ChatbotSubServicioService $subServicioService;
+
+    private ChatbotSessionManager $sessionManager;
 
     public function __construct(
         ChatbotTextProcessor $textProcessor,
@@ -78,6 +81,7 @@ class ChatbotController extends Controller
                 return $accion;
             }
         }
+
         return null;
     }
 
@@ -101,11 +105,12 @@ class ChatbotController extends Controller
         } elseif ($sessionDays > 0) {
             $daysForResponse = $sessionDays;
         }
-        if (!empty($intencionesConfirmadas)) {
+        if (! empty($intencionesConfirmadas)) {
             $relSub = $this->subServicioService->obtenerSubServiciosPorIntenciones($intencionesConfirmadas);
             if ($relSub->isNotEmpty()) {
                 session(['chat.intenciones' => $intencionesConfirmadas]);
                 $seleccionesActuales = (array) session('chat.selecciones', []);
+
                 return $this->responseBuilder->responderOpciones(
                     'Perfecto. Estas son las opciones relacionadas. Selecciona los sub-servicios que deseas cotizar:',
                     $relSub,
@@ -114,6 +119,7 @@ class ChatbotController extends Controller
                 );
             }
         }
+
         return $this->responseBuilder->mostrarCatalogoJson(
             'No encontré una coincidencia clara. Aquí tienes el catálogo:',
             $daysForResponse ?? null,
@@ -143,11 +149,12 @@ class ChatbotController extends Controller
 
     private function manejarErrorEnProcesamiento(Request $request, \Throwable $e): \Illuminate\Http\JsonResponse
     {
-        Log::error('Error en ChatbotController@enviar: ' . $e->getMessage(), [ 'trace' => $e->getTraceAsString() ]);
+        Log::error('Error en ChatbotController@enviar: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
         $respuestaRecuperacion = $this->intentarRecuperacion($request);
         if ($respuestaRecuperacion !== null) {
             return $respuestaRecuperacion;
         }
+
         return $this->responseBuilder->mostrarCatalogoJson(
             'Estoy teniendo inconvenientes para procesar tu mensaje. Te muestro el catálogo para que puedas continuar:',
             (int) session('chat.days', 1) ?: null,
@@ -169,14 +176,15 @@ class ChatbotController extends Controller
             } catch (\Throwable $_) {
                 // Ignorar errores al generar sugerencias
             }
-            $tok = isset($hint['token']) ? trim((string)$hint['token']) : null;
-            $respuestaTexto = $tok ? ("Por \"{$tok}\" ¿te refieres a " . implode(' y ', $ints) . "?") : ("¿Te refieres a " . implode(' y ', $ints) . "?");
+            $tok = isset($hint['token']) ? trim((string) $hint['token']) : null;
+            $respuestaTexto = $tok ? ("Por \"{$tok}\" ¿te refieres a ".implode(' y ', $ints).'?') : ('¿Te refieres a '.implode(' y ', $ints).'?');
             $sessionDaysValue = (int) session('chat.days', 0);
+
             return response()->json([
                 'respuesta' => $respuestaTexto,
                 'actions' => [
                     ['id' => 'confirm_intent', 'label' => 'Sí, continuar', 'meta' => ['intenciones' => $ints, 'dias' => $sessionDaysValue > 0 ? $sessionDaysValue : null]],
-                    ['id' => 'reject_intent', 'label' => 'No, mostrar catálogo']
+                    ['id' => 'reject_intent', 'label' => 'No, mostrar catálogo'],
                 ],
                 'days' => $sessionDaysValue > 0 ? $sessionDaysValue : null,
             ]);
@@ -188,6 +196,7 @@ class ChatbotController extends Controller
     private function manejarLimpiezaCotizacion()
     {
         $this->sessionManager->limpiarSesionChat();
+
         return response()->json([
             'respuesta' => 'Cotización limpiada. Puedes empezar una nueva selección.',
             'selecciones' => [],
@@ -202,6 +211,7 @@ class ChatbotController extends Controller
         $personasId = session('usuario_id');
         $this->sessionManager->guardarCotizacion($personasId, $selecciones, $dias);
         $this->sessionManager->limpiarSesionChat();
+
         return response()->json([
             'respuesta' => 'Gracias por tu interés. Contacta con un trabajador en <a href="https://w.app/zlxp23" target="_blank" rel="noopener noreferrer">https://w.app/zlxp23</a>. Tu cotización ha sido guardada.',
             'limpiar_chat' => true,
@@ -209,7 +219,6 @@ class ChatbotController extends Controller
             'total' => 0,
         ]);
     }
-
 
     private function procesarSeleccionSubServicios(array $seleccion, int $dias)
     {
@@ -220,6 +229,7 @@ class ChatbotController extends Controller
         if (empty($seleccionNormalizada)) {
             session()->forget('chat.selecciones');
             $diasParaRespuesta = $this->sessionManager->obtenerDiasParaRespuesta($dias);
+
             return $this->responseBuilder->mostrarCatalogoJson(
                 'No tienes sub-servicios seleccionados. El catálogo está disponible para que agregues los que necesites:',
                 $diasParaRespuesta,
@@ -231,6 +241,7 @@ class ChatbotController extends Controller
         if ($items->isEmpty()) {
             session()->forget('chat.selecciones');
             $diasParaRespuesta = $this->sessionManager->obtenerDiasParaRespuesta($dias);
+
             return $this->responseBuilder->mostrarCatalogoJson(
                 'No se encontraron sub-servicios para tu selección. Aquí está el catálogo completo:',
                 $diasParaRespuesta,
@@ -245,6 +256,7 @@ class ChatbotController extends Controller
         } else {
             $diasCalculo = max(1, $sessionDaysValue > 0 ? $sessionDaysValue : 1);
         }
+
         return $this->responseBuilder->responderCotizacion($items, $diasCalculo, $seleccionNormalizada);
     }
 
@@ -256,10 +268,7 @@ class ChatbotController extends Controller
         } elseif ($sessionDaysValue > 0) {
             return $sessionDaysValue;
         }
+
         return null;
     }
-
-
-
-
 }

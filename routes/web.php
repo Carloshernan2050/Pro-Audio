@@ -1,23 +1,25 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UsuarioController;
-use App\Http\Controllers\ServiciosController;
+use App\Http\Controllers\AjustesController;
+use App\Http\Controllers\BusquedaController;
 use App\Http\Controllers\CalendarioController;
-use App\Http\Controllers\ServiciosViewController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\MovimientosInventarioController;
-use App\Http\Controllers\AjustesController;
-use App\Http\Controllers\ChatbotController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\BusquedaController;
-use App\Http\Controllers\SubServiciosController;
-use App\Http\Controllers\RoleAdminController;
-use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\RoleAdminController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ServiciosController;
+use App\Http\Controllers\ServiciosViewController;
+use App\Http\Controllers\SubServiciosController;
+use App\Http\Controllers\UsuarioController;
+use Illuminate\Support\Facades\Route;
 
 // Inicio directo al dashboard (middleware pondrá Invitado por defecto)
-Route::get('/', function(){ return redirect()->route('inicio'); });
+Route::get('/', function () {
+    return redirect()->route('inicio');
+});
 
 // Inicio principal (dashboard de la app)
 Route::get('/inicio', function () {
@@ -37,11 +39,12 @@ Route::post('/usuarios/cerrarSesion', [UsuarioController::class, 'cerrarSesion']
 
 // Dashboard protegido
 Route::get('/dashboard', function () {
-    if (!session()->has('usuario_id')) {
+    if (! session()->has('usuario_id')) {
         return redirect()->route('usuarios.inicioSesion')->with('error', 'Debes iniciar sesión primero.');
     }
+
     return view('usuarios.dashboard', [
-        'usuario_nombre' => session('usuario_nombre')
+        'usuario_nombre' => session('usuario_nombre'),
     ]);
 })->name('dashboard');
 

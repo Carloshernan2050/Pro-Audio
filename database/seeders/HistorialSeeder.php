@@ -20,7 +20,7 @@ class HistorialSeeder extends Seeder
         }
 
         // Insertar solo si hay datos válidos
-        if (!empty($data)) {
+        if (! empty($data)) {
             DB::table('historial')->insert($data);
         }
     }

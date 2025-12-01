@@ -9,7 +9,6 @@ use App\Models\MovimientosInventario;
 use App\Models\Usuario;
 use App\Services\CalendarioEventService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 class CalendarioEventServiceTest extends TestCase
@@ -17,18 +16,23 @@ class CalendarioEventServiceTest extends TestCase
     use RefreshDatabase;
 
     private const EVENTO_DE_PRUEBA = 'Evento de prueba';
+
     private const PRODUCTO_TEST = 'Producto Test';
+
     private const FECHA_INICIO = '2024-01-01';
+
     private const FECHA_FIN = '2024-01-05';
+
     private const MOVIMIENTO_DE_PRUEBA = 'Movimiento de prueba';
 
     private CalendarioEventService $service;
+
     private Usuario $persona;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CalendarioEventService();
+        $this->service = new CalendarioEventService;
         $this->persona = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'User',
@@ -153,12 +157,12 @@ class CalendarioEventServiceTest extends TestCase
     public function test_construir_evento_con_multiples_items(): void
     {
         $inventario1 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 1',
+            'descripcion' => self::PRODUCTO_TEST.' 1',
             'stock' => 10,
         ]);
 
         $inventario2 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 2',
+            'descripcion' => self::PRODUCTO_TEST.' 2',
             'stock' => 10,
         ]);
 
@@ -207,8 +211,8 @@ class CalendarioEventServiceTest extends TestCase
 
         $this->assertIsArray($resultado);
         $this->assertCount(2, $resultado['items']);
-        $this->assertStringContainsString(self::PRODUCTO_TEST . ' 1', $resultado['evento']['title']);
-        $this->assertStringContainsString(self::PRODUCTO_TEST . ' 2', $resultado['evento']['title']);
+        $this->assertStringContainsString(self::PRODUCTO_TEST.' 1', $resultado['evento']['title']);
+        $this->assertStringContainsString(self::PRODUCTO_TEST.' 2', $resultado['evento']['title']);
     }
 
     public function test_construir_evento_con_item_sin_inventario_en_coleccion(): void
@@ -317,7 +321,8 @@ class CalendarioEventServiceTest extends TestCase
 
     public function test_next_palette_color_usa_default_si_palette_vacia(): void
     {
-        $service = new class extends CalendarioEventService {
+        $service = new class extends CalendarioEventService
+        {
             private array $calendarColorPalette = [];
         };
 
@@ -439,4 +444,3 @@ class CalendarioEventServiceTest extends TestCase
         $this->assertIsString($resultado['evento']['description']);
     }
 }
-

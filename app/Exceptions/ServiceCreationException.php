@@ -7,9 +7,4 @@ use RuntimeException;
 /**
  * @codeCoverageIgnore
  */
-class ServiceCreationException extends RuntimeException
-{
-}
-
-
-
+class ServiceCreationException extends RuntimeException {}

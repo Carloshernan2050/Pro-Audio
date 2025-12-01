@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             CotizacionSeeder::class,
             CalendarioSeeder::class,
             HistorialSeeder::class,
-            
+
         ]);
     }
 }

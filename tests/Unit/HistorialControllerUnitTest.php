@@ -2,15 +2,15 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Http\Controllers\HistorialController;
+use App\Models\Calendario;
 use App\Models\Historial;
+use App\Models\Inventario;
+use App\Models\MovimientosInventario;
 use App\Models\Reserva;
 use App\Models\Usuario;
-use App\Models\Calendario;
-use App\Models\MovimientosInventario;
-use App\Models\Inventario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para HistorialController
@@ -26,7 +26,7 @@ class HistorialControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new HistorialController();
+        $this->controller = new HistorialController;
     }
 
     public function test_controller_instancia_correctamente(): void
@@ -43,12 +43,12 @@ class HistorialControllerUnitTest extends TestCase
             'correo' => 'test@test.com',
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $inventario = Inventario::create([
             'descripcion' => 'Test Inventario',
-            'stock' => 10
+            'stock' => 10,
         ]);
 
         $movimiento = MovimientosInventario::create([
@@ -56,7 +56,7 @@ class HistorialControllerUnitTest extends TestCase
             'tipo_movimiento' => 'salida',
             'cantidad' => 1,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Test movimiento'
+            'descripcion' => 'Test movimiento',
         ]);
 
         $calendario = Calendario::create([
@@ -66,7 +66,7 @@ class HistorialControllerUnitTest extends TestCase
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
             'evento' => 'Test evento',
-            'descripcion_evento' => 'Test descripción'
+            'descripcion_evento' => 'Test descripción',
         ]);
 
         $reserva = Reserva::create([
@@ -74,17 +74,17 @@ class HistorialControllerUnitTest extends TestCase
             'calendario_id' => $calendario->id,
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
-            'estado' => 'pendiente'
+            'estado' => 'pendiente',
         ]);
 
         Historial::create([
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
-            'accion' => 'creada'
+            'accion' => 'creada',
         ]);
 
         $response = $this->controller->index();
-        
+
         $this->assertNotNull($response);
     }
 
@@ -97,12 +97,12 @@ class HistorialControllerUnitTest extends TestCase
             'correo' => 'test@test.com',
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $inventario = Inventario::create([
             'descripcion' => 'Test Inventario',
-            'stock' => 10
+            'stock' => 10,
         ]);
 
         $movimiento = MovimientosInventario::create([
@@ -110,7 +110,7 @@ class HistorialControllerUnitTest extends TestCase
             'tipo_movimiento' => 'salida',
             'cantidad' => 1,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Test movimiento'
+            'descripcion' => 'Test movimiento',
         ]);
 
         $calendario = Calendario::create([
@@ -120,7 +120,7 @@ class HistorialControllerUnitTest extends TestCase
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
             'evento' => 'Test evento',
-            'descripcion_evento' => 'Test descripción'
+            'descripcion_evento' => 'Test descripción',
         ]);
 
         $reserva = Reserva::create([
@@ -128,17 +128,17 @@ class HistorialControllerUnitTest extends TestCase
             'calendario_id' => $calendario->id,
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
-            'estado' => 'pendiente'
+            'estado' => 'pendiente',
         ]);
 
         Historial::create([
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
-            'accion' => 'creada'
+            'accion' => 'creada',
         ]);
 
         $response = $this->controller->exportPdf();
-        
+
         $this->assertNotNull($response);
         $this->assertStringContainsString('historial.pdf', $response->headers->get('Content-Disposition'));
     }
@@ -149,7 +149,7 @@ class HistorialControllerUnitTest extends TestCase
         $formatoPapel = 'a4';
         $orientacion = 'portrait';
         $nombreArchivo = 'historial.pdf';
-        
+
         $this->assertEquals('a4', $formatoPapel);
         $this->assertEquals('portrait', $orientacion);
         $this->assertStringEndsWith('.pdf', $nombreArchivo);
@@ -159,7 +159,7 @@ class HistorialControllerUnitTest extends TestCase
     {
         // Verificar que la vista existe conceptualmente
         $vista = 'usuarios.historial';
-        
+
         $this->assertIsString($vista);
         $this->assertStringStartsWith('usuarios.', $vista);
     }

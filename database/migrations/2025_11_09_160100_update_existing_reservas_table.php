@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('reservas')) {
+        if (! Schema::hasTable('reservas')) {
             return;
         }
 
-            Schema::table('reservas', function (Blueprint $table) {
+        Schema::table('reservas', function (Blueprint $table) {
             $this->addDescripcionEvento($table);
             $this->addColumnIfMissing($table, 'servicio', function ($table) {
                 $table->string('servicio')->nullable()->after('personas_id');
@@ -47,20 +47,20 @@ return new class extends Migration
             return;
         }
 
-                    $afterColumn = Schema::hasColumn('reservas', 'fecha_fin') ? 'fecha_fin' : null;
-                    if ($afterColumn) {
-                        $table->text('descripcion_evento')->nullable()->after($afterColumn);
-                    } else {
-                        $table->text('descripcion_evento')->nullable();
-                    }
-                }
+        $afterColumn = Schema::hasColumn('reservas', 'fecha_fin') ? 'fecha_fin' : null;
+        if ($afterColumn) {
+            $table->text('descripcion_evento')->nullable()->after($afterColumn);
+        } else {
+            $table->text('descripcion_evento')->nullable();
+        }
+    }
 
     /**
      * Add a column if it doesn't exist.
      */
     private function addColumnIfMissing(Blueprint $table, string $columnName, callable $callback): void
     {
-        if (!Schema::hasColumn('reservas', $columnName)) {
+        if (! Schema::hasColumn('reservas', $columnName)) {
             $callback($table);
         }
     }
@@ -70,11 +70,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (!Schema::hasTable('reservas')) {
+        if (! Schema::hasTable('reservas')) {
             return;
         }
 
-            Schema::table('reservas', function (Blueprint $table) {
+        Schema::table('reservas', function (Blueprint $table) {
             $this->dropColumnIfExists($table, 'meta');
             $this->dropColumnIfExists($table, 'estado');
             $this->dropColumnIfExists($table, 'cantidad_total');
@@ -99,10 +99,10 @@ return new class extends Migration
      */
     private function dropPersonasIdIfExists(Blueprint $table): void
     {
-                if (Schema::hasColumn('reservas', 'personas_id')) {
-                    $table->dropForeign(['personas_id']);
-                    $table->dropColumn('personas_id');
-                }
+        if (Schema::hasColumn('reservas', 'personas_id')) {
+            $table->dropForeign(['personas_id']);
+            $table->dropColumn('personas_id');
+        }
     }
 
     /**
@@ -110,9 +110,8 @@ return new class extends Migration
      */
     private function dropTimestampsIfExists(Blueprint $table): void
     {
-                if (Schema::hasColumn('reservas', 'created_at') && Schema::hasColumn('reservas', 'updated_at')) {
-                    $table->dropTimestamps();
+        if (Schema::hasColumn('reservas', 'created_at') && Schema::hasColumn('reservas', 'updated_at')) {
+            $table->dropTimestamps();
         }
     }
 };
-

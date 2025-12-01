@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('reservas')) {
+        if (! Schema::hasTable('reservas')) {
             Schema::create('reservas', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('personas_id')->nullable()->constrained('personas');
@@ -26,7 +26,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('reserva_items')) {
+        if (! Schema::hasTable('reserva_items')) {
             Schema::create('reserva_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('reserva_id')->constrained('reservas')->cascadeOnDelete();
@@ -38,16 +38,16 @@ return new class extends Migration
 
         if (Schema::hasTable('historial')) {
             Schema::table('historial', function (Blueprint $table) {
-                if (!Schema::hasColumn('historial', 'reserva_id')) {
+                if (! Schema::hasColumn('historial', 'reserva_id')) {
                     $table->foreignId('reserva_id')->nullable()->after('calendario_id')->constrained('reservas')->nullOnDelete();
                 }
-                if (!Schema::hasColumn('historial', 'accion')) {
+                if (! Schema::hasColumn('historial', 'accion')) {
                     $table->string('accion', 50)->nullable()->after('reserva_id');
                 }
-                if (!Schema::hasColumn('historial', 'confirmado_en')) {
+                if (! Schema::hasColumn('historial', 'confirmado_en')) {
                     $table->dateTime('confirmado_en')->nullable()->after('accion');
                 }
-                if (!Schema::hasColumn('historial', 'observaciones')) {
+                if (! Schema::hasColumn('historial', 'observaciones')) {
                     $table->text('observaciones')->nullable()->after('confirmado_en');
                 }
             });
@@ -85,4 +85,3 @@ return new class extends Migration
         }
     }
 };
-

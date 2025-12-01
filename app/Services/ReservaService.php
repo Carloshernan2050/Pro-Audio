@@ -14,7 +14,7 @@ class ReservaService
     public function actualizarReservaVinculada(Request $request, int $calendarioId, int $cantidadTotal, array $nuevosItemsReserva): void
     {
         $reserva = Reserva::with('items')->where('calendario_id', $calendarioId)->first();
-        if (!$reserva) {
+        if (! $reserva) {
             return;
         }
 
@@ -41,7 +41,7 @@ class ReservaService
     public function actualizarReservaFormatoAntiguo(Request $request, int $calendarioId, Calendario $calendario): void
     {
         $reserva = Reserva::where('calendario_id', $calendarioId)->first();
-        if (!$reserva) {
+        if (! $reserva) {
             return;
         }
 
@@ -57,4 +57,3 @@ class ReservaService
         ]);
     }
 }
-

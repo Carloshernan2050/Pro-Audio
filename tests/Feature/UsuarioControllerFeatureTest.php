@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 /**
  * Tests Feature para UsuarioController
@@ -19,25 +19,34 @@ class UsuarioControllerFeatureTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'test@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Juan';
+
     private const TEST_APELLIDO = 'Pérez';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROL_CLIENTE = 'Cliente';
+
     private const ROUTE_PERFIL = '/perfil';
+
     private const ROUTE_PERFIL_PHOTO = '/perfil/photo';
+
     private const ROUTE_USUARIOS = '/usuarios';
+
     private const ROUTE_USUARIOS_AUTENTICAR = '/usuarios/autenticar';
 
     protected function setUp(): void
     {
         parent::setUp();
         Storage::fake('public');
-        
+
         // Crear rol Cliente si no existe
-        if (!DB::table('roles')->where('nombre_rol', 'Cliente')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Cliente')->exists()) {
             DB::table('roles')->insert([
-                'nombre_rol' => 'Cliente'
+                'nombre_rol' => 'Cliente',
             ]);
         }
     }
@@ -96,18 +105,18 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response->assertStatus(200);
         $response->assertJson([
             'success' => true,
-            'message' => 'Foto de perfil actualizada correctamente'
+            'message' => 'Foto de perfil actualizada correctamente',
         ]);
         $response->assertJsonStructure([
             'success',
             'message',
-            'foto_url'
+            'foto_url',
         ]);
 
         $usuario->refresh();
@@ -120,7 +129,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         // El middleware redirige cuando no hay sesión (asigna Invitado y redirige porque no tiene acceso)
@@ -145,7 +154,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         // El middleware redirige porque 'Invitado' no está en la lista de roles permitidos
@@ -160,13 +169,13 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response->assertStatus(404);
         $response->assertJson([
             'success' => false,
-            'message' => 'Usuario no encontrado'
+            'message' => 'Usuario no encontrado',
         ]);
     }
 
@@ -190,7 +199,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('new_perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response->assertStatus(200);
@@ -226,7 +235,6 @@ class UsuarioControllerFeatureTest extends TestCase
         }
     }
 
-
     // ============================================
     // TESTS PARA STORE - CASOS ESPECÍFICOS
     // ============================================
@@ -247,7 +255,7 @@ class UsuarioControllerFeatureTest extends TestCase
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
         $this->assertDatabaseHas('personas', [
-            'correo' => self::TEST_EMAIL
+            'correo' => self::TEST_EMAIL,
         ]);
     }
 
@@ -256,7 +264,7 @@ class UsuarioControllerFeatureTest extends TestCase
         // Crear rol solo con nombre_rol
         DB::table('roles')->truncate();
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         $response = $this->post(self::ROUTE_USUARIOS, [
@@ -269,11 +277,11 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $this->assertDatabaseHas('personas_roles', [
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
     }
 
@@ -369,12 +377,12 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => 'Administrador'
+            'nombre_rol' => 'Administrador',
         ]);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         $this->post(self::ROUTE_USUARIOS_AUTENTICAR, [
@@ -400,13 +408,13 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         // Insertar el mismo rol dos veces
         DB::table('personas_roles')->insert([
             ['personas_id' => $usuario->id, 'roles_id' => $rolId],
-            ['personas_id' => $usuario->id, 'roles_id' => $rolId]
+            ['personas_id' => $usuario->id, 'roles_id' => $rolId],
         ]);
 
         $this->post(self::ROUTE_USUARIOS_AUTENTICAR, [
@@ -448,7 +456,7 @@ class UsuarioControllerFeatureTest extends TestCase
         DB::table('roles')->truncate();
         $rolId = DB::table('roles')->insertGetId([
             'name' => 'Cliente',
-            'nombre_rol' => 'Cliente'
+            'nombre_rol' => 'Cliente',
         ]);
 
         $response = $this->post(self::ROUTE_USUARIOS, [
@@ -461,11 +469,11 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $this->assertDatabaseHas('personas_roles', [
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
     }
 
@@ -501,7 +509,6 @@ class UsuarioControllerFeatureTest extends TestCase
         $this->assertNull(session('usuario_id'));
     }
 
-
     public function test_update_photo_con_foto_anterior_que_no_existe_en_storage(): void
     {
         $usuario = Usuario::create([
@@ -520,7 +527,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response->assertStatus(200);
@@ -640,7 +647,7 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         $this->assertDatabaseHas('personas', [
             'correo' => self::TEST_EMAIL,
             'segundo_nombre' => 'Carlos',
@@ -661,7 +668,7 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $this->assertNull($usuario->segundo_nombre);
         $this->assertNull($usuario->segundo_apellido);
@@ -758,7 +765,7 @@ class UsuarioControllerFeatureTest extends TestCase
     {
         // Crear un usuario con un ID que cause conflicto al insertar en personas_roles
         // Esto simulará una excepción en el bloque try-catch
-        
+
         // Primero crear un usuario normalmente
         $usuario1 = Usuario::create([
             'primer_nombre' => 'Usuario',
@@ -775,7 +782,7 @@ class UsuarioControllerFeatureTest extends TestCase
             // Insertar manualmente para que el segundo intento falle
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario1->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -798,7 +805,6 @@ class UsuarioControllerFeatureTest extends TestCase
     // TESTS ADICIONALES PARA AUTENTICAR
     // ============================================
 
-
     public function test_autenticar_con_roles_multiples_sin_duplicados(): void
     {
         $usuario = Usuario::create([
@@ -816,7 +822,7 @@ class UsuarioControllerFeatureTest extends TestCase
 
         DB::table('personas_roles')->insert([
             ['personas_id' => $usuario->id, 'roles_id' => $rol1Id],
-            ['personas_id' => $usuario->id, 'roles_id' => $rol2Id]
+            ['personas_id' => $usuario->id, 'roles_id' => $rol2Id],
         ]);
 
         $this->post(self::ROUTE_USUARIOS_AUTENTICAR, [
@@ -846,12 +852,12 @@ class UsuarioControllerFeatureTest extends TestCase
 
         // Usar un rol válido del enum
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => 'Administrador'
+            'nombre_rol' => 'Administrador',
         ]);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         $this->post(self::ROUTE_USUARIOS_AUTENTICAR, [
@@ -877,12 +883,12 @@ class UsuarioControllerFeatureTest extends TestCase
 
         // Usar un rol válido del enum (nombre_rol es NOT NULL)
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => 'Invitado'
+            'nombre_rol' => 'Invitado',
         ]);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         $this->post(self::ROUTE_USUARIOS_AUTENTICAR, [
@@ -977,7 +983,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response->assertStatus(200);
@@ -1003,7 +1009,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100)->size(6144); // 6MB
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         if ($response->status() === 302) {
@@ -1013,7 +1019,6 @@ class UsuarioControllerFeatureTest extends TestCase
             $response->assertJsonValidationErrors('foto_perfil');
         }
     }
-
 
     public function test_update_photo_con_diferentes_formatos_permitidos(): void
     {
@@ -1030,14 +1035,14 @@ class UsuarioControllerFeatureTest extends TestCase
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
 
         $formatos = ['jpg', 'png', 'gif'];
-        
+
         foreach ($formatos as $formato) {
             $file = \Illuminate\Http\UploadedFile::fake()->image("perfil.{$formato}", 100, 100);
-            
+
             $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-                'foto_perfil' => $file
+                'foto_perfil' => $file,
             ]);
-            
+
             $this->assertEquals(200, $response->status(), "El formato {$formato} debería ser aceptado");
         }
     }
@@ -1062,7 +1067,7 @@ class UsuarioControllerFeatureTest extends TestCase
             'usuario_id' => $usuario->id,
             'usuario_nombre' => self::TEST_NOMBRE,
             'roles' => [self::ROL_CLIENTE],
-            'role' => self::ROL_CLIENTE
+            'role' => self::ROL_CLIENTE,
         ]);
 
         $response = $this->post('/usuarios/cerrarSesion');
@@ -1132,13 +1137,12 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         // Verificar que el usuario se creó pero sin rol asignado
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $this->assertNotNull($usuario);
         $this->assertCount(0, DB::table('personas_roles')->where('personas_id', $usuario->id)->get());
     }
-
 
     public function test_autenticar_con_roles_array_vacio_despues_de_map(): void
     {
@@ -1207,7 +1211,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->create('documento.pdf', 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         if ($response->status() === 302) {
@@ -1236,7 +1240,7 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.webp', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         if ($response->status() === 302) {
@@ -1268,11 +1272,11 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response->assertStatus(200);
-        
+
         // Verificar que la foto anterior fue eliminada
         Storage::disk('public')->assertMissing('perfiles/foto_anterior.jpg');
     }
@@ -1282,8 +1286,8 @@ class UsuarioControllerFeatureTest extends TestCase
         // Crear rol con name (simulando spatie/permission)
         // Aunque la tabla solo tiene nombre_rol, el código busca name primero
         $rolId = DB::table('roles')->where('nombre_rol', 'Cliente')->value('id');
-        
-        if (!$rolId) {
+
+        if (! $rolId) {
             $rolId = DB::table('roles')->insertGetId(['nombre_rol' => 'Cliente']);
         }
 
@@ -1297,10 +1301,10 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $this->assertNotNull($usuario);
-        
+
         // Verificar que se asignó el rol
         $rolAsignado = DB::table('personas_roles')
             ->where('personas_id', $usuario->id)
@@ -1308,7 +1312,6 @@ class UsuarioControllerFeatureTest extends TestCase
             ->exists();
         $this->assertTrue($rolAsignado);
     }
-
 
     public function test_store_valida_string_en_campos(): void
     {
@@ -1379,7 +1382,7 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         $usuario = Usuario::where('correo', 'nuevo@example.com')->first();
         $this->assertNotNull($usuario);
     }
@@ -1425,9 +1428,9 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
-        
+
         // Verificar que no se insertó en personas_roles porque $rolId era null
         $rolAsignado = DB::table('personas_roles')
             ->where('personas_id', $usuario->id)
@@ -1452,7 +1455,7 @@ class UsuarioControllerFeatureTest extends TestCase
         // Asignar el mismo rol dos veces (simulando duplicado)
         DB::table('personas_roles')->insert([
             ['personas_id' => $usuario->id, 'roles_id' => $rolId],
-            ['personas_id' => $usuario->id, 'roles_id' => $rolId]
+            ['personas_id' => $usuario->id, 'roles_id' => $rolId],
         ]);
 
         $this->post(self::ROUTE_USUARIOS_AUTENTICAR, [
@@ -1484,12 +1487,10 @@ class UsuarioControllerFeatureTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $response = $this->post(self::ROUTE_PERFIL_PHOTO, [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response->assertStatus(200);
         // No debería intentar eliminar nada porque foto_perfil es null
     }
-
 }
-

@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Http\Controllers\RoleController;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para RoleController
@@ -17,6 +17,7 @@ class RoleControllerUnitTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_ROLE_SET = '/role/set';
+
     private const ROUTE_ADMIN_KEY_VERIFY = '/role/admin-key/verify';
 
     protected $controller;
@@ -24,7 +25,7 @@ class RoleControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new RoleController();
+        $this->controller = new RoleController;
     }
 
     public function test_controller_instancia_correctamente(): void
@@ -35,18 +36,18 @@ class RoleControllerUnitTest extends TestCase
     public function test_select_retorna_vista(): void
     {
         $response = $this->controller->select();
-        
+
         $this->assertNotNull($response);
     }
 
     public function test_set_con_rol_administrador_sin_sesion(): void
     {
         $request = Request::create(self::ROUTE_ROLE_SET, 'POST', [
-            'role' => 'Administrador'
+            'role' => 'Administrador',
         ]);
 
         $response = $this->controller->set($request);
-        
+
         $this->assertNotNull($response);
         $this->assertTrue(session()->has('pending_admin'));
     }
@@ -54,9 +55,9 @@ class RoleControllerUnitTest extends TestCase
     public function test_set_con_rol_administrador_con_sesion(): void
     {
         session(['usuario_id' => 1]);
-        
+
         $request = Request::create(self::ROUTE_ROLE_SET, 'POST', [
-            'role' => 'Administrador'
+            'role' => 'Administrador',
         ]);
 
         $response = $this->controller->set($request);
@@ -67,11 +68,11 @@ class RoleControllerUnitTest extends TestCase
     public function test_set_con_rol_cliente(): void
     {
         $request = Request::create(self::ROUTE_ROLE_SET, 'POST', [
-            'role' => 'Cliente'
+            'role' => 'Cliente',
         ]);
 
         $response = $this->controller->set($request);
-        
+
         $this->assertNotNull($response);
         $this->assertEquals('Cliente', session('role'));
     }
@@ -79,11 +80,11 @@ class RoleControllerUnitTest extends TestCase
     public function test_set_con_rol_invitado(): void
     {
         $request = Request::create(self::ROUTE_ROLE_SET, 'POST', [
-            'role' => 'Invitado'
+            'role' => 'Invitado',
         ]);
 
         $response = $this->controller->set($request);
-        
+
         $this->assertNotNull($response);
         $this->assertEquals('Invitado', session('role'));
     }
@@ -98,22 +99,22 @@ class RoleControllerUnitTest extends TestCase
     public function test_admin_key_form_con_sesion(): void
     {
         session(['usuario_id' => 1, 'pending_admin' => true]);
-        
+
         $response = $this->controller->adminKeyForm();
-        
+
         $this->assertNotNull($response);
     }
 
     public function test_admin_key_verify_clave_correcta(): void
     {
         session(['usuario_id' => 1, 'pending_admin' => true]);
-        
+
         $request = Request::create(self::ROUTE_ADMIN_KEY_VERIFY, 'POST', [
-            'admin_key' => 'ProAudio00'
+            'admin_key' => 'ProAudio00',
         ]);
 
         $response = $this->controller->adminKeyVerify($request);
-        
+
         $this->assertNotNull($response);
         $this->assertEquals('Administrador', session('role'));
         $this->assertFalse(session()->has('pending_admin'));
@@ -122,20 +123,20 @@ class RoleControllerUnitTest extends TestCase
     public function test_admin_key_verify_clave_incorrecta(): void
     {
         session(['usuario_id' => 1, 'pending_admin' => true]);
-        
+
         $request = Request::create(self::ROUTE_ADMIN_KEY_VERIFY, 'POST', [
-            'admin_key' => 'clave_incorrecta'
+            'admin_key' => 'clave_incorrecta',
         ]);
 
         $response = $this->controller->adminKeyVerify($request);
-        
+
         $this->assertNotNull($response);
     }
 
     public function test_admin_key_verify_sin_sesion(): void
     {
         $request = Request::create(self::ROUTE_ADMIN_KEY_VERIFY, 'POST', [
-            'admin_key' => 'ProAudio00'
+            'admin_key' => 'ProAudio00',
         ]);
 
         $response = $this->controller->adminKeyVerify($request);
@@ -146,9 +147,9 @@ class RoleControllerUnitTest extends TestCase
     public function test_clear_limpia_rol(): void
     {
         session(['role' => 'Cliente']);
-        
+
         $response = $this->controller->clear();
-        
+
         $this->assertNotNull($response);
         $this->assertFalse(session()->has('role'));
     }
@@ -187,4 +188,3 @@ class RoleControllerUnitTest extends TestCase
         $this->assertContains('Invitado', $rolesEsperados);
     }
 }
-

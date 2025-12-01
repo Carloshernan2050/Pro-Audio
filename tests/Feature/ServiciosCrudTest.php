@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Servicios;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para CRUD de Servicios
@@ -19,22 +19,28 @@ class ServiciosCrudTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROUTE_SERVICIOS = '/servicios';
+
     private const DESC_PRUEBA = 'Descripción';
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Crear roles
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Administrador',
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -55,7 +61,7 @@ class ServiciosCrudTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -76,7 +82,7 @@ class ServiciosCrudTest extends TestCase
 
         Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler'
+            'descripcion' => 'Servicio de alquiler',
         ]);
 
         $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS);
@@ -107,7 +113,7 @@ class ServiciosCrudTest extends TestCase
         $response = $this->post(self::ROUTE_SERVICIOS, [
             'nombre_servicio' => 'Nuevo Servicio',
             'descripcion' => 'Descripción del nuevo servicio',
-            'icono' => 'icono-test'
+            'icono' => 'icono-test',
         ]);
 
         $response->assertRedirect(route('servicios.index'));
@@ -115,7 +121,7 @@ class ServiciosCrudTest extends TestCase
 
         $this->assertDatabaseHas('servicios', [
             'nombre_servicio' => 'Nuevo Servicio',
-            'descripcion' => 'Descripción del nuevo servicio'
+            'descripcion' => 'Descripción del nuevo servicio',
         ]);
     }
 
@@ -124,7 +130,7 @@ class ServiciosCrudTest extends TestCase
         $this->crearUsuarioAdmin();
 
         $response = $this->post(self::ROUTE_SERVICIOS, [
-            'descripcion' => 'Descripción sin nombre'
+            'descripcion' => 'Descripción sin nombre',
         ]);
 
         $response->assertSessionHasErrors('nombre_servicio');
@@ -136,12 +142,12 @@ class ServiciosCrudTest extends TestCase
 
         Servicios::create([
             'nombre_servicio' => 'Servicio Existente',
-            'descripcion' => self::DESC_PRUEBA
+            'descripcion' => self::DESC_PRUEBA,
         ]);
 
         $response = $this->post(self::ROUTE_SERVICIOS, [
             'nombre_servicio' => 'Servicio Existente',
-            'descripcion' => 'Otra descripción'
+            'descripcion' => 'Otra descripción',
         ]);
 
         $response->assertSessionHasErrors('nombre_servicio');
@@ -153,7 +159,7 @@ class ServiciosCrudTest extends TestCase
 
         $response = $this->post(self::ROUTE_SERVICIOS, [
             'nombre_servicio' => str_repeat('a', 101), // Más de 100 caracteres
-            'descripcion' => self::DESC_PRUEBA
+            'descripcion' => self::DESC_PRUEBA,
         ]);
 
         $response->assertSessionHasErrors('nombre_servicio');
@@ -169,10 +175,10 @@ class ServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler'
+            'descripcion' => 'Servicio de alquiler',
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS . "/{$servicio->id}");
+        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS."/{$servicio->id}");
 
         // Nota: El controlador intenta cargar una vista dinámica basada en el nombre del servicio
         // Si la vista no existe (usuarios.alquiler), retorna 500
@@ -184,7 +190,7 @@ class ServiciosCrudTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->get(self::ROUTE_SERVICIOS . '/99999');
+        $response = $this->get(self::ROUTE_SERVICIOS.'/99999');
 
         $response->assertStatus(404);
     }
@@ -199,13 +205,13 @@ class ServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Servicio Original',
-            'descripcion' => 'Descripción original'
+            'descripcion' => 'Descripción original',
         ]);
 
-        $response = $this->put(self::ROUTE_SERVICIOS . "/{$servicio->id}", [
+        $response = $this->put(self::ROUTE_SERVICIOS."/{$servicio->id}", [
             'nombre_servicio' => 'Servicio Actualizado',
             'descripcion' => 'Descripción actualizada',
-            'icono' => 'icono-actualizado'
+            'icono' => 'icono-actualizado',
         ]);
 
         $response->assertRedirect(route('servicios.index'));
@@ -214,7 +220,7 @@ class ServiciosCrudTest extends TestCase
         $this->assertDatabaseHas('servicios', [
             'id' => $servicio->id,
             'nombre_servicio' => 'Servicio Actualizado',
-            'descripcion' => 'Descripción actualizada'
+            'descripcion' => 'Descripción actualizada',
         ]);
     }
 
@@ -224,17 +230,17 @@ class ServiciosCrudTest extends TestCase
 
         Servicios::create([
             'nombre_servicio' => 'Servicio 1',
-            'descripcion' => self::DESC_PRUEBA
+            'descripcion' => self::DESC_PRUEBA,
         ]);
 
         $servicio2 = Servicios::create([
             'nombre_servicio' => 'Servicio 2',
-            'descripcion' => self::DESC_PRUEBA
+            'descripcion' => self::DESC_PRUEBA,
         ]);
 
-        $response = $this->put(self::ROUTE_SERVICIOS . "/{$servicio2->id}", [
+        $response = $this->put(self::ROUTE_SERVICIOS."/{$servicio2->id}", [
             'nombre_servicio' => 'Servicio 1', // Nombre duplicado
-            'descripcion' => self::DESC_PRUEBA
+            'descripcion' => self::DESC_PRUEBA,
         ]);
 
         $response->assertSessionHasErrors('nombre_servicio');
@@ -250,16 +256,16 @@ class ServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Servicio a Eliminar',
-            'descripcion' => self::DESC_PRUEBA
+            'descripcion' => self::DESC_PRUEBA,
         ]);
 
-        $response = $this->delete(self::ROUTE_SERVICIOS . "/{$servicio->id}");
+        $response = $this->delete(self::ROUTE_SERVICIOS."/{$servicio->id}");
 
         $response->assertRedirect(route('servicios.index'));
         $response->assertSessionHas('success');
 
         $this->assertDatabaseMissing('servicios', [
-            'id' => $servicio->id
+            'id' => $servicio->id,
         ]);
     }
 
@@ -267,13 +273,13 @@ class ServiciosCrudTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->delete(self::ROUTE_SERVICIOS . '/99999');
+        $response = $this->delete(self::ROUTE_SERVICIOS.'/99999');
 
         // findOrFail lanza ModelNotFoundException que devuelve 404
         // pero si hay middleware puede redirigir, así que aceptamos ambos
         $this->assertTrue(
             $response->status() === 404 || $response->isRedirect(),
-            'Expected status 404 or redirect, got: ' . $response->status()
+            'Expected status 404 or redirect, got: '.$response->status()
         );
     }
 
@@ -290,4 +296,3 @@ class ServiciosCrudTest extends TestCase
         $this->assertTrue($response->isRedirect() || $response->status() === 403);
     }
 }
-

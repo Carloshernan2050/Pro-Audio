@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
+use App\Models\Servicios;
+use App\Models\SubServicios;
 use App\Services\ChatbotSuggestionGenerator;
 use App\Services\ChatbotTextProcessor;
-use App\Models\SubServicios;
-use App\Models\Servicios;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ChatbotSuggestionGenerator
@@ -17,11 +17,17 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     use RefreshDatabase;
 
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
+
     private const NOMBRE_SERVICIO_ALQUILER = 'Alquiler';
+
     private const MENSAJE_STOPWORDS_ALQUILER = 'para con de alquiler';
+
     private const EQUIPO_SONIDO_PROFESIONAL = 'Equipo de sonido profesional';
+
     private const EQUIPO_COMPLETO = 'Equipo completo';
+
     private const TOKEN_AB_CD = 'ab cd';
+
     private const TOKEN_AB_CD_EF_ALQUILER = 'ab cd ef alquiler';
 
     protected ChatbotSuggestionGenerator $generator;
@@ -29,7 +35,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $textProcessor = new ChatbotTextProcessor();
+        $textProcessor = new ChatbotTextProcessor;
         $this->generator = new ChatbotSuggestionGenerator($textProcessor);
     }
 
@@ -40,14 +46,14 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_generar_sugerencias_con_mensaje_vacio(): void
     {
         $resultado = $this->generator->generarSugerencias('');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_con_mensaje_valido(): void
     {
         $resultado = $this->generator->generarSugerencias('necesito alquiler');
-        
+
         $this->assertIsArray($resultado);
         $this->assertLessThanOrEqual(5, count($resultado));
     }
@@ -55,7 +61,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_generar_sugerencias_retorna_maximo_5(): void
     {
         $resultado = $this->generator->generarSugerencias('necesito equipos de sonido y luces');
-        
+
         $this->assertIsArray($resultado);
         $this->assertLessThanOrEqual(5, count($resultado));
     }
@@ -64,7 +70,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Si no hay vocabulario, debería retornar sugerencias base
         $resultado = $this->generator->generarSugerencias('xyz123abc');
-        
+
         $this->assertIsArray($resultado);
         $this->assertNotEmpty($resultado);
     }
@@ -76,7 +82,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_generar_sugerencias_por_token_vacio(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('');
-        
+
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
     }
@@ -84,9 +90,9 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_generar_sugerencias_por_token_con_mensaje(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('necesito alqiler');
-        
+
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertArrayHasKey(0, $resultado);
             $this->assertArrayHasKey('token', $resultado[0]);
             $this->assertArrayHasKey('sugerencias', $resultado[0]);
@@ -96,14 +102,14 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_generar_sugerencias_por_token_filtra_stopwords(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken(self::MENSAJE_STOPWORDS_ALQUILER);
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_por_token_filtra_genericos(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('necesito quiero busco');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -114,7 +120,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_fallback_token_hints_con_mensaje_vacio(): void
     {
         $resultado = $this->generator->fallbackTokenHints('');
-        
+
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
     }
@@ -122,16 +128,16 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_fallback_token_hints_con_mensaje_corto(): void
     {
         $resultado = $this->generator->fallbackTokenHints('ab');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_fallback_token_hints_con_mensaje_valido(): void
     {
         $resultado = $this->generator->fallbackTokenHints('necesito alquiler');
-        
+
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertArrayHasKey(0, $resultado);
             $this->assertArrayHasKey('token', $resultado[0]);
             $this->assertArrayHasKey('sugerencias', $resultado[0]);
@@ -141,7 +147,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_fallback_token_hints_filtra_tokens_cortos(): void
     {
         $resultado = $this->generator->fallbackTokenHints('ab cd ef');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -152,7 +158,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_extraer_mejor_sugerencia_vacio(): void
     {
         $resultado = $this->generator->extraerMejorSugerencia([]);
-        
+
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
     }
@@ -160,7 +166,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_extraer_mejor_sugerencia_sin_token(): void
     {
         $resultado = $this->generator->extraerMejorSugerencia([['sugerencias' => ['alquiler']]]);
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -169,14 +175,14 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $tokenHints = [
             [
                 'token' => 'alqiler',
-                'sugerencias' => ['alquiler', 'animacion']
-            ]
+                'sugerencias' => ['alquiler', 'animacion'],
+            ],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
-        
+
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertArrayHasKey('token', $resultado);
             $this->assertArrayHasKey('sugerencia', $resultado);
         }
@@ -187,12 +193,12 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $tokenHints = [
             [
                 'token' => 'test',
-                'sugerencias' => []
-            ]
+                'sugerencias' => [],
+            ],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -204,7 +210,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // El vocabulario debería incluir palabras clave base
         $vocab = $this->generator->generarSugerencias('alquiler');
-        
+
         $this->assertIsArray($vocab);
     }
 
@@ -212,18 +218,18 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::EQUIPO_SONIDO_PROFESIONAL,
             'descripcion' => self::EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('sonido');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -235,14 +241,14 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Este método es privado, pero se prueba indirectamente a través de generarSugerencias
         $resultado = $this->generator->generarSugerencias('alquiler');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_calcular_scores_sugerencias_ordena_por_score(): void
     {
         $resultado = $this->generator->generarSugerencias('alqiler');
-        
+
         $this->assertIsArray($resultado);
         // Las sugerencias deberían estar ordenadas por relevancia
     }
@@ -255,7 +261,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Este método es privado, pero se prueba indirectamente
         $resultado = $this->generator->generarSugerenciasPorToken('necesito alqiler equipos');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -267,9 +273,9 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Este método es privado, pero se prueba indirectamente
         $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
-        
+
         $this->assertIsArray($resultado);
-        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+        if (! empty($resultado) && isset($resultado[0]['sugerencias'])) {
             $this->assertLessThanOrEqual(6, count($resultado[0]['sugerencias']));
         }
     }
@@ -277,35 +283,35 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_generar_sugerencias_por_token_con_vocabulario_vacio(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('xyz123');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_fallback_token_hints_con_tokens_cortos(): void
     {
         $resultado = $this->generator->fallbackTokenHints(self::TOKEN_AB_CD);
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_con_tokens_stopwords(): void
     {
         $resultado = $this->generator->generarSugerencias(self::MENSAJE_STOPWORDS_ALQUILER);
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_por_token_filtra_numeros(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('necesito 123 alquiler');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_con_mensaje_normalizado(): void
     {
         $resultado = $this->generator->generarSugerencias('necesito alquiler de equipos');
-        
+
         $this->assertIsArray($resultado);
         $this->assertLessThanOrEqual(5, count($resultado));
     }
@@ -314,7 +320,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Este método es privado, pero se prueba indirectamente
         $resultado = $this->generator->generarSugerenciasPorToken('necesito quiero busco alquiler');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -322,9 +328,9 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Este método es privado, pero se prueba indirectamente
         $resultado = $this->generator->generarSugerenciasPorToken('necesito alqiler equipos');
-        
+
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertArrayHasKey('token', $resultado[0]);
         }
     }
@@ -333,7 +339,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Este método es privado, pero se prueba indirectamente
         $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -341,7 +347,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Este método es privado, pero se prueba indirectamente
         $resultado = $this->generator->generarSugerenciasPorToken('test');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -349,18 +355,18 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo profesional de sonido',
             'descripcion' => self::EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('sonido');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -368,53 +374,53 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Microfono profesional',
             'descripcion' => 'Microfono de alta calidad',
-            'precio' => 50
+            'precio' => 50,
         ]);
-        
+
         $resultado = $this->generator->generarSugerenciasPorToken('microfono');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_con_tokens_vacios(): void
     {
         $resultado = $this->generator->generarSugerencias('   ');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_por_token_con_tokens_cortos(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('ab cd ef');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_por_token_con_solo_stopwords(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('para con de la');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_generar_sugerencias_por_token_con_solo_numeros(): void
     {
         $resultado = $this->generator->generarSugerenciasPorToken('123 456 789');
-        
+
         $this->assertIsArray($resultado);
     }
 
     public function test_fallback_token_hints_con_whitespace_multiple(): void
     {
         $resultado = $this->generator->fallbackTokenHints('necesito    alquiler   equipos');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -423,12 +429,12 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $tokenHints = [
             [
                 'token' => 'test',
-                'sugerencias' => null
-            ]
+                'sugerencias' => null,
+            ],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -436,7 +442,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         // Forzar un caso donde el vocabulario podría estar vacío
         $resultado = $this->generator->generarSugerencias('xyz123abc456');
-        
+
         $this->assertIsArray($resultado);
         // Debería retornar sugerencias base si no encuentra nada
         $this->assertNotEmpty($resultado);
@@ -446,7 +452,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $mensajeLargo = str_repeat('alquiler ', 50);
         $resultado = $this->generator->generarSugerenciasPorToken($mensajeLargo);
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -454,18 +460,18 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo profesional de sonido con luces y audio',
             'descripcion' => 'Equipo completo con todas las características',
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('sonido luces audio');
-        
+
         $this->assertIsArray($resultado);
         $this->assertLessThanOrEqual(5, count($resultado));
     }
@@ -474,18 +480,18 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Alquiler',
             'descripcion' => 'Servicio de alquiler',
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerenciasPorToken('alquiler');
-        
+
         $this->assertIsArray($resultado);
     }
 
@@ -530,7 +536,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $resultado = $this->generator->generarSugerenciasPorToken(self::MENSAJE_STOPWORDS_ALQUILER);
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             // El token debería ser 'alquiler', no los stopwords
             $this->assertNotEquals('para', $resultado[0]['token'] ?? null);
         }
@@ -540,7 +546,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $genericos = ['necesito', 'nececito', 'nesecito', 'necesitar', 'requiero', 'quiero', 'busco', 'hola', 'buenas', 'gracias', 'dias', 'dia'];
         foreach ($genericos as $generico) {
-            $resultado = $this->generator->generarSugerenciasPorToken($generico . ' alquiler');
+            $resultado = $this->generator->generarSugerenciasPorToken($generico.' alquiler');
             $this->assertIsArray($resultado);
         }
     }
@@ -549,7 +555,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $resultado = $this->generator->generarSugerenciasPorToken('123 456 alquiler');
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertNotEquals('123', $resultado[0]['token'] ?? null);
             $this->assertNotEquals('456', $resultado[0]['token'] ?? null);
         }
@@ -582,7 +588,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertEquals('alqiler', $resultado[0]['token'] ?? null);
         }
     }
@@ -595,11 +601,11 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
         $this->assertIsArray($resultado);
-        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+        if (! empty($resultado) && isset($resultado[0]['sugerencias'])) {
             $sugerencias = $resultado[0]['sugerencias'];
             $this->assertLessThanOrEqual(6, count($sugerencias));
             // La primera sugerencia debería ser la más similar
-            if (!empty($sugerencias)) {
+            if (! empty($sugerencias)) {
                 $this->assertIsString($sugerencias[0]);
             }
         }
@@ -623,7 +629,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
         $this->assertIsArray($resultado);
         // Si hay resultados, debería tener sugerencias ordenadas por similitud
-        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+        if (! empty($resultado) && isset($resultado[0]['sugerencias'])) {
             $this->assertGreaterThan(0, count($resultado[0]['sugerencias']));
         }
     }
@@ -675,16 +681,16 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         // 'dj' es una excepción que se incluye aunque tenga menos de 4 caracteres
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'DJ',
             'descripcion' => 'Servicio de DJ',
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('dj');
         $this->assertIsArray($resultado);
     }
@@ -704,16 +710,16 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         // Solo incluye términos entre 4 y 30 caracteres (excepto 'dj')
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'A', // Muy corto
             'descripcion' => 'Descripción muy larga que excede los 30 caracteres permitidos en el vocabulario',
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('equipo');
         $this->assertIsArray($resultado);
     }
@@ -735,7 +741,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $resultado = $this->generator->fallbackTokenHints('necesito    alquiler');
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertArrayHasKey('token', $resultado[0]);
         }
     }
@@ -744,7 +750,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $resultado = $this->generator->fallbackTokenHints(self::TOKEN_AB_CD_EF_ALQUILER);
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             // Debería retornar el primer token de 3+ caracteres
             $this->assertEquals('alquiler', $resultado[0]['token'] ?? null);
         }
@@ -766,9 +772,9 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_extraer_mejor_sugerencia_sin_indice_token(): void
     {
         $tokenHints = [
-            ['sugerencias' => ['alquiler']]
+            ['sugerencias' => ['alquiler']],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
@@ -777,9 +783,9 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     public function test_extraer_mejor_sugerencia_con_sugerencias_null(): void
     {
         $tokenHints = [
-            ['token' => 'test']
+            ['token' => 'test'],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
         $this->assertIsArray($resultado);
     }
@@ -789,13 +795,13 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $tokenHints = [
             [
                 'token' => 'alqiler',
-                'sugerencias' => ['alquiler', 'animacion', 'publicidad']
-            ]
+                'sugerencias' => ['alquiler', 'animacion', 'publicidad'],
+            ],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertEquals('alquiler', $resultado['sugerencia'] ?? null);
         }
     }
@@ -826,16 +832,16 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
             'descripcion' => '', // Descripción vacía
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerenciasPorToken('equipo');
         $this->assertIsArray($resultado);
     }
@@ -872,7 +878,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         // Las sugerencias se ordenan por similitud descendente
         $resultado = $this->generator->generarSugerenciasPorToken('alqiler');
         $this->assertIsArray($resultado);
-        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+        if (! empty($resultado) && isset($resultado[0]['sugerencias'])) {
             $sugerencias = $resultado[0]['sugerencias'];
             $this->assertGreaterThan(0, count($sugerencias));
         }
@@ -882,23 +888,22 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::EQUIPO_SONIDO_PROFESIONAL,
             'descripcion' => 'Equipo completo con todas las características',
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerenciasPorToken('equipo');
         $this->assertIsArray($resultado);
-        if (!empty($resultado) && isset($resultado[0]['sugerencias'])) {
+        if (! empty($resultado) && isset($resultado[0]['sugerencias'])) {
             $this->assertLessThanOrEqual(6, count($resultado[0]['sugerencias']));
         }
     }
-
 
     // ============================================
     // TESTS ADICIONALES PARA generarSugerencias()
@@ -917,16 +922,16 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         // Debería retornar máximo 5 sugerencias
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::EQUIPO_SONIDO_PROFESIONAL,
             'descripcion' => self::EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('equipo sonido audio luces dj animacion');
         $this->assertIsArray($resultado);
         $this->assertLessThanOrEqual(5, count($resultado));
@@ -940,19 +945,19 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         // Crear múltiples subservicios para ampliar el vocabulario
         for ($i = 1; $i <= 10; $i++) {
             SubServicios::create([
                 'servicios_id' => $servicio->id,
                 'nombre' => "Equipo {$i}",
                 'descripcion' => "Descripción del equipo {$i}",
-                'precio' => 100 * $i
+                'precio' => 100 * $i,
             ]);
         }
-        
+
         $resultado = $this->generator->generarSugerencias('equipo');
         $this->assertIsArray($resultado);
     }
@@ -961,19 +966,19 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         // Crear más de 500 subservicios para verificar el límite
         for ($i = 1; $i <= 600; $i++) {
             SubServicios::create([
                 'servicios_id' => $servicio->id,
                 'nombre' => "Equipo {$i}",
                 'descripcion' => "Descripción {$i}",
-                'precio' => 100
+                'precio' => 100,
             ]);
         }
-        
+
         $resultado = $this->generator->generarSugerencias('equipo');
         $this->assertIsArray($resultado);
     }
@@ -982,16 +987,16 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo   Sonido', // Con espacios múltiples
             'descripcion' => 'Descripción   con   espacios',
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('equipo');
         $this->assertIsArray($resultado);
     }
@@ -1000,16 +1005,16 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $servicio = Servicios::create([
             'nombre_servicio' => self::NOMBRE_SERVICIO_ALQUILER,
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
-        
+
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Animación',
             'descripcion' => 'Servicio de animación',
-            'precio' => 100
+            'precio' => 100,
         ]);
-        
+
         $resultado = $this->generator->generarSugerencias('animacion');
         $this->assertIsArray($resultado);
     }
@@ -1051,7 +1056,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         // Tokens de exactamente 3 caracteres deberían incluirse
         $resultado = $this->generator->fallbackTokenHints('sol mar');
         $this->assertIsArray($resultado);
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertArrayHasKey('token', $resultado[0]);
         }
     }
@@ -1071,10 +1076,10 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $tokenHints = [
             [
                 'token' => 'test',
-                'sugerencias' => []
-            ]
+                'sugerencias' => [],
+            ],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
@@ -1085,13 +1090,12 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $tokenHints = [
             [
                 'token' => 'test',
-                'sugerencias' => [null, '']
-            ]
+                'sugerencias' => [null, ''],
+            ],
         ];
-        
+
         $resultado = $this->generator->extraerMejorSugerencia($tokenHints);
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
     }
 }
-

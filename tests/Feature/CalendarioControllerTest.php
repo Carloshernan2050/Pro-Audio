@@ -2,17 +2,16 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Calendario;
 use App\Models\CalendarioItem;
 use App\Models\Inventario;
 use App\Models\MovimientosInventario;
 use App\Models\Reserva;
 use App\Models\Usuario;
-use App\Models\ReservaItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests Feature para CalendarioController
@@ -22,18 +21,31 @@ class CalendarioControllerTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_CALENDARIO = '/calendario';
+
     private const ROUTE_CALENDARIO_EVENTOS = '/calendario/eventos';
+
     private const ROUTE_CALENDARIO_REGISTROS = '/calendario/registros';
+
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const FECHA_INICIO = '2024-01-01';
+
     private const FECHA_FIN = '2024-01-05';
+
     private const DESCRIPCION_EVENTO = 'Evento de prueba';
+
     private const PRODUCTO_TEST = 'Producto Test';
+
     private const MOVIMIENTO_DE_PRUEBA = 'Movimiento de prueba';
+
     private const EVENTO_ACTUALIZADO = 'Evento actualizado';
 
     protected function setUp(): void
@@ -41,9 +53,9 @@ class CalendarioControllerTest extends TestCase
         parent::setUp();
 
         // Crear rol Administrador si no existe
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -64,7 +76,7 @@ class CalendarioControllerTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -159,7 +171,7 @@ class CalendarioControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'registros',
-            'total'
+            'total',
         ]);
         $response->assertJson(['total' => 1]);
     }
@@ -185,7 +197,7 @@ class CalendarioControllerTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 5,
-                ]
+                ],
             ],
         ]);
 
@@ -217,7 +229,7 @@ class CalendarioControllerTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 5,
-                ]
+                ],
             ],
         ]);
 
@@ -241,7 +253,7 @@ class CalendarioControllerTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 5,
-                ]
+                ],
             ],
         ]);
 
@@ -266,7 +278,7 @@ class CalendarioControllerTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 5,
-                ]
+                ],
             ],
         ]);
 
@@ -311,7 +323,7 @@ class CalendarioControllerTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 10, // Más que el stock disponible
-                ]
+                ],
             ],
         ]);
 
@@ -415,7 +427,7 @@ class CalendarioControllerTest extends TestCase
 
         $inventario->decrement('stock', 5);
 
-        $response = $this->put(self::ROUTE_CALENDARIO . '/' . $calendario->id, [
+        $response = $this->put(self::ROUTE_CALENDARIO.'/'.$calendario->id, [
             'servicio' => 'Alquiler',
             'fecha_inicio' => '2024-01-02',
             'fecha_fin' => '2024-01-06',
@@ -424,7 +436,7 @@ class CalendarioControllerTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 3,
-                ]
+                ],
             ],
         ]);
 
@@ -466,7 +478,7 @@ class CalendarioControllerTest extends TestCase
             'evento' => 'Alquiler',
         ]);
 
-        $response = $this->put(self::ROUTE_CALENDARIO . '/' . $calendario->id, [
+        $response = $this->put(self::ROUTE_CALENDARIO.'/'.$calendario->id, [
             'servicio' => 'Alquiler',
             'movimientos_inventario_id' => $movimiento->id,
             'fecha_inicio' => '2024-01-02',
@@ -521,7 +533,7 @@ class CalendarioControllerTest extends TestCase
 
         $inventario->decrement('stock', 5); // Stock queda en 5
 
-        $response = $this->deleteJson(self::ROUTE_CALENDARIO . '/' . $calendario->id);
+        $response = $this->deleteJson(self::ROUTE_CALENDARIO.'/'.$calendario->id);
 
         $response->assertStatus(200);
         $response->assertJson([
@@ -530,7 +542,7 @@ class CalendarioControllerTest extends TestCase
         ]);
 
         $this->assertDatabaseMissing('calendario', ['id' => $calendario->id]);
-        
+
         $inventario->refresh();
         $this->assertEquals(10, $inventario->stock); // Stock restaurado: 5 + 5 = 10
     }
@@ -576,7 +588,7 @@ class CalendarioControllerTest extends TestCase
         // Nota: Este test puede fallar si la tabla historial no tiene las columnas necesarias
         // (reserva_id, accion, confirmado_en, observaciones)
         // El controlador intenta crear un registro de historial que puede fallar
-        $response = $this->deleteJson(self::ROUTE_CALENDARIO . '/' . $calendario->id);
+        $response = $this->deleteJson(self::ROUTE_CALENDARIO.'/'.$calendario->id);
 
         // Puede retornar 200 o 500 dependiendo de si la tabla historial tiene las columnas
         if ($response->status() === 200) {
@@ -618,9 +630,8 @@ class CalendarioControllerTest extends TestCase
             'evento' => 'Alquiler',
         ]);
 
-        $response = $this->deleteJson(self::ROUTE_CALENDARIO . '/' . $calendario->id);
+        $response = $this->deleteJson(self::ROUTE_CALENDARIO.'/'.$calendario->id);
 
         $this->assertContains($response->status(), [302, 403]);
     }
 }
-

@@ -10,6 +10,7 @@ class HistorialController extends Controller
     public function index()
     {
         $items = Historial::with(['reserva'])->get();
+
         return view('usuarios.historial', compact('items'));
     }
 
@@ -25,5 +26,3 @@ class HistorialController extends Controller
         return $pdf->download('historial.pdf');
     }
 }
-
-

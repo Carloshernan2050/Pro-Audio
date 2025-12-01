@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Services\ChatbotIntentionDetector;
 use App\Services\ChatbotTextProcessor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ChatbotIntentionDetector
@@ -13,20 +13,27 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class ChatbotIntentionDetectorTest extends TestCase
 {
     use RefreshDatabase;
+
     private const INTENCION_ANIMACION = 'Animación';
+
     private const INTENCION_ALQUILER = 'Alquiler';
+
     private const INTENCION_PUBLICIDAD = 'Publicidad';
+
     private const MENSAJE_PUBLICIDAD = 'necesito publicidad';
+
     private const MENSAJE_ALGO = 'necesito algo';
+
     private const MENSAJE_ALQUILER = 'necesito alquiler';
 
     protected ChatbotIntentionDetector $detector;
+
     protected ChatbotTextProcessor $textProcessor;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->textProcessor = new ChatbotTextProcessor();
+        $this->textProcessor = new ChatbotTextProcessor;
         $this->detector = new ChatbotIntentionDetector($this->textProcessor);
     }
 
@@ -501,7 +508,7 @@ class ChatbotIntentionDetectorTest extends TestCase
             'publicidad radio',
             'anuncio spot',
             'locucion profesional',
-            'jingle publicitario'
+            'jingle publicitario',
         ];
 
         foreach ($variaciones as $variacion) {
@@ -521,7 +528,7 @@ class ChatbotIntentionDetectorTest extends TestCase
             'que hora es',
             'como llegar a',
             'cual es el precio de',
-            'informacion sobre clima'
+            'informacion sobre clima',
         ];
 
         foreach ($noRelacionadas as $mensaje) {
@@ -651,20 +658,20 @@ class ChatbotIntentionDetectorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => 'Servicio de alquiler de equipos',
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo de Sonido',
             'descripcion' => 'Equipo profesional de sonido para eventos',
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         $resultado = $this->detector->clasificarPorTfidf('alquiler equipo sonido profesional');
         $this->assertIsArray($resultado);
         // Si hay datos y el score es >= 0.12, debería retornar el servicio
-        if (!empty($resultado)) {
+        if (! empty($resultado)) {
             $this->assertContains('Alquiler', $resultado);
         }
     }
@@ -675,27 +682,27 @@ class ChatbotIntentionDetectorTest extends TestCase
         $servicioAlquiler = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => 'Servicio de alquiler',
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         $servicioAnimacion = \App\Models\Servicios::create([
             'nombre_servicio' => 'Animación',
             'descripcion' => 'Servicio de animación',
-            'icono' => 'animacion-icon'
+            'icono' => 'animacion-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicioAlquiler->id,
             'nombre' => 'Equipo Sonido',
             'descripcion' => 'Equipo profesional sonido audio',
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicioAnimacion->id,
             'nombre' => 'DJ Profesional',
             'descripcion' => 'DJ profesional animación eventos',
-            'precio' => 150000
+            'precio' => 150000,
         ]);
 
         $resultado = $this->detector->clasificarPorTfidf('equipo sonido profesional');
@@ -708,14 +715,14 @@ class ChatbotIntentionDetectorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => 'Servicio de alquiler',
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
             'descripcion' => 'Equipo básico',
-            'precio' => 50000
+            'precio' => 50000,
         ]);
 
         // Mensaje con palabras que no coinciden mucho
@@ -816,4 +823,3 @@ class ChatbotIntentionDetectorTest extends TestCase
         $this->assertIsBool($resultado);
     }
 }
-

@@ -2,17 +2,17 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Http\Controllers\ChatbotController;
-use App\Services\ChatbotTextProcessor;
 use App\Services\ChatbotIntentionDetector;
-use App\Services\ChatbotSuggestionGenerator;
-use App\Services\ChatbotResponseBuilder;
 use App\Services\ChatbotMessageProcessor;
-use App\Services\ChatbotSubServicioService;
+use App\Services\ChatbotResponseBuilder;
 use App\Services\ChatbotSessionManager;
+use App\Services\ChatbotSubServicioService;
+use App\Services\ChatbotSuggestionGenerator;
+use App\Services\ChatbotTextProcessor;
 use Illuminate\Http\Request;
 use Mockery;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ChatbotController
@@ -26,18 +26,25 @@ class ChatbotControllerUnitTest extends TestCase
     private const ROUTE_CHAT_ENVIAR = '/chat/enviar';
 
     protected $controller;
+
     protected $textProcessor;
+
     protected $intentionDetector;
+
     protected $suggestionGenerator;
+
     protected $responseBuilder;
+
     protected $messageProcessor;
+
     protected $subServicioService;
+
     protected $sessionManager;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Crear mocks de todos los servicios requeridos usando Mockery
         $this->textProcessor = Mockery::mock(ChatbotTextProcessor::class);
         $this->intentionDetector = Mockery::mock(ChatbotIntentionDetector::class);
@@ -46,7 +53,7 @@ class ChatbotControllerUnitTest extends TestCase
         $this->messageProcessor = Mockery::mock(ChatbotMessageProcessor::class);
         $this->subServicioService = Mockery::mock(ChatbotSubServicioService::class);
         $this->sessionManager = Mockery::mock(ChatbotSessionManager::class);
-        
+
         // Instanciar el controlador con los mocks
         $this->controller = new ChatbotController(
             $this->textProcessor,
@@ -76,14 +83,14 @@ class ChatbotControllerUnitTest extends TestCase
     public function test_index_retorna_vista(): void
     {
         $response = $this->controller->index();
-        
+
         $this->assertNotNull($response);
     }
 
     public function test_enviar_procesa_mensaje(): void
     {
         $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
-            'mensaje' => 'hola'
+            'mensaje' => 'hola',
         ]);
 
         $this->textProcessor
@@ -102,14 +109,14 @@ class ChatbotControllerUnitTest extends TestCase
             ->andReturn(0);
 
         $responseMock = response()->json(['respuesta' => 'test']);
-        
+
         $this->messageProcessor
             ->shouldReceive('procesarMensajeTexto')
             ->once()
             ->andReturn($responseMock);
 
         $response = $this->controller->enviar($request);
-        
+
         $this->assertNotNull($response);
     }
 
@@ -117,7 +124,7 @@ class ChatbotControllerUnitTest extends TestCase
     {
         $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
             'seleccion' => [1, 2, 3],
-            'dias' => 5
+            'dias' => 5,
         ]);
 
         // Cuando hay selección y días > 0, no se llama a esContinuacion ni extraerDiasDelRequest
@@ -148,13 +155,13 @@ class ChatbotControllerUnitTest extends TestCase
             ->andReturn($collectionMock);
 
         $responseMock = response()->json(['respuesta' => 'cotizacion']);
-        
+
         $this->responseBuilder
             ->shouldReceive('responderCotizacion')
             ->once()
             ->with(Mockery::any(), Mockery::any(), Mockery::type('array'))
             ->andReturn($responseMock);
-        
+
         // En caso de error, se llama a mostrarCatalogoJson
         $this->responseBuilder
             ->shouldReceive('mostrarCatalogoJson')
@@ -164,14 +171,14 @@ class ChatbotControllerUnitTest extends TestCase
         session(['chat.days' => 0]);
 
         $response = $this->controller->enviar($request);
-        
+
         $this->assertNotNull($response);
     }
 
     public function test_enviar_maneja_error(): void
     {
         $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
-            'mensaje' => 'test'
+            'mensaje' => 'test',
         ]);
 
         $this->textProcessor
@@ -185,7 +192,7 @@ class ChatbotControllerUnitTest extends TestCase
             ->andReturn([]);
 
         $responseMock = response()->json(['respuesta' => 'catalogo']);
-        
+
         $this->responseBuilder
             ->shouldReceive('mostrarCatalogoJson')
             ->once()
@@ -194,7 +201,7 @@ class ChatbotControllerUnitTest extends TestCase
         session(['chat.days' => 1, 'chat.selecciones' => []]);
 
         $response = $this->controller->enviar($request);
-        
+
         $this->assertNotNull($response);
     }
 
@@ -202,7 +209,7 @@ class ChatbotControllerUnitTest extends TestCase
     {
         $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
             'seleccion' => [],
-            'dias' => 5
+            'dias' => 5,
         ]);
 
         $this->textProcessor
@@ -221,7 +228,7 @@ class ChatbotControllerUnitTest extends TestCase
             ->andReturn(5);
 
         $responseMock = response()->json(['respuesta' => 'catalogo']);
-        
+
         $this->responseBuilder
             ->shouldReceive('mostrarCatalogoJson')
             ->once()
@@ -230,7 +237,7 @@ class ChatbotControllerUnitTest extends TestCase
         session(['chat.days' => 0]);
 
         $response = $this->controller->enviar($request);
-        
+
         $this->assertNotNull($response);
     }
 
@@ -239,7 +246,7 @@ class ChatbotControllerUnitTest extends TestCase
         $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
             'confirm_intencion' => true,
             'intenciones' => ['Alquiler'],
-            'dias' => 3
+            'dias' => 3,
         ]);
 
         $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
@@ -251,7 +258,7 @@ class ChatbotControllerUnitTest extends TestCase
             ->andReturn($collectionMock);
 
         $responseMock = response()->json(['respuesta' => 'opciones']);
-        
+
         $this->responseBuilder
             ->shouldReceive('responderOpciones')
             ->once()
@@ -260,14 +267,14 @@ class ChatbotControllerUnitTest extends TestCase
         session(['chat.selecciones' => []]);
 
         $response = $this->controller->enviar($request);
-        
+
         $this->assertNotNull($response);
     }
 
     public function test_enviar_limpiar_cotizacion(): void
     {
         $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
-            'limpiar_cotizacion' => true
+            'limpiar_cotizacion' => true,
         ]);
 
         $this->sessionManager
@@ -275,7 +282,7 @@ class ChatbotControllerUnitTest extends TestCase
             ->once();
 
         $response = $this->controller->enviar($request);
-        
+
         $this->assertNotNull($response);
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('respuesta', $data);
@@ -284,7 +291,7 @@ class ChatbotControllerUnitTest extends TestCase
     public function test_enviar_terminar_cotizacion(): void
     {
         $request = Request::create(self::ROUTE_CHAT_ENVIAR, 'POST', [
-            'terminar_cotizacion' => true
+            'terminar_cotizacion' => true,
         ]);
 
         $this->sessionManager
@@ -298,7 +305,7 @@ class ChatbotControllerUnitTest extends TestCase
         session(['chat.selecciones' => [1, 2], 'chat.days' => 3, 'usuario_id' => 1]);
 
         $response = $this->controller->enviar($request);
-        
+
         $this->assertNotNull($response);
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('limpiar_chat', $data);
@@ -312,4 +319,3 @@ class ChatbotControllerUnitTest extends TestCase
     // - ChatbotSessionManagerTest
     // etc.
 }
-

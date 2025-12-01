@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Servicios;
 use App\Models\SubServicios;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para Chatbot
@@ -20,25 +20,34 @@ class ChatbotTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'test@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Juan';
+
     private const TEST_APELLIDO = 'Pérez';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROUTE_CHAT_ENVIAR = '/chat/enviar';
+
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
+
     private const NOMBRE_EQUIPO_SONIDO = 'Equipo de sonido';
+
     private const DESC_EQUIPO_COMPLETO = 'Equipo completo';
+
     private const MENSAJE_NECESITO_ALQUILER = 'necesito alquiler';
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Crear rol Cliente si no existe
-        if (!DB::table('roles')->where('name', 'Cliente')->exists()) {
+        if (! DB::table('roles')->where('name', 'Cliente')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Cliente',
-                'nombre_rol' => 'Cliente'
+                'nombre_rol' => 'Cliente',
             ]);
         }
     }
@@ -59,7 +68,7 @@ class ChatbotTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -103,13 +112,13 @@ class ChatbotTest extends TestCase
         $this->crearUsuarioAutenticado();
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'catalogo'
+            'mensaje' => 'catalogo',
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'optionGroups'
+            'optionGroups',
         ]);
     }
 
@@ -119,23 +128,23 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => self::MENSAJE_NECESITO_ALQUILER
+            'mensaje' => self::MENSAJE_NECESITO_ALQUILER,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'respuesta'
+            'respuesta',
         ]);
     }
 
@@ -145,25 +154,25 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'seleccion' => [$subServicio->id],
-            'dias' => 3
+            'dias' => 3,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'cotizacion'
+            'cotizacion',
         ]);
     }
 
@@ -173,14 +182,14 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         // Primero seleccionar un servicio
@@ -188,7 +197,7 @@ class ChatbotTest extends TestCase
 
         // Luego actualizar días
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'por 5 dias'
+            'mensaje' => 'por 5 dias',
         ]);
 
         $response->assertStatus(200);
@@ -201,26 +210,26 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'confirm_intencion' => true,
             'intenciones' => ['Alquiler'],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'optionGroups'
+            'optionGroups',
         ]);
     }
 
@@ -231,7 +240,7 @@ class ChatbotTest extends TestCase
         session(['chat.selecciones' => [1, 2, 3], 'chat.days' => 5]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'limpiar_cotizacion' => true
+            'limpiar_cotizacion' => true,
         ]);
 
         $response->assertStatus(200);
@@ -245,20 +254,20 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         session(['chat.selecciones' => [$subServicio->id], 'chat.days' => 3]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'terminar_cotizacion' => true
+            'terminar_cotizacion' => true,
         ]);
 
         $response->assertStatus(200);
@@ -266,7 +275,7 @@ class ChatbotTest extends TestCase
             'respuesta',
             'limpiar_chat',
             'selecciones',
-            'total'
+            'total',
         ]);
     }
 
@@ -275,12 +284,12 @@ class ChatbotTest extends TestCase
         $this->crearUsuarioAutenticado();
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => ''
+            'mensaje' => '',
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'respuesta'
+            'respuesta',
         ]);
     }
 
@@ -289,13 +298,13 @@ class ChatbotTest extends TestCase
         $this->crearUsuarioAutenticado();
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'hola como estas'
+            'mensaje' => 'hola como estas',
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'sugerencias'
+            'sugerencias',
         ]);
     }
 
@@ -306,13 +315,13 @@ class ChatbotTest extends TestCase
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'confirm_intencion' => true,
             'intenciones' => ['IntencionInexistente'],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'optionGroups'
+            'optionGroups',
         ]);
         $data = json_decode($response->getContent(), true);
         $this->assertStringContainsString('catálogo', strtolower($data['respuesta']));
@@ -324,26 +333,26 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'confirm_intencion' => true,
             'intenciones' => ['Alquiler'],
-            'dias' => 5
+            'dias' => 5,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'optionGroups'
+            'optionGroups',
         ]);
     }
 
@@ -353,14 +362,14 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         session(['chat.days' => 3]);
@@ -368,7 +377,7 @@ class ChatbotTest extends TestCase
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'confirm_intencion' => true,
             'intenciones' => ['Alquiler'],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
@@ -380,13 +389,13 @@ class ChatbotTest extends TestCase
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'seleccion' => [],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'optionGroups'
+            'optionGroups',
         ]);
         $this->assertEmpty(session('chat.selecciones'));
     }
@@ -397,13 +406,13 @@ class ChatbotTest extends TestCase
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'seleccion' => [0, -1, 'abc'],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'optionGroups'
+            'optionGroups',
         ]);
     }
 
@@ -413,13 +422,13 @@ class ChatbotTest extends TestCase
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'seleccion' => [99999, 99998],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'optionGroups'
+            'optionGroups',
         ]);
         $this->assertEmpty(session('chat.selecciones'));
     }
@@ -430,27 +439,27 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         session(['chat.days' => 3]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'seleccion' => [$subServicio->id],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'cotizacion'
+            'cotizacion',
         ]);
     }
 
@@ -460,27 +469,27 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         session()->forget('chat.days');
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'seleccion' => [$subServicio->id],
-            'dias' => 0
+            'dias' => 0,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'cotizacion'
+            'cotizacion',
         ]);
     }
 
@@ -490,20 +499,20 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         // Simular un error que puede ser recuperado
         // Esto se hace enviando un mensaje que cause un error pero que tenga intenciones detectables
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'alquiler'
+            'mensaje' => 'alquiler',
         ]);
 
         $response->assertStatus(200);
@@ -519,12 +528,12 @@ class ChatbotTest extends TestCase
 
         // Mensaje que no tiene intenciones detectables para recuperación
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'xyzabc123'
+            'mensaje' => 'xyzabc123',
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'respuesta'
+            'respuesta',
         ]);
         // Puede retornar optionGroups o sugerencias dependiendo del flujo
         $data = json_decode($response->getContent(), true);
@@ -537,26 +546,26 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'mensaje' => '',
             'seleccion' => [$subServicio->id],
-            'dias' => 3
+            'dias' => 3,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'cotizacion'
+            'cotizacion',
         ]);
     }
 
@@ -566,19 +575,19 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'mensaje' => self::MENSAJE_NECESITO_ALQUILER,
-            'dias' => 5
+            'dias' => 5,
         ]);
 
         $response->assertStatus(200);
@@ -592,27 +601,27 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         session(['chat.selecciones' => [$subServicio->id], 'chat.days' => 3]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'terminar_cotizacion' => true
+            'terminar_cotizacion' => true,
         ]);
 
         $response->assertStatus(200);
-        
+
         // Verificar que se guardó la cotización
         $this->assertDatabaseHas('cotizacion', [
-            'personas_id' => session('usuario_id')
+            'personas_id' => session('usuario_id'),
         ]);
 
         // Verificar que se limpió la sesión
@@ -625,14 +634,14 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         session()->forget('usuario_id');
@@ -640,7 +649,7 @@ class ChatbotTest extends TestCase
 
         // El controlador puede fallar si usuario_id es null, pero debería manejar el error
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'terminar_cotizacion' => true
+            'terminar_cotizacion' => true,
         ]);
 
         // Puede retornar 200 con error manejado o 500 si no se maneja
@@ -653,28 +662,28 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         // Selección con IDs duplicados
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'seleccion' => [$subServicio->id, $subServicio->id, $subServicio->id],
-            'dias' => 3
+            'dias' => 3,
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'respuesta',
-            'cotizacion'
+            'cotizacion',
         ]);
-        
+
         // Verificar que solo se guardó una vez
         $selecciones = session('chat.selecciones', []);
         $this->assertCount(1, array_unique($selecciones));
@@ -686,19 +695,19 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
             'mensaje' => self::MENSAJE_NECESITO_ALQUILER,
-            'dias' => 7
+            'dias' => 7,
         ]);
 
         $response->assertStatus(200);
@@ -712,26 +721,25 @@ class ChatbotTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         session(['chat.intenciones' => ['Alquiler'], 'chat.days' => 3]);
 
         $response = $this->postJson(self::ROUTE_CHAT_ENVIAR, [
-            'mensaje' => 'tambien'
+            'mensaje' => 'tambien',
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'respuesta'
+            'respuesta',
         ]);
     }
 }
-

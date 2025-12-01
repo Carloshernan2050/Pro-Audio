@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Historial;
 use App\Models\Reserva;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para HistorialController
@@ -20,15 +20,25 @@ class HistorialControllerTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_HISTORIAL = '/historial';
+
     private const ROUTE_HISTORIAL_EXPORT = '/historial/pdf';
+
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const FECHA_INICIO = '2024-01-01';
+
     private const FECHA_FIN = '2024-01-05';
+
     private const DESCRIPCION_EVENTO = 'Evento de prueba';
+
     private const MSG_TABLA_HISTORIAL_SIN_COLUMNAS = 'La tabla historial no tiene las columnas necesarias';
 
     protected function setUp(): void
@@ -36,9 +46,9 @@ class HistorialControllerTest extends TestCase
         parent::setUp();
 
         // Crear rol Administrador si no existe
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -59,7 +69,7 @@ class HistorialControllerTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -115,7 +125,7 @@ class HistorialControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('usuarios.historial');
         $response->assertViewHas('items');
-        
+
         $items = $response->viewData('items');
         $this->assertCount(0, $items);
     }
@@ -245,4 +255,3 @@ class HistorialControllerTest extends TestCase
         }
     }
 }
-

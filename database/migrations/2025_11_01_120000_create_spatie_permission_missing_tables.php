@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         // Create permissions table if missing
-        if (!Schema::hasTable('permissions')) {
+        if (! Schema::hasTable('permissions')) {
             Schema::create('permissions', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -20,7 +20,7 @@ return new class extends Migration
         }
 
         // Create model_has_permissions if missing
-        if (!Schema::hasTable('model_has_permissions')) {
+        if (! Schema::hasTable('model_has_permissions')) {
             Schema::create('model_has_permissions', function (Blueprint $table) {
                 $table->unsignedBigInteger('permission_id');
                 $table->string('model_type');
@@ -38,7 +38,7 @@ return new class extends Migration
         }
 
         // Create model_has_roles if missing
-        if (!Schema::hasTable('model_has_roles')) {
+        if (! Schema::hasTable('model_has_roles')) {
             Schema::create('model_has_roles', function (Blueprint $table) {
                 $table->unsignedBigInteger('role_id');
                 $table->string('model_type');
@@ -56,7 +56,7 @@ return new class extends Migration
         }
 
         // Create role_has_permissions if missing
-        if (!Schema::hasTable('role_has_permissions')) {
+        if (! Schema::hasTable('role_has_permissions')) {
             Schema::create('role_has_permissions', function (Blueprint $table) {
                 $table->unsignedBigInteger('permission_id');
                 $table->unsignedBigInteger('role_id');
@@ -92,5 +92,3 @@ return new class extends Migration
         }
     }
 };
-
-

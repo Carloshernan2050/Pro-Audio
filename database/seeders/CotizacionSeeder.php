@@ -17,13 +17,13 @@ class CotizacionSeeder extends Seeder
                 'personas_id' => 1,
                 'sub_servicios_id' => 1,
                 'monto' => $precio1,
-                'fecha_cotizacion' => now()
+                'fecha_cotizacion' => now(),
             ],
             [
                 'personas_id' => 2,
                 'sub_servicios_id' => 2,
                 'monto' => $precio2,
-                'fecha_cotizacion' => now()
+                'fecha_cotizacion' => now(),
             ],
         ]);
 

@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\ServiciosController;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Unitarios para ServiciosController
@@ -18,7 +18,7 @@ class ServiciosControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new ServiciosController();
+        $this->controller = new ServiciosController;
     }
 
     // ============================================
@@ -30,7 +30,7 @@ class ServiciosControllerUnitTest extends TestCase
         // Verificar que Str::slug funciona correctamente
         $nombre = 'Alquiler de Equipos';
         $slug = Str::slug($nombre, '_');
-        
+
         $this->assertIsString($slug);
         $this->assertNotEmpty($slug);
         $this->assertStringNotContainsString(' ', $slug);
@@ -40,7 +40,7 @@ class ServiciosControllerUnitTest extends TestCase
     {
         $nombre = 'Servicio & Eventos';
         $slug = Str::slug($nombre, '_');
-        
+
         $this->assertIsString($slug);
         $this->assertNotEmpty($slug);
     }
@@ -49,7 +49,7 @@ class ServiciosControllerUnitTest extends TestCase
     {
         $nombre = 'Animación';
         $slug = Str::slug($nombre, '_');
-        
+
         $this->assertIsString($slug);
         $this->assertNotEmpty($slug);
     }
@@ -66,7 +66,7 @@ class ServiciosControllerUnitTest extends TestCase
             'descripcion' => 'nullable|string|max:500',
             'icono' => 'nullable|string|max:80',
         ];
-        
+
         $this->assertArrayHasKey('nombre_servicio', $reglasEsperadas);
         $this->assertStringContainsString('required', $reglasEsperadas['nombre_servicio']);
         $this->assertStringContainsString('max:100', $reglasEsperadas['nombre_servicio']);
@@ -77,7 +77,7 @@ class ServiciosControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'descripcion' => 'nullable|string|max:500',
         ];
-        
+
         $this->assertStringContainsString('nullable', $reglasEsperadas['descripcion']);
     }
 
@@ -86,7 +86,7 @@ class ServiciosControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'icono' => 'nullable|string|max:80',
         ];
-        
+
         $this->assertStringContainsString('nullable', $reglasEsperadas['icono']);
         $this->assertStringContainsString('max:80', $reglasEsperadas['icono']);
     }
@@ -99,7 +99,7 @@ class ServiciosControllerUnitTest extends TestCase
     {
         // Verificar que la plantilla base existe conceptualmente
         $nombrePlantilla = 'animacion.blade.php';
-        
+
         $this->assertIsString($nombrePlantilla);
         $this->assertStringEndsWith('.blade.php', $nombrePlantilla);
     }
@@ -110,10 +110,9 @@ class ServiciosControllerUnitTest extends TestCase
         $nombreServicio = 'Test';
         $slug = Str::slug($nombreServicio, '_');
         $rutaEsperada = "views/usuarios/{$slug}.blade.php";
-        
+
         $this->assertIsString($rutaEsperada);
         $this->assertStringContainsString('views/usuarios/', $rutaEsperada);
         $this->assertStringEndsWith('.blade.php', $rutaEsperada);
     }
 }
-

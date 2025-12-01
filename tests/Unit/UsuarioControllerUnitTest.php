@@ -2,14 +2,14 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Http\Controllers\UsuarioController;
 use App\Models\Usuario;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para UsuarioController
@@ -21,13 +21,21 @@ class UsuarioControllerUnitTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL_JUAN = 'juan@test.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const ROL_CLIENTE = 'Cliente';
+
     private const ROUTE_USUARIOS_AUTENTICAR = '/usuarios/autenticar';
+
     private const ROUTE_USUARIOS_PERFIL_PHOTO = '/usuarios/perfil/photo';
+
     private const ROUTE_USUARIOS_REGISTRO = '/usuarios/registro';
+
     private const APELLIDO_PEREZ = 'Pérez';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const MSG_EXPECTED_VALIDATION_EXCEPTION = 'Se esperaba una ValidationException';
 
     protected $controller;
@@ -36,7 +44,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        $this->controller = new UsuarioController();
+        $this->controller = new UsuarioController;
     }
 
     // ============================================
@@ -55,7 +63,7 @@ class UsuarioControllerUnitTest extends TestCase
             'direccion' => 'nullable|string|max:255',
             'contrasena' => 'required|string|min:8|confirmed',
         ];
-        
+
         $this->assertArrayHasKey('primer_nombre', $reglasEsperadas);
         $this->assertArrayHasKey('correo', $reglasEsperadas);
         $this->assertArrayHasKey('contrasena', $reglasEsperadas);
@@ -65,9 +73,9 @@ class UsuarioControllerUnitTest extends TestCase
     {
         // La contraseña debe tener al menos 8 caracteres
         $reglasEsperadas = [
-            'contrasena' => 'required|string|min:8|confirmed'
+            'contrasena' => 'required|string|min:8|confirmed',
         ];
-        
+
         $this->assertStringContainsString('min:8', $reglasEsperadas['contrasena']);
         $this->assertStringContainsString('confirmed', $reglasEsperadas['contrasena']);
     }
@@ -76,16 +84,16 @@ class UsuarioControllerUnitTest extends TestCase
     {
         // El teléfono máximo es 20 caracteres
         $maxCaracteres = 20;
-        
+
         $this->assertEquals(20, $maxCaracteres);
     }
 
     public function test_validacion_correo_debe_ser_email(): void
     {
         $reglasEsperadas = [
-            'correo' => 'required|email|unique:personas,correo'
+            'correo' => 'required|email|unique:personas,correo',
         ];
-        
+
         $this->assertStringContainsString('email', $reglasEsperadas['correo']);
     }
 
@@ -99,7 +107,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => 'required|email',
             'contrasena' => 'required|string',
         ];
-        
+
         $this->assertArrayHasKey('correo', $reglasEsperadas);
         $this->assertArrayHasKey('contrasena', $reglasEsperadas);
     }
@@ -111,9 +119,9 @@ class UsuarioControllerUnitTest extends TestCase
     public function test_validacion_foto_perfil_estructura(): void
     {
         $reglasEsperadas = [
-            'foto_perfil' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
+            'foto_perfil' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
         ];
-        
+
         $this->assertStringContainsString('image', $reglasEsperadas['foto_perfil']);
         $this->assertStringContainsString('max:5120', $reglasEsperadas['foto_perfil']);
     }
@@ -122,7 +130,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         // Formatos permitidos: jpeg, png, jpg, gif
         $formatos = ['jpeg', 'png', 'jpg', 'gif'];
-        
+
         $this->assertCount(4, $formatos);
         $this->assertContains('jpeg', $formatos);
         $this->assertContains('png', $formatos);
@@ -132,7 +140,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         // El tamaño máximo es 5120 KB (5MB)
         $maxTamano = 5120;
-        
+
         $this->assertEquals(5120, $maxTamano);
     }
 
@@ -144,7 +152,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         // El estado por defecto es 1 (Activo)
         $estadoActivo = 1;
-        
+
         $this->assertEquals(1, $estadoActivo);
     }
 
@@ -152,14 +160,14 @@ class UsuarioControllerUnitTest extends TestCase
     {
         // El rol por defecto es 'Cliente'
         $rolDefecto = self::ROL_CLIENTE;
-        
+
         $this->assertEquals(self::ROL_CLIENTE, $rolDefecto);
     }
 
     public function test_registro_retorna_vista(): void
     {
         $response = $this->controller->registro();
-        
+
         $this->assertNotNull($response);
     }
 
@@ -167,7 +175,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_REGISTRO, 'POST', [
@@ -176,23 +184,23 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->store($request);
-        
+
         $this->assertNotNull($response);
-        
+
         $this->assertDatabaseHas('personas', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'primer_nombre' => 'Juan'
+            'primer_nombre' => 'Juan',
         ]);
     }
 
     public function test_inicio_sesion_retorna_vista(): void
     {
         $response = $this->controller->inicioSesion();
-        
+
         $this->assertNotNull($response);
     }
 
@@ -205,16 +213,16 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->autenticar($request);
-        
+
         $this->assertNotNull($response);
         $this->assertEquals($usuario->id, session('usuario_id'));
     }
@@ -228,16 +236,16 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => 'password_incorrecta'
+            'contrasena' => 'password_incorrecta',
         ]);
 
         $response = $this->controller->autenticar($request);
-        
+
         $this->assertNotNull($response);
     }
 
@@ -250,26 +258,26 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->autenticar($request);
-        
+
         $this->assertNotNull($response);
         $this->assertTrue(session()->has('roles'));
     }
@@ -283,14 +291,14 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['pending_admin' => true]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         try {
@@ -307,7 +315,7 @@ class UsuarioControllerUnitTest extends TestCase
         session(['usuario_id' => 1, 'usuario_nombre' => 'Juan']);
 
         $response = $this->controller->cerrarSesion();
-        
+
         $this->assertNotNull($response);
         $this->assertFalse(session()->has('usuario_id'));
     }
@@ -321,13 +329,13 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id]);
 
         $response = $this->controller->perfil();
-        
+
         $this->assertNotNull($response);
     }
 
@@ -340,7 +348,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
@@ -348,34 +356,35 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $this->assertNotNull($response);
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertTrue($data['success']);
     }
 
     public function test_update_photo_sin_sesion(): void
     {
-        if (!extension_loaded('gd')) {
+        if (! extension_loaded('gd')) {
             $this->markTestSkipped('GD extension is not installed');
+
             return;
         }
 
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $this->assertNotNull($response);
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertFalse($data['success']);
     }
@@ -389,7 +398,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id, 'roles' => ['Invitado']]);
@@ -397,13 +406,13 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $this->assertNotNull($response);
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertFalse($data['success']);
     }
@@ -418,7 +427,7 @@ class UsuarioControllerUnitTest extends TestCase
             'contrasena' => 'password',
             'foto_perfil' => 'old_perfil.jpg',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         Storage::disk('public')->put('perfiles/old_perfil.jpg', 'fake content');
@@ -428,13 +437,13 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('new_perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $this->assertNotNull($response);
-        
+
         $this->assertFalse(Storage::disk('public')->exists('perfiles/old_perfil.jpg'));
     }
 
@@ -446,7 +455,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_REGISTRO, 'POST', [
@@ -455,11 +464,11 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->store($request);
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL_JUAN)->first();
         $this->assertNotNull($usuario);
         $this->assertNotEquals(self::TEST_PASSWORD, $usuario->contrasena);
@@ -470,7 +479,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_REGISTRO, 'POST', [
@@ -479,11 +488,11 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->store($request);
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL_JUAN)->first();
         $this->assertNotNull($usuario->fecha_registro);
         $this->assertEquals(1, $usuario->estado);
@@ -493,7 +502,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         $rolId = DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_REGISTRO, 'POST', [
@@ -502,15 +511,15 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->store($request);
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL_JUAN)->first();
         $this->assertDatabaseHas('personas_roles', [
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
     }
 
@@ -523,21 +532,21 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->store($request);
-        
+
         $this->assertNotNull($response);
         $this->assertDatabaseHas('personas', [
-            'correo' => self::TEST_EMAIL_JUAN
+            'correo' => self::TEST_EMAIL_JUAN,
         ]);
     }
 
     public function test_store_usa_nombre_rol_si_name_no_existe(): void
     {
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
             // No incluir 'name'
         ]);
 
@@ -547,15 +556,15 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->store($request);
-        
+
         $usuario = Usuario::where('correo', self::TEST_EMAIL_JUAN)->first();
         $this->assertDatabaseHas('personas_roles', [
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
     }
 
@@ -563,7 +572,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_REGISTRO, 'POST', [
@@ -572,11 +581,11 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->store($request);
-        
+
         $this->assertNotNull($response);
         $this->assertTrue($response->isRedirect());
     }
@@ -585,11 +594,11 @@ class UsuarioControllerUnitTest extends TestCase
     {
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => 'noexiste@test.com',
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->autenticar($request);
-        
+
         $this->assertNotNull($response);
         $this->assertFalse(session()->has('usuario_id'));
     }
@@ -603,18 +612,18 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         // No crear roles en personas_roles
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->autenticar($request);
-        
+
         $this->assertEquals(['Cliente'], session('roles'));
         $this->assertEquals('Cliente', session('role'));
     }
@@ -628,16 +637,16 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->autenticar($request);
-        
+
         $this->assertEquals('Juan', session('usuario_nombre'));
     }
 
@@ -650,16 +659,16 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->autenticar($request);
-        
+
         $this->assertNotNull($response);
         $this->assertTrue($response->isRedirect());
     }
@@ -673,31 +682,31 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $rol1Id = DB::table('roles')->insertGetId([
             'name' => 'Cliente',
-            'nombre_rol' => 'Cliente'
+            'nombre_rol' => 'Cliente',
         ]);
 
         $rol2Id = DB::table('roles')->insertGetId([
             'name' => 'Administrador',
-            'nombre_rol' => 'Administrador'
+            'nombre_rol' => 'Administrador',
         ]);
 
         DB::table('personas_roles')->insert([
             ['personas_id' => $usuario->id, 'roles_id' => $rol1Id],
-            ['personas_id' => $usuario->id, 'roles_id' => $rol2Id]
+            ['personas_id' => $usuario->id, 'roles_id' => $rol2Id],
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->autenticar($request);
-        
+
         $roles = session('roles');
         $this->assertIsArray($roles);
         $this->assertGreaterThanOrEqual(1, count($roles));
@@ -708,7 +717,7 @@ class UsuarioControllerUnitTest extends TestCase
         session(['usuario_id' => 1, 'usuario_nombre' => 'Juan']);
 
         $response = $this->controller->cerrarSesion();
-        
+
         $this->assertNotNull($response);
         $this->assertTrue($response->isRedirect());
     }
@@ -717,7 +726,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         // No establecer usuario_id en sesión
         $response = $this->controller->perfil();
-        
+
         $this->assertNotNull($response);
     }
 
@@ -726,7 +735,7 @@ class UsuarioControllerUnitTest extends TestCase
         session(['usuario_id' => 99999]); // ID que no existe
 
         $response = $this->controller->perfil();
-        
+
         $this->assertNotNull($response);
     }
 
@@ -737,13 +746,13 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $this->assertNotNull($response);
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertFalse($data['success']);
         $this->assertEquals(404, $response->getStatusCode());
@@ -758,7 +767,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
@@ -766,11 +775,11 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertTrue($data['success']);
         $this->assertArrayHasKey('foto_url', $data);
@@ -786,7 +795,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
             // No establecer foto_perfil
         ]);
 
@@ -798,15 +807,15 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $this->assertNotNull($response);
         $data = json_decode($response->getContent(), true);
         $this->assertTrue($data['success']);
-        
+
         // Verificar que ahora tiene foto_perfil
         $usuario->refresh();
         $this->assertNotNull($usuario->foto_perfil);
@@ -821,7 +830,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
@@ -829,11 +838,11 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $this->controller->updatePhoto($request);
-        
+
         $usuario->refresh();
         $this->assertNotNull($usuario->foto_perfil);
         $this->assertStringStartsWith('perfil_', $usuario->foto_perfil);
@@ -848,26 +857,26 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
             // Solo nombre_rol, sin name
         ]);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->autenticar($request);
-        
+
         $this->assertTrue(session()->has('roles'));
         $roles = session('roles');
         $this->assertContains(self::ROL_CLIENTE, $roles);
@@ -883,7 +892,7 @@ class UsuarioControllerUnitTest extends TestCase
             'primer_apellido' => self::APELLIDO_PEREZ,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         try {
@@ -903,7 +912,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_REGISTRO, 'POST', [
@@ -911,7 +920,7 @@ class UsuarioControllerUnitTest extends TestCase
             'primer_apellido' => self::APELLIDO_PEREZ,
             'correo' => self::TEST_EMAIL_JUAN, // Correo duplicado
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         try {
@@ -929,7 +938,7 @@ class UsuarioControllerUnitTest extends TestCase
             'primer_apellido' => self::APELLIDO_PEREZ,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => '123', // Menos de 8 caracteres
-            'contrasena_confirmation' => '123'
+            'contrasena_confirmation' => '123',
         ]);
 
         try {
@@ -947,7 +956,7 @@ class UsuarioControllerUnitTest extends TestCase
             'primer_apellido' => self::APELLIDO_PEREZ,
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => 'diferente' // No coincide
+            'contrasena_confirmation' => 'diferente', // No coincide
         ]);
 
         try {
@@ -961,7 +970,7 @@ class UsuarioControllerUnitTest extends TestCase
     public function test_autenticar_valida_correo_requerido(): void
     {
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
             // Falta correo
         ]);
 
@@ -976,7 +985,7 @@ class UsuarioControllerUnitTest extends TestCase
     public function test_autenticar_valida_contrasena_requerida(): void
     {
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
-            'correo' => self::TEST_EMAIL_JUAN
+            'correo' => self::TEST_EMAIL_JUAN,
             // Falta contraseña
         ]);
 
@@ -997,7 +1006,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
@@ -1023,7 +1032,7 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
@@ -1032,7 +1041,7 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->create('documento.pdf', 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         try {
@@ -1047,7 +1056,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_REGISTRO, 'POST', [
@@ -1059,11 +1068,11 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'direccion' => 'Calle 123',
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->store($request);
-        
+
         $this->assertNotNull($response);
         $this->assertDatabaseHas('personas', [
             'correo' => self::TEST_EMAIL_JUAN,
@@ -1072,7 +1081,7 @@ class UsuarioControllerUnitTest extends TestCase
             'primer_apellido' => self::APELLIDO_PEREZ,
             'segundo_apellido' => 'García',
             'telefono' => self::TEST_TELEFONO,
-            'direccion' => 'Calle 123'
+            'direccion' => 'Calle 123',
         ]);
     }
 
@@ -1081,7 +1090,7 @@ class UsuarioControllerUnitTest extends TestCase
         // Crear un rol con estructura que cause problema
         DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         // Eliminar la tabla personas_roles temporalmente para forzar excepción
@@ -1094,15 +1103,15 @@ class UsuarioControllerUnitTest extends TestCase
             'telefono' => self::TEST_TELEFONO,
             'correo' => 'nuevo@test.com',
             'contrasena' => self::TEST_PASSWORD,
-            'contrasena_confirmation' => self::TEST_PASSWORD
+            'contrasena_confirmation' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->store($request);
-        
+
         // Debe continuar sin error aunque falle la asignación de rol
         $this->assertNotNull($response);
         $this->assertDatabaseHas('personas', [
-            'correo' => 'nuevo@test.com'
+            'correo' => 'nuevo@test.com',
         ]);
     }
 
@@ -1116,7 +1125,7 @@ class UsuarioControllerUnitTest extends TestCase
             'contrasena' => 'password',
             'foto_perfil' => 'foto_inexistente.jpg', // Existe en BD pero no físicamente
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
@@ -1124,15 +1133,15 @@ class UsuarioControllerUnitTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
 
         $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
-            'foto_perfil' => $file
+            'foto_perfil' => $file,
         ]);
 
         $response = $this->controller->updatePhoto($request);
-        
+
         $this->assertNotNull($response);
         $data = json_decode($response->getContent(), true);
         $this->assertTrue($data['success']);
-        
+
         // Verificar que se creó la nueva foto
         $usuario->refresh();
         $this->assertNotNull($usuario->foto_perfil);
@@ -1143,11 +1152,11 @@ class UsuarioControllerUnitTest extends TestCase
     {
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => 'noexiste@test.com',
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $response = $this->controller->autenticar($request);
-        
+
         $this->assertNotNull($response);
         $this->assertFalse(session()->has('usuario_id'));
         // Verificar que retorna con errores
@@ -1163,26 +1172,26 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->autenticar($request);
-        
+
         $this->assertTrue(session()->has('roles'));
         $roles = session('roles');
         $this->assertContains(self::ROL_CLIENTE, $roles);
@@ -1197,25 +1206,25 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => 'test2@test.com',
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => 'Administrador'
+            'nombre_rol' => 'Administrador',
         ]);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => 'test2@test.com',
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->autenticar($request);
-        
+
         $this->assertTrue(session()->has('roles'));
         $roles = session('roles');
         // Verificar que usa nombre_rol cuando name no existe
@@ -1231,31 +1240,30 @@ class UsuarioControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL_JUAN,
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $rolId = DB::table('roles')->insertGetId([
             'name' => self::ROL_CLIENTE,
-            'nombre_rol' => self::ROL_CLIENTE
+            'nombre_rol' => self::ROL_CLIENTE,
         ]);
 
         // Insertar el mismo rol dos veces (simulando duplicado)
         DB::table('personas_roles')->insert([
             ['personas_id' => $usuario->id, 'roles_id' => $rolId],
-            ['personas_id' => $usuario->id, 'roles_id' => $rolId]
+            ['personas_id' => $usuario->id, 'roles_id' => $rolId],
         ]);
 
         $request = Request::create(self::ROUTE_USUARIOS_AUTENTICAR, 'POST', [
             'correo' => self::TEST_EMAIL_JUAN,
-            'contrasena' => self::TEST_PASSWORD
+            'contrasena' => self::TEST_PASSWORD,
         ]);
 
         $this->controller->autenticar($request);
-        
+
         $roles = session('roles');
         // Debe eliminar duplicados
         $this->assertCount(1, $roles);
         $this->assertContains(self::ROL_CLIENTE, $roles);
     }
 }
-

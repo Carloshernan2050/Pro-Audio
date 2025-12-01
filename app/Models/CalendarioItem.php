@@ -10,11 +10,11 @@ class CalendarioItem extends Model
     use HasFactory;
 
     protected $table = 'calendario_items';
-    
+
     protected $fillable = [
         'calendario_id',
         'movimientos_inventario_id',
-        'cantidad'
+        'cantidad',
     ];
 
     public function calendario()
@@ -27,4 +27,3 @@ class CalendarioItem extends Model
         return $this->belongsTo(\App\Models\MovimientosInventario::class, 'movimientos_inventario_id');
     }
 }
-

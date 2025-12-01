@@ -10,18 +10,31 @@ use Illuminate\Support\Facades\DB;
 class CalendarioValidationService
 {
     private const MSG_SELECCIONAR_PRODUCTO = 'Debe seleccionar al menos un producto.';
+
     private const MSG_PRODUCTO_INVENTARIO = 'Debe seleccionar un producto del inventario.';
+
     private const MSG_PRODUCTO_NO_EXISTE = 'El producto seleccionado no existe.';
+
     private const MSG_CANTIDAD_OBLIGATORIA = 'La cantidad es obligatoria para cada producto.';
+
     private const MSG_CANTIDAD_ENTERO = 'La cantidad debe ser un número entero.';
+
     private const MSG_CANTIDAD_MAYOR_CERO = 'La cantidad debe ser mayor a 0.';
+
     private const MSG_FECHA_INICIO_OBLIGATORIA = 'La fecha de inicio es obligatoria.';
+
     private const MSG_FECHA_INICIO_VALIDA = 'La fecha de inicio debe ser una fecha válida.';
+
     private const MSG_FECHA_FIN_OBLIGATORIA = 'La fecha de fin es obligatoria.';
+
     private const MSG_FECHA_FIN_VALIDA = 'La fecha de fin debe ser una fecha válida.';
+
     private const MSG_FECHA_FIN_AFTER = 'La fecha de fin debe ser posterior o igual a la fecha de inicio.';
+
     private const MSG_DESCRIPCION_OBLIGATORIA = 'La descripción del evento es obligatoria.';
+
     private const MSG_DESCRIPCION_TEXTO = 'La descripción del evento debe ser texto.';
+
     private const MSG_SERVICIO_OBLIGATORIO = 'Debe seleccionar un servicio.';
 
     /**
@@ -30,12 +43,12 @@ class CalendarioValidationService
     public function getValidationRulesForItems(): array
     {
         return [
-            'items'                      => 'required|array|min:1',
-            'items.*.inventario_id'      => 'required|exists:inventario,id',
-            'items.*.cantidad'           => 'required|integer|min:1',
-            'fecha_inicio'              => 'required|date',
-            'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
-            'descripcion_evento'        => 'required|string'
+            'items' => 'required|array|min:1',
+            'items.*.inventario_id' => 'required|exists:inventario,id',
+            'items.*.cantidad' => 'required|integer|min:1',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'descripcion_evento' => 'required|string',
         ];
     }
 
@@ -58,7 +71,7 @@ class CalendarioValidationService
             'fecha_fin.date' => self::MSG_FECHA_FIN_VALIDA,
             'fecha_fin.after_or_equal' => self::MSG_FECHA_FIN_AFTER,
             'descripcion_evento.required' => self::MSG_DESCRIPCION_OBLIGATORIA,
-            'descripcion_evento.string' => self::MSG_DESCRIPCION_TEXTO
+            'descripcion_evento.string' => self::MSG_DESCRIPCION_TEXTO,
         ];
     }
 
@@ -69,9 +82,9 @@ class CalendarioValidationService
     {
         return [
             'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
-            'fecha_inicio'              => 'required|date',
-            'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
-            'descripcion_evento'        => 'required|string'
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'descripcion_evento' => 'required|string',
         ];
     }
 
@@ -89,7 +102,7 @@ class CalendarioValidationService
             'fecha_fin.date' => self::MSG_FECHA_FIN_VALIDA,
             'fecha_fin.after_or_equal' => self::MSG_FECHA_FIN_AFTER,
             'descripcion_evento.required' => self::MSG_DESCRIPCION_OBLIGATORIA,
-            'descripcion_evento.string' => self::MSG_DESCRIPCION_TEXTO
+            'descripcion_evento.string' => self::MSG_DESCRIPCION_TEXTO,
         ];
     }
 
@@ -99,13 +112,13 @@ class CalendarioValidationService
     public function getValidationRulesForUpdateItems(): array
     {
         return [
-            'servicio'                  => 'required|string|max:120',
-            'items'                      => 'required|array|min:1',
-            'items.*.inventario_id'      => 'required|exists:inventario,id',
-            'items.*.cantidad'           => 'required|integer|min:1',
-            'fecha_inicio'              => 'required|date',
-            'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
-            'descripcion_evento'        => 'required|string'
+            'servicio' => 'required|string|max:120',
+            'items' => 'required|array|min:1',
+            'items.*.inventario_id' => 'required|exists:inventario,id',
+            'items.*.cantidad' => 'required|integer|min:1',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'descripcion_evento' => 'required|string',
         ];
     }
 
@@ -125,12 +138,12 @@ class CalendarioValidationService
     public function getValidationRulesForUpdateOldFormat(): array
     {
         return [
-            'servicio'                  => 'required|string|max:120',
+            'servicio' => 'required|string|max:120',
             'movimientos_inventario_id' => 'required|exists:movimientos_inventario,id',
-            'fecha_inicio'              => 'required|date',
-            'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
-            'descripcion_evento'        => 'required|string',
-            'cantidad'                  => 'nullable|integer|min:1'
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'descripcion_evento' => 'required|string',
+            'cantidad' => 'nullable|integer|min:1',
         ];
     }
 
@@ -145,6 +158,7 @@ class CalendarioValidationService
             'cantidad.min' => self::MSG_CANTIDAD_MAYOR_CERO,
         ], $this->getValidationMessagesForOldFormat());
     }
+
     /**
      * Valida el stock disponible para todos los items.
      *
@@ -157,7 +171,7 @@ class CalendarioValidationService
             $inventarioId = $item['inventario_id'];
 
             $inventario = DB::table('inventario')->where('id', $inventarioId)->first();
-            if (!$inventario) {
+            if (! $inventario) {
                 throw new InventarioNotFoundException('El producto del inventario seleccionado no existe.');
             }
 
@@ -186,7 +200,7 @@ class CalendarioValidationService
             $inventarioId = $item['inventario_id'];
 
             $inventario = DB::table('inventario')->where('id', $inventarioId)->first();
-            if (!$inventario) {
+            if (! $inventario) {
                 throw new InventarioNotFoundException('El producto del inventario seleccionado no existe.');
             }
 
@@ -233,4 +247,3 @@ class CalendarioValidationService
             ->sum('calendario_items.cantidad') ?? 0;
     }
 }
-

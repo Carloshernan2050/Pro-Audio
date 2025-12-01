@@ -11,11 +11,11 @@ class EnsureSuperadminSeeder extends Seeder
     public function run(): void
     {
         // Configurable por .env
-        $email      = env('SUPERADMIN_EMAIL', 'superadmin@proaudio.test');
-        $password   = env('SUPERADMIN_PASSWORD', 'SuperAdmin#2025'); // úsalo para la tabla de autenticación si aplica
-        $firstName  = env('SUPERADMIN_FIRST_NAME', 'Super');
-        $lastName   = env('SUPERADMIN_LAST_NAME', 'Admin');
-        $telefono   = env('SUPERADMIN_PHONE', null);
+        $email = env('SUPERADMIN_EMAIL', 'superadmin@proaudio.test');
+        $password = env('SUPERADMIN_PASSWORD', 'SuperAdmin#2025'); // úsalo para la tabla de autenticación si aplica
+        $firstName = env('SUPERADMIN_FIRST_NAME', 'Super');
+        $lastName = env('SUPERADMIN_LAST_NAME', 'Admin');
+        $telefono = env('SUPERADMIN_PHONE', null);
 
         // Asegurar rol "Superadmin" en tabla roles (name o nombre_rol)
         $role = DB::table('roles')
@@ -23,7 +23,7 @@ class EnsureSuperadminSeeder extends Seeder
             ->where(DB::raw('COALESCE(name, nombre_rol)'), 'Superadmin')
             ->first();
 
-        if (!$role) {
+        if (! $role) {
             $roleId = DB::table('roles')->insertGetId([
                 'name' => 'Superadmin',
             ]);
@@ -33,19 +33,19 @@ class EnsureSuperadminSeeder extends Seeder
 
         // Asegurar persona en tabla personas (columna correo)
         $persona = DB::table('personas')->where('correo', $email)->first();
-        if (!$persona) {
+        if (! $persona) {
             $personaId = DB::table('personas')->insertGetId([
-                'primer_nombre'   => $firstName,
+                'primer_nombre' => $firstName,
                 'primer_apellido' => $lastName,
-                'correo'          => $email,
-                'telefono'        => $telefono,
+                'correo' => $email,
+                'telefono' => $telefono,
             ]);
         } else {
             $personaId = $persona->id;
             DB::table('personas')->where('id', $personaId)->update([
-                'primer_nombre'   => $firstName,
+                'primer_nombre' => $firstName,
                 'primer_apellido' => $lastName,
-                'telefono'        => $telefono,
+                'telefono' => $telefono,
             ]);
         }
 
@@ -54,10 +54,10 @@ class EnsureSuperadminSeeder extends Seeder
             ->where('personas_id', $personaId)
             ->where('roles_id', $roleId)
             ->exists();
-        if (!$existsPivot) {
+        if (! $existsPivot) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $personaId,
-                'roles_id'    => $roleId,
+                'roles_id' => $roleId,
             ]);
         }
 
@@ -75,11 +75,13 @@ class EnsureSuperadminSeeder extends Seeder
     }
 }
 
-if (!function_exists('schemaHasTable')) {
+if (! function_exists('schemaHasTable')) {
     function schemaHasTable(string $table): bool
     {
-        try { return DB::getSchemaBuilder()->hasTable($table); } catch (\Throwable $e) { return false; }
+        try {
+            return DB::getSchemaBuilder()->hasTable($table);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }
-
-

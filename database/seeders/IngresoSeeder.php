@@ -17,7 +17,7 @@ class IngresoSeeder extends Seeder
             [
                 'personas_id' => 2,
                 'fecha_ingreso' => now(),
-            ]
+            ],
         ]);
 
     }

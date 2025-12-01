@@ -17,17 +17,21 @@ class CalendarioDataServiceTest extends TestCase
     use RefreshDatabase;
 
     private const EVENTO_DE_PRUEBA = 'Evento de prueba';
+
     private const PRODUCTO_TEST = 'Producto Test';
+
     private const FECHA_INICIO = '2024-01-01';
+
     private const FECHA_FIN = '2024-01-05';
 
     private CalendarioDataService $service;
+
     private Usuario $persona;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CalendarioDataService();
+        $this->service = new CalendarioDataService;
         $this->persona = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'User',
@@ -223,7 +227,7 @@ class CalendarioDataServiceTest extends TestCase
         $clave = $this->service->generarClaveUnicaRegistro($calendario);
 
         $this->assertIsString($clave);
-        $this->assertStringContainsString((string)$movimiento->id, $clave);
+        $this->assertStringContainsString((string) $movimiento->id, $clave);
         $this->assertStringContainsString('3', $clave);
     }
 
@@ -342,12 +346,12 @@ class CalendarioDataServiceTest extends TestCase
     public function test_transformar_registro_a_data_con_multiples_items(): void
     {
         $inventario1 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 1',
+            'descripcion' => self::PRODUCTO_TEST.' 1',
             'stock' => 10,
         ]);
 
         $inventario2 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 2',
+            'descripcion' => self::PRODUCTO_TEST.' 2',
             'stock' => 10,
         ]);
 
@@ -554,4 +558,3 @@ class CalendarioDataServiceTest extends TestCase
         $this->assertEquals(1, $resultado['cantidad_total']); // Default a 1
     }
 }
-

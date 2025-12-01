@@ -15,4 +15,3 @@ class StockInsuficienteException extends Exception
         parent::__construct($message);
     }
 }
-

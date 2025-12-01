@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SubServicios;
 use App\Models\Servicios;
+use App\Models\SubServicios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,6 +19,7 @@ class SubServiciosController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => $message]);
         }
+
         return redirect()->route('subservicios.index')->with('success', $message);
     }
 
@@ -30,6 +31,7 @@ class SubServiciosController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['errors' => $e->errors(), 'error' => 'Error de validación'], 422);
         }
+
         return redirect()->route('subservicios.index')
             ->withErrors($e->errors())
             ->withInput();
@@ -41,10 +43,11 @@ class SubServiciosController extends Controller
     private function handleExceptionError(Request $request, \Exception $e, string $action)
     {
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['error' => "Error al {$action}: " . $e->getMessage()], 422);
+            return response()->json(['error' => "Error al {$action}: ".$e->getMessage()], 422);
         }
+
         return redirect()->route('subservicios.index')
-            ->with('error', "Error al {$action}: " . $e->getMessage());
+            ->with('error', "Error al {$action}: ".$e->getMessage());
     }
 
     /**
@@ -57,16 +60,17 @@ class SubServiciosController extends Controller
                 ->orderBy('servicios_id')
                 ->orderBy('nombre')
                 ->get();
-            
+
             $servicios = Servicios::orderBy('nombre_servicio')->get();
-            
+
             return view('usuarios.subservicios', compact('subServicios', 'servicios'));
         } catch (\Exception $e) {
-            \Log::error('SubServiciosController@index Error: ' . $e->getMessage());
+            \Log::error('SubServiciosController@index Error: '.$e->getMessage());
+
             return view('usuarios.subservicios', [
                 'subServicios' => collect(),
-                'servicios' => collect()
-            ])->with('error', 'Error al cargar los subservicios: ' . $e->getMessage());
+                'servicios' => collect(),
+            ])->with('error', 'Error al cargar los subservicios: '.$e->getMessage());
         }
     }
 
@@ -76,6 +80,7 @@ class SubServiciosController extends Controller
     public function create()
     {
         $servicios = Servicios::orderBy('nombre_servicio')->get();
+
         return view('usuarios.subservicios', compact('servicios'));
     }
 
@@ -96,7 +101,7 @@ class SubServiciosController extends Controller
             $imagenPath = null;
             if ($request->hasFile('imagen')) {
                 $file = $request->file('imagen');
-                $filename = 'subservicio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filename = 'subservicio_'.time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
                 $file->storeAs(self::STORAGE_PATH, $filename, 'public');
                 $imagenPath = $filename;
             }
@@ -123,6 +128,7 @@ class SubServiciosController extends Controller
     public function show($id)
     {
         $subServicio = SubServicios::with('servicio')->findOrFail($id);
+
         return view('usuarios.subservicios', compact('subServicio'));
     }
 
@@ -133,7 +139,7 @@ class SubServiciosController extends Controller
     {
         $subServicio = SubServicios::findOrFail($id);
         $servicios = Servicios::orderBy('nombre_servicio')->get();
-        
+
         return view('usuarios.subservicios', compact('subServicio', 'servicios'));
     }
 
@@ -144,7 +150,7 @@ class SubServiciosController extends Controller
     {
         try {
             $subServicio = SubServicios::findOrFail($id);
-            
+
             $request->validate([
                 'servicios_id' => 'required|exists:servicios,id',
                 'nombre' => 'required|string|max:100',
@@ -156,13 +162,13 @@ class SubServiciosController extends Controller
             // Manejar la imagen
             if ($request->hasFile('imagen')) {
                 // Eliminar imagen anterior si existe
-                if ($subServicio->imagen && Storage::disk('public')->exists(self::STORAGE_PATH . $subServicio->imagen)) {
-                    Storage::disk('public')->delete(self::STORAGE_PATH . $subServicio->imagen);
+                if ($subServicio->imagen && Storage::disk('public')->exists(self::STORAGE_PATH.$subServicio->imagen)) {
+                    Storage::disk('public')->delete(self::STORAGE_PATH.$subServicio->imagen);
                 }
-                
+
                 // Guardar nueva imagen
                 $file = $request->file('imagen');
-                $filename = 'subservicio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filename = 'subservicio_'.time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
                 $file->storeAs(self::STORAGE_PATH, $filename, 'public');
                 $imagenPath = $filename;
             } else {
@@ -194,12 +200,12 @@ class SubServiciosController extends Controller
         try {
             $request = request();
             $subServicio = SubServicios::findOrFail($id);
-            
+
             // Eliminar imagen si existe
-            if ($subServicio->imagen && Storage::disk('public')->exists(self::STORAGE_PATH . $subServicio->imagen)) {
-                Storage::disk('public')->delete(self::STORAGE_PATH . $subServicio->imagen);
+            if ($subServicio->imagen && Storage::disk('public')->exists(self::STORAGE_PATH.$subServicio->imagen)) {
+                Storage::disk('public')->delete(self::STORAGE_PATH.$subServicio->imagen);
             }
-            
+
             $subServicio->delete();
 
             return $this->handleSuccessResponse($request, 'Subservicio eliminado exitosamente.');

@@ -15,7 +15,7 @@ class Inventario extends Model
 
     protected $fillable = [
         'descripcion',
-        'stock'
+        'stock',
     ];
 
     // Relación con movimientos de inventario

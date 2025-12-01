@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ServiceCreationException;
-use App\Models\Servicios;
 use App\Models\Cotizacion;
+use App\Models\Servicios;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ServiciosController extends Controller
@@ -20,19 +20,20 @@ class ServiciosController extends Controller
     {
         try {
             $servicios = Servicios::orderBy('id', 'desc')->get();
-            
+
             // Debug: verificar que hay servicios
             if ($servicios->isEmpty()) {
                 Log::info('ServiciosController@index: No hay servicios en la base de datos');
             } else {
-                Log::info('ServiciosController@index: Se encontraron ' . $servicios->count() . ' servicios');
+                Log::info('ServiciosController@index: Se encontraron '.$servicios->count().' servicios');
             }
-            
+
             return view('usuarios.ajustes', compact('servicios'));
         } catch (\Exception $e) {
-            Log::error('ServiciosController@index Error: ' . $e->getMessage());
+            Log::error('ServiciosController@index Error: '.$e->getMessage());
+
             return view('usuarios.ajustes', ['servicios' => collect()])
-                ->with('error', 'Error al cargar los servicios: ' . $e->getMessage());
+                ->with('error', 'Error al cargar los servicios: '.$e->getMessage());
         }
     }
 
@@ -64,7 +65,7 @@ class ServiciosController extends Controller
             ]);
 
             // Verificar que se guardó correctamente
-            if (!$servicio || !$servicio->id) {
+            if (! $servicio || ! $servicio->id) {
                 throw new ServiceCreationException('El servicio no se guardó correctamente en la base de datos.');
             }
 
@@ -76,17 +77,17 @@ class ServiciosController extends Controller
                 // Solo mostramos un mensaje de advertencia
                 $redirect = redirect()->route('servicios.index')
                     ->with('success', 'Servicio creado exitosamente en la base de datos.')
-                    ->with('warning', 'Advertencia: No se pudo generar la vista automáticamente. ' . $bladeError->getMessage());
+                    ->with('warning', 'Advertencia: No se pudo generar la vista automáticamente. '.$bladeError->getMessage());
             }
 
             $redirect = $redirect ?? redirect()->route('servicios.index')
                 ->with('success', 'Servicio creado exitosamente y vista generada automáticamente.');
         } catch (ServiceCreationException $e) {
             $redirect = redirect()->route('servicios.index')
-                ->with('error', 'Error al crear el servicio: ' . $e->getMessage());
+                ->with('error', 'Error al crear el servicio: '.$e->getMessage());
         } catch (\Exception $e) {
             $redirect = redirect()->route('servicios.index')
-                ->with('error', 'Error inesperado al crear el servicio: ' . $e->getMessage());
+                ->with('error', 'Error inesperado al crear el servicio: '.$e->getMessage());
         }
 
         return $redirect;
@@ -99,10 +100,10 @@ class ServiciosController extends Controller
     {
         $servicio = Servicios::findOrFail($id);
         $subServicios = $servicio->subServicios;
-        
+
         // Nombre normalizado para la vista
         $nombreVista = Str::slug($servicio->nombre_servicio, '_');
-        
+
         return view("usuarios.{$nombreVista}", compact('subServicios', 'servicio'));
     }
 
@@ -112,6 +113,7 @@ class ServiciosController extends Controller
     public function edit($id)
     {
         $servicio = Servicios::findOrFail($id);
+
         return view('usuarios.ajustes', compact('servicio'));
     }
 
@@ -121,16 +123,16 @@ class ServiciosController extends Controller
     public function update(Request $request, $id)
     {
         $servicio = Servicios::findOrFail($id);
-        
+
         $request->validate([
-            'nombre_servicio' => 'required|string|max:100|unique:servicios,nombre_servicio,' . $id,
+            'nombre_servicio' => 'required|string|max:100|unique:servicios,nombre_servicio,'.$id,
             'descripcion' => 'nullable|string|max:500',
             'icono' => 'nullable|string|max:80',
         ]);
 
         try {
             $nombreAnterior = $servicio->nombre_servicio;
-            
+
             $servicio->update([
                 'nombre_servicio' => $request->nombre_servicio,
                 'descripcion' => $request->descripcion ?? '',
@@ -150,7 +152,7 @@ class ServiciosController extends Controller
                 ->with('success', 'Servicio actualizado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->route('servicios.index')
-                ->with('error', 'Error al actualizar el servicio: ' . $e->getMessage());
+                ->with('error', 'Error al actualizar el servicio: '.$e->getMessage());
         }
     }
 
@@ -181,7 +183,7 @@ class ServiciosController extends Controller
                 ->with('success', 'Servicio eliminado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->route('servicios.index')
-                ->with('error', 'Error al eliminar el servicio: ' . $e->getMessage());
+                ->with('error', 'Error al eliminar el servicio: '.$e->getMessage());
         }
     }
 
@@ -193,28 +195,28 @@ class ServiciosController extends Controller
         $nombreVista = Str::slug($servicio->nombre_servicio, '_');
         $nombreServicio = $servicio->nombre_servicio;
         $descripcion = $servicio->descripcion ?? 'Servicios profesionales de alta calidad para tus eventos.';
-        
+
         $rutaVista = resource_path("views/usuarios/{$nombreVista}.blade.php");
         $directorioVista = resource_path('views/usuarios');
-        
+
         // Asegurar que el directorio existe
-        if (!File::exists($directorioVista)) {
+        if (! File::exists($directorioVista)) {
             File::makeDirectory($directorioVista, 0755, true);
         }
 
         // Usar una plantilla existente como base y personalizarla
         $plantillaBase = resource_path('views/usuarios/animacion.blade.php');
-        
+
         if (File::exists($plantillaBase)) {
             // Leer la plantilla base
             $contenidoBlade = File::get($plantillaBase);
-            
+
             // Reemplazar los valores específicos
-            $contenidoBlade = str_replace('PRO AUDIO - Animación', 'PRO AUDIO - ' . e($nombreServicio), $contenidoBlade);
+            $contenidoBlade = str_replace('PRO AUDIO - Animación', 'PRO AUDIO - '.e($nombreServicio), $contenidoBlade);
             $contenidoBlade = str_replace('Animación de Eventos', e($nombreServicio), $contenidoBlade);
             $contenidoBlade = str_replace('Personal capacitado y sistemas de última generación para crear el ambiente perfecto en tu evento.', e($descripcion), $contenidoBlade);
-            $contenidoBlade = str_replace('/images/animacion/', '/images/' . e($nombreVista) . '/', $contenidoBlade);
-            $contenidoBlade = str_replace('para animación', 'para ' . e($nombreServicio), $contenidoBlade);
+            $contenidoBlade = str_replace('/images/animacion/', '/images/'.e($nombreVista).'/', $contenidoBlade);
+            $contenidoBlade = str_replace('para animación', 'para '.e($nombreServicio), $contenidoBlade);
         } else {
             // Si no existe la plantilla, crear una desde cero
             $contenidoBlade = $this->crearContenidoBladeDesdeCero($nombreServicio, $descripcion, $nombreVista);
@@ -230,18 +232,18 @@ class ServiciosController extends Controller
     {
         $nombreVista = Str::slug($servicio->nombre_servicio, '_');
         $rutaVista = resource_path("views/usuarios/{$nombreVista}.blade.php");
-        
+
         if (File::exists($rutaVista)) {
             $contenido = File::get($rutaVista);
             $descripcion = $servicio->descripcion ?? 'Servicios profesionales de alta calidad para tus eventos.';
-            
+
             // Reemplazar la descripción en el blade usando regex más específico
             $contenido = preg_replace(
                 '/<p class="page-subtitle">[^<]*<\/p>/',
-                '<p class="page-subtitle">' . e($descripcion) . '</p>',
+                '<p class="page-subtitle">'.e($descripcion).'</p>',
                 $contenido
             );
-            
+
             File::put($rutaVista, $contenido);
         }
     }
@@ -324,12 +326,12 @@ class ServiciosController extends Controller
         </main>
 @endsection
 BLADE;
-        
+
         // Reemplazar los placeholders
         $contenido = str_replace('{NOMBRE_SERVICIO}', e($nombreServicio), $contenido);
         $contenido = str_replace('{DESCRIPCION}', e($descripcion), $contenido);
         $contenido = str_replace('{NOMBRE_VISTA}', e($nombreVista), $contenido);
-        
+
         return $contenido;
     }
 }

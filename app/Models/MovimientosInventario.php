@@ -18,7 +18,7 @@ class MovimientosInventario extends Model
         'tipo_movimiento',
         'cantidad',
         'fecha_movimiento',
-        'descripcion'
+        'descripcion',
     ];
 
     // Relación con inventario
