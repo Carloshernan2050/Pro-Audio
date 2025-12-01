@@ -62,7 +62,7 @@ class EnsureSuperadminSeeder extends Seeder
         }
 
         // Si tu app también usa tabla users para login, crear/actualizar credenciales mínimas
-        if (schema_has_table('users')) {
+        if (schemaHasTable('users')) {
             try {
                 DB::table('users')->updateOrInsert(
                     ['email' => $email],
@@ -75,8 +75,8 @@ class EnsureSuperadminSeeder extends Seeder
     }
 }
 
-if (!function_exists('schema_has_table')) {
-    function schema_has_table(string $table): bool
+if (!function_exists('schemaHasTable')) {
+    function schemaHasTable(string $table): bool
     {
         try { return DB::getSchemaBuilder()->hasTable($table); } catch (\Throwable $e) { return false; }
     }

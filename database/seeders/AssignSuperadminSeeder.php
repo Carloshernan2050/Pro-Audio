@@ -13,8 +13,8 @@ class AssignSuperadminSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = 'proaudio14@gmail.com';
-        $password = '123456789';
+        $email = env('SUPERADMIN_EMAIL', 'proaudio14@gmail.com');
+        $password = env('SUPERADMIN_PASSWORD', '123456789');
 
         // Asegurar que el rol exista en Spatie
         $role = Role::findOrCreate('Superadmin', 'web');
