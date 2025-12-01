@@ -386,10 +386,13 @@
 
 /* Estilos para el contenedor de botones */
 .button-container {
-    margin-bottom: 20px;
+    margin: 0 0 20px 0;
+    padding: 0;
     display: flex;
     gap: 10px;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Historial: controles y agrupaciones */
@@ -451,6 +454,21 @@ tr.group-header th {
     margin: 2px 0;
 }
 
+/* Estilos base para títulos de página */
+.page-title {
+    color: #e91c1c;
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.page-subtitle {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
 /* Responsive */
 /* Tablets (768px - 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -485,6 +503,49 @@ tr.group-header th {
 
 /* Móviles (hasta 767px) */
 @media (max-width: 767px) {
+    .page-title {
+        font-size: 1.5rem !important;
+        margin: 0 0 10px 0 !important;
+        padding: 0 !important;
+        word-wrap: break-word !important;
+        text-align: left !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border: 0 !important;
+        outline: 0 !important;
+    }
+
+    .page-subtitle {
+        font-size: 0.95rem !important;
+        margin: 0 0 20px 0 !important;
+        padding: 0 !important;
+        word-wrap: break-word !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border: 0 !important;
+        outline: 0 !important;
+    }
+
+    .main-content {
+        padding: 15px 12px !important;
+        padding-top: 20px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        border: 0 !important;
+        outline: 0 !important;
+        position: relative !important;
+        left: 0 !important;
+    }
+
+    .button-container {
+        margin: 0 0 20px 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
     .modal-content {
         width: 95%;
         max-width: 95%;
@@ -511,12 +572,17 @@ tr.group-header th {
     .button-container {
         flex-direction: column;
         align-items: stretch;
+        margin: 0 0 20px 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .button-container .btn-tab {
         width: 100%;
-        margin-right: 0;
-        margin-bottom: 8px;
+        margin: 0 0 8px 0 !important;
+        padding: 8px 12px !important;
+        box-sizing: border-box !important;
     }
     
     .table-container {
@@ -595,5 +661,48 @@ tr.group-header th {
     .btn-action {
         flex: 1 1 auto;
         min-width: 70px;
+    }
+}
+
+/* Móviles pequeños (hasta 500px) */
+@media (max-width: 500px) {
+    .page-title {
+        font-size: 1.3rem !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border: 0 !important;
+        outline: 0 !important;
+    }
+
+    .page-subtitle {
+        font-size: 0.85rem !important;
+        margin: 0 0 18px 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border: 0 !important;
+        outline: 0 !important;
+    }
+
+    .main-content {
+        padding: 10px 8px !important;
+        padding-top: 15px !important;
+        margin: 0 !important;
+        border: 0 !important;
+        outline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+        left: 0 !important;
+    }
+
+    .button-container {
+        margin: 0 0 20px 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 }
