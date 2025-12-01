@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             UsuariosSeeder::class,
 
             ServiciosSeeder::class,
-            SubserviciosSeeder::class,   // ojo: corregido nombre
+            SubServiciosSeeder::class,
 
             InventarioSeeder::class,
             MovimientosInventarioSeeder::class,
