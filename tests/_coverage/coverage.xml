@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1764562569">
-  <project timestamp="1764562569" name="Clover Coverage">
+<coverage generated="1764567987">
+  <project timestamp="1764567987" name="Clover Coverage">
     <package name="App\Exceptions">
       <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Exceptions\InventarioNotFoundException.php">
         <class name="App\Exceptions\InventarioNotFoundException" namespace="App\Exceptions">

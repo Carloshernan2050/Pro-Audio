@@ -16,10 +16,11 @@
 
 .top-bar { grid-area: topbar; }
 .sidebar { grid-area: sidebar; }
-.main-content { grid-area: main; }
-
-/* Asegura espaciados básicos del contenido */
-.main-content {
-	padding: 20px;
+/* Contenido principal - estilos consolidados */
+.main-content { 
+	grid-area: main; 
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
