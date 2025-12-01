@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('reservas')) {
+        if (! Schema::hasTable('reservas')) {
             return;
         }
 
@@ -54,7 +54,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (!Schema::hasTable('reservas')) {
+        if (! Schema::hasTable('reservas')) {
             return;
         }
 
@@ -77,7 +77,7 @@ return new class extends Migration
      */
     private function addColumnIfMissing(Blueprint $table, string $columnName, callable $callback): void
     {
-        if (!Schema::hasColumn('reservas', $columnName)) {
+        if (! Schema::hasColumn('reservas', $columnName)) {
             $callback($table);
         }
     }
@@ -124,4 +124,3 @@ return new class extends Migration
         }
     }
 };
-

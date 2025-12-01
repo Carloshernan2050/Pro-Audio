@@ -7,14 +7,20 @@ use App\Models\SubServicios;
 class ChatbotIntentionDetector
 {
     private ChatbotTextProcessor $textProcessor;
-    
+
     private const PAR_LED = 'par led';
+
     private const ANIMACION = 'animación';
+
     private const CUMPLEANOS = 'cumpleaños';
+
     private const MAESTRO_CEREMONIAS = 'maestro de ceremonias';
+
     private const LOCUCION = 'locución';
+
     private const EQUIPO_SONIDO = 'equipo de sonido';
-    private const STOPWORDS = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
+
+    private const STOPWORDS = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al'];
 
     // Cache estático para arrays de palabras
     private static array $cachePalabras = [];
@@ -35,6 +41,7 @@ class ChatbotIntentionDetector
         $explicitas = $this->getPalabras('explicitas');
         $fuertes = $this->getPalabras('fuertes');
         $result = $this->filtrarIntencionesPorUmbral($puntajes, $texto, $explicitas, $fuertes);
+
         return $this->ordenarIntencionesPorPuntaje($result, $puntajes);
     }
 
@@ -49,6 +56,7 @@ class ChatbotIntentionDetector
         if (empty($cache) || empty($qTokens)) {
             return [];
         }
+
         return $this->calcularYObtenerMejorIntencion($cache, $qTokens);
     }
 
@@ -61,17 +69,18 @@ class ChatbotIntentionDetector
         $texto = $this->textProcessor->normalizarTexto($mensajeCorregido);
         $validadas = [];
         foreach ($intenciones as $svc) {
-            if (!isset($explicitas[$svc])) {
+            if (! isset($explicitas[$svc])) {
                 continue;
             }
             foreach ($explicitas[$svc] as $kw) {
                 $kwNorm = $this->textProcessor->normalizarTexto($kw);
-                if (preg_match('/\b' . preg_quote($kwNorm, '/') . '\b/u', $texto)) {
+                if (preg_match('/\b'.preg_quote($kwNorm, '/').'\b/u', $texto)) {
                     $validadas[] = $svc;
                     break;
                 }
             }
         }
+
         return $validadas;
     }
 
@@ -84,10 +93,11 @@ class ChatbotIntentionDetector
         $explicitas = $this->getPalabras('relacionadas');
         foreach ($explicitas as $kw) {
             $kwNorm = $this->textProcessor->normalizarTexto($kw);
-            if (preg_match('/\b' . preg_quote($kwNorm, '/') . '\b/u', $texto)) {
+            if (preg_match('/\b'.preg_quote($kwNorm, '/').'\b/u', $texto)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -101,38 +111,39 @@ class ChatbotIntentionDetector
         $datos = [
             'mapa' => [
                 'Alquiler' => [
-                    'alquiler','alquilar','arrendar','rentar','equipo',self::EQUIPO_SONIDO,'sonido','audio','bafle','parlante','altavoz','bocina','consola','mezcladora','mixer','microfono','microfono','luces','luz','lampara','lámpara','iluminacion','iluminación','rack',self::PAR_LED
+                    'alquiler', 'alquilar', 'arrendar', 'rentar', 'equipo', self::EQUIPO_SONIDO, 'sonido', 'audio', 'bafle', 'parlante', 'altavoz', 'bocina', 'consola', 'mezcladora', 'mixer', 'microfono', 'microfono', 'luces', 'luz', 'lampara', 'lámpara', 'iluminacion', 'iluminación', 'rack', self::PAR_LED,
                 ],
                 'Animación' => [
-                    'animacion',self::ANIMACION,'animador','dj',self::MAESTRO_CEREMONIAS,'presentador','coordinador','cumpleanos',self::CUMPLEANOS,'fiesta','evento'
+                    'animacion', self::ANIMACION, 'animador', 'dj', self::MAESTRO_CEREMONIAS, 'presentador', 'coordinador', 'cumpleanos', self::CUMPLEANOS, 'fiesta', 'evento',
                 ],
                 'Publicidad' => [
-                    'publicidad','publicitar','publicitarlos','publicitarlas','publicitarlo','publicitarla','anuncio','spot','cuña','cuna','jingle','locucion',self::LOCUCION,'radio'
+                    'publicidad', 'publicitar', 'publicitarlos', 'publicitarlas', 'publicitarlo', 'publicitarla', 'anuncio', 'spot', 'cuña', 'cuna', 'jingle', 'locucion', self::LOCUCION, 'radio',
                 ],
             ],
             'explicitas' => [
-                'Alquiler' => ['alquiler','alquilar','rentar','arrendar'],
-                'Animación' => ['animacion',self::ANIMACION,'animador','dj'],
-                'Publicidad' => ['publicidad','publicitar','anuncio','spot','cuña','locucion',self::LOCUCION]
+                'Alquiler' => ['alquiler', 'alquilar', 'rentar', 'arrendar'],
+                'Animación' => ['animacion', self::ANIMACION, 'animador', 'dj'],
+                'Publicidad' => ['publicidad', 'publicitar', 'anuncio', 'spot', 'cuña', 'locucion', self::LOCUCION],
             ],
             'fuertes' => [
-                'Alquiler' => ['parlante','bafle','altavoz','bocina','microfono','consola','mezcladora','mixer','luces','lampara',self::PAR_LED,'rack','equipo','audio','sonido'],
-                'Animación' => ['dj','animador','presentador',self::MAESTRO_CEREMONIAS],
-                'Publicidad' => ['anuncio','spot','cuña','locucion','jingle','radio']
+                'Alquiler' => ['parlante', 'bafle', 'altavoz', 'bocina', 'microfono', 'consola', 'mezcladora', 'mixer', 'luces', 'lampara', self::PAR_LED, 'rack', 'equipo', 'audio', 'sonido'],
+                'Animación' => ['dj', 'animador', 'presentador', self::MAESTRO_CEREMONIAS],
+                'Publicidad' => ['anuncio', 'spot', 'cuña', 'locucion', 'jingle', 'radio'],
             ],
             'relacionadas' => [
-                'alquiler','alquilar','arrendar','rentar','equipo',self::EQUIPO_SONIDO,'sonido','audio','bafle','bafles','parlante','parlantes','altavoz','altavoces','bocina','bocinas','consola','consolas','mezcladora','mezcladoras','mixer','microfono','microfonos','luces','luz','lampara','lamparas','iluminacion','rack',self::PAR_LED,
-                'animacion',self::ANIMACION,'animador','animadores','dj',self::MAESTRO_CEREMONIAS,'maestro','maestro ceremonias','presentador','presentadores','coordinador','coordinadores','fiesta','fiestas','evento','eventos','cumpleanos',self::CUMPLEANOS,
-                'publicidad','publicitar','anuncio','anuncios','spot','spots','cuña','cuñas','jingle','jingles','locucion',self::LOCUCION,'radio'
+                'alquiler', 'alquilar', 'arrendar', 'rentar', 'equipo', self::EQUIPO_SONIDO, 'sonido', 'audio', 'bafle', 'bafles', 'parlante', 'parlantes', 'altavoz', 'altavoces', 'bocina', 'bocinas', 'consola', 'consolas', 'mezcladora', 'mezcladoras', 'mixer', 'microfono', 'microfonos', 'luces', 'luz', 'lampara', 'lamparas', 'iluminacion', 'rack', self::PAR_LED,
+                'animacion', self::ANIMACION, 'animador', 'animadores', 'dj', self::MAESTRO_CEREMONIAS, 'maestro', 'maestro ceremonias', 'presentador', 'presentadores', 'coordinador', 'coordinadores', 'fiesta', 'fiestas', 'evento', 'eventos', 'cumpleanos', self::CUMPLEANOS,
+                'publicidad', 'publicitar', 'anuncio', 'anuncios', 'spot', 'spots', 'cuña', 'cuñas', 'jingle', 'jingles', 'locucion', self::LOCUCION, 'radio',
             ],
             'validacion' => [
-                'Alquiler' => ['alquiler','alquilar','rentar','arrendar','equipo','sonido','audio','parlante','altavoz','bafle','bocina','consola','mezcladora','mixer','microfono','luces','iluminacion',self::PAR_LED,'rack'],
-                'Animación' => ['animacion',self::ANIMACION,'animador','dj',self::MAESTRO_CEREMONIAS,'presentador','coordinador','fiesta','evento','cumpleanos',self::CUMPLEANOS],
-                'Publicidad' => ['publicidad','publicitar','anuncio','spot','cuña','locucion',self::LOCUCION,'jingle','radio']
-            ]
+                'Alquiler' => ['alquiler', 'alquilar', 'rentar', 'arrendar', 'equipo', 'sonido', 'audio', 'parlante', 'altavoz', 'bafle', 'bocina', 'consola', 'mezcladora', 'mixer', 'microfono', 'luces', 'iluminacion', self::PAR_LED, 'rack'],
+                'Animación' => ['animacion', self::ANIMACION, 'animador', 'dj', self::MAESTRO_CEREMONIAS, 'presentador', 'coordinador', 'fiesta', 'evento', 'cumpleanos', self::CUMPLEANOS],
+                'Publicidad' => ['publicidad', 'publicitar', 'anuncio', 'spot', 'cuña', 'locucion', self::LOCUCION, 'jingle', 'radio'],
+            ],
         ];
 
         self::$cachePalabras[$tipo] = $datos[$tipo] ?? [];
+
         return self::$cachePalabras[$tipo];
     }
 
@@ -142,11 +153,12 @@ class ChatbotIntentionDetector
         foreach ($mapa as $servicio => $keywords) {
             foreach ($keywords as $kw) {
                 $kwNorm = $this->textProcessor->normalizarTexto($kw);
-                if (str_contains($texto, $kwNorm) || preg_match('/\b' . preg_quote($kwNorm, '/') . '/i', $texto)) {
+                if (str_contains($texto, $kwNorm) || preg_match('/\b'.preg_quote($kwNorm, '/').'/i', $texto)) {
                     $puntajes[$servicio]++;
                 }
             }
         }
+
         return $puntajes;
     }
 
@@ -155,16 +167,17 @@ class ChatbotIntentionDetector
         $result = [];
         foreach ($puntajes as $servicio => $score) {
             $aceptar = $score >= 2;
-            if (!$aceptar) {
+            if (! $aceptar) {
                 $aceptar = $this->verificarPalabras($texto, $explicitas[$servicio], 'explicitas');
             }
-            if (!$aceptar) {
+            if (! $aceptar) {
                 $aceptar = $this->verificarPalabras($texto, $fuertes[$servicio] ?? [], 'fuertes');
             }
             if ($aceptar) {
                 $result[] = $servicio;
             }
         }
+
         return $result;
     }
 
@@ -178,18 +191,20 @@ class ChatbotIntentionDetector
                     return true;
                 }
             } else {
-                if (preg_match('/\b' . preg_quote($kwNorm, '/') . '\w*/u', $texto)) {
+                if (preg_match('/\b'.preg_quote($kwNorm, '/').'\w*/u', $texto)) {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
     private function ordenarIntencionesPorPuntaje(array $result, array $puntajes): array
     {
         arsort($puntajes);
-        usort($result, fn($a, $b) => $puntajes[$b] <=> $puntajes[$a]);
+        usort($result, fn ($a, $b) => $puntajes[$b] <=> $puntajes[$a]);
+
         return $result;
     }
 
@@ -202,19 +217,20 @@ class ChatbotIntentionDetector
                     ->select('sub_servicios.nombre', 'sub_servicios.descripcion', 'servicios.nombre_servicio')
                     ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
                     ->get();
-                
+
                 $docsBySvc = [];
                 foreach ($rows as $r) {
                     $svc = $r->nombre_servicio;
-                    $content = trim(($r->nombre ?? '') . ' ' . ($r->descripcion ?? ''));
-                    $docsBySvc[$svc] = ($docsBySvc[$svc] ?? '') . ' ' . $content;
+                    $content = trim(($r->nombre ?? '').' '.($r->descripcion ?? ''));
+                    $docsBySvc[$svc] = ($docsBySvc[$svc] ?? '').' '.$content;
                 }
-                
+
                 $cache = $this->procesarDocumentosParaCache($docsBySvc);
             } catch (\Exception $e) {
                 $cache = [];
             }
         }
+
         return $cache;
     }
 
@@ -232,6 +248,7 @@ class ChatbotIntentionDetector
                 $df[$term] = ($df[$term] ?? 0) + 1;
             }
         }
+
         return ['docs' => $docs, 'df' => $df, 'N' => max(1, $numDocs)];
     }
 
@@ -240,9 +257,10 @@ class ChatbotIntentionDetector
     {
         return array_values(array_filter(
             preg_split('/[^a-z0-9áéíóúñ]+/u', $texto),
-            function($t) {
+            function ($t) {
                 $t = trim($t);
-                return $t !== '' && mb_strlen($t) >= 3 && !in_array($t, self::STOPWORDS, true);
+
+                return $t !== '' && mb_strlen($t) >= 3 && ! in_array($t, self::STOPWORDS, true);
             }
         ));
     }
@@ -253,6 +271,7 @@ class ChatbotIntentionDetector
         foreach ($tokens as $t) {
             $freq[$t] = ($freq[$t] ?? 0) + 1;
         }
+
         return $freq;
     }
 
@@ -263,9 +282,10 @@ class ChatbotIntentionDetector
         foreach ($cache['docs'] as $svc => $tf) {
             $scores[$svc] = $this->calcularScoreServicio($cache, $qtf, $tf);
         }
-        
+
         arsort($scores);
         $top = array_key_first($scores);
+
         return ($top !== null && $scores[$top] >= 0.12) ? [$top] : [];
     }
 
@@ -274,7 +294,7 @@ class ChatbotIntentionDetector
         $num = 0.0;
         $normQ = 0.0;
         $normD = 0.0;
-        
+
         foreach ($qtf as $term => $fq) {
             $df = $cache['df'][$term] ?? 0;
             if ($df <= 0) {
@@ -286,7 +306,7 @@ class ChatbotIntentionDetector
             $num += $wq * $wd;
             $normQ += $wq * $wq;
         }
-        
+
         foreach ($tf as $term => $fd) {
             $df = $cache['df'][$term] ?? 0;
             if ($df <= 0) {
@@ -296,8 +316,9 @@ class ChatbotIntentionDetector
             $wd = $fd * $idf;
             $normD += $wd * $wd;
         }
-        
+
         $den = (sqrt(max(1e-8, $normQ)) * sqrt(max(1e-8, $normD)));
+
         return $den > 0 ? ($num / $den) : 0.0;
     }
 }

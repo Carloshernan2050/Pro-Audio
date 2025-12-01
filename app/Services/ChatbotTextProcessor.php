@@ -4,13 +4,20 @@ namespace App\Services;
 
 class ChatbotTextProcessor
 {
-    private const STOPWORDS = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al'];
-    private const STOPWORDS_EXT = ['para','por','con','sin','del','de','la','las','el','los','una','unos','unas','que','y','o','en','al','par'];
-    private const CUES_AGREGAR = ['tambien','también','ademas','además','y ',' y','sumar','agrega','agregar','junto','ademas de','además de'];
+    private const STOPWORDS = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al'];
+
+    private const STOPWORDS_EXT = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al', 'par'];
+
+    private const CUES_AGREGAR = ['tambien', 'también', 'ademas', 'además', 'y ', ' y', 'sumar', 'agrega', 'agregar', 'junto', 'ademas de', 'además de'];
+
     private const REGEX_WHITESPACE = '/\s+/';
+
     private const REGEX_DIAS = '/^(por\s+)?\d+\s*d[ií]as?$/i';
+
     private const PAR_LED = 'par led';
+
     private const LOCUCION = 'locución';
+
     private const EQUIPO_SONIDO = 'equipo de sonido';
 
     public function normalizarTexto(string $t): string
@@ -19,6 +26,7 @@ class ChatbotTextProcessor
         $reemplazos = [
             'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ñ' => 'n',
         ];
+
         return strtr($t, $reemplazos);
     }
 
@@ -58,29 +66,32 @@ class ChatbotTextProcessor
             'microfno' => 'microfono',
             'parled' => self::PAR_LED,
         ];
-        
+
         $textoNormalizado = $this->normalizarTexto($texto);
         foreach ($correcciones as $error => $correcto) {
             $errorNorm = $this->normalizarTexto($error);
-            $textoNormalizado = preg_replace('/\b' . preg_quote($errorNorm, '/') . '\b/i', $this->normalizarTexto($correcto), $textoNormalizado);
+            $textoNormalizado = preg_replace('/\b'.preg_quote($errorNorm, '/').'\b/i', $this->normalizarTexto($correcto), $textoNormalizado);
         }
-        
+
         $vocabulario = $this->obtenerVocabularioCorreccion();
-        if (!empty($vocabulario)) {
+        if (! empty($vocabulario)) {
             $palabras = preg_split(self::REGEX_WHITESPACE, $textoNormalizado);
             $corregidas = [];
             foreach ($palabras as $palabra) {
                 $p = trim($palabra);
                 if ($p === '' || mb_strlen($p) < 3) {
                     $corregidas[] = $p;
+
                     continue;
                 }
                 $mejor = $this->buscarCorreccionCercana($p, $vocabulario);
                 $corregidas[] = $mejor ?? $p;
             }
-            $textoNormalizado = trim(implode(' ', array_filter($corregidas, function($w){ return $w !== null && $w !== ''; })));
+            $textoNormalizado = trim(implode(' ', array_filter($corregidas, function ($w) {
+                return $w !== null && $w !== '';
+            })));
         }
-        
+
         return $textoNormalizado;
     }
 
@@ -94,7 +105,8 @@ class ChatbotTextProcessor
             if (mb_strlen($t) < 3) {
                 return false;
             }
-            return !in_array($t, self::STOPWORDS, true);
+
+            return ! in_array($t, self::STOPWORDS, true);
         }));
     }
 
@@ -106,13 +118,14 @@ class ChatbotTextProcessor
         $t = $this->normalizarTexto($mensaje);
         $cues = [
             'tambien', 'también', 'ademas', 'además', 'eso', 'esa', 'ese', 'esos', 'esas',
-            'lo mismo', 'igual', 'continuar', 'sigue', 'seguimos', 'por esos dias', 'mismos dias', 'mismos días'
+            'lo mismo', 'igual', 'continuar', 'sigue', 'seguimos', 'por esos dias', 'mismos dias', 'mismos días',
         ];
         foreach ($cues as $c) {
             if (str_contains($t, $this->normalizarTexto($c))) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -124,6 +137,7 @@ class ChatbotTextProcessor
                 return true;
             }
         }
+
         return false;
     }
 
@@ -131,6 +145,7 @@ class ChatbotTextProcessor
     {
         $soloDiasOriginal = preg_match(self::REGEX_DIAS, trim($mensaje));
         $soloDiasCorregido = preg_match(self::REGEX_DIAS, trim($mensajeCorregido));
+
         return $soloDiasOriginal || $soloDiasCorregido;
     }
 
@@ -150,36 +165,37 @@ class ChatbotTextProcessor
             'diez' => 10,
         ];
         foreach ($mapa as $pal => $num) {
-            if (preg_match('/\b' . preg_quote($pal, '/') . '\b\s*dias?/i', $texto)) {
+            if (preg_match('/\b'.preg_quote($pal, '/').'\b\s*dias?/i', $texto)) {
                 return $num;
             }
         }
+
         return null;
     }
 
     private function obtenerVocabularioCorreccion(): array
     {
         $keywords = [
-            'alquiler','alquilar','arrendar','rentar','equipo',self::EQUIPO_SONIDO,'sonido','audio','bafle','parlante','parlantes','altavoz','bocina','consola','mezcladora','mixer','microfono','luces','luz','lampara','iluminacion','rack',self::PAR_LED,
-            'animacion','animador','dj','maestro','ceremonias','presentador','coordinador','cumpleanos','fiesta','evento',
-            'publicidad','publicitar','anuncio','spot','cuña','jingle','locucion','radio'
+            'alquiler', 'alquilar', 'arrendar', 'rentar', 'equipo', self::EQUIPO_SONIDO, 'sonido', 'audio', 'bafle', 'parlante', 'parlantes', 'altavoz', 'bocina', 'consola', 'mezcladora', 'mixer', 'microfono', 'luces', 'luz', 'lampara', 'iluminacion', 'rack', self::PAR_LED,
+            'animacion', 'animador', 'dj', 'maestro', 'ceremonias', 'presentador', 'coordinador', 'cumpleanos', 'fiesta', 'evento',
+            'publicidad', 'publicitar', 'anuncio', 'spot', 'cuña', 'jingle', 'locucion', 'radio',
         ];
         $vocab = [];
         foreach ($keywords as $k) {
             $vocab[$this->normalizarTexto($k)] = true;
         }
-        
+
         try {
-            $subServicios = \App\Models\SubServicios::query()->select('nombre','descripcion')->limit(500)->get();
+            $subServicios = \App\Models\SubServicios::query()->select('nombre', 'descripcion')->limit(500)->get();
             foreach ($subServicios as $ss) {
-                $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', ($ss->nombre . ' ' . ($ss->descripcion ?? '')));
+                $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', ($ss->nombre.' '.($ss->descripcion ?? '')));
                 foreach ($tokens as $tk) {
                     $tk = trim($tk);
                     if ($tk === '') {
                         continue;
                     }
                     $norm = $this->normalizarTexto($tk);
-                    if (($norm === 'dj' || mb_strlen($norm) >= 4) && mb_strlen($norm) <= 30 && !in_array($norm, self::STOPWORDS_EXT, true)) {
+                    if (($norm === 'dj' || mb_strlen($norm) >= 4) && mb_strlen($norm) <= 30 && ! in_array($norm, self::STOPWORDS_EXT, true)) {
                         $vocab[$norm] = true;
                     }
                 }
@@ -187,7 +203,7 @@ class ChatbotTextProcessor
         } catch (\Exception $e) {
             // Si falla la DB, seguimos solo con palabras base
         }
-        
+
         return array_keys($vocab);
     }
 
@@ -199,7 +215,7 @@ class ChatbotTextProcessor
         $bestDist = PHP_INT_MAX;
         $bestSim = 0.0;
         foreach ($vocabulario as $term) {
-            if (!$this->esTerminoValidoParaCorreccion($palabra, $term, $len, $umbral)) {
+            if (! $this->esTerminoValidoParaCorreccion($palabra, $term, $len, $umbral)) {
                 continue;
             }
             [$dist, $sim] = $this->calcularSimilitud($palabra, $term, $len);
@@ -212,6 +228,7 @@ class ChatbotTextProcessor
                 }
             }
         }
+
         return $this->validarCorreccion($best, $bestDist, $umbral, $bestSim);
     }
 
@@ -221,6 +238,7 @@ class ChatbotTextProcessor
         if ($diff > $umbral + 1) {
             return false;
         }
+
         return mb_substr($palabra, 0, 1) === mb_substr($term, 0, 1);
     }
 
@@ -229,6 +247,7 @@ class ChatbotTextProcessor
         $percent = 0.0;
         similar_text($palabra, $term, $percent);
         $dist = function_exists('levenshtein') ? levenshtein($palabra, $term) : (int) round((100 - $percent) * $len / 100);
+
         return [$dist, $percent];
     }
 
@@ -242,7 +261,7 @@ class ChatbotTextProcessor
         if ($best !== null && $bestDist <= $umbral && $bestSim >= 85.0) {
             return $best;
         }
+
         return null;
     }
 }
-

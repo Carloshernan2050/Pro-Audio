@@ -2,26 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Reserva;
-use App\Models\ReservaItem;
-use App\Models\Inventario;
-use App\Models\Historial;
 use App\Models\Calendario;
 use App\Models\CalendarioItem;
+use App\Models\Historial;
+use App\Models\Inventario;
 use App\Models\MovimientosInventario;
+use App\Models\Reserva;
+use App\Models\ReservaItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReservaController extends Controller
 {
     private const ESTADO_PENDIENTE = 'pendiente';
+
     private const ESTADO_CONFIRMADA = 'confirmada';
+
     private const TIPO_MOVIMIENTO_ALQUILADO = 'alquilado';
+
     private const EVENTO_RESERVA_CONFIRMADA = 'Reserva confirmada';
+
     private const META_SOURCE_CALENDARIO = 'calendario';
+
     private const ACCION_CONFIRMADA = 'confirmada';
+
     private const MENSAJE_SOLO_PENDIENTES_CONFIRMAR = 'Solo se pueden confirmar reservas pendientes.';
+
     private const MENSAJE_SOLO_PENDIENTES_CANCELAR = 'Solo se pueden cancelar reservas pendientes.';
+
     private const MENSAJE_INVENTARIO_NO_ENCONTRADO = 'Inventario asociado no encontrado.';
 
     public function index()
@@ -68,7 +76,7 @@ class ReservaController extends Controller
             $inventario = Inventario::findOrFail($item['inventario_id']);
             if ($item['cantidad'] > $inventario->stock) {
                 return response()->json([
-                    'error' => "La cantidad solicitada para '{$inventario->descripcion}' supera el stock disponible ({$inventario->stock})."
+                    'error' => "La cantidad solicitada para '{$inventario->descripcion}' supera el stock disponible ({$inventario->stock}).",
                 ], 422);
             }
         }
@@ -142,7 +150,7 @@ class ReservaController extends Controller
         $errorMessage = null;
         foreach ($reserva->items as $item) {
             $inventario = $item->inventario;
-            if (!$inventario) {
+            if (! $inventario) {
                 $errorMessage = self::MENSAJE_INVENTARIO_NO_ENCONTRADO;
                 break;
             }
@@ -178,7 +186,7 @@ class ReservaController extends Controller
     {
         foreach ($reserva->items as $item) {
             $inventario = $item->inventario;
-            if (!$inventario) {
+            if (! $inventario) {
                 continue;
             }
 
@@ -189,7 +197,7 @@ class ReservaController extends Controller
                 'tipo_movimiento' => self::TIPO_MOVIMIENTO_ALQUILADO,
                 'cantidad' => $item->cantidad,
                 'fecha_movimiento' => now(),
-                'descripcion' => self::EVENTO_RESERVA_CONFIRMADA . ' #' . $reserva->id,
+                'descripcion' => self::EVENTO_RESERVA_CONFIRMADA.' #'.$reserva->id,
             ]);
 
             CalendarioItem::create([
@@ -237,14 +245,13 @@ class ReservaController extends Controller
     private function authorizeAdminLike(): void
     {
         $roles = session('roles') ?? [session('role')];
-        if (!is_array($roles)) {
+        if (! is_array($roles)) {
             $roles = [$roles];
         }
         $roles = array_map(fn ($role) => is_string($role) ? strtolower($role) : $role, $roles);
         $isAllowed = in_array('superadmin', $roles, true) || in_array('admin', $roles, true) || in_array('administrador', $roles, true);
-        if (!$isAllowed) {
+        if (! $isAllowed) {
             abort(403, 'No autorizado');
         }
     }
 }
-

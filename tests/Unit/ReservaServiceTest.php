@@ -16,22 +16,31 @@ class ReservaServiceTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_PATH = '/test';
+
     private const FECHA_INICIO_ORIGINAL = '2024-01-01';
+
     private const FECHA_FIN_ORIGINAL = '2024-01-05';
+
     private const FECHA_INICIO_NUEVA = '2024-02-01';
+
     private const FECHA_FIN_NUEVA = '2024-02-05';
+
     private const NUEVO_SERVICIO = 'Nuevo Servicio';
+
     private const NUEVO_EVENTO = 'Nuevo Evento';
+
     private const EVENTO_ORIGINAL = 'Evento Original';
+
     private const EVENTO_DE_PRUEBA = 'Evento de prueba';
 
     private ReservaService $service;
+
     private Usuario $persona;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new ReservaService();
+        $this->service = new ReservaService;
         $this->persona = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'User',
@@ -53,7 +62,7 @@ class ReservaServiceTest extends TestCase
             'descripcion_evento' => self::EVENTO_ORIGINAL,
             'evento' => self::EVENTO_ORIGINAL,
         ]);
-        
+
         $reserva = Reserva::create([
             'calendario_id' => $calendario->id,
             'servicio' => 'Servicio Original',
@@ -85,7 +94,7 @@ class ReservaServiceTest extends TestCase
             'descripcion' => 'Inventario de prueba 2',
             'stock' => 10,
         ]);
-        
+
         $inventario3 = \App\Models\Inventario::create([
             'descripcion' => 'Inventario de prueba 3',
             'stock' => 10,
@@ -144,7 +153,7 @@ class ReservaServiceTest extends TestCase
             'cantidad' => 5,
             'evento' => self::EVENTO_DE_PRUEBA,
         ]);
-        
+
         $reserva = Reserva::create([
             'calendario_id' => $calendario->id,
             'servicio' => 'Servicio Original',
@@ -182,7 +191,7 @@ class ReservaServiceTest extends TestCase
             'cantidad' => 12,
             'evento' => self::EVENTO_DE_PRUEBA,
         ]);
-        
+
         $reserva = Reserva::create([
             'calendario_id' => $calendario->id,
             'fecha_inicio' => self::FECHA_INICIO_ORIGINAL,
@@ -224,4 +233,3 @@ class ReservaServiceTest extends TestCase
         ]);
     }
 }
-

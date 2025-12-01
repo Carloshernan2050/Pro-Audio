@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Cotizacion;
 use App\Models\Servicios;
 use App\Models\SubServicios;
-use App\Models\Cotizacion;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para AjustesController
@@ -21,17 +21,29 @@ class AjustesControllerTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_AJUSTES = '/usuarios/ajustes';
+
     private const ROUTE_AJUSTES_EXPORT = '/usuarios/ajustes/historial/pdf';
+
     private const ROUTE_AJUSTES_SUBSERVICIOS = '/usuarios/ajustes/subservicios';
+
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const NOMBRE_SERVICIO = 'Alquiler';
+
     private const DESC_SERVICIO = 'Servicio de alquiler';
+
     private const NOMBRE_SUBSERVICIO = 'Equipo de sonido';
+
     private const DESC_SUBSERVICIO = 'Equipo completo';
+
     private const CONTENT_TYPE_PDF = 'application/pdf';
 
     protected function setUp(): void
@@ -39,9 +51,9 @@ class AjustesControllerTest extends TestCase
         parent::setUp();
 
         // Crear rol Administrador si no existe
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -59,13 +71,13 @@ class AjustesControllerTest extends TestCase
         ]);
 
         $rolId = DB::table('roles')->where('nombre_rol', 'Administrador')->orWhere('nombre_rol', 'Admin')->value('id');
-        if (!$rolId) {
+        if (! $rolId) {
             $rolId = DB::table('roles')->insertGetId(['nombre_rol' => 'Administrador']);
         }
-        
+
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
-            'roles_id' => $rolId
+            'roles_id' => $rolId,
         ]);
 
         session(['usuario_id' => $usuario->id, 'usuario_nombre' => self::TEST_NOMBRE]);
@@ -168,7 +180,7 @@ class AjustesControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES . '?group_by=dia');
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?group_by=dia');
 
         $response->assertStatus(200);
         $response->assertViewHas('groupBy', 'dia');
@@ -179,7 +191,7 @@ class AjustesControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES . '?group_by=consulta');
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?group_by=consulta');
 
         $response->assertStatus(200);
         $response->assertViewHas('groupBy', 'consulta');
@@ -190,7 +202,7 @@ class AjustesControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES . '?tab=inventario');
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?tab=inventario');
 
         $response->assertStatus(200);
         $response->assertViewHas('activeTab', 'inventario');
@@ -244,8 +256,8 @@ class AjustesControllerTest extends TestCase
                 'nombre',
                 'descripcion',
                 'precio',
-                'servicio'
-            ]
+                'servicio',
+            ],
         ]);
     }
 
@@ -301,7 +313,7 @@ class AjustesControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->get(self::ROUTE_AJUSTES_EXPORT . '?group_by=dia');
+        $response = $this->get(self::ROUTE_AJUSTES_EXPORT.'?group_by=dia');
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', self::CONTENT_TYPE_PDF);
@@ -311,7 +323,7 @@ class AjustesControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->get(self::ROUTE_AJUSTES_EXPORT . '?group_by=consulta');
+        $response = $this->get(self::ROUTE_AJUSTES_EXPORT.'?group_by=consulta');
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', self::CONTENT_TYPE_PDF);
@@ -325,4 +337,3 @@ class AjustesControllerTest extends TestCase
         $this->assertContains($response->status(), [302, 404]);
     }
 }
-

@@ -36,7 +36,6 @@ class Usuario extends Model
         'contrasena',
         'fecha_registro',
         'estado',
-        'foto_perfil'
+        'foto_perfil',
     ];
 }
-

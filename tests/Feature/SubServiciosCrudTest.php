@@ -2,15 +2,15 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Servicios;
 use App\Models\SubServicios;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Vite;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para CRUD de SubServicios
@@ -22,20 +22,28 @@ class SubServiciosCrudTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROUTE_SUBSERVICIOS = '/subservicios';
+
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
+
     private const NOMBRE_SUBSERVICIO_CON_IMAGEN = 'Subservicio con Imagen';
+
     private const DESC_PRUEBA = 'Descripción';
 
     protected function setUp(): void
     {
         parent::setUp();
         Storage::fake('public');
-        
+
         // Mock Vite para evitar errores de manifest
         // Vite se usa como función invocable en las vistas (@vite())
         Vite::shouldReceive('__invoke')
@@ -44,12 +52,12 @@ class SubServiciosCrudTest extends TestCase
         Vite::shouldReceive('asset')
             ->zeroOrMoreTimes()
             ->andReturn('/build/assets/app.css');
-        
+
         // Crear roles
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Administrador',
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -70,7 +78,7 @@ class SubServiciosCrudTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -91,14 +99,14 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo de sonido',
             'descripcion' => 'Equipo completo',
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->get(self::ROUTE_SUBSERVICIOS);
@@ -116,14 +124,14 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler'
+            'descripcion' => 'Servicio de alquiler',
         ]);
 
         $response = $this->post('/subservicios', [
             'servicios_id' => $servicio->id,
             'nombre' => 'Nuevo Subservicio',
             'descripcion' => 'Descripción del subservicio',
-            'precio' => 150
+            'precio' => 150,
         ]);
 
         $response->assertRedirect(route('subservicios.index'));
@@ -132,13 +140,13 @@ class SubServiciosCrudTest extends TestCase
         $this->assertDatabaseHas('sub_servicios', [
             'nombre' => 'Nuevo Subservicio',
             'descripcion' => 'Descripción del subservicio',
-            'precio' => 150
+            'precio' => 150,
         ]);
     }
 
     public function test_store_crea_subservicio_con_imagen(): void
     {
-        if (!extension_loaded('gd')) {
+        if (! extension_loaded('gd')) {
             $this->markTestSkipped('GD extension is not installed');
         }
 
@@ -146,7 +154,7 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $file = \Illuminate\Http\UploadedFile::fake()->image('test.jpg', 100, 100);
@@ -156,7 +164,7 @@ class SubServiciosCrudTest extends TestCase
             'nombre' => self::NOMBRE_SUBSERVICIO_CON_IMAGEN,
             'descripcion' => self::DESC_PRUEBA,
             'precio' => 200,
-            'imagen' => $file
+            'imagen' => $file,
         ]);
 
         $response->assertRedirect(route('subservicios.index'));
@@ -173,7 +181,7 @@ class SubServiciosCrudTest extends TestCase
 
         $response = $this->post(self::ROUTE_SUBSERVICIOS, [
             'nombre' => 'Subservicio',
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response->assertSessionHasErrors('servicios_id');
@@ -186,7 +194,7 @@ class SubServiciosCrudTest extends TestCase
         $response = $this->post(self::ROUTE_SUBSERVICIOS, [
             'servicios_id' => 99999,
             'nombre' => 'Subservicio',
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response->assertSessionHasErrors('servicios_id');
@@ -198,12 +206,12 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $response = $this->post(self::ROUTE_SUBSERVICIOS, [
             'servicios_id' => $servicio->id,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response->assertSessionHasErrors('nombre');
@@ -215,12 +223,12 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $response = $this->post(self::ROUTE_SUBSERVICIOS, [
             'servicios_id' => $servicio->id,
-            'nombre' => 'Subservicio'
+            'nombre' => 'Subservicio',
         ]);
 
         $response->assertSessionHasErrors('precio');
@@ -232,13 +240,13 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $response = $this->post(self::ROUTE_SUBSERVICIOS, [
             'servicios_id' => $servicio->id,
             'nombre' => 'Subservicio',
-            'precio' => -10
+            'precio' => -10,
         ]);
 
         $response->assertSessionHasErrors('precio');
@@ -254,17 +262,17 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo de sonido',
             'descripcion' => 'Equipo completo',
-            'precio' => 100
+            'precio' => 100,
         ]);
 
-        $response = $this->get(self::ROUTE_SUBSERVICIOS . "/{$subServicio->id}");
+        $response = $this->get(self::ROUTE_SUBSERVICIOS."/{$subServicio->id}");
 
         $response->assertStatus(200);
     }
@@ -273,7 +281,7 @@ class SubServiciosCrudTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->get(self::ROUTE_SUBSERVICIOS . '/99999');
+        $response = $this->get(self::ROUTE_SUBSERVICIOS.'/99999');
 
         $response->assertStatus(404);
     }
@@ -288,21 +296,21 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Subservicio Original',
             'descripcion' => 'Descripción original',
-            'precio' => 100
+            'precio' => 100,
         ]);
 
-        $response = $this->put(self::ROUTE_SUBSERVICIOS . "/{$subServicio->id}", [
+        $response = $this->put(self::ROUTE_SUBSERVICIOS."/{$subServicio->id}", [
             'servicios_id' => $servicio->id,
             'nombre' => 'Subservicio Actualizado',
             'descripcion' => 'Descripción actualizada',
-            'precio' => 200
+            'precio' => 200,
         ]);
 
         $response->assertRedirect(route('subservicios.index'));
@@ -312,13 +320,13 @@ class SubServiciosCrudTest extends TestCase
             'id' => $subServicio->id,
             'nombre' => 'Subservicio Actualizado',
             'descripcion' => 'Descripción actualizada',
-            'precio' => 200
+            'precio' => 200,
         ]);
     }
 
     public function test_update_actualiza_imagen(): void
     {
-        if (!extension_loaded('gd')) {
+        if (! extension_loaded('gd')) {
             $this->markTestSkipped('GD extension is not installed');
         }
 
@@ -326,7 +334,7 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
@@ -334,20 +342,20 @@ class SubServiciosCrudTest extends TestCase
             'nombre' => 'Subservicio',
             'descripcion' => self::DESC_PRUEBA,
             'precio' => 100,
-            'imagen' => 'old_image.jpg'
+            'imagen' => 'old_image.jpg',
         ]);
 
         Storage::disk('public')->put('subservicios/old_image.jpg', 'fake content');
 
         $file = \Illuminate\Http\UploadedFile::fake()->image('new_test.jpg', 100, 100);
 
-        $response = $this->put(self::ROUTE_SUBSERVICIOS . "/{$subServicio->id}", [
+        $response = $this->put(self::ROUTE_SUBSERVICIOS."/{$subServicio->id}", [
             'servicios_id' => $servicio->id,
             'nombre' => 'Subservicio',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ], [
-            'imagen' => $file
+            'imagen' => $file,
         ]);
 
         $response->assertRedirect(route('subservicios.index'));
@@ -364,23 +372,23 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Subservicio a Eliminar',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
-        $response = $this->delete(self::ROUTE_SUBSERVICIOS . "/{$subServicio->id}");
+        $response = $this->delete(self::ROUTE_SUBSERVICIOS."/{$subServicio->id}");
 
         $response->assertRedirect(route('subservicios.index'));
         $response->assertSessionHas('success');
 
         $this->assertDatabaseMissing('sub_servicios', [
-            'id' => $subServicio->id
+            'id' => $subServicio->id,
         ]);
     }
 
@@ -390,7 +398,7 @@ class SubServiciosCrudTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
@@ -398,12 +406,12 @@ class SubServiciosCrudTest extends TestCase
             'nombre' => self::NOMBRE_SUBSERVICIO_CON_IMAGEN,
             'descripcion' => self::DESC_PRUEBA,
             'precio' => 100,
-            'imagen' => 'test_image.jpg'
+            'imagen' => 'test_image.jpg',
         ]);
 
         Storage::disk('public')->put('subservicios/test_image.jpg', 'fake content');
 
-        $response = $this->delete(self::ROUTE_SUBSERVICIOS . "/{$subServicio->id}");
+        $response = $this->delete(self::ROUTE_SUBSERVICIOS."/{$subServicio->id}");
 
         $response->assertRedirect(route('subservicios.index'));
         $this->assertFalse(Storage::disk('public')->exists('subservicios/test_image.jpg'));
@@ -413,7 +421,7 @@ class SubServiciosCrudTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->delete(self::ROUTE_SUBSERVICIOS . '/99999');
+        $response = $this->delete(self::ROUTE_SUBSERVICIOS.'/99999');
 
         // El middleware puede redirigir antes de que el controlador lance 404
         // O el controlador puede manejar la excepción y redirigir
@@ -438,4 +446,3 @@ class SubServiciosCrudTest extends TestCase
         $this->assertTrue($response->isRedirect() || $response->status() === 403);
     }
 }
-

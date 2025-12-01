@@ -2,15 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Cotizacion;
 use App\Models\Servicios;
 use App\Models\SubServicios;
-use App\Models\Cotizacion;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests Feature para ServiciosController
@@ -20,19 +19,33 @@ class ServiciosControllerTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_SERVICIOS = '/servicios';
+
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const NOMBRE_SERVICIO = 'Alquiler';
+
     private const DESCRIPCION_SERVICIO = 'Servicio de alquiler de equipos';
+
     private const ICONO_SERVICIO = 'alquiler-icon';
+
     private const SERVICIO_1 = 'Servicio 1';
+
     private const DESCRIPCION_1 = 'Descripción 1';
+
     private const SERVICIO_2 = 'Servicio 2';
+
     private const DESCRIPCION_2 = 'Descripción 2';
+
     private const NUEVO_NOMBRE = 'Nuevo Nombre';
+
     private const NUEVA_DESCRIPCION = 'Nueva Descripción';
 
     protected function setUp(): void
@@ -40,9 +53,9 @@ class ServiciosControllerTest extends TestCase
         parent::setUp();
 
         // Crear rol Administrador si no existe
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -63,7 +76,7 @@ class ServiciosControllerTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -148,7 +161,7 @@ class ServiciosControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS . '/create');
+        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS.'/create');
 
         $response->assertStatus(200);
         $response->assertViewIs('usuarios.ajustes');
@@ -309,7 +322,7 @@ class ServiciosControllerTest extends TestCase
             'precio' => 100,
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS . '/' . $servicio->id);
+        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS.'/'.$servicio->id);
 
         $response->assertStatus(200);
         $response->assertViewHas('servicio');
@@ -320,7 +333,7 @@ class ServiciosControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->get(self::ROUTE_SERVICIOS . '/99999');
+        $response = $this->get(self::ROUTE_SERVICIOS.'/99999');
 
         $response->assertStatus(404);
     }
@@ -336,7 +349,7 @@ class ServiciosControllerTest extends TestCase
 
         // El controlador intenta renderizar una vista que puede no existir
         // Esto es un problema del código, no de los tests
-        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS . '/' . $servicio->id);
+        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS.'/'.$servicio->id);
 
         // Puede retornar 200 si la vista existe, o 500 si no existe
         $this->assertContains($response->status(), [200, 500]);
@@ -355,7 +368,7 @@ class ServiciosControllerTest extends TestCase
             'descripcion' => self::DESCRIPCION_SERVICIO,
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS . '/' . $servicio->id . '/edit');
+        $response = $this->withoutVite()->get(self::ROUTE_SERVICIOS.'/'.$servicio->id.'/edit');
 
         $response->assertStatus(200);
         $response->assertViewIs('usuarios.ajustes');
@@ -366,7 +379,7 @@ class ServiciosControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->get(self::ROUTE_SERVICIOS . '/99999/edit');
+        $response = $this->get(self::ROUTE_SERVICIOS.'/99999/edit');
 
         $response->assertStatus(404);
     }
@@ -384,7 +397,7 @@ class ServiciosControllerTest extends TestCase
             'descripcion' => self::DESCRIPCION_SERVICIO,
         ]);
 
-        $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
+        $response = $this->put(self::ROUTE_SERVICIOS.'/'.$servicio->id, [
             'nombre_servicio' => self::NUEVO_NOMBRE,
             'descripcion' => self::NUEVA_DESCRIPCION,
             'icono' => 'nuevo-icono',
@@ -408,7 +421,7 @@ class ServiciosControllerTest extends TestCase
             'descripcion' => self::DESCRIPCION_SERVICIO,
         ]);
 
-        $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
+        $response = $this->put(self::ROUTE_SERVICIOS.'/'.$servicio->id, [
             'descripcion' => self::NUEVA_DESCRIPCION,
         ]);
 
@@ -430,7 +443,7 @@ class ServiciosControllerTest extends TestCase
         ]);
 
         // Intentar cambiar servicio1 al nombre de servicio2
-        $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio1->id, [
+        $response = $this->put(self::ROUTE_SERVICIOS.'/'.$servicio1->id, [
             'nombre_servicio' => self::SERVICIO_2,
             'descripcion' => self::DESCRIPCION_1,
         ]);
@@ -447,7 +460,7 @@ class ServiciosControllerTest extends TestCase
             'descripcion' => self::DESCRIPCION_SERVICIO,
         ]);
 
-        $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
+        $response = $this->put(self::ROUTE_SERVICIOS.'/'.$servicio->id, [
             'nombre_servicio' => self::NOMBRE_SERVICIO,
             'descripcion' => self::NUEVA_DESCRIPCION,
         ]);
@@ -466,7 +479,7 @@ class ServiciosControllerTest extends TestCase
         ]);
 
         // Simular error (difícil sin mockear)
-        $response = $this->put(self::ROUTE_SERVICIOS . '/' . $servicio->id, [
+        $response = $this->put(self::ROUTE_SERVICIOS.'/'.$servicio->id, [
             'nombre_servicio' => self::NUEVO_NOMBRE,
             'descripcion' => self::NUEVA_DESCRIPCION,
         ]);
@@ -488,7 +501,7 @@ class ServiciosControllerTest extends TestCase
             'descripcion' => self::DESCRIPCION_SERVICIO,
         ]);
 
-        $response = $this->delete(self::ROUTE_SERVICIOS . '/' . $servicio->id);
+        $response = $this->delete(self::ROUTE_SERVICIOS.'/'.$servicio->id);
 
         $response->assertRedirect(route('servicios.index'));
         $response->assertSessionHas('success');
@@ -519,7 +532,7 @@ class ServiciosControllerTest extends TestCase
             'fecha_cotizacion' => now(),
         ]);
 
-        $response = $this->delete(self::ROUTE_SERVICIOS . '/' . $servicio->id);
+        $response = $this->delete(self::ROUTE_SERVICIOS.'/'.$servicio->id);
 
         $response->assertRedirect(route('servicios.index'));
         $response->assertSessionHas('success');
@@ -528,7 +541,6 @@ class ServiciosControllerTest extends TestCase
         $this->assertDatabaseMissing('sub_servicios', ['id' => $subServicio->id]);
         $this->assertDatabaseMissing('cotizacion', ['id' => $cotizacion->id]);
     }
-
 
     public function test_destroy_maneja_error(): void
     {
@@ -540,7 +552,7 @@ class ServiciosControllerTest extends TestCase
         ]);
 
         // Simular error (difícil sin mockear)
-        $response = $this->delete(self::ROUTE_SERVICIOS . '/' . $servicio->id);
+        $response = $this->delete(self::ROUTE_SERVICIOS.'/'.$servicio->id);
 
         // Debería redirigir con éxito o error
         $response->assertRedirect(route('servicios.index'));
@@ -550,7 +562,7 @@ class ServiciosControllerTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->delete(self::ROUTE_SERVICIOS . '/99999');
+        $response = $this->delete(self::ROUTE_SERVICIOS.'/99999');
 
         // Puede retornar 404 o 302 (redirección) dependiendo del manejo de errores
         $this->assertContains($response->status(), [302, 404]);
@@ -593,7 +605,7 @@ class ServiciosControllerTest extends TestCase
             'fecha_cotizacion' => now(),
         ]);
 
-        $response = $this->delete(self::ROUTE_SERVICIOS . '/' . $servicio->id);
+        $response = $this->delete(self::ROUTE_SERVICIOS.'/'.$servicio->id);
 
         $response->assertRedirect(route('servicios.index'));
         $response->assertSessionHas('success');
@@ -602,4 +614,3 @@ class ServiciosControllerTest extends TestCase
         $this->assertDatabaseMissing('cotizacion', ['id' => $cotizacion2->id]);
     }
 }
-

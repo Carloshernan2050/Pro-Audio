@@ -16,7 +16,7 @@ class RagServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new RagService();
+        $this->service = new RagService;
     }
 
     public function test_recuperar_contexto_encontra_resultados(): void
@@ -76,7 +76,7 @@ class RagServiceTest extends TestCase
 
         $this->assertNotNull($contexto);
         $lineas = explode("\n", $contexto);
-        $lineasConDatos = array_filter($lineas, fn($linea) => str_starts_with($linea, '-'));
+        $lineasConDatos = array_filter($lineas, fn ($linea) => str_starts_with($linea, '-'));
         $this->assertLessThanOrEqual(6, count($lineasConDatos)); // 1 línea de encabezado + máximo 5 resultados
     }
 
@@ -96,4 +96,3 @@ class RagServiceTest extends TestCase
         $this->assertStringContainsString('- Test Servicio: Test Descripción', $contexto);
     }
 }
-

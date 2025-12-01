@@ -10,6 +10,7 @@ class Calendario extends Model
     use HasFactory;
 
     protected $table = 'calendario';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -20,7 +21,7 @@ class Calendario extends Model
         'fecha_inicio',
         'fecha_fin',
         'evento',
-        'cantidad'
+        'cantidad',
     ];
 
     public function usuario()

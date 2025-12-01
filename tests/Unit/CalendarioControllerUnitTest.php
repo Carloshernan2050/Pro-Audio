@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\CalendarioController;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Unitarios para CalendarioController
@@ -49,4 +49,3 @@ class CalendarioControllerUnitTest extends TestCase
         $this->assertContains('superadmin', $rolesLower);
     }
 }
-

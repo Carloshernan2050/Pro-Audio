@@ -17,7 +17,7 @@ class ChatbotSessionManager
 
     public function guardarCotizacion(int $personasId, array $selecciones, int $dias): void
     {
-        if (empty($selecciones) || !$personasId) {
+        if (empty($selecciones) || ! $personasId) {
             return;
         }
 
@@ -37,7 +37,7 @@ class ChatbotSessionManager
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error('Error al guardar cotización: ' . $e->getMessage());
+            Log::error('Error al guardar cotización: '.$e->getMessage());
         }
     }
 
@@ -49,6 +49,7 @@ class ChatbotSessionManager
         } elseif ($sessionDaysValue > 0) {
             return $sessionDaysValue;
         }
+
         return null;
     }
 
@@ -65,10 +66,10 @@ class ChatbotSessionManager
         }
         if ($dias > 0) {
             session(['chat.days' => $dias]);
-        } elseif (!$esContinuacion) {
+        } elseif (! $esContinuacion) {
             session()->forget('chat.days');
         }
+
         return $dias;
     }
 }
-

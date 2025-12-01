@@ -2,16 +2,15 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Calendario;
 use App\Models\CalendarioItem;
 use App\Models\Inventario;
 use App\Models\MovimientosInventario;
-use App\Models\Reserva;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests Adicionales de Integración para CalendarioController
@@ -23,29 +22,44 @@ class CalendarioControllerAdditionalTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_CALENDARIO = '/calendario';
+
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const FECHA_INICIO = '2024-01-01';
+
     private const FECHA_FIN = '2024-01-05';
+
     private const DESCRIPCION_EVENTO = 'Evento de prueba';
+
     private const PRODUCTO_TEST = 'Producto Test';
+
     private const MOVIMIENTO_DE_PRUEBA = 'Movimiento de prueba';
+
     private const FECHA_INICIO_ACTUALIZADA = '2024-01-02';
+
     private const FECHA_FIN_ACTUALIZADA = '2024-01-06';
+
     private const EVENTO_ACTUALIZADO = 'Evento actualizado';
+
     private const MOVIMIENTO_1 = 'Movimiento 1';
+
     private const MOVIMIENTO_2 = 'Movimiento 2';
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -66,7 +80,7 @@ class CalendarioControllerAdditionalTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -106,12 +120,12 @@ class CalendarioControllerAdditionalTest extends TestCase
                 [
                     'inventario_id' => $inventario2->id,
                     'cantidad' => 5,
-                ]
+                ],
             ],
         ]);
 
         $response->assertStatus(200);
-        
+
         $calendario = Calendario::latest()->first();
         $this->assertEquals(8, $calendario->cantidad); // 3 + 5 = 8
         $this->assertCount(2, $calendario->items);
@@ -135,7 +149,7 @@ class CalendarioControllerAdditionalTest extends TestCase
                 'item1' => [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 5,
-                ]
+                ],
             ],
         ]);
 
@@ -212,7 +226,7 @@ class CalendarioControllerAdditionalTest extends TestCase
 
         $inventario->decrement('stock', 5);
 
-        $response = $this->put(self::ROUTE_CALENDARIO . '/' . $calendario->id, [
+        $response = $this->put(self::ROUTE_CALENDARIO.'/'.$calendario->id, [
             'servicio' => 'Alquiler',
             'fecha_inicio' => self::FECHA_INICIO_ACTUALIZADA,
             'fecha_fin' => self::FECHA_FIN_ACTUALIZADA,
@@ -221,12 +235,12 @@ class CalendarioControllerAdditionalTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 7, // Cambiar de 5 a 7
-                ]
+                ],
             ],
         ]);
 
         $response->assertRedirect(route('usuarios.calendario'));
-        
+
         $calendario->refresh();
         $this->assertEquals(7, $calendario->cantidad);
     }
@@ -281,7 +295,7 @@ class CalendarioControllerAdditionalTest extends TestCase
 
         $inventario->decrement('stock', 8);
 
-        $response = $this->put(self::ROUTE_CALENDARIO . '/' . $calendario->id, [
+        $response = $this->put(self::ROUTE_CALENDARIO.'/'.$calendario->id, [
             'servicio' => 'Alquiler',
             'fecha_inicio' => self::FECHA_INICIO_ACTUALIZADA,
             'fecha_fin' => self::FECHA_FIN_ACTUALIZADA,
@@ -290,12 +304,12 @@ class CalendarioControllerAdditionalTest extends TestCase
                 [
                     'inventario_id' => $inventario->id,
                     'cantidad' => 4, // Solo un item nuevo
-                ]
+                ],
             ],
         ]);
 
         $response->assertRedirect(route('usuarios.calendario'));
-        
+
         $calendario->refresh();
         $this->assertCount(1, $calendario->items);
     }
@@ -327,7 +341,7 @@ class CalendarioControllerAdditionalTest extends TestCase
             'evento' => 'Alquiler',
         ]);
 
-        $response = $this->put(self::ROUTE_CALENDARIO . '/' . $calendario->id, [
+        $response = $this->put(self::ROUTE_CALENDARIO.'/'.$calendario->id, [
             'servicio' => 'Alquiler',
             'movimientos_inventario_id' => $movimiento->id,
             'fecha_inicio' => self::FECHA_INICIO_ACTUALIZADA,
@@ -337,7 +351,7 @@ class CalendarioControllerAdditionalTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.calendario'));
-        
+
         $calendario->refresh();
         $this->assertEquals(8, $calendario->cantidad);
     }
@@ -370,7 +384,7 @@ class CalendarioControllerAdditionalTest extends TestCase
             'cantidad' => 5,
         ]);
 
-        $response = $this->put(self::ROUTE_CALENDARIO . '/' . $calendario->id, [
+        $response = $this->put(self::ROUTE_CALENDARIO.'/'.$calendario->id, [
             'servicio' => 'Alquiler',
             'movimientos_inventario_id' => $movimiento->id,
             'fecha_inicio' => self::FECHA_INICIO_ACTUALIZADA,
@@ -380,7 +394,7 @@ class CalendarioControllerAdditionalTest extends TestCase
         ]);
 
         $response->assertRedirect(route('usuarios.calendario'));
-        
+
         $calendario->refresh();
         // La cantidad debería mantenerse
         $this->assertEquals(5, $calendario->cantidad);
@@ -439,10 +453,10 @@ class CalendarioControllerAdditionalTest extends TestCase
 
         $inventario->decrement('stock', 8); // Stock queda en 12
 
-        $response = $this->deleteJson(self::ROUTE_CALENDARIO . '/' . $calendario->id);
+        $response = $this->deleteJson(self::ROUTE_CALENDARIO.'/'.$calendario->id);
 
         $response->assertStatus(200);
-        
+
         $inventario->refresh();
         $this->assertEquals(20, $inventario->stock); // 12 + 5 + 3 = 20
     }
@@ -483,11 +497,11 @@ class CalendarioControllerAdditionalTest extends TestCase
 
         $inventario->decrement('stock', 5);
 
-        $response = $this->deleteJson(self::ROUTE_CALENDARIO . '/' . $calendario->id);
+        $response = $this->deleteJson(self::ROUTE_CALENDARIO.'/'.$calendario->id);
 
         $response->assertStatus(200);
         $this->assertDatabaseMissing('calendario', ['id' => $calendario->id]);
-        
+
         // Verificar que el stock se restauró
         $inventario->refresh();
         $this->assertEquals(10, $inventario->stock);
@@ -508,13 +522,13 @@ class CalendarioControllerAdditionalTest extends TestCase
         ]);
 
         $response = $this->withHeaders([
-            'X-Requested-With' => 'XMLHttpRequest'
-        ])->deleteJson(self::ROUTE_CALENDARIO . '/' . $calendario->id);
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->deleteJson(self::ROUTE_CALENDARIO.'/'.$calendario->id);
 
         $response->assertStatus(200);
         $response->assertJson([
             'success' => true,
-            'message' => 'Evento eliminado y stock restaurado.'
+            'message' => 'Evento eliminado y stock restaurado.',
         ]);
     }
 
@@ -575,4 +589,3 @@ class CalendarioControllerAdditionalTest extends TestCase
         $this->assertGreaterThanOrEqual(2, count($eventos));
     }
 }
-

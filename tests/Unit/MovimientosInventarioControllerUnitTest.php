@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\MovimientosInventarioController;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Unitarios para MovimientosInventarioController
@@ -17,7 +17,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new MovimientosInventarioController();
+        $this->controller = new MovimientosInventarioController;
     }
 
     // ============================================
@@ -29,7 +29,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
         $reglasEsperadas = [
             'inventario_id' => 'required|exists:inventario,id',
             'tipo_movimiento' => 'required|in:entrada,salida,alquilado,devuelto',
-            'cantidad' => 'required|integer|min:1'
+            'cantidad' => 'required|integer|min:1',
         ];
 
         $this->assertArrayHasKey('inventario_id', $reglasEsperadas);
@@ -73,7 +73,7 @@ class MovimientosInventarioControllerUnitTest extends TestCase
     {
         // La cantidad debe ser mínimo 1
         $reglasEsperadas = [
-            'cantidad' => 'required|integer|min:1'
+            'cantidad' => 'required|integer|min:1',
         ];
 
         $this->assertStringContainsString('min:1', $reglasEsperadas['cantidad']);
@@ -82,10 +82,9 @@ class MovimientosInventarioControllerUnitTest extends TestCase
     public function test_validacion_cantidad_debe_ser_integer(): void
     {
         $reglasEsperadas = [
-            'cantidad' => 'required|integer|min:1'
+            'cantidad' => 'required|integer|min:1',
         ];
 
         $this->assertStringContainsString('integer', $reglasEsperadas['cantidad']);
     }
 }
-

@@ -7,9 +7,13 @@ use Illuminate\Http\Request;
 class ChatbotMessageProcessor
 {
     private ChatbotTextProcessor $textProcessor;
+
     private ChatbotIntentionDetector $intentionDetector;
+
     private ChatbotSuggestionGenerator $suggestionGenerator;
+
     private ChatbotResponseBuilder $responseBuilder;
+
     private ChatbotSubServicioService $subServicioService;
 
     private const REGEX_DIAS = '/^(por\s+)?\d+\s*d[ií]as?$/i';
@@ -48,6 +52,7 @@ class ChatbotMessageProcessor
         if ($esSolicitudCatalogo) {
             $seleccionesActuales = (array) session('chat.selecciones', []);
             $sessionDaysValue = (int) session('chat.days', 1);
+
             return $this->responseBuilder->mostrarCatalogoJson(
                 'Catálogo completo. Selecciona los sub-servicios que deseas agregar a tu cotización:',
                 $sessionDaysValue > 0 ? $sessionDaysValue : null,
@@ -65,14 +70,14 @@ class ChatbotMessageProcessor
         $esAgregado = $this->textProcessor->verificarSiEsAgregado($mensajeCorregido);
         $soloDias = $this->textProcessor->verificarSoloDias($mensaje, $mensajeCorregido);
         $esSolicitudCatalogo = $this->esSolicitudCatalogo($mensaje, $mensajeCorregido);
-        $esNuevaConsulta = !$esContinuacion && !$esAgregado && !$esSolicitudCatalogo && !$soloDias && (!empty($intencionesDetectadas) || !empty($tokens));
+        $esNuevaConsulta = ! $esContinuacion && ! $esAgregado && ! $esSolicitudCatalogo && ! $soloDias && (! empty($intencionesDetectadas) || ! empty($tokens));
 
         $respuestaActualizacionDias = $this->procesarActualizacionDias($dias, $soloDias);
         if ($respuestaActualizacionDias !== null) {
             return $respuestaActualizacionDias;
         }
 
-        if (!empty($intencionesDetectadas)) {
+        if (! empty($intencionesDetectadas)) {
             $intencionesDetectadas = $this->intentionDetector->validarIntencionesContraMensaje($intencionesDetectadas, $mensajeCorregido);
         }
 
@@ -100,22 +105,24 @@ class ChatbotMessageProcessor
 
     private function esSolicitudCatalogo(string $mensaje, string $mensajeCorregido): bool
     {
-        return in_array(mb_strtolower(trim($mensaje)), ['catalogo','catálogo'], true)
-            || in_array(mb_strtolower(trim($mensajeCorregido)), ['catalogo','catálogo'], true);
+        return in_array(mb_strtolower(trim($mensaje)), ['catalogo', 'catálogo'], true)
+            || in_array(mb_strtolower(trim($mensajeCorregido)), ['catalogo', 'catálogo'], true);
     }
 
     private function verificarMensajeFueraDeTema(string $mensaje, string $mensajeCorregido, int $dias): ?\Illuminate\Http\JsonResponse
     {
-        if (!$this->intentionDetector->esRelacionado($mensajeCorregido)) {
+        if (! $this->intentionDetector->esRelacionado($mensajeCorregido)) {
             $seleccionesPrevChk = (array) session('chat.selecciones', []);
             $soloDiasOriginalGate = preg_match(self::REGEX_DIAS, trim($mensaje));
             $soloDiasCorregidoGate = preg_match(self::REGEX_DIAS, trim($mensajeCorregido));
             $soloDiasNowGate = $soloDiasOriginalGate || $soloDiasCorregidoGate || ($dias > 0);
-            if (!($soloDiasNowGate && !empty($seleccionesPrevChk))) {
+            if (! ($soloDiasNowGate && ! empty($seleccionesPrevChk))) {
                 session()->forget('chat.intenciones');
+
                 return $this->responderFueraDeTema($mensaje, $mensajeCorregido);
             }
         }
+
         return null;
     }
 
@@ -124,23 +131,25 @@ class ChatbotMessageProcessor
         $intencionesDetectadas = $this->intentionDetector->detectarIntenciones($mensaje);
         if (empty($intencionesDetectadas)) {
             $mlIntent = $this->intentionDetector->clasificarPorTfidf($mensajeCorregido);
-            if (!empty($mlIntent)) {
+            if (! empty($mlIntent)) {
                 $intencionesDetectadas = $mlIntent;
             }
         }
-        if (empty($intencionesDetectadas) && !empty($sessionIntenciones)
+        if (empty($intencionesDetectadas) && ! empty($sessionIntenciones)
             && ($esContinuacion || $dias > 0) && $this->intentionDetector->esRelacionado($mensajeCorregido)) {
             $intencionesDetectadas = $sessionIntenciones;
         }
+
         return $intencionesDetectadas;
     }
 
     private function procesarActualizacionDias(int $dias, bool $soloDias): ?\Illuminate\Http\JsonResponse
     {
         $seleccionesPrevias = (array) session('chat.selecciones', []);
-        if (!($soloDias || $dias > 0) || empty($seleccionesPrevias)) {
+        if (! ($soloDias || $dias > 0) || empty($seleccionesPrevias)) {
             return null;
         }
+
         return $this->actualizarCotizacionConDias($dias, $seleccionesPrevias);
     }
 
@@ -150,10 +159,12 @@ class ChatbotMessageProcessor
             $items = $this->subServicioService->obtenerItemsSeleccionados($seleccionesPrevias);
             if ($items->isNotEmpty()) {
                 $diasCalculo = (int) $dias;
+
                 return $this->responseBuilder->responderCotizacion($items, $diasCalculo, $seleccionesPrevias, true);
             }
             session()->forget('chat.selecciones');
             $diasParaRespuesta = $dias > 0 ? $dias : null;
+
             return $this->responseBuilder->mostrarCatalogoJson(
                 'No se encontraron los servicios seleccionados. Aquí está el catálogo completo:',
                 $diasParaRespuesta,
@@ -161,6 +172,7 @@ class ChatbotMessageProcessor
             );
         } catch (\Exception $e) {
             $diasParaRespuesta = $dias > 0 ? $dias : null;
+
             return $this->responseBuilder->mostrarCatalogoJson(
                 'Ocurrió un error al calcular la cotización. Aquí está el catálogo completo:',
                 $diasParaRespuesta,
@@ -171,8 +183,8 @@ class ChatbotMessageProcessor
 
     private function combinarIntenciones(array $intencionesDetectadas, array $sessionIntenciones, bool $esAgregado, bool $esNuevaConsulta): array
     {
-        if (!empty($intencionesDetectadas)) {
-            if ($esAgregado && !empty($sessionIntenciones)) {
+        if (! empty($intencionesDetectadas)) {
+            if ($esAgregado && ! empty($sessionIntenciones)) {
                 $intenciones = array_values(array_unique(array_merge($sessionIntenciones, $intencionesDetectadas)));
             } else {
                 $intenciones = $intencionesDetectadas;
@@ -181,11 +193,13 @@ class ChatbotMessageProcessor
                 }
             }
             session(['chat.intenciones' => $intenciones]);
+
             return $intenciones;
         }
         if ($esNuevaConsulta) {
             session()->forget('chat.selecciones');
         }
+
         return $sessionIntenciones;
     }
 
@@ -197,18 +211,20 @@ class ChatbotMessageProcessor
         if ($dias > 0) {
             return $dias;
         }
+
         return ($esContinuacion && $sessionDays > 0) ? $sessionDays : null;
     }
 
     private function procesarIntencionesDetectadas(array $intenciones, array $contexto): ?\Illuminate\Http\JsonResponse
     {
-        if (empty($intenciones) || !$this->intentionDetector->esRelacionado($contexto['mensajeCorregido'])) {
+        if (empty($intenciones) || ! $this->intentionDetector->esRelacionado($contexto['mensajeCorregido'])) {
             return null;
         }
         $relSub = $this->subServicioService->obtenerSubServiciosPorIntenciones($intenciones);
         if ($relSub->isEmpty()) {
             return null;
         }
+
         return $this->responderConIntenciones($intenciones, $relSub, $contexto);
     }
 
@@ -217,7 +233,7 @@ class ChatbotMessageProcessor
         $lista = implode(' y ', $intenciones);
         $request = $contexto['request'];
         $provieneDeSugerencia = $request->boolean('sugerencia_aplicada', false);
-        $esPeticionNueva = !$contexto['esContinuacion'] && !$contexto['esAgregado'] && !$contexto['esSolicitudCatalogo'] && !$contexto['soloDias'];
+        $esPeticionNueva = ! $contexto['esContinuacion'] && ! $contexto['esAgregado'] && ! $contexto['esSolicitudCatalogo'] && ! $contexto['soloDias'];
         if ($provieneDeSugerencia || $esPeticionNueva) {
             $hint = [];
             try {
@@ -225,8 +241,10 @@ class ChatbotMessageProcessor
             } catch (\Throwable $_) {
                 // Ignorar errores al generar sugerencias
             }
+
             return $this->responseBuilder->solicitarConfirmacionIntencion($lista, $intenciones, $contexto['dias'], $contexto['daysForResponse'], $hint);
         }
+
         return $this->responseBuilder->mostrarOpcionesConIntenciones($intenciones, $relSub, $contexto['dias'], $contexto['daysForResponse']);
     }
 
@@ -239,8 +257,9 @@ class ChatbotMessageProcessor
                 ? 'Con base en tu consulta, estas opciones están relacionadas. '
                 : 'He encontrado opciones relacionadas.';
             $seleccionesActuales = (array) session('chat.selecciones', []);
+
             return $this->responseBuilder->responderOpciones(
-                $intro . 'Selecciona los sub-servicios que deseas cotizar:',
+                $intro.'Selecciona los sub-servicios que deseas cotizar:',
                 $relSub,
                 $daysForResponse,
                 $seleccionesActuales
@@ -270,11 +289,10 @@ class ChatbotMessageProcessor
             $sugerencias = $this->suggestionGenerator->generarSugerencias($mensajeCorregido);
             $tokenHints = $this->suggestionGenerator->generarSugerenciasPorToken($mensajeOriginal);
         } catch (\Throwable $e) {
-            $sugerencias = ['alquiler','animacion','publicidad','luces','dj','audio'];
+            $sugerencias = ['alquiler', 'animacion', 'publicidad', 'luces', 'dj', 'audio'];
             $tokenHints = $this->suggestionGenerator->fallbackTokenHints($mensajeOriginal);
         }
 
         return [$sugerencias, $tokenHints, $this->suggestionGenerator->extraerMejorSugerencia($tokenHints)];
     }
 }
-

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\SubServicios;
-use Illuminate\Support\Collection;
 
 class ChatbotResponseBuilder
 {
@@ -19,6 +18,7 @@ class ChatbotResponseBuilder
     public function mostrarCatalogoJson(string $mensaje, ?int $dias = null, array $seleccionesPrevias = []): \Illuminate\Http\JsonResponse
     {
         $items = $this->ordenarSubServicios($this->subServiciosQuery())->get();
+
         return $this->responderOpciones($mensaje, $items, $dias, $seleccionesPrevias);
     }
 
@@ -34,14 +34,15 @@ class ChatbotResponseBuilder
 
     public function solicitarConfirmacionIntencion(string $lista, array $intenciones, int $dias, ?int $daysForResponse, ?array $hint = null): \Illuminate\Http\JsonResponse
     {
-        $tok = isset($hint['token']) ? trim((string)$hint['token']) : null;
+        $tok = isset($hint['token']) ? trim((string) $hint['token']) : null;
         $diasParaMeta = $dias > 0 ? $dias : null;
         $respuestaTexto = $tok ? "Por \"{$tok}\" ¿te refieres a {$lista}?" : "¿Te refieres a {$lista}?";
+
         return response()->json([
             'respuesta' => $respuestaTexto,
             'actions' => [
                 ['id' => 'confirm_intent', 'label' => 'Sí, continuar', 'meta' => ['intenciones' => $intenciones, 'dias' => $diasParaMeta]],
-                ['id' => 'reject_intent', 'label' => 'No, mostrar catálogo']
+                ['id' => 'reject_intent', 'label' => 'No, mostrar catálogo'],
             ],
             'days' => $daysForResponse,
         ]);
@@ -52,9 +53,10 @@ class ChatbotResponseBuilder
         $lista = implode(' y ', $intenciones);
         $prefijo = '';
         if ($dias > 0) {
-            $prefijo = " para {$dias} día" . ($dias > 1 ? 's' : '');
+            $prefijo = " para {$dias} día".($dias > 1 ? 's' : '');
         }
         $seleccionesActuales = (array) session('chat.selecciones', []);
+
         return $this->responderOpciones(
             "Estas son nuestras opciones de {$lista}{$prefijo}. Selecciona los sub-servicios que deseas cotizar:",
             $relSub,
@@ -68,6 +70,7 @@ class ChatbotResponseBuilder
         $detalle = $this->construirDetalleCotizacion($items, $diasCalculo, $mostrarDiasSiempre);
         $total = $detalle['total'];
         $mensaje = $detalle['mensaje'];
+
         return response()->json([
             'respuesta' => $mensaje,
             'cotizacion' => [
@@ -100,10 +103,11 @@ class ChatbotResponseBuilder
                 'subtotal' => $subtotal,
             ];
         }
-        $mensaje = "Cotización calculada para {$diasCalculo} día" . ($diasCalculo > 1 ? 's' : '') . ":";
+        $mensaje = "Cotización calculada para {$diasCalculo} día".($diasCalculo > 1 ? 's' : '').':';
         if ($mostrarDiasSiempre || $diasCalculo > 1) {
-            $mensaje .= " Total: $" . number_format($total, 2, '.', ',');
+            $mensaje .= ' Total: $'.number_format($total, 2, '.', ',');
         }
+
         return [
             'items' => $itemsArray,
             'total' => $total,
@@ -152,4 +156,3 @@ class ChatbotResponseBuilder
             ->all();
     }
 }
-

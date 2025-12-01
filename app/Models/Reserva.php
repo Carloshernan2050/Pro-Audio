@@ -39,4 +39,3 @@ class Reserva extends Model
         return $this->hasMany(ReservaItem::class);
     }
 }
-

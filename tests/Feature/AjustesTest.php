@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Cotizacion;
 use App\Models\Servicios;
 use App\Models\SubServicios;
-use App\Models\Cotizacion;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para AjustesController
@@ -21,15 +21,25 @@ class AjustesTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'admin@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Admin';
+
     private const TEST_APELLIDO = 'Usuario';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROUTE_AJUSTES = '/usuarios/ajustes';
+
     private const ROUTE_AJUSTES_HISTORIAL_PDF = '/usuarios/ajustes/historial/pdf';
+
     private const ROUTE_AJUSTES_SUBSERVICIOS = '/usuarios/ajustes/subservicios';
+
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
+
     private const NOMBRE_EQUIPO_SONIDO = 'Equipo de sonido';
+
     private const DESC_EQUIPO_COMPLETO = 'Equipo completo';
 
     protected function setUp(): void
@@ -37,10 +47,10 @@ class AjustesTest extends TestCase
         parent::setUp();
 
         // Crear rol Administrador
-        if (!DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Administrador',
-                'nombre_rol' => 'Administrador'
+                'nombre_rol' => 'Administrador',
             ]);
         }
     }
@@ -61,7 +71,7 @@ class AjustesTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -81,14 +91,14 @@ class AjustesTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->withoutVite()->get(self::ROUTE_AJUSTES);
@@ -103,7 +113,7 @@ class AjustesTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES . '?tab=servicios');
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?tab=servicios');
 
         $response->assertStatus(200);
         $response->assertViewHas('activeTab', 'servicios');
@@ -113,7 +123,7 @@ class AjustesTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES . '?tab=subservicios');
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?tab=subservicios');
 
         $response->assertStatus(200);
         $response->assertViewHas('activeTab', 'subservicios');
@@ -126,24 +136,24 @@ class AjustesTest extends TestCase
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES . '?group_by=consulta');
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?group_by=consulta');
 
         $response->assertStatus(200);
         $response->assertViewHas('groupBy', 'consulta');
@@ -157,24 +167,24 @@ class AjustesTest extends TestCase
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES . '?group_by=dia');
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?group_by=dia');
 
         $response->assertStatus(200);
         $response->assertViewHas('groupBy', 'dia');
@@ -202,24 +212,24 @@ class AjustesTest extends TestCase
         $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         $subServicio = SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
-        $response = $this->get(self::ROUTE_AJUSTES_HISTORIAL_PDF . '?group_by=consulta');
+        $response = $this->get(self::ROUTE_AJUSTES_HISTORIAL_PDF.'?group_by=consulta');
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/pdf');
@@ -235,14 +245,14 @@ class AjustesTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->get(self::ROUTE_AJUSTES_SUBSERVICIOS);
@@ -254,8 +264,8 @@ class AjustesTest extends TestCase
                 'nombre',
                 'precio',
                 'descripcion',
-                'servicio'
-            ]
+                'servicio',
+            ],
         ]);
     }
 
@@ -270,4 +280,3 @@ class AjustesTest extends TestCase
         $this->assertTrue($response->isRedirect() || $response->status() === 403);
     }
 }
-

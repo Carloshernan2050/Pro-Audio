@@ -9,14 +9,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('roles')) {
+        if (! Schema::hasTable('roles')) {
             return;
         }
         Schema::table('roles', function (Blueprint $table) {
-            if (!Schema::hasColumn('roles', 'name')) {
+            if (! Schema::hasColumn('roles', 'name')) {
                 $table->string('name')->nullable()->after('id');
             }
-            if (!Schema::hasColumn('roles', 'guard_name')) {
+            if (! Schema::hasColumn('roles', 'guard_name')) {
                 $table->string('guard_name')->default('web')->after('name');
             }
         });
@@ -32,7 +32,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('roles')) {
+        if (! Schema::hasTable('roles')) {
             return;
         }
         Schema::table('roles', function (Blueprint $table) {

@@ -18,7 +18,7 @@ class SubServicios extends Model
         'nombre',
         'descripcion',
         'precio',
-        'imagen'
+        'imagen',
     ];
 
     // Relación con el modelo Servicios

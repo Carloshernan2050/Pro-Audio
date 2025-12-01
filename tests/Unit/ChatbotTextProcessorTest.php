@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Services\ChatbotTextProcessor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ChatbotTextProcessor
@@ -12,16 +12,27 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class ChatbotTextProcessorTest extends TestCase
 {
     use RefreshDatabase;
+
     private const MENSAJE_NECESITO_ALQUILER = 'necesito alquiler';
+
     private const MENSAJE_TAMBIEN_NECESITO = 'tambien necesito';
+
     private const MENSAJE_ADEMAS_DE_ESO = 'ademas de eso';
+
     private const MENSAJE_TRES_DIAS = 'tres dias';
+
     private const MENSAJE_POR_5_DIAS = 'por 5 dias';
+
     private const MENSAJE_NECESITO_POR_3_DIAS = 'necesito por 3 dias';
+
     private const MENSAJE_3_DIAS = '3 dias';
+
     private const MENSAJE_ALQILER_DE_EQUIPOS = 'alqiler de equipos';
+
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
+
     private const NOMBRE_EQUIPO_SONIDO = 'Equipo Sonido';
+
     private const DESC_EQUIPO_PROFESIONAL = 'Equipo profesional';
 
     protected ChatbotTextProcessor $processor;
@@ -29,7 +40,7 @@ class ChatbotTextProcessorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->processor = new ChatbotTextProcessor();
+        $this->processor = new ChatbotTextProcessor;
     }
 
     // ============================================
@@ -103,7 +114,7 @@ class ChatbotTextProcessorTest extends TestCase
 
     public function test_extraer_tokens_elimina_stopwords(): void
     {
-        $tokens = $this->processor->extraerTokens(self::MENSAJE_NECESITO_ALQUILER . ' de equipos');
+        $tokens = $this->processor->extraerTokens(self::MENSAJE_NECESITO_ALQUILER.' de equipos');
         $this->assertNotContains('de', $tokens);
         $this->assertContains('necesito', $tokens);
         $this->assertContains('alquiler', $tokens);
@@ -259,7 +270,7 @@ class ChatbotTextProcessorTest extends TestCase
 
     public function test_extraer_dias_desde_palabras_con_texto_adicional(): void
     {
-        $resultado = $this->processor->extraerDiasDesdePalabras(self::MENSAJE_NECESITO_ALQUILER . ' por ' . self::MENSAJE_TRES_DIAS);
+        $resultado = $this->processor->extraerDiasDesdePalabras(self::MENSAJE_NECESITO_ALQUILER.' por '.self::MENSAJE_TRES_DIAS);
         $this->assertEquals(3, $resultado);
     }
 
@@ -523,7 +534,7 @@ class ChatbotTextProcessorTest extends TestCase
         // El servicio normaliza acentos, así que "locución" se convierte en "locucion"
         $resultado = $this->processor->corregirOrtografia('locucion');
         $this->assertStringContainsString('locucion', $resultado);
-        
+
         $resultado = $this->processor->corregirOrtografia('locuion');
         $this->assertStringContainsString('locucion', $resultado);
     }
@@ -539,7 +550,7 @@ class ChatbotTextProcessorTest extends TestCase
         // El servicio normaliza acentos, así que "cuña" se convierte en "cuna"
         $resultado = $this->processor->corregirOrtografia('cuna');
         $this->assertStringContainsString('cuna', $resultado);
-        
+
         $resultado = $this->processor->corregirOrtografia('cunya');
         $this->assertStringContainsString('cuna', $resultado);
     }
@@ -548,7 +559,7 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $resultado = $this->processor->corregirOrtografia('iluinacion');
         $this->assertStringContainsString('iluminacion', $resultado);
-        
+
         $resultado = $this->processor->corregirOrtografia('iluminasion');
         $this->assertStringContainsString('iluminacion', $resultado);
     }
@@ -575,7 +586,7 @@ class ChatbotTextProcessorTest extends TestCase
     {
         $resultado = $this->processor->corregirOrtografia('microphono');
         $this->assertStringContainsString('microfono', $resultado);
-        
+
         $resultado = $this->processor->corregirOrtografia('microfno');
         $this->assertStringContainsString('microfono', $resultado);
     }
@@ -647,14 +658,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo de Sonido Profesional',
             'descripcion' => 'Equipo profesional de sonido para eventos',
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Probar corrección con vocabulario de BD
@@ -668,14 +679,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Probar corrección con palabra similar (buscarCorreccionCercana)
@@ -688,14 +699,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra que no está en el vocabulario y no tiene corrección cercana
@@ -717,14 +728,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra que está exactamente en el vocabulario
@@ -738,14 +749,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra con alta similitud (>85%) debería corregirse
@@ -758,14 +769,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra con baja similitud (<85%) no debería corregirse
@@ -778,14 +789,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra con diferencia de longitud mayor al umbral no debería considerarse
@@ -798,14 +809,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra con inicial diferente no debería considerarse
@@ -818,21 +829,21 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Parlantes',
             'descripcion' => 'Parlantes profesionales',
-            'precio' => 50000
+            'precio' => 50000,
         ]);
 
         // Probar con múltiples subservicios para ampliar vocabulario
@@ -845,14 +856,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo Muy Largo Para Probar',
             'descripcion' => 'Descripción muy larga para probar tokens',
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Tokens muy largos (>30 caracteres) no deberían agregarse al vocabulario
@@ -865,14 +876,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Para Por Con',
             'descripcion' => 'Stopwords no deberían agregarse',
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Stopwords no deberían agregarse al vocabulario
@@ -885,14 +896,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Animación',
             'descripcion' => 'Servicio de animación',
-            'icono' => 'animacion-icon'
+            'icono' => 'animacion-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'DJ Profesional',
             'descripcion' => 'DJ para eventos',
-            'precio' => 150000
+            'precio' => 150000,
         ]);
 
         // "dj" es una excepción: se agrega aunque tenga menos de 4 caracteres
@@ -905,14 +916,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Tokens menores a 3 caracteres no se corrigen con vocabulario
@@ -925,14 +936,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabras vacías o null deberían filtrarse
@@ -945,14 +956,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra exacta debería tener distancia 0 y similitud 100%
@@ -965,14 +976,14 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Debería elegir la mejor corrección entre múltiples opciones
@@ -985,19 +996,18 @@ class ChatbotTextProcessorTest extends TestCase
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
-            'icono' => 'alquiler-icon'
+            'icono' => 'alquiler-icon',
         ]);
 
         \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_PROFESIONAL,
-            'precio' => 100000
+            'precio' => 100000,
         ]);
 
         // Palabra con distancia mayor al umbral no debería corregirse
         $resultado = $this->processor->corregirOrtografia('abcdefghijklmnopqrstuvwxyz');
         $this->assertIsString($resultado);
     }
-
 }

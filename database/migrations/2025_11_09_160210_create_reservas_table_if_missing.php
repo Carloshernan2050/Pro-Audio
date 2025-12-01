@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('reservas')) {
+        if (! Schema::hasTable('reservas')) {
             Schema::create('reservas', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('personas_id')->nullable()->constrained('personas');
@@ -31,4 +31,3 @@ return new class extends Migration
         }
     }
 };
-

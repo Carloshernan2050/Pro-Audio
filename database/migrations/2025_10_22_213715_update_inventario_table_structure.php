@@ -31,10 +31,10 @@ return new class extends Migration
     {
         if (Schema::hasTable('inventario')) {
             Schema::table('inventario', function (Blueprint $table) {
-                if (!Schema::hasColumn('inventario', 'cantidad_disponible')) {
+                if (! Schema::hasColumn('inventario', 'cantidad_disponible')) {
                     $table->integer('cantidad_disponible');
                 }
-                if (!Schema::hasColumn('inventario', 'fecha_actualizacion')) {
+                if (! Schema::hasColumn('inventario', 'fecha_actualizacion')) {
                     $table->dateTime('fecha_actualizacion')->nullable();
                 }
             });

@@ -7,8 +7,11 @@ use Illuminate\Support\Collection;
 class CalendarioEventService
 {
     private const DEFAULT_COLOR = '#e91c1c';
+
     private const DEFAULT_TEXT_COLOR = '#ffffff';
+
     private const DEFAULT_PRODUCT_LABEL = 'Sin producto';
+
     private const DEFAULT_EVENT_TITLE = 'Alquiler';
 
     /**
@@ -77,7 +80,7 @@ class CalendarioEventService
             $inventarioId = $mov->inventario_id ?? null;
             if ($inventarioId && isset($inventarios[$inventarioId])) {
                 $nombreProducto = $inventarios[$inventarioId]->descripcion ?? self::DEFAULT_PRODUCT_LABEL;
-                $productos[] = $nombreProducto . ' (x' . $item->cantidad . ')';
+                $productos[] = $nombreProducto.' (x'.$item->cantidad.')';
                 $inventarioIds[] = $inventarioId;
                 $itemsData[] = [
                     'inventario_id' => $inventarioId,
@@ -86,8 +89,8 @@ class CalendarioEventService
             }
         }
 
-        $titulo = !empty($productos) ? implode(', ', $productos) : self::DEFAULT_EVENT_TITLE;
-        $descripcion = ($registro->descripcion_evento ?? '') . ' | Productos: ' . implode(', ', $productos);
+        $titulo = ! empty($productos) ? implode(', ', $productos) : self::DEFAULT_EVENT_TITLE;
+        $descripcion = ($registro->descripcion_evento ?? '').' | Productos: '.implode(', ', $productos);
 
         return [$titulo, $descripcion, $inventarioIds, $itemsData];
     }
@@ -102,11 +105,11 @@ class CalendarioEventService
             : self::DEFAULT_PRODUCT_LABEL;
 
         if ($registro->cantidad) {
-            $titulo .= ' (x' . $registro->cantidad . ')';
+            $titulo .= ' (x'.$registro->cantidad.')';
         }
 
         $descripcion = trim(
-            ($registro->cantidad ? ('Cantidad solicitada: ' . $registro->cantidad . '. ') : '') .
+            ($registro->cantidad ? ('Cantidad solicitada: '.$registro->cantidad.'. ') : '').
             ($registro->descripcion_evento ?? '')
         );
 
@@ -146,4 +149,3 @@ class CalendarioEventService
         $this->paletteCursor = 0;
     }
 }
-

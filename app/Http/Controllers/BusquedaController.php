@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\SubServicios;
 use App\Models\Servicios;
+use App\Models\SubServicios;
+use Illuminate\Http\Request;
 
 class BusquedaController extends Controller
 {
@@ -14,38 +14,38 @@ class BusquedaController extends Controller
     public function buscar(Request $request)
     {
         $termino = trim($request->input('buscar', ''));
-        
+
         // Si no hay término de búsqueda, devolver vista vacía
         if (empty($termino)) {
             return view('usuarios.busqueda', [
                 'termino' => '',
-                'resultados' => collect()
+                'resultados' => collect(),
             ]);
         }
 
         // Normalizar el término de búsqueda
         $terminoNormalizado = $this->normalizarTexto($termino);
         $tokens = explode(' ', $terminoNormalizado);
-        
+
         // Buscar en sub-servicios (nombre y descripción)
         $resultados = SubServicios::query()
             ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio',
-                     'sub_servicios.descripcion', 'servicios.nombre_servicio')
+                'sub_servicios.descripcion', 'servicios.nombre_servicio')
             ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
             ->where(function ($query) use ($terminoNormalizado, $tokens) {
                 // Búsqueda en el término completo
                 $query->where('sub_servicios.nombre', 'like', "%{$terminoNormalizado}%")
-                      ->orWhere('sub_servicios.descripcion', 'like', "%{$terminoNormalizado}%");
-                
+                    ->orWhere('sub_servicios.descripcion', 'like', "%{$terminoNormalizado}%");
+
                 // Búsqueda por palabras individuales
                 foreach ($tokens as $token) {
                     $token = trim($token);
                     if ($token !== '') {
                         $query->orWhere('sub_servicios.nombre', 'like', "%{$token}%")
-                              ->orWhere('sub_servicios.descripcion', 'like', "%{$token}%");
+                            ->orWhere('sub_servicios.descripcion', 'like', "%{$token}%");
                     }
                 }
-                
+
                 // También buscar en el nombre del servicio
                 $query->orWhere('servicios.nombre_servicio', 'like', "%{$terminoNormalizado}%");
             })
@@ -55,7 +55,7 @@ class BusquedaController extends Controller
 
         return view('usuarios.busqueda', [
             'termino' => $termino,
-            'resultados' => $resultados
+            'resultados' => $resultados,
         ]);
     }
 
@@ -66,7 +66,7 @@ class BusquedaController extends Controller
     {
         // Convertir a minúsculas y eliminar acentos
         $texto = mb_strtolower($texto, 'UTF-8');
-        
+
         // Correcciones comunes de ortografía
         $correcciones = [
             'animacion' => 'animación',
@@ -74,13 +74,13 @@ class BusquedaController extends Controller
             'alquiler' => 'alquiler',
             'publicidad' => 'publicidad',
         ];
-        
+
         foreach ($correcciones as $error => $correcto) {
             if (str_contains($texto, $error)) {
                 $texto = str_replace($error, $correcto, $texto);
             }
         }
-        
+
         return trim($texto);
     }
 }

@@ -24,6 +24,7 @@ class ChatbotSubServicioService
             ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 'servicios.nombre_servicio')
             ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
             ->whereIn('servicios.nombre_servicio', $intenciones);
+
         return $this->responseBuilder->ordenarSubServicios($query)->get();
     }
 
@@ -43,23 +44,22 @@ class ChatbotSubServicioService
     {
         return $this->responseBuilder->ordenarSubServicios(
             $this->responseBuilder->subServiciosQuery()
-            ->where(function ($q) use ($mensajeCorregido, $tokens) {
-                if ($mensajeCorregido !== '') {
-                    $q->where('sub_servicios.nombre', 'like', "%{$mensajeCorregido}%")
-                      ->orWhere('sub_servicios.descripcion', 'like', "%{$mensajeCorregido}%");
-                }
-                foreach ($tokens as $tk) {
-                    $tk = trim($tk);
-                    if ($tk !== '') {
-                        $q->orWhere('sub_servicios.nombre', 'like', "%{$tk}%")
-                          ->orWhere('sub_servicios.descripcion', 'like', "%{$tk}%");
+                ->where(function ($q) use ($mensajeCorregido, $tokens) {
+                    if ($mensajeCorregido !== '') {
+                        $q->where('sub_servicios.nombre', 'like', "%{$mensajeCorregido}%")
+                            ->orWhere('sub_servicios.descripcion', 'like', "%{$mensajeCorregido}%");
                     }
-                }
-            })
-            ->when(!empty($intenciones), function ($q) use ($intenciones) {
-                $q->whereIn('servicios.nombre_servicio', $intenciones);
-            })
+                    foreach ($tokens as $tk) {
+                        $tk = trim($tk);
+                        if ($tk !== '') {
+                            $q->orWhere('sub_servicios.nombre', 'like', "%{$tk}%")
+                                ->orWhere('sub_servicios.descripcion', 'like', "%{$tk}%");
+                        }
+                    }
+                })
+                ->when(! empty($intenciones), function ($q) use ($intenciones) {
+                    $q->whereIn('servicios.nombre_servicio', $intenciones);
+                })
         )->limit(12)->get();
     }
 }
-

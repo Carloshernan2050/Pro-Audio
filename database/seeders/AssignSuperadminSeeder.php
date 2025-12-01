@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
+use App\Models\Usuario;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Usuario;
 use Spatie\Permission\Models\Role;
 
 class AssignSuperadminSeeder extends Seeder
@@ -40,7 +40,7 @@ class AssignSuperadminSeeder extends Seeder
         $personaId = DB::table('personas')->where('correo', $email)->value('id');
 
         // Crear persona si no existe (para el flujo de login propio con tabla personas)
-        if (!$personaId) {
+        if (! $personaId) {
             $persona = Usuario::create([
                 'primer_nombre' => 'Edwin',
                 'segundo_nombre' => 'Fernando',

@@ -19,21 +19,29 @@ class CalendarioValidationServiceTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_PATH = '/test';
+
     private const PRODUCTO_TEST = 'Producto Test';
+
     private const FECHA_INICIO_ORIGINAL = '2024-01-01';
+
     private const FECHA_FIN_ORIGINAL = '2024-01-05';
+
     private const FECHA_INICIO_MEDIA = '2024-01-02';
+
     private const FECHA_FIN_MEDIA = '2024-01-04';
+
     private const EVENTO_DE_PRUEBA = 'Evento de prueba';
+
     private const MOVIMIENTO_DE_PRUEBA = 'Movimiento de prueba';
 
     private CalendarioValidationService $service;
+
     private Usuario $persona;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CalendarioValidationService();
+        $this->service = new CalendarioValidationService;
         $this->persona = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'User',
@@ -386,12 +394,12 @@ class CalendarioValidationServiceTest extends TestCase
     public function test_validar_stock_para_items_con_multiples_items(): void
     {
         $inventario1 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 1',
+            'descripcion' => self::PRODUCTO_TEST.' 1',
             'stock' => 10,
         ]);
 
         $inventario2 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 2',
+            'descripcion' => self::PRODUCTO_TEST.' 2',
             'stock' => 10,
         ]);
 
@@ -654,12 +662,12 @@ class CalendarioValidationServiceTest extends TestCase
     public function test_validar_stock_para_actualizacion_con_multiples_items(): void
     {
         $inventario1 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 1',
+            'descripcion' => self::PRODUCTO_TEST.' 1',
             'stock' => 10,
         ]);
 
         $inventario2 = Inventario::create([
-            'descripcion' => self::PRODUCTO_TEST . ' 2',
+            'descripcion' => self::PRODUCTO_TEST.' 2',
             'stock' => 10,
         ]);
 
@@ -1018,4 +1026,3 @@ class CalendarioValidationServiceTest extends TestCase
         $this->assertArrayHasKey('movimientos_inventario_id.required', $messages);
     }
 }
-

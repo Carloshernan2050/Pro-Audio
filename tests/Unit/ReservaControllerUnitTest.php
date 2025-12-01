@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Http\Controllers\ReservaController;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Unitarios para ReservaController
@@ -17,7 +17,7 @@ class ReservaControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new ReservaController();
+        $this->controller = new ReservaController;
     }
 
     // ============================================
@@ -45,7 +45,7 @@ class ReservaControllerUnitTest extends TestCase
     {
         // Debe haber al menos 1 item
         $reglasEsperadas = [
-            'items' => 'required|array|min:1'
+            'items' => 'required|array|min:1',
         ];
 
         $this->assertStringContainsString('min:1', $reglasEsperadas['items']);
@@ -55,7 +55,7 @@ class ReservaControllerUnitTest extends TestCase
     {
         // La cantidad debe ser mínimo 1
         $reglasEsperadas = [
-            'items.*.cantidad' => 'required|integer|min:1'
+            'items.*.cantidad' => 'required|integer|min:1',
         ];
 
         $this->assertStringContainsString('min:1', $reglasEsperadas['items.*.cantidad']);
@@ -86,4 +86,3 @@ class ReservaControllerUnitTest extends TestCase
         $this->assertEquals('alquilado', $tipoMovimiento);
     }
 }
-

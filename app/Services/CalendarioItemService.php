@@ -17,9 +17,9 @@ class CalendarioItemService
             $movimientoId = $this->obtenerOCrearMovimientoInventario($item['inventario_id']);
 
             CalendarioItem::create([
-                'calendario_id'           => $calendarioId,
+                'calendario_id' => $calendarioId,
                 'movimientos_inventario_id' => $movimientoId,
-                'cantidad'                => $item['cantidad'] ?? 1
+                'cantidad' => $item['cantidad'] ?? 1,
             ]);
         }
     }
@@ -45,7 +45,7 @@ class CalendarioItemService
             'tipo_movimiento' => 'entrada',
             'cantidad' => $stockActual > 0 ? $stockActual : 1,
             'fecha_movimiento' => now(),
-            'descripcion' => 'Movimiento automático al crear alquiler'
+            'descripcion' => 'Movimiento automático al crear alquiler',
         ])->id;
     }
 
@@ -68,13 +68,13 @@ class CalendarioItemService
                 'tipo_movimiento' => 'alquilado',
                 'cantidad' => $cantidad,
                 'fecha_movimiento' => now(),
-                'descripcion' => 'Ajuste de reserva #' . $calendarioId . ' (nueva cantidad)',
+                'descripcion' => 'Ajuste de reserva #'.$calendarioId.' (nueva cantidad)',
             ]);
 
             CalendarioItem::create([
-                'calendario_id'           => $calendarioId,
+                'calendario_id' => $calendarioId,
                 'movimientos_inventario_id' => $movimientoId,
-                'cantidad'                => $cantidad
+                'cantidad' => $cantidad,
             ]);
 
             $nuevosItemsReserva[] = [
@@ -86,4 +86,3 @@ class CalendarioItemService
         return $nuevosItemsReserva;
     }
 }
-

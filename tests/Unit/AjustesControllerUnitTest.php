@@ -2,16 +2,15 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Http\Controllers\AjustesController;
+use App\Models\Cotizacion;
 use App\Models\Servicios;
 use App\Models\SubServicios;
-use App\Models\Cotizacion;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use ReflectionClass;
-use ReflectionMethod;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para AjustesController
@@ -23,9 +22,13 @@ class AjustesControllerUnitTest extends TestCase
     use RefreshDatabase;
 
     private const ROUTE_AJUSTES = '/ajustes';
+
     private const ROUTE_EXPORT_PDF = '/ajustes/export-pdf';
+
     private const TEST_EMAIL = 'test@test.com';
+
     private const DESC_PRUEBA = 'Descripción de prueba';
+
     private const TELEFONO_PRUEBA = '1234567890';
 
     protected $controller;
@@ -33,21 +36,21 @@ class AjustesControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new AjustesController();
+        $this->controller = new AjustesController;
     }
 
     /**
      * Helper para invocar métodos privados
      *
-     * @param object $object
-     * @param string $methodName
-     * @param array $parameters
+     * @param  object  $object
+     * @param  string  $methodName
      * @return mixed
      */
     private function invokePrivateMethod($object, $methodName, array $parameters = [])
     {
         $reflection = new ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
+
         // NOSONAR: S3011 - Reflection is required to test private methods in unit tests
         // Note: setAccessible() is no longer needed in PHP 8.1+ as reflected methods are accessible by default
         return $method->invokeArgs($object, $parameters);
@@ -64,7 +67,7 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $request = Request::create(self::ROUTE_AJUSTES, 'GET');
@@ -153,7 +156,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -161,14 +164,14 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $request = Request::create(self::ROUTE_AJUSTES, 'GET');
@@ -211,7 +214,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -219,14 +222,14 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $request = Request::create(self::ROUTE_EXPORT_PDF, 'GET', ['group_by' => 'consulta']);
@@ -247,7 +250,7 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $response = $this->controller->getSubservicios();
@@ -265,7 +268,7 @@ class AjustesControllerUnitTest extends TestCase
     public function test_group_by_opciones_validas(): void
     {
         $opcionesValidas = [null, 'consulta', 'dia'];
-        
+
         $this->assertContains(null, $opcionesValidas);
         $this->assertContains('consulta', $opcionesValidas);
         $this->assertContains('dia', $opcionesValidas);
@@ -274,7 +277,7 @@ class AjustesControllerUnitTest extends TestCase
     public function test_tab_opciones_validas(): void
     {
         $tabsValidos = ['servicios', 'subservicios', 'inventario', 'movimientos', 'historial'];
-        
+
         $this->assertCount(5, $tabsValidos);
         $this->assertContains('servicios', $tabsValidos);
         $this->assertContains('historial', $tabsValidos);
@@ -284,7 +287,7 @@ class AjustesControllerUnitTest extends TestCase
     {
         $groupBy = null;
         $activeTab = $groupBy ? 'historial' : 'servicios';
-        
+
         $this->assertEquals('servicios', $activeTab);
     }
 
@@ -292,7 +295,7 @@ class AjustesControllerUnitTest extends TestCase
     {
         $groupBy = 'dia';
         $activeTab = $groupBy ? 'historial' : 'servicios';
-        
+
         $this->assertEquals('historial', $activeTab);
     }
 
@@ -305,7 +308,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -313,14 +316,14 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $request = Request::create(self::ROUTE_AJUSTES, 'GET', ['group_by' => 'dia']);
@@ -340,7 +343,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -348,14 +351,14 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $request = Request::create(self::ROUTE_AJUSTES, 'GET', ['group_by' => 'consulta']);
@@ -379,7 +382,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -387,18 +390,18 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
-        
+
         $this->assertNotNull($cotizaciones);
         $this->assertGreaterThanOrEqual(1, $cotizaciones->count());
     }
@@ -412,7 +415,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -420,7 +423,7 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $fecha = now();
@@ -428,22 +431,22 @@ class AjustesControllerUnitTest extends TestCase
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => $fecha
+            'fecha_cotizacion' => $fecha,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 200,
-            'fecha_cotizacion' => $fecha
+            'fecha_cotizacion' => $fecha,
         ]);
 
         $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
         $grouped = $this->invokePrivateMethod($this->controller, 'groupCotizaciones', [$cotizaciones, 'dia']);
-        
+
         $this->assertNotNull($grouped);
         $this->assertGreaterThanOrEqual(1, $grouped->count());
-        
+
         // Verificar estructura de agrupación
         $firstGroup = $grouped->first();
         $this->assertArrayHasKey('items', $firstGroup);
@@ -460,7 +463,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -468,7 +471,7 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         $fecha = now();
@@ -476,15 +479,15 @@ class AjustesControllerUnitTest extends TestCase
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => $fecha
+            'fecha_cotizacion' => $fecha,
         ]);
 
         $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
         $grouped = $this->invokePrivateMethod($this->controller, 'groupCotizaciones', [$cotizaciones, 'consulta']);
-        
+
         $this->assertNotNull($grouped);
         $this->assertGreaterThanOrEqual(1, $grouped->count());
-        
+
         // Verificar estructura de agrupación
         $firstGroup = $grouped->first();
         $this->assertArrayHasKey('items', $firstGroup);
@@ -503,7 +506,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -511,19 +514,19 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         Cotizacion::create([
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
         $grouped = $this->invokePrivateMethod($this->controller, 'groupCotizaciones', [$cotizaciones, null]);
-        
+
         $this->assertNull($grouped);
     }
 
@@ -536,7 +539,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -544,7 +547,7 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         // Crear cotización con fecha válida (fecha_cotizacion no puede ser null según la base de datos)
@@ -552,12 +555,12 @@ class AjustesControllerUnitTest extends TestCase
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
         $grouped = $this->invokePrivateMethod($this->controller, 'groupCotizaciones', [$cotizaciones, 'dia']);
-        
+
         $this->assertNotNull($grouped);
     }
 
@@ -570,7 +573,7 @@ class AjustesControllerUnitTest extends TestCase
             'correo' => self::TEST_EMAIL,
             'contrasena' => 'password',
             'fecha_registro' => now(),
-            'estado' => true
+            'estado' => true,
         ]);
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -578,7 +581,7 @@ class AjustesControllerUnitTest extends TestCase
             'servicios_id' => $servicio->id,
             'nombre' => 'SubTest',
             'descripcion' => self::DESC_PRUEBA,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
         // Nota: personas_id no puede ser null según la base de datos
@@ -587,12 +590,12 @@ class AjustesControllerUnitTest extends TestCase
             'personas_id' => $usuario->id,
             'sub_servicios_id' => $subServicio->id,
             'monto' => 100,
-            'fecha_cotizacion' => now()
+            'fecha_cotizacion' => now(),
         ]);
 
         $cotizaciones = $this->invokePrivateMethod($this->controller, 'getCotizaciones');
         $grouped = $this->invokePrivateMethod($this->controller, 'groupCotizaciones', [$cotizaciones, 'consulta']);
-        
+
         $this->assertNotNull($grouped);
     }
 
@@ -600,7 +603,7 @@ class AjustesControllerUnitTest extends TestCase
     {
         $request = Request::create(self::ROUTE_AJUSTES, 'GET', [
             'group_by' => 'dia',
-            'tab' => 'servicios'
+            'tab' => 'servicios',
         ]);
         $response = $this->controller->index($request);
 
@@ -609,6 +612,4 @@ class AjustesControllerUnitTest extends TestCase
         $this->assertEquals('dia', $data['groupBy']);
         $this->assertEquals('servicios', $data['activeTab']); // El tab tiene prioridad
     }
-
 }
-

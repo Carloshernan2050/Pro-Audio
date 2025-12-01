@@ -36,6 +36,7 @@ class RoleMiddleware
                 'cliente' => 'Usuario',
             ];
             $trimmed = trim($role);
+
             return $map[$trimmed] ?? $map[strtolower($trimmed)] ?? $trimmed;
         };
 
@@ -51,12 +52,10 @@ class RoleMiddleware
 
         // Permitir si hay intersección
         $hasAccess = count(array_intersect($normalizedUserRoles, $normalizedAllowedRoles)) > 0;
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->route('inicio')->with('error', 'No tienes permisos para acceder a esta sección.');
         }
 
         return $next($request);
     }
 }
-
-

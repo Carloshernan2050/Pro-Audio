@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Servicios;
 use App\Models\SubServicios;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para BusquedaController
@@ -20,23 +20,31 @@ class BusquedaTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'test@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Juan';
+
     private const TEST_APELLIDO = 'Pérez';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROUTE_BUSCAR = '/buscar';
+
     private const DESC_SERVICIO_ALQUILER = 'Servicio de alquiler';
+
     private const NOMBRE_EQUIPO_SONIDO = 'Equipo de sonido';
+
     private const DESC_EQUIPO_COMPLETO = 'Equipo completo';
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        if (!DB::table('roles')->where('nombre_rol', 'Cliente')->exists()) {
+        if (! DB::table('roles')->where('nombre_rol', 'Cliente')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Cliente',
-                'nombre_rol' => 'Cliente'
+                'nombre_rol' => 'Cliente',
             ]);
         }
     }
@@ -57,7 +65,7 @@ class BusquedaTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -89,17 +97,17 @@ class BusquedaTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR . '?buscar=sonido');
+        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR.'?buscar=sonido');
 
         $response->assertStatus(200);
         $response->assertViewIs('usuarios.busqueda');
@@ -113,17 +121,17 @@ class BusquedaTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => 'Servicio de alquiler'
+            'descripcion' => 'Servicio de alquiler',
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo de sonido',
             'descripcion' => 'Equipo completo de audio',
-            'precio' => 100
+            'precio' => 100,
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR . '?buscar=audio');
+        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR.'?buscar=audio');
 
         $response->assertStatus(200);
         $resultados = $response->viewData('resultados');
@@ -136,17 +144,17 @@ class BusquedaTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR . '?buscar=Alquiler');
+        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR.'?buscar=Alquiler');
 
         $response->assertStatus(200);
         $resultados = $response->viewData('resultados');
@@ -159,17 +167,17 @@ class BusquedaTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
-            'descripcion' => self::DESC_SERVICIO_ALQUILER
+            'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => self::NOMBRE_EQUIPO_SONIDO,
             'descripcion' => self::DESC_EQUIPO_COMPLETO,
-            'precio' => 100
+            'precio' => 100,
         ]);
 
-        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR . '?buscar=equipo sonido');
+        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR.'?buscar=equipo sonido');
 
         $response->assertStatus(200);
         $resultados = $response->viewData('resultados');
@@ -180,7 +188,7 @@ class BusquedaTest extends TestCase
     {
         $this->crearUsuarioAutenticado();
 
-        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR . '?buscar=xyz123noexiste');
+        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR.'?buscar=xyz123noexiste');
 
         $response->assertStatus(200);
         $resultados = $response->viewData('resultados');
@@ -193,22 +201,21 @@ class BusquedaTest extends TestCase
 
         $servicio = Servicios::create([
             'nombre_servicio' => 'Animación',
-            'descripcion' => 'Servicio de animación'
+            'descripcion' => 'Servicio de animación',
         ]);
 
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Animador',
             'descripcion' => 'Servicio de animación',
-            'precio' => 200
+            'precio' => 200,
         ]);
 
         // Buscar con error ortográfico que debería normalizarse
-        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR . '?buscar=animacion');
+        $response = $this->withoutVite()->get(self::ROUTE_BUSCAR.'?buscar=animacion');
 
         $response->assertStatus(200);
         $resultados = $response->viewData('resultados');
         $this->assertGreaterThan(0, $resultados->count());
     }
 }
-

@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Services\ChatbotSessionManager;
 use App\Services\ChatbotTextProcessor;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ChatbotSessionManager
@@ -16,7 +16,7 @@ class ChatbotSessionManagerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sessionManager = new ChatbotSessionManager();
+        $this->sessionManager = new ChatbotSessionManager;
     }
 
     // ============================================
@@ -74,7 +74,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_con_numero(): void
     {
-        $textProcessor = new ChatbotTextProcessor();
+        $textProcessor = new ChatbotTextProcessor;
         $resultado = $this->sessionManager->extraerDiasDelRequest(
             'necesito por 3 dias',
             false,
@@ -86,7 +86,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_con_palabras(): void
     {
-        $textProcessor = new ChatbotTextProcessor();
+        $textProcessor = new ChatbotTextProcessor;
         $resultado = $this->sessionManager->extraerDiasDelRequest(
             'necesito por tres dias',
             false,
@@ -98,7 +98,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_con_continuacion(): void
     {
-        $textProcessor = new ChatbotTextProcessor();
+        $textProcessor = new ChatbotTextProcessor;
         session(['chat.days' => 5]);
         $resultado = $this->sessionManager->extraerDiasDelRequest(
             'tambien',
@@ -111,7 +111,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_guarda_en_session(): void
     {
-        $textProcessor = new ChatbotTextProcessor();
+        $textProcessor = new ChatbotTextProcessor;
         session()->forget('chat.days');
         $this->sessionManager->extraerDiasDelRequest(
             'por 4 dias',
@@ -122,4 +122,3 @@ class ChatbotSessionManagerTest extends TestCase
         $this->assertEquals(4, session('chat.days'));
     }
 }
-

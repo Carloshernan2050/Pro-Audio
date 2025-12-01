@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 /**
  * Tests de Integración para Autenticación
@@ -18,22 +18,28 @@ class AutenticacionTest extends TestCase
     use RefreshDatabase;
 
     private const TEST_EMAIL = 'test@example.com';
+
     private const TEST_PASSWORD = 'password123';
+
     private const TEST_NOMBRE = 'Juan';
+
     private const TEST_APELLIDO = 'Pérez';
+
     private const TEST_TELEFONO = '1234567890';
+
     private const ROUTE_USUARIOS = '/usuarios';
+
     private const ROUTE_USUARIOS_AUTENTICAR = '/usuarios/autenticar';
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Crear rol Cliente si no existe
-        if (!DB::table('roles')->where('name', 'Cliente')->exists()) {
+        if (! DB::table('roles')->where('name', 'Cliente')->exists()) {
             DB::table('roles')->insert([
                 'name' => 'Cliente',
-                'nombre_rol' => 'Cliente'
+                'nombre_rol' => 'Cliente',
             ]);
         }
     }
@@ -55,7 +61,7 @@ class AutenticacionTest extends TestCase
 
         $response->assertRedirect(route('usuarios.inicioSesion'));
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('personas', [
             'correo' => self::TEST_EMAIL,
             'primer_nombre' => self::TEST_NOMBRE,
@@ -134,7 +140,7 @@ class AutenticacionTest extends TestCase
             ->where('personas_roles.personas_id', $usuario->id)
             ->where(function ($query) {
                 $query->where('roles.name', 'Cliente')
-                      ->orWhere('roles.nombre_rol', 'Cliente');
+                    ->orWhere('roles.nombre_rol', 'Cliente');
             })
             ->exists();
 
@@ -161,7 +167,7 @@ class AutenticacionTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -224,7 +230,7 @@ class AutenticacionTest extends TestCase
         if ($rolId) {
             DB::table('personas_roles')->insert([
                 'personas_id' => $usuario->id,
-                'roles_id' => $rolId
+                'roles_id' => $rolId,
             ]);
         }
 
@@ -283,4 +289,3 @@ class AutenticacionTest extends TestCase
         $response->assertViewIs('usuarios.inicioSesion');
     }
 }
-

@@ -27,4 +27,3 @@ class ReservaItem extends Model
         return $this->belongsTo(Inventario::class);
     }
 }
-

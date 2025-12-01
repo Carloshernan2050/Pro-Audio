@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Servicios;
 use App\Models\Cotizacion;
+use App\Models\Servicios;
 use App\Models\SubServicios;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -58,6 +58,7 @@ class AjustesController extends Controller
     public function getSubservicios()
     {
         $subServicios = SubServicios::with('servicio')->orderBy('id', 'asc')->get();
+
         return response()->json($subServicios);
     }
 
@@ -76,8 +77,8 @@ class AjustesController extends Controller
     /**
      * Agrupa las cotizaciones según el tipo de agrupación especificado.
      *
-     * @param \Illuminate\Database\Eloquent\Collection $cotizaciones
-     * @param string|null $groupBy
+     * @param  \Illuminate\Database\Eloquent\Collection  $cotizaciones
+     * @param  string|null  $groupBy
      * @return \Illuminate\Support\Collection|null
      */
     private function groupCotizaciones($cotizaciones, $groupBy)
@@ -97,9 +98,11 @@ class AjustesController extends Controller
         if ($groupBy === 'consulta') {
             return $cotizaciones->groupBy(function ($c) {
                 $fecha = optional($c->fecha_cotizacion)?->format('Y-m-d H:i:s');
-                return ($c->personas_id ?? '0') . '|' . ($fecha ?? '');
+
+                return ($c->personas_id ?? '0').'|'.($fecha ?? '');
             })->map(function ($group) {
                 $first = $group->first();
+
                 return [
                     'items' => $group,
                     'total' => $group->sum('monto'),
