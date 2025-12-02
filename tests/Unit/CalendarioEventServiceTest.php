@@ -319,12 +319,14 @@ class CalendarioEventServiceTest extends TestCase
         $this->assertIsArray($color3);
     }
 
-    public function test_next_palette_color_usa_default_si_palette_vacia(): void
+    public function test_next_palette_color_usa_default_si_palette_vacia_cubre_linea_132(): void
     {
-        $service = new class extends CalendarioEventService
-        {
-            private array $calendarColorPalette = [];
-        };
+        // Crear un servicio con palette vacía usando Reflection
+        $service = new CalendarioEventService;
+        $reflection = new \ReflectionClass($service);
+        $property = $reflection->getProperty('calendarColorPalette');
+        $property->setAccessible(true);
+        $property->setValue($service, []); // Establecer palette vacía
 
         $color = $service->nextPaletteColor();
 

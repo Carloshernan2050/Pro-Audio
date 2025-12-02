@@ -1098,4 +1098,109 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);
     }
+
+    // ============================================
+    // TESTS PARA COBERTURA - Líneas 28, 54, 113
+    // ============================================
+
+    /**
+     * Test para cubrir línea 28 de ChatbotSuggestionGenerator
+     * generarSugerencias() retorna array vacío cuando vocab está vacío
+     * Ejecuta el código original replicándolo línea por línea para forzar la condición
+     */
+    public function test_generar_sugerencias_vocab_vacio_cubre_linea_28(): void
+    {
+        $textProcessor = new ChatbotTextProcessor;
+        
+        // Crear una clase anónima que sobrescriba obtenerVocabularioCorreccion
+        // para retornar array vacío, permitiendo que el código original ejecute línea 28
+        $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
+            protected function obtenerVocabularioCorreccion(): array
+            {
+                return []; // Forzar retornar vacío para que línea 28 se ejecute
+            }
+            
+            // El método generarSugerencias usará el obtenerVocabularioCorreccion sobrescrito
+            // y ejecutará el código original incluyendo línea 28
+        };
+
+        // Ejecutar el método original que ahora ejecutará línea 28 porque vocab está vacío
+        $resultado = $generator->generarSugerencias('test');
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
+    }
+
+    /**
+     * Test para cubrir línea 54 de ChatbotSuggestionGenerator
+     * generarSugerenciasPorToken() retorna array vacío cuando targetToken es null
+     * Ejecuta el código original forzando que encontrarTokenMasRaro retorne null
+     */
+    public function test_generar_sugerencias_por_token_target_token_null_cubre_linea_54(): void
+    {
+        $textProcessor = new ChatbotTextProcessor;
+        
+        // Crear una clase anónima que sobrescriba encontrarTokenMasRaro para retornar null
+        $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
+            protected function filtrarTokensValidos(string $mensajeOriginal): array
+            {
+                // Retornar un array no vacío para que no salga temprano en línea 48
+                return [['orig' => 'test', 'norm' => 'test']];
+            }
+
+            protected function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
+            {
+                return null; // Forzar retornar null para que línea 54 se ejecute
+            }
+            
+            // El método generarSugerenciasPorToken usará los métodos sobrescritos
+            // y ejecutará el código original incluyendo línea 54
+        };
+
+        // Ejecutar el método original que ahora ejecutará línea 54 porque targetToken es null
+        $resultado = $generator->generarSugerenciasPorToken('test');
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
+    }
+
+    /**
+     * Test para cubrir línea 113 de ChatbotSuggestionGenerator
+     * obtenerVocabularioCorreccion() catch block cuando hay excepción en BD
+     */
+    public function test_obtener_vocabulario_correccion_catch_exception_cubre_linea_113(): void
+    {
+        $textProcessor = new ChatbotTextProcessor;
+        $generator = new ChatbotSuggestionGenerator($textProcessor);
+
+        $reflection = new \ReflectionClass($generator);
+        $method = $reflection->getMethod('obtenerVocabularioCorreccion');
+        $method->setAccessible(true);
+
+        // Guardar información de la conexión original
+        $connection = \Illuminate\Support\Facades\DB::connection();
+        $connectionName = $connection->getName();
+        $originalConfig = config("database.connections.{$connectionName}");
+
+        try {
+            // Cambiar temporalmente la configuración para que la conexión falle
+            config(["database.connections.{$connectionName}.database" => ':nonexistent:']);
+
+            // Limpiar la instancia de conexión para forzar que use la nueva configuración
+            \Illuminate\Support\Facades\DB::purge($connectionName);
+
+            // Ahora el método debería lanzar una excepción al intentar consultar SubServicios
+            // y el catch block (línea 113) debería manejarla
+            $resultado = $method->invoke($generator);
+
+            // Debería retornar al menos las palabras base (catch ejecutado, línea 113)
+            $this->assertIsArray($resultado);
+            $this->assertNotEmpty($resultado); // Debe tener al menos palabras base
+        } finally {
+            // Restaurar la configuración original
+            config(["database.connections.{$connectionName}" => $originalConfig]);
+
+            // Limpiar y reconectar
+            \Illuminate\Support\Facades\DB::purge($connectionName);
+            \Illuminate\Support\Facades\DB::reconnect($connectionName);
+        }
+    }
 }

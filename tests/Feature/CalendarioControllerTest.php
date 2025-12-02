@@ -52,11 +52,38 @@ class CalendarioControllerTest extends TestCase
     {
         parent::setUp();
 
+        // Asegurar que la tabla roles existe
+        if (! DB::getSchemaBuilder()->hasTable('roles')) {
+            DB::statement('CREATE TABLE roles (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre_rol VARCHAR(255), name VARCHAR(255), guard_name VARCHAR(255) DEFAULT "web", created_at DATETIME, updated_at DATETIME)');
+        }
+
+        // Agregar columna name si no existe
+        if (DB::getSchemaBuilder()->hasTable('roles') && ! DB::getSchemaBuilder()->hasColumn('roles', 'name')) {
+            DB::statement('ALTER TABLE roles ADD COLUMN name VARCHAR(255)');
+        }
+
+        // Agregar columna guard_name si no existe
+        if (DB::getSchemaBuilder()->hasTable('roles') && ! DB::getSchemaBuilder()->hasColumn('roles', 'guard_name')) {
+            DB::statement('ALTER TABLE roles ADD COLUMN guard_name VARCHAR(255) DEFAULT "web"');
+        }
+
         // Crear rol Administrador si no existe
-        if (! DB::table('roles')->where('nombre_rol', 'Administrador')->exists()) {
-            DB::table('roles')->insert([
-                'nombre_rol' => 'Administrador',
-            ]);
+        $exists = DB::table('roles')
+            ->where(function($query) {
+                $query->where('nombre_rol', 'Administrador')
+                      ->orWhere('name', 'Administrador');
+            })
+            ->exists();
+
+        if (! $exists) {
+            $roleData = ['nombre_rol' => 'Administrador'];
+            if (DB::getSchemaBuilder()->hasColumn('roles', 'name')) {
+                $roleData['name'] = 'Administrador';
+            }
+            if (DB::getSchemaBuilder()->hasColumn('roles', 'guard_name')) {
+                $roleData['guard_name'] = 'web';
+            }
+            DB::table('roles')->insert($roleData);
         }
     }
 

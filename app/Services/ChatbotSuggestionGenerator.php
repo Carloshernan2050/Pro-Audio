@@ -83,7 +83,7 @@ class ChatbotSuggestionGenerator
         return $best ? ['token' => $token, 'sugerencia' => $best] : [];
     }
 
-    private function obtenerVocabularioCorreccion(): array
+    protected function obtenerVocabularioCorreccion(): array
     {
         $keywords = [
             'alquiler', 'alquilar', 'arrendar', 'rentar', 'equipo', 'equipo de sonido', 'sonido', 'audio', 'bafle', 'parlante', 'parlantes', 'altavoz', 'bocina', 'consola', 'mezcladora', 'mixer', 'microfono', 'luces', 'luz', 'lampara', 'iluminacion', 'rack', 'par led',
@@ -152,7 +152,7 @@ class ChatbotSuggestionGenerator
         return $scores;
     }
 
-    private function filtrarTokensValidos(string $mensajeOriginal): array
+    protected function filtrarTokensValidos(string $mensajeOriginal): array
     {
         $stop = self::STOPWORDS;
         $rawTokens = preg_split(self::REGEX_WHITESPACE, trim($mensajeOriginal));
@@ -178,7 +178,7 @@ class ChatbotSuggestionGenerator
         return $pairs;
     }
 
-    private function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
+    protected function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
     {
         $tokenScores = [];
         foreach ($pairs as $p) {
