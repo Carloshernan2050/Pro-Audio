@@ -10,7 +10,7 @@ class RoleAdminController extends Controller
     public function index()
     {
         // Usar sintaxis compatible con SQLite (no soporta SEPARATOR)
-        $connection = DB::getDriverName();
+        $connection = $this->getDatabaseDriverName();
         if ($connection === 'sqlite') {
             $usuarios = DB::table('personas as p')
                 ->leftJoin('personas_roles as pr', 'pr.personas_id', '=', 'p.id')
@@ -123,5 +123,14 @@ class RoleAdminController extends Controller
         });
 
         return back()->with('success', 'Roles actualizados correctamente');
+    }
+
+    /**
+     * Obtener el nombre del driver de base de datos
+     * Método protegido para permitir testing
+     */
+    protected function getDatabaseDriverName(): string
+    {
+        return DB::getDriverName();
     }
 }

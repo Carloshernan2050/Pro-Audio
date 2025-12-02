@@ -52,25 +52,6 @@ class ChatbotIntentionDetectorCoverageTest extends TestCase
         $this->assertIsArray($result);
     }
 
-    /**
-     * Test para cubrir líneas 229-230 de ChatbotIntentionDetector
-     * obtenerCacheTfidf() catch block cuando hay excepción
-     */
-    public function test_obtener_cache_tfidf_catch_exception_cubre_lineas_229_230(): void
-    {
-        // Nota: Es muy difícil forzar una excepción en Eloquent sin usar mocks
-        // que interfieren con las transacciones de la base de datos.
-        // La línea 229-230 se ejecuta cuando SubServicios::query()->get() lanza una excepción.
-        // El código está ahí para manejar errores de BD y retornar array vacío.
-        
-        // En un entorno normal, el método debería funcionar
-        // Para cubrir líneas 229-230, necesitaríamos forzar una excepción en SubServicios::query()
-        // pero los mocks de alias interfieren con las transacciones de BD
-        // El código está ahí para manejar errores de BD en producción
-        $result = $this->detector->clasificarPorTfidf('test mensaje');
-
-        $this->assertIsArray($result);
-    }
 
     /**
      * Test para cubrir líneas 243-248 de ChatbotIntentionDetector

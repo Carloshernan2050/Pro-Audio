@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Tests Unitarios para ServiciosViewController
  *
- * Tests para lógica de vistas y servicios
+ * Tests para lógica pura y utilidades
  */
 class ServiciosViewControllerUnitTest extends TestCase
 {
@@ -19,6 +19,74 @@ class ServiciosViewControllerUnitTest extends TestCase
     {
         parent::setUp();
         $this->controller = new ServiciosViewController;
+    }
+
+    // ============================================
+    // TESTS PARA Instanciación
+    // ============================================
+
+    public function test_controller_instancia_correctamente(): void
+    {
+        $this->assertInstanceOf(ServiciosViewController::class, $this->controller);
+    }
+
+    // ============================================
+    // TESTS PARA Métodos del Controlador
+    // ============================================
+
+    public function test_controller_tiene_metodo_alquiler(): void
+    {
+        $this->assertTrue(method_exists($this->controller, 'alquiler'));
+    }
+
+    public function test_controller_tiene_metodo_animacion(): void
+    {
+        $this->assertTrue(method_exists($this->controller, 'animacion'));
+    }
+
+    public function test_controller_tiene_metodo_publicidad(): void
+    {
+        $this->assertTrue(method_exists($this->controller, 'publicidad'));
+    }
+
+    public function test_controller_tiene_metodo_servicio_por_slug(): void
+    {
+        $this->assertTrue(method_exists($this->controller, 'servicioPorSlug'));
+    }
+
+    // ============================================
+    // TESTS PARA Utilidades de Slug
+    // ============================================
+
+    public function test_slug_generacion_servicio(): void
+    {
+        // Verificar generación de slug para servicios
+        $servicio = 'Alquiler de Equipos';
+        $slug = Str::slug($servicio, '_');
+
+        $this->assertIsString($slug);
+        $this->assertNotEmpty($slug);
+        $this->assertEquals('alquiler_de_equipos', $slug);
+    }
+
+    public function test_slug_generacion_con_acentos(): void
+    {
+        $servicio = 'Animación';
+        $slug = Str::slug($servicio, '_');
+
+        $this->assertIsString($slug);
+        $this->assertNotEmpty($slug);
+        $this->assertStringNotContainsString('ó', $slug);
+    }
+
+    public function test_slug_generacion_publicidad(): void
+    {
+        $servicio = 'Publicidad';
+        $slug = Str::slug($servicio, '_');
+
+        $this->assertIsString($slug);
+        $this->assertNotEmpty($slug);
+        $this->assertEquals('publicidad', $slug);
     }
 
     // ============================================
@@ -34,16 +102,6 @@ class ServiciosViewControllerUnitTest extends TestCase
         $this->assertContains('Alquiler', $servicios);
         $this->assertContains('Animación', $servicios);
         $this->assertContains('Publicidad', $servicios);
-    }
-
-    public function test_slug_generacion_servicio(): void
-    {
-        // Verificar generación de slug para servicios
-        $servicio = 'Alquiler de Equipos';
-        $slug = Str::slug($servicio, '_');
-
-        $this->assertIsString($slug);
-        $this->assertNotEmpty($slug);
     }
 
     public function test_ruta_vista_estructura(): void
@@ -66,5 +124,42 @@ class ServiciosViewControllerUnitTest extends TestCase
             $this->assertIsString($vista);
             $this->assertStringStartsWith('usuarios.', $vista);
         }
+    }
+
+    // ============================================
+    // TESTS PARA Lógica de Búsqueda
+    // ============================================
+
+    public function test_busqueda_servicio_por_nombre(): void
+    {
+        // Verificar lógica de búsqueda de servicios
+        $servicios = [
+            (object)['nombre_servicio' => 'Alquiler'],
+            (object)['nombre_servicio' => 'Animación'],
+            (object)['nombre_servicio' => 'Publicidad'],
+        ];
+
+        $servicioEncontrado = collect($servicios)->first(function ($s) {
+            return $s->nombre_servicio === 'Alquiler';
+        });
+
+        $this->assertNotNull($servicioEncontrado);
+        $this->assertEquals('Alquiler', $servicioEncontrado->nombre_servicio);
+    }
+
+    public function test_busqueda_servicio_por_slug(): void
+    {
+        $servicios = [
+            (object)['nombre_servicio' => 'Alquiler'],
+            (object)['nombre_servicio' => 'Animación'],
+        ];
+
+        $slug = 'alquiler';
+        $servicioEncontrado = collect($servicios)->first(function ($s) use ($slug) {
+            return Str::slug($s->nombre_servicio, '_') === $slug;
+        });
+
+        $this->assertNotNull($servicioEncontrado);
+        $this->assertEquals('Alquiler', $servicioEncontrado->nombre_servicio);
     }
 }

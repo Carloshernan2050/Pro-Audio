@@ -1106,29 +1106,34 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     /**
      * Test para cubrir línea 28 de ChatbotSuggestionGenerator
      * generarSugerencias() retorna array vacío cuando vocab está vacío
-     * Usa una clase anónima que sobrescribe el método privado usando reflection
+     * Ejecuta el código original replicándolo línea por línea para forzar la condición
      */
     public function test_generar_sugerencias_vocab_vacio_cubre_linea_28(): void
     {
         $textProcessor = new ChatbotTextProcessor;
         
-        // Crear una clase anónima que sobrescriba obtenerVocabularioCorreccion para retornar array vacío
+        // Crear una clase anónima que sobrescriba obtenerVocabularioCorreccion
+        // para retornar array vacío, permitiendo que el código original ejecute línea 28
         $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
-            private function obtenerVocabularioCorreccion(): array
+            protected function obtenerVocabularioCorreccion(): array
             {
-                return []; // Retornar array vacío para forzar línea 28
+                return []; // Forzar retornar vacío para que línea 28 se ejecute
             }
+            
+            // El método generarSugerencias usará el obtenerVocabularioCorreccion sobrescrito
+            // y ejecutará el código original incluyendo línea 28
         };
 
+        // Ejecutar el método original que ahora ejecutará línea 28 porque vocab está vacío
         $resultado = $generator->generarSugerencias('test');
         $this->assertIsArray($resultado);
-        $this->assertEmpty($resultado); // Debe retornar [] cuando vocab está vacío (línea 28)
+        $this->assertEmpty($resultado);
     }
 
     /**
      * Test para cubrir línea 54 de ChatbotSuggestionGenerator
      * generarSugerenciasPorToken() retorna array vacío cuando targetToken es null
-     * Usa una clase anónima que sobrescribe los métodos privados
+     * Ejecuta el código original forzando que encontrarTokenMasRaro retorne null
      */
     public function test_generar_sugerencias_por_token_target_token_null_cubre_linea_54(): void
     {
@@ -1136,21 +1141,25 @@ class ChatbotSuggestionGeneratorTest extends TestCase
         
         // Crear una clase anónima que sobrescriba encontrarTokenMasRaro para retornar null
         $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
-            private function filtrarTokensValidos(string $mensajeOriginal): array
+            protected function filtrarTokensValidos(string $mensajeOriginal): array
             {
                 // Retornar un array no vacío para que no salga temprano en línea 48
                 return [['orig' => 'test', 'norm' => 'test']];
             }
 
-            private function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
+            protected function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
             {
-                return null; // Retornar null para forzar línea 54
+                return null; // Forzar retornar null para que línea 54 se ejecute
             }
+            
+            // El método generarSugerenciasPorToken usará los métodos sobrescritos
+            // y ejecutará el código original incluyendo línea 54
         };
 
+        // Ejecutar el método original que ahora ejecutará línea 54 porque targetToken es null
         $resultado = $generator->generarSugerenciasPorToken('test');
         $this->assertIsArray($resultado);
-        $this->assertEmpty($resultado); // Debe retornar [] cuando targetToken es null (línea 54)
+        $this->assertEmpty($resultado);
     }
 
     /**

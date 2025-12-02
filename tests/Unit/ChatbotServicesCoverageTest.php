@@ -127,17 +127,28 @@ class ChatbotServicesCoverageTest extends TestCase
             'precio' => 100000,
         ]);
 
-        // Nota: Es difícil forzar una excepción sin usar mocks de alias que interfieren
-        // con las transacciones de la base de datos. Este test verifica el comportamiento
-        // normal y documenta que las líneas 39-40 están ahí para manejar errores de BD.
-        // En producción, estas líneas se ejecutarían si hay un error al crear la cotización.
-        
-        // En un entorno normal, esto debería funcionar
-        $sessionManager->guardarCotizacion($usuario->id, [$subServicio->id], 5);
-        
-        // Verificar que se creó la cotización
+        // Forzar una excepción usando el evento creating de Cotizacion
+        // Esto cubrirá las líneas 39-40 del catch block
+        \App\Models\Cotizacion::creating(function () {
+            throw new \Exception('Error simulado al guardar cotización');
+        });
+
+        // Verificar que Log::error será llamado
+        Log::shouldReceive('error')
+            ->once()
+            ->with(\Mockery::pattern('/Error al guardar cotización:/'));
+
+        try {
+            // Esto debería lanzar una excepción que será capturada en el catch (líneas 39-40)
+            $sessionManager->guardarCotizacion($usuario->id, [$subServicio->id], 5);
+        } finally {
+            // Limpiar eventos para no afectar otros tests
+            \App\Models\Cotizacion::flushEventListeners();
+        }
+
+        // Verificar que no se creó ninguna cotización debido a la excepción
         $count = \App\Models\Cotizacion::where('personas_id', $usuario->id)->count();
-        $this->assertGreaterThanOrEqual(1, $count);
+        $this->assertEquals(0, $count);
     }
 
     /**
@@ -270,13 +281,7 @@ class ChatbotServicesCoverageTest extends TestCase
     /**
      * Test para cubrir línea 203 de ChatbotTextProcessor
      * obtenerVocabularioCorreccion() catch block cuando hay excepción en BD
-     * Nota: Es muy difícil forzar una excepción en Eloquent sin usar mocks de alias
-     * que interfieren con las transacciones de la base de datos.
-     * La línea 203 se ejecuta cuando SubServicios::query()->get() lanza una excepción.
-     * El código está ahí para manejar errores de BD y retornar solo palabras base.
-     * 
-     * Este test verifica el comportamiento normal y documenta que la línea 203
-     * está preparada para manejar errores de BD en producción.
+     * Fuerza una excepción desconectando temporalmente la base de datos.
      */
     public function test_obtener_vocabulario_correccion_catch_exception_cubre_linea_203(): void
     {
@@ -286,13 +291,37 @@ class ChatbotServicesCoverageTest extends TestCase
         $method = $reflection->getMethod('obtenerVocabularioCorreccion');
         $method->setAccessible(true);
 
-        // En un entorno normal, el método debería funcionar
-        // Para cubrir línea 203, necesitaríamos forzar una excepción en SubServicios::query()
-        // pero los mocks de alias interfieren con las transacciones de BD
-        // El código está ahí para manejar errores de BD en producción
-        $result = $method->invoke($processor);
+        // Guardar información de la conexión original
+        $connection = DB::connection();
+        $connectionName = $connection->getName();
         
-        // Debería retornar al menos las palabras base
+        // Desconectar la base de datos para forzar una excepción
+        $connection->disconnect();
+        
+        // Forzar que cualquier intento de reconexión automática también falle
+        // estableciendo una configuración temporal que hará que la conexión falle
+        $originalConfig = config("database.connections.{$connectionName}");
+        
+        try {
+            // Cambiar temporalmente la configuración para que la conexión falle
+            config(["database.connections.{$connectionName}.database" => ':nonexistent:']);
+            
+            // Limpiar la instancia de conexión para forzar que use la nueva configuración
+            DB::purge($connectionName);
+            
+            // Ahora el método debería lanzar una excepción al intentar consultar SubServicios
+            // y el catch block (línea 203) debería manejarla
+            $result = $method->invoke($processor);
+        } finally {
+            // Restaurar la configuración original
+            config(["database.connections.{$connectionName}" => $originalConfig]);
+            
+            // Limpiar y reconectar
+            DB::purge($connectionName);
+            DB::reconnect($connectionName);
+        }
+        
+        // Debería retornar al menos las palabras base (sin las de BD)
         $this->assertIsArray($result);
         $this->assertNotEmpty($result); // Debe tener al menos palabras base
     }
