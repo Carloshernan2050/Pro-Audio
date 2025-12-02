@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
 
             ServiciosSeeder::class,
             SubServiciosSeeder::class,
+            GenerarVistasServiciosSeeder::class, // Genera vistas para todos los servicios
 
             InventarioSeeder::class,
             MovimientosInventarioSeeder::class,

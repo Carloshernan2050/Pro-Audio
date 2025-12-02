@@ -7,41 +7,17 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-class ServiciosSeeder extends Seeder
+class GenerarVistasServiciosSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Genera vistas Blade para todos los servicios existentes que no tengan vista
+     * Este seeder se ejecuta después de las migraciones para asegurar que todas las vistas existan
      */
     public function run(): void
     {
-        $servicios = [
-            [
-                'nombre_servicio' => 'Animación',
-                'descripcion' => '',
-                'icono' => null,
-            ],
-            [
-                'nombre_servicio' => 'Publicidad',
-                'descripcion' => '',
-                'icono' => null,
-            ],
-            [
-                'nombre_servicio' => 'Alquiler',
-                'descripcion' => '',
-                'icono' => null,
-            ],
-        ];
+        $servicios = Servicios::all();
 
-        foreach ($servicios as $servicioData) {
-            $servicio = Servicios::firstOrCreate(
-                ['nombre_servicio' => $servicioData['nombre_servicio']],
-                [
-                    'descripcion' => $servicioData['descripcion'],
-                    'icono' => $servicioData['icono'],
-                ]
-            );
-
-            // Generar la vista automáticamente si no existe
+        foreach ($servicios as $servicio) {
             $this->generarVistaServicio($servicio);
         }
     }
@@ -118,3 +94,4 @@ class ServiciosSeeder extends Seeder
 BLADE;
     }
 }
+
