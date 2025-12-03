@@ -87,6 +87,60 @@ class SubServiciosSeeder extends Seeder
                 'descripcion' => 'Iluminación que se sincroniza automáticamente con la música.',
                 'precio' => 110000,
             ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Micrófono de Mano',
+                'descripcion' => 'Micrófonos profesionales con cable para presentaciones y eventos.',
+                'precio' => 70000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Proyector Multimedia',
+                'descripcion' => 'Proyectores de alta definición para presentaciones y proyecciones.',
+                'precio' => 180000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Pantalla de Proyección',
+                'descripcion' => 'Pantallas profesionales para proyecciones de diferentes tamaños.',
+                'precio' => 120000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Sistema de Sonido Completo',
+                'descripcion' => 'Paquete completo de audio con bafles, consola y micrófonos.',
+                'precio' => 400000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Equipo de DJ',
+                'descripcion' => 'Equipo completo para DJ incluyendo mezcladora, reproductores y auriculares.',
+                'precio' => 350000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Luces LED',
+                'descripcion' => 'Sistemas de iluminación LED para crear ambientes dinámicos.',
+                'precio' => 130000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Mesa de Sonido',
+                'descripcion' => 'Mesas de mezcla profesionales para control de audio en vivo.',
+                'precio' => 250000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Monitor de Escenario',
+                'descripcion' => 'Monitores de escenario para que los artistas escuchen su interpretación.',
+                'precio' => 140000,
+            ],
+            [
+                'servicios_id' => 3,
+                'nombre' => 'Cables y Accesorios',
+                'descripcion' => 'Cables de audio, adaptadores y accesorios necesarios para conexiones.',
+                'precio' => 50000,
+            ],
         ]);
 
     }

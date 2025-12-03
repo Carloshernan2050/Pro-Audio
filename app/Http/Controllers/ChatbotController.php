@@ -166,31 +166,81 @@ class ChatbotController extends Controller
     {
         try {
             $mensajeFallback = (string) $request->input('mensaje', '');
-            $ints = $this->intentionDetector->detectarIntenciones($mensajeFallback);
-            if (empty($ints)) {
-                return null;
+            $respuestaSugerencia = $this->procesarSugerenciaDeBaseDatos($mensajeFallback);
+            if ($respuestaSugerencia !== null) {
+                return $respuestaSugerencia;
             }
-            $hint = [];
-            try {
-                $hint = $this->suggestionGenerator->generarSugerenciasPorToken($mensajeFallback)[0] ?? [];
-            } catch (\Throwable $_) {
-                // Ignorar errores al generar sugerencias
-            }
-            $tok = isset($hint['token']) ? trim((string) $hint['token']) : null;
-            $respuestaTexto = $tok ? ("Por \"{$tok}\" ¿te refieres a ".implode(' y ', $ints).'?') : ('¿Te refieres a '.implode(' y ', $ints).'?');
-            $sessionDaysValue = (int) session('chat.days', 0);
 
-            return response()->json([
-                'respuesta' => $respuestaTexto,
-                'actions' => [
-                    ['id' => 'confirm_intent', 'label' => 'Sí, continuar', 'meta' => ['intenciones' => $ints, 'dias' => $sessionDaysValue > 0 ? $sessionDaysValue : null]],
-                    ['id' => 'reject_intent', 'label' => 'No, mostrar catálogo'],
-                ],
-                'days' => $sessionDaysValue > 0 ? $sessionDaysValue : null,
-            ]);
+            return $this->procesarFallbackIntenciones($mensajeFallback);
         } catch (\Throwable $_) {
             return null;
         }
+    }
+
+    private function procesarSugerenciaDeBaseDatos(string $mensajeFallback): ?\Illuminate\Http\JsonResponse
+    {
+        $hint = $this->obtenerSugerenciaDeBaseDatos($mensajeFallback);
+        if (empty($hint) || !isset($hint['token']) || empty($hint['sugerencias'])) {
+            return null;
+        }
+
+        $mejorSugerencia = $hint['sugerencias'][0] ?? null;
+        if (empty($mejorSugerencia)) {
+            return null;
+        }
+
+        $sessionDaysValue = (int) session('chat.days', 0);
+        $respuestaTexto = "Tal vez quisiste decir \"{$mejorSugerencia}\"";
+        $ints = $this->intentionDetector->detectarIntenciones($mejorSugerencia);
+        $actions = $this->construirAccionesRecuperacion($ints, $sessionDaysValue);
+
+        return response()->json([
+            'respuesta' => $respuestaTexto,
+            'actions' => $actions,
+            'days' => $sessionDaysValue > 0 ? $sessionDaysValue : null,
+        ]);
+    }
+
+    private function obtenerSugerenciaDeBaseDatos(string $mensajeFallback): array
+    {
+        try {
+            return $this->suggestionGenerator->generarSugerenciasPorToken($mensajeFallback)[0] ?? [];
+        } catch (\Throwable $_) {
+            return [];
+        }
+    }
+
+    private function procesarFallbackIntenciones(string $mensajeFallback): ?\Illuminate\Http\JsonResponse
+    {
+        $ints = $this->intentionDetector->detectarIntenciones($mensajeFallback);
+        if (empty($ints)) {
+            return null;
+        }
+
+        $sessionDaysValue = (int) session('chat.days', 0);
+        $respuestaTexto = '¿Te refieres a '.implode(' y ', $ints).'?';
+        $actions = $this->construirAccionesRecuperacion($ints, $sessionDaysValue);
+
+        return response()->json([
+            'respuesta' => $respuestaTexto,
+            'actions' => $actions,
+            'days' => $sessionDaysValue > 0 ? $sessionDaysValue : null,
+        ]);
+    }
+
+    private function construirAccionesRecuperacion(array $ints, int $sessionDaysValue): array
+    {
+        if (empty($ints)) {
+            return [
+                ['id' => 'reject_intent', 'label' => 'Mostrar catálogo'],
+            ];
+        }
+
+        $dias = $sessionDaysValue > 0 ? $sessionDaysValue : null;
+        return [
+            ['id' => 'confirm_intent', 'label' => 'Sí, continuar', 'meta' => ['intenciones' => $ints, 'dias' => $dias]],
+            ['id' => 'reject_intent', 'label' => 'No, mostrar catálogo'],
+        ];
     }
 
     private function manejarLimpiezaCotizacion()
@@ -213,7 +263,7 @@ class ChatbotController extends Controller
         $this->sessionManager->limpiarSesionChat();
 
         return response()->json([
-            'respuesta' => 'Gracias por tu interés. Contacta con un trabajador en <a href="https://w.app/zlxp23" target="_blank" rel="noopener noreferrer">https://w.app/zlxp23</a>. Tu cotización ha sido guardada.',
+            'respuesta' => 'Gracias por tu interés. Contacta con un trabajador en <a href="https://wa.link/isz77x" target="_blank" rel="noopener noreferrer">https://wa.link/isz77x</a>. Tu cotización ha sido guardada.',
             'limpiar_chat' => true,
             'selecciones' => [],
             'total' => 0,

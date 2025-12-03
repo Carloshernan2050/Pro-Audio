@@ -186,9 +186,11 @@ class ChatbotTextProcessor
         }
 
         try {
-            $subServicios = \App\Models\SubServicios::query()->select('nombre', 'descripcion')->limit(500)->get();
+            // Solo usar NOMBRES de subservicios, NO descripciones
+            $subServicios = \App\Models\SubServicios::query()->select('nombre')->limit(500)->get();
             foreach ($subServicios as $ss) {
-                $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', ($ss->nombre.' '.($ss->descripcion ?? '')));
+                // Solo extraer tokens del nombre, no de la descripción
+                $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', ($ss->nombre ?? ''));
                 foreach ($tokens as $tk) {
                     $tk = trim($tk);
                     if ($tk === '') {
