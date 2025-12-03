@@ -6,8 +6,6 @@ class ChatbotSuggestionGenerator
 {
     private ChatbotTextProcessor $textProcessor;
 
-    private const SUGERENCIAS_BASE = ['alquiler', 'animacion', 'publicidad', 'luces', 'dj', 'audio'];
-
     private const STOPWORDS = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al'];
 
     private const STOPWORDS_EXT = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al', 'par'];
@@ -23,6 +21,13 @@ class ChatbotSuggestionGenerator
 
     public function generarSugerencias(string $mensajeCorregido): array
     {
+        // Primero intentar buscar nombres completos de subservicios
+        $sugerenciasNombres = $this->generarSugerenciasNombresCompletos($mensajeCorregido);
+        if (!empty($sugerenciasNombres)) {
+            return array_slice($sugerenciasNombres, 0, 5);
+        }
+        
+        // Fallback al método anterior si no hay subservicios
         $vocab = $this->obtenerVocabularioCorreccion();
         if (empty($vocab)) {
             return [];
@@ -33,16 +38,19 @@ class ChatbotSuggestionGenerator
         }
         $scores = $this->calcularScoresSugerencias($tokens, $vocab);
         arsort($scores);
-        $lista = array_slice(array_keys($scores), 0, 5);
-        if (empty($lista)) {
-            $lista = self::SUGERENCIAS_BASE;
-        }
 
-        return $lista;
+        return array_slice(array_keys($scores), 0, 5);
     }
 
     public function generarSugerenciasPorToken(string $mensajeOriginal): array
     {
+        // Primero intentar buscar nombres completos de subservicios
+        $sugerenciasNombres = $this->generarSugerenciasPorTokenNombresCompletos($mensajeOriginal);
+        if (!empty($sugerenciasNombres)) {
+            return $sugerenciasNombres;
+        }
+        
+        // Fallback al método anterior si no hay subservicios
         $vocab = $this->obtenerVocabularioCorreccion();
         $pairs = $this->filtrarTokensValidos($mensajeOriginal);
         if (empty($pairs)) {
@@ -68,7 +76,18 @@ class ChatbotSuggestionGenerator
             return [];
         }
 
-        return [['token' => $tokens[0], 'sugerencias' => self::SUGERENCIAS_BASE]];
+        // Intentar obtener nombres completos de subservicios
+        $subServicios = $this->buscarSubServiciosPorTokens($tokens);
+        if ($subServicios->isNotEmpty()) {
+            $nombres = $subServicios->pluck('nombre')->unique()->values()->toArray();
+            return [['token' => $tokens[0], 'sugerencias' => array_slice($nombres, 0, 6)]];
+        }
+
+        // Fallback: obtener sugerencias de la BD (tokens individuales)
+        $vocab = $this->obtenerVocabularioCorreccion();
+        $sugerencias = !empty($vocab) ? array_slice($vocab, 0, 6) : [];
+
+        return [['token' => $tokens[0], 'sugerencias' => $sugerencias]];
     }
 
     public function extraerMejorSugerencia(array $tokenHints): array
@@ -85,36 +104,56 @@ class ChatbotSuggestionGenerator
 
     protected function obtenerVocabularioCorreccion(): array
     {
-        $keywords = [
-            'alquiler', 'alquilar', 'arrendar', 'rentar', 'equipo', 'equipo de sonido', 'sonido', 'audio', 'bafle', 'parlante', 'parlantes', 'altavoz', 'bocina', 'consola', 'mezcladora', 'mixer', 'microfono', 'luces', 'luz', 'lampara', 'iluminacion', 'rack', 'par led',
-            'animacion', 'animador', 'dj', 'maestro', 'ceremonias', 'presentador', 'coordinador', 'cumpleanos', 'fiesta', 'evento',
-            'publicidad', 'publicitar', 'anuncio', 'spot', 'cuña', 'jingle', 'locucion', 'radio',
-        ];
         $vocab = [];
-        foreach ($keywords as $k) {
-            $vocab[$this->textProcessor->normalizarTexto($k)] = true;
-        }
-
+        
         try {
-            $subServicios = \App\Models\SubServicios::query()->select('nombre', 'descripcion')->limit(500)->get();
-            foreach ($subServicios as $ss) {
-                $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', ($ss->nombre.' '.($ss->descripcion ?? '')));
-                foreach ($tokens as $tk) {
-                    $tk = trim($tk);
-                    if ($tk === '') {
-                        continue;
-                    }
-                    $norm = $this->textProcessor->normalizarTexto($tk);
-                    if (($norm === 'dj' || mb_strlen($norm) >= 4) && mb_strlen($norm) <= 30 && ! in_array($norm, self::STOPWORDS_EXT, true)) {
-                        $vocab[$norm] = true;
-                    }
-                }
-            }
+            $this->extraerTokensDeServicios($vocab);
+            $this->extraerTokensDeSubServicios($vocab);
         } catch (\Exception $e) {
-            // Si falla la DB, seguimos solo con palabras base
+            // Si falla la DB, retornar array vacío (no usar palabras hardcodeadas)
+            return [];
         }
 
         return array_keys($vocab);
+    }
+
+    private function extraerTokensDeServicios(array &$vocab): void
+    {
+        $servicios = \App\Models\Servicios::query()->select('nombre_servicio')->get();
+        foreach ($servicios as $servicio) {
+            $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $servicio->nombre_servicio ?? '');
+            foreach ($tokens as $tk) {
+                $this->agregarTokenAlVocabulario($vocab, $tk, 3);
+            }
+        }
+    }
+
+    private function extraerTokensDeSubServicios(array &$vocab): void
+    {
+        // Solo extraer palabras de los NOMBRES de subservicios, NO de las descripciones
+        $subServicios = \App\Models\SubServicios::query()->select('nombre')->limit(500)->get();
+        foreach ($subServicios as $ss) {
+            $nombre = $ss->nombre ?? '';
+            $tokensNombre = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $nombre);
+            foreach ($tokensNombre as $tk) {
+                $this->agregarTokenAlVocabulario($vocab, $tk, 3, true);
+            }
+        }
+    }
+
+    private function agregarTokenAlVocabulario(array &$vocab, string $token, int $longitudMinima, bool $permitirDj = false): void
+    {
+        $tk = trim($token);
+        if ($tk === '') {
+            return;
+        }
+
+        $norm = $this->textProcessor->normalizarTexto($tk);
+        $longitudValida = ($permitirDj && $norm === 'dj') || mb_strlen($norm) >= $longitudMinima;
+        
+        if ($longitudValida && mb_strlen($norm) <= 30 && !in_array($norm, self::STOPWORDS_EXT, true)) {
+            $vocab[$norm] = true;
+        }
     }
 
     private function extraerTokensDelMensaje(string $mensajeCorregido): array
@@ -132,17 +171,21 @@ class ChatbotSuggestionGenerator
     {
         $scores = [];
         $stop = self::STOPWORDS_EXT;
+        $umbralMinimo = 30.0; // Umbral mínimo de similitud (30%)
+        
         foreach ($tokens as $t) {
             foreach ($vocab as $term) {
                 if (in_array($term, $stop, true) || mb_strlen($term) < 3) {
                     continue;
                 }
+                
                 $percent = 0.0;
                 similar_text($t, $term, $percent);
                 if (mb_substr($t, 0, 1) !== mb_substr($term, 0, 1)) {
                     $percent *= 0.85;
                 }
-                if ($percent <= 0) {
+                // Aplicar umbral mínimo
+                if ($percent < $umbralMinimo) {
                     continue;
                 }
                 $scores[$term] = max($scores[$term] ?? 0.0, $percent);
@@ -209,15 +252,211 @@ class ChatbotSuggestionGenerator
     {
         $candidatos = [];
         $targetNorm = $this->textProcessor->normalizarTexto($targetToken);
+        $targetLen = mb_strlen($targetNorm);
+        
+        // Mapeo de conceptos relacionados (para mejorar sugerencias semánticas)
+        $conceptosRelacionados = $this->obtenerConceptosRelacionados();
+        
         foreach ($vocab as $term) {
+            $termNorm = $term;
+            $termLen = mb_strlen($termNorm);
+            
+            // Calcular similitud básica
             $percent = 0.0;
-            similar_text($targetNorm, $term, $percent);
-            if ($percent > 0) {
-                $candidatos[$term] = $percent;
+            similar_text($targetNorm, $termNorm, $percent);
+            
+            // Verificar si son conceptos relacionados semánticamente
+            $esRelacionado = $this->sonConceptosRelacionados($targetNorm, $termNorm, $conceptosRelacionados);
+            if ($esRelacionado) {
+                $percent = 100.0; // Prioridad máxima para conceptos relacionados
+            }
+            
+            // Bonus si comparten la primera letra
+            if (mb_substr($targetNorm, 0, 1) === mb_substr($termNorm, 0, 1)) {
+                $percent *= 1.15;
+            }
+            
+            // Bonus si hay subcadena común significativa (mínimo 3 caracteres)
+            $subcadenaComun = $this->encontrarSubcadenaComunMasLarga($targetNorm, $termNorm);
+            if (mb_strlen($subcadenaComun) >= 3) {
+                $percent += 15.0;
+            }
+            
+            // Penalizar si la diferencia de longitud es muy grande
+            $lenDiff = abs($targetLen - $termLen);
+            if ($lenDiff > max($targetLen, $termLen) * 0.6) {
+                $percent *= 0.7;
+            }
+            
+            // Umbral mínimo dinámico
+            $umbralMinimo = $targetLen <= 5 ? 30.0 : 35.0;
+            
+            // Si no hay relación semántica y la similitud es muy baja, no incluir
+            if (!$esRelacionado && $percent < 30.0) {
+                continue;
+            }
+            
+            if ($percent >= $umbralMinimo || $esRelacionado) {
+                // Los conceptos relacionados tienen prioridad absoluta
+                $score = $esRelacionado ? 1000.0 + $percent : $percent;
+                $candidatos[$term] = $score;
             }
         }
         arsort($candidatos);
 
         return array_slice(array_keys($candidatos), 0, 6);
+    }
+
+    private function obtenerConceptosRelacionados(): array
+    {
+        return [
+            'lampara' => ['luces', 'luz', 'iluminacion', 'audioritmicas'],
+            'luz' => ['luces', 'lampara', 'iluminacion', 'audioritmicas'],
+            'luces' => ['luz', 'lampara', 'iluminacion', 'audioritmicas'],
+            'iluminacion' => ['luces', 'luz', 'lampara', 'audioritmicas'],
+            'microfono' => ['microfono', 'inalambrico'],
+            'parlante' => ['bafle', 'altavoz', 'bocina', 'audio', 'sonido'],
+            'bafle' => ['parlante', 'altavoz', 'bocina', 'audio', 'sonido'],
+            'altavoz' => ['parlante', 'bafle', 'bocina', 'audio', 'sonido'],
+            'bocina' => ['parlante', 'bafle', 'altavoz', 'audio', 'sonido'],
+            'consola' => ['mezcladora', 'mixer', 'audio'],
+            'mezcladora' => ['consola', 'mixer', 'audio'],
+            'mixer' => ['consola', 'mezcladora', 'audio'],
+            'dj' => ['animador', 'animacion', 'eventos'],
+            'animador' => ['dj', 'animacion', 'eventos'],
+            'animacion' => ['dj', 'animador', 'eventos'],
+            'publicidad' => ['anuncio', 'spot', 'cuna', 'locucion', 'jingle'],
+            'anuncio' => ['publicidad', 'spot', 'cuna', 'locucion'],
+            'spot' => ['publicidad', 'anuncio', 'cuna', 'locucion'],
+        ];
+    }
+
+    private function sonConceptosRelacionados(string $palabra1, string $palabra2, array $conceptos): bool
+    {
+        $p1 = mb_strtolower($palabra1);
+        $p2 = mb_strtolower($palabra2);
+        
+        // Verificar si están en el mismo grupo de conceptos relacionados
+        if (isset($conceptos[$p1]) && in_array($p2, $conceptos[$p1], true)) {
+            return true;
+        }
+        if (isset($conceptos[$p2]) && in_array($p1, $conceptos[$p2], true)) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    private function encontrarSubcadenaComunMasLarga(string $str1, string $str2): string
+    {
+        $maxLen = 0;
+        $maxSubstr = '';
+        $len1 = mb_strlen($str1);
+        $len2 = mb_strlen($str2);
+        
+        for ($i = 0; $i < $len1; $i++) {
+            for ($j = 0; $j < $len2; $j++) {
+                $k = 0;
+                while ($i + $k < $len1 && $j + $k < $len2 &&
+                       mb_substr($str1, $i + $k, 1) === mb_substr($str2, $j + $k, 1)) {
+                    $k++;
+                }
+                if ($k > $maxLen) {
+                    $maxLen = $k;
+                    $maxSubstr = mb_substr($str1, $i, $k);
+                }
+            }
+        }
+        
+        return $maxSubstr;
+    }
+
+    /**
+     * Genera sugerencias basadas en nombres completos de subservicios que contienen los tokens
+     */
+    public function generarSugerenciasNombresCompletos(string $mensajeCorregido): array
+    {
+        $tokens = $this->extraerTokensDelMensaje($mensajeCorregido);
+        if (empty($tokens)) {
+            $tokens = [$this->textProcessor->normalizarTexto($mensajeCorregido)];
+        }
+        
+        // Buscar subservicios que contengan los tokens
+        $subServicios = $this->buscarSubServiciosPorTokens($tokens);
+        
+        if ($subServicios->isEmpty()) {
+            return [];
+        }
+        
+        // Retornar solo los nombres
+        return $subServicios->pluck('nombre')->unique()->values()->toArray();
+    }
+
+    /**
+     * Genera sugerencias por token basadas en nombres completos de subservicios
+     */
+    public function generarSugerenciasPorTokenNombresCompletos(string $mensajeOriginal): array
+    {
+        $pairs = $this->filtrarTokensValidos($mensajeOriginal);
+        if (empty($pairs)) {
+            return [];
+        }
+        
+        $vocab = $this->obtenerVocabularioCorreccion();
+        $targetToken = $this->encontrarTokenMasRaro($pairs, $vocab);
+        if ($targetToken === null) {
+            return [];
+        }
+        
+        // Buscar subservicios que contengan el token
+        $subServicios = $this->buscarSubServiciosPorTokens([$targetToken]);
+        
+        if ($subServicios->isEmpty()) {
+            return [];
+        }
+        
+        $nombres = $subServicios->pluck('nombre')->unique()->values()->toArray();
+        
+        return [['token' => $targetToken, 'sugerencias' => array_slice($nombres, 0, 6)]];
+    }
+
+    /**
+     * Busca subservicios que contengan los tokens en sus nombres
+     */
+    private function buscarSubServiciosPorTokens(array $tokens): \Illuminate\Support\Collection
+    {
+        if (empty($tokens)) {
+            return collect();
+        }
+        
+        $tokensNormalizados = array_map(function ($tk) {
+            return $this->textProcessor->normalizarTexto(trim($tk));
+        }, array_filter($tokens, function ($tk) {
+            return trim($tk) !== '';
+        }));
+        
+        if (empty($tokensNormalizados)) {
+            return collect();
+        }
+        
+        $grammar = \Illuminate\Support\Facades\DB::getQueryGrammar();
+        $columnaWrapped = $grammar->wrap('sub_servicios.nombre');
+        $columnaNormalizada = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE({$columnaWrapped}, 'á', 'a'), 'é', 'e'), 'í', 'i'), 'ó', 'o'), 'ú', 'u'), 'ñ', 'n'))";
+        
+        return \App\Models\SubServicios::query()
+            ->select('sub_servicios.nombre')
+            ->where(function ($q) use ($tokensNormalizados, $columnaNormalizada) {
+                foreach ($tokensNormalizados as $index => $termino) {
+                    if ($termino !== '') {
+                        if ($index === 0) {
+                            $q->whereRaw("{$columnaNormalizada} LIKE ?", ["%{$termino}%"]);
+                        } else {
+                            $q->orWhereRaw("{$columnaNormalizada} LIKE ?", ["%{$termino}%"]);
+                        }
+                    }
+                }
+            })
+            ->limit(12)
+            ->get();
     }
 }

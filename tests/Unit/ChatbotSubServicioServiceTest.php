@@ -30,7 +30,8 @@ class ChatbotSubServicioServiceTest extends TestCase
     {
         parent::setUp();
         $responseBuilder = new ChatbotResponseBuilder;
-        $this->service = new ChatbotSubServicioService($responseBuilder);
+        $textProcessor = new \App\Services\ChatbotTextProcessor();
+        $this->service = new ChatbotSubServicioService($responseBuilder, $textProcessor);
     }
 
     // ============================================
@@ -328,11 +329,13 @@ class ChatbotSubServicioServiceTest extends TestCase
 
     public function test_buscar_sub_servicios_relacionados_por_descripcion(): void
     {
+        // NOTA: Este test verifica que NO se busque en descripciones, solo en nombres
         $servicio = Servicios::create([
             'nombre_servicio' => 'Alquiler',
             'descripcion' => self::DESC_SERVICIO_ALQUILER,
         ]);
 
+        // Crear subservicio donde "audio" está en la descripción pero NO en el nombre
         SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Equipo',
@@ -340,13 +343,16 @@ class ChatbotSubServicioServiceTest extends TestCase
             'precio' => 100,
         ]);
 
+        // Buscar "audio" - NO debería encontrar nada porque solo buscamos en nombres
         $resultado = $this->service->buscarSubServiciosRelacionados(
             'audio',
             [],
             []
         );
 
+        // Debe retornar vacío porque "audio" no está en el nombre "Equipo"
         $this->assertInstanceOf(\Illuminate\Support\Collection::class, $resultado);
+        $this->assertEmpty($resultado, 'No debe encontrar resultados cuando la palabra solo está en la descripción');
     }
 
     public function test_obtener_items_seleccionados_con_relacion_servicio(): void

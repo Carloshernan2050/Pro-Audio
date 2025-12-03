@@ -265,8 +265,9 @@
             } else if (sugerencias && typeof sugerencias === 'object') {
                 list = Object.values(sugerencias).slice(0, 5);
             }
+            // Si no hay sugerencias de la BD, no mostrar fallback hardcodeado
             if (!Array.isArray(list) || list.length === 0) {
-                list = ['alquiler','animacion','publicidad','luces','dj','audio'];
+                list = [];
             }
 
             list.forEach((s) => {
@@ -431,7 +432,7 @@
 
         let list = [];
         if (Array.isArray(sugerencias)) list = sugerencias; else if (typeof sugerencias === 'string') list = [sugerencias];
-        if (!list.length) list = ['alquiler','animacion','publicidad','luces','dj','audio'];
+        // Si no hay sugerencias, no mostrar fallback hardcodeado
         list.slice(0, 6).forEach((s) => {
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -768,7 +769,7 @@
                     contenedor.innerHTML += `
                         <div class="message-wrapper incoming">
                             <i class="fas fa-robot chat-avatar"></i>
-                            <div class="message-bubble">Gracias por tu interés. Contacta con un trabajador en <a href="https://w.app/zlxp23" target="_blank" rel="noopener noreferrer">https://w.app/zlxp23</a>.</div>
+                            <div class="message-bubble">Gracias por tu interés. Contacta con un trabajador en <a href="https://wa.link/isz77x" target="_blank" rel="noopener noreferrer">https://wa.link/isz77x</a>.</div>
                         </div>
                     `;
                     contenedor.scrollTop = contenedor.scrollHeight;

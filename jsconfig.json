@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "checkJs": false,
-    "noLib": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": ["ES2020"]
   },
   "exclude": [
     "**/*.blade.php",

@@ -1094,42 +1094,13 @@ class ChatbotMessageProcessorTest extends TestCase
     public function test_procesar_mensaje_texto_con_intenciones_vacias_y_no_relacionado(): void
     {
         $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => 'opciones']);
 
-        $this->intentionDetectorMock
-            ->shouldReceive('detectarIntenciones')
-            ->andReturn([]);
-
-        $this->intentionDetectorMock
-            ->shouldReceive('clasificarPorTfidf')
-            ->andReturn([]);
-
-        $this->intentionDetectorMock
-            ->shouldReceive('esRelacionado')
-            ->andReturn(false);
-
-        $this->textProcessorMock
-            ->shouldReceive('extraerTokens')
-            ->andReturn([]);
-
-        $this->textProcessorMock
-            ->shouldReceive('verificarSiEsAgregado')
-            ->andReturn(false);
-
-        $this->textProcessorMock
-            ->shouldReceive('verificarSoloDias')
-            ->andReturn(false);
-
-        $this->suggestionGeneratorMock
-            ->shouldReceive('generarSugerencias')
-            ->andReturn(['alquiler']);
-
-        $this->suggestionGeneratorMock
-            ->shouldReceive('generarSugerenciasPorToken')
-            ->andReturn([['token' => 'test', 'sugerencias' => []]]);
-
-        $this->suggestionGeneratorMock
-            ->shouldReceive('extraerMejorSugerencia')
-            ->andReturn(['token' => 'test', 'sugerencia' => 'alquiler']);
+        // "hola" ahora es detectado como saludo, así que debe mockear responderConOpciones
+        $this->responseBuilderMock
+            ->shouldReceive('responderConOpciones')
+            ->once()
+            ->andReturn($responseMock);
 
         session()->forget('chat.selecciones');
 
@@ -1515,22 +1486,13 @@ class ChatbotMessageProcessorTest extends TestCase
     public function test_procesar_mensaje_texto_obtener_sugerencias_con_error(): void
     {
         $request = Request::create(self::ROUTE_TEST, 'POST');
+        $responseMock = response()->json(['respuesta' => 'opciones']);
 
-        $this->intentionDetectorMock
-            ->shouldReceive('esRelacionado')
-            ->andReturn(false);
-
-        $this->suggestionGeneratorMock
-            ->shouldReceive('generarSugerencias')
-            ->andThrow(new \Exception('Error en sugerencias'));
-
-        $this->suggestionGeneratorMock
-            ->shouldReceive('fallbackTokenHints')
-            ->andReturn([['token' => 'test', 'sugerencias' => ['alquiler']]]);
-
-        $this->suggestionGeneratorMock
-            ->shouldReceive('extraerMejorSugerencia')
-            ->andReturn(['token' => 'test', 'sugerencia' => 'alquiler']);
+        // "hola" ahora es detectado como saludo, así que debe mockear responderConOpciones
+        $this->responseBuilderMock
+            ->shouldReceive('responderConOpciones')
+            ->once()
+            ->andReturn($responseMock);
 
         session()->forget('chat.selecciones');
 
@@ -1545,8 +1507,170 @@ class ChatbotMessageProcessorTest extends TestCase
         );
 
         $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+    }
+
+    /**
+     * Test para cubrir líneas 326-328: obtenerSugerenciasConHints con excepción
+     */
+    public function test_obtener_sugerencias_con_hints_catch_excepcion_cubre_lineas_326_328(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(false);
+
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn([]);
+
+        $this->intentionDetectorMock
+            ->shouldReceive('clasificarPorTfidf')
+            ->andReturn([]);
+
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn([]);
+
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(false);
+
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(true);
+        $collectionMock->shouldReceive('isNotEmpty')->andReturn(false);
+
+        $this->subServicioServiceMock
+            ->shouldReceive('buscarSubServiciosRelacionados')
+            ->andReturn($collectionMock);
+
+        // Forzar excepción en generarSugerenciasPorToken para cubrir el catch (líneas 326-328)
+        // Primero generarSugerencias debe ejecutarse exitosamente (línea 324)
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerencias')
+            ->once()
+            ->with('xyz123')
+            ->andReturn(['alquiler', 'animacion']);
+
+        // Luego generarSugerenciasPorToken debe lanzar excepción (línea 325)
+        // Esto hace que el catch se ejecute (línea 326) y cubra las líneas 327-328
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerenciasPorToken')
+            ->once()
+            ->with('xyz123')
+            ->andThrow(new \Exception('Error en generarSugerenciasPorToken'));
+
+        // Cuando la excepción ocurre, el catch ejecuta:
+        // - Línea 327: $sugerencias = [];
+        // - Línea 328: $tokenHints = $this->suggestionGenerator->fallbackTokenHints($mensajeOriginal);
+        $this->suggestionGeneratorMock
+            ->shouldReceive('fallbackTokenHints')
+            ->once()
+            ->with('xyz123')
+            ->andReturn([['token' => 'test', 'sugerencias' => ['alquiler']]]);
+
+        $this->suggestionGeneratorMock
+            ->shouldReceive('extraerMejorSugerencia')
+            ->andReturn(['token' => 'test', 'sugerencia' => 'alquiler']);
+
+        session()->forget('chat.selecciones');
+
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            'xyz123',
+            'xyz123',
+            0,
+            0,
+            [],
+            false
+        );
+
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
         $data = json_decode($resultado->getContent(), true);
         $this->assertArrayHasKey('sugerencias', $data);
+        $this->assertArrayHasKey('tokenHints', $data);
+    }
+
+    /**
+     * Test adicional para cubrir líneas 326-328 cuando la excepción ocurre en generarSugerencias
+     */
+    public function test_obtener_sugerencias_con_hints_catch_excepcion_generar_sugerencias_cubre_lineas_326_328(): void
+    {
+        $request = Request::create(self::ROUTE_TEST, 'POST');
+
+        $this->intentionDetectorMock
+            ->shouldReceive('esRelacionado')
+            ->andReturn(false);
+
+        $this->intentionDetectorMock
+            ->shouldReceive('detectarIntenciones')
+            ->andReturn([]);
+
+        $this->intentionDetectorMock
+            ->shouldReceive('clasificarPorTfidf')
+            ->andReturn([]);
+
+        $this->textProcessorMock
+            ->shouldReceive('extraerTokens')
+            ->andReturn([]);
+
+        $this->textProcessorMock
+            ->shouldReceive('verificarSiEsAgregado')
+            ->andReturn(false);
+
+        $this->textProcessorMock
+            ->shouldReceive('verificarSoloDias')
+            ->andReturn(false);
+
+        $collectionMock = Mockery::mock(\Illuminate\Support\Collection::class);
+        $collectionMock->shouldReceive('isEmpty')->andReturn(true);
+        $collectionMock->shouldReceive('isNotEmpty')->andReturn(false);
+
+        $this->subServicioServiceMock
+            ->shouldReceive('buscarSubServiciosRelacionados')
+            ->andReturn($collectionMock);
+
+        // Forzar excepción en generarSugerencias (línea 324) para cubrir el catch (líneas 326-328)
+        $this->suggestionGeneratorMock
+            ->shouldReceive('generarSugerencias')
+            ->once()
+            ->with('test2')
+            ->andThrow(new \Exception('Error en generarSugerencias'));
+
+        // Cuando generarSugerencias lanza excepción, el catch ejecuta:
+        // - Línea 327: $sugerencias = [];
+        // - Línea 328: $tokenHints = $this->suggestionGenerator->fallbackTokenHints($mensajeOriginal);
+        $this->suggestionGeneratorMock
+            ->shouldReceive('fallbackTokenHints')
+            ->once()
+            ->with('test2')
+            ->andReturn([['token' => 'test', 'sugerencias' => ['alquiler']]]);
+
+        $this->suggestionGeneratorMock
+            ->shouldReceive('extraerMejorSugerencia')
+            ->once()
+            ->andReturn(['token' => 'test', 'sugerencia' => 'alquiler']);
+
+        session()->forget('chat.selecciones');
+
+        $resultado = $this->processor->procesarMensajeTexto(
+            $request,
+            'test2',
+            'test2',
+            0,
+            0,
+            [],
+            false
+        );
+
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $resultado);
+        $data = json_decode($resultado->getContent(), true);
+        $this->assertArrayHasKey('sugerencias', $data);
+        $this->assertArrayHasKey('tokenHints', $data);
     }
 
     // ============================================

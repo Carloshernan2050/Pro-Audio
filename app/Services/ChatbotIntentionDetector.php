@@ -213,15 +213,17 @@ class ChatbotIntentionDetector
         static $cache = null;
         if ($cache === null) {
             try {
+                // Solo usar NOMBRES de subservicios y servicios, NO descripciones
                 $rows = SubServicios::query()
-                    ->select('sub_servicios.nombre', 'sub_servicios.descripcion', 'servicios.nombre_servicio')
+                    ->select('sub_servicios.nombre', 'servicios.nombre_servicio')
                     ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
                     ->get();
 
                 $docsBySvc = [];
                 foreach ($rows as $r) {
                     $svc = $r->nombre_servicio;
-                    $content = trim(($r->nombre ?? '').' '.($r->descripcion ?? ''));
+                    // Solo usar el nombre del subservicio, no la descripción
+                    $content = trim($r->nombre ?? '');
                     $docsBySvc[$svc] = ($docsBySvc[$svc] ?? '').' '.$content;
                 }
 

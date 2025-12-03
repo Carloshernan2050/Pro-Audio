@@ -232,9 +232,9 @@ class ChatbotServicesCoverageTest extends TestCase
         // El código está ahí para manejar errores de BD en producción
         $result = $method->invoke($generator);
         
-        // Debería retornar al menos las palabras base
+        // Debería retornar array (puede estar vacío si no hay datos en BD)
         $this->assertIsArray($result);
-        $this->assertNotEmpty($result); // Debe tener al menos palabras base
+        // Ya no hay palabras base hardcodeadas
     }
 
     /**

@@ -48,6 +48,11 @@ class ChatbotMessageProcessor
 
     private function procesarMensajesEspeciales(string $mensaje, string $mensajeCorregido, int $dias): ?\Illuminate\Http\JsonResponse
     {
+        $esSaludo = $this->esSaludo($mensaje, $mensajeCorregido);
+        if ($esSaludo) {
+            return $this->responseBuilder->responderConOpciones();
+        }
+
         $esSolicitudCatalogo = $this->esSolicitudCatalogo($mensaje, $mensajeCorregido);
         if ($esSolicitudCatalogo) {
             $seleccionesActuales = (array) session('chat.selecciones', []);
@@ -101,6 +106,36 @@ class ChatbotMessageProcessor
         }
 
         return $this->buscarSubServiciosRelacionados($mensaje, $mensajeCorregido, $tokens, $intenciones, $daysForResponse);
+    }
+
+    private function esSaludo(string $mensaje, string $mensajeCorregido): bool
+    {
+        $mensajeLower = mb_strtolower(trim($mensaje));
+        $mensajeCorregidoLower = mb_strtolower(trim($mensajeCorregido));
+
+        $saludos = [
+            'hola',
+            'buenos dias',
+            'buenos días',
+            'buenas dias',
+            'buenas días',
+            'buenas tardes',
+            'buenas noches',
+            'buenas',
+            'saludos',
+            'saludo',
+            'hi',
+            'hello',
+            'buen dia',
+            'buen día',
+            'buena tarde',
+            'buena noche',
+        ];
+
+        return in_array($mensajeLower, $saludos, true)
+            || in_array($mensajeCorregidoLower, $saludos, true)
+            || preg_match('/^(hola|buenos?\s+d[ií]as?|buenas?\s+(tardes|noches|d[ií]as?)|saludos?)[\s\.\!]*$/i', $mensajeLower)
+            || preg_match('/^(hola|buenos?\s+d[ií]as?|buenas?\s+(tardes|noches|d[ií]as?)|saludos?)[\s\.\!]*$/i', $mensajeCorregidoLower);
     }
 
     private function esSolicitudCatalogo(string $mensaje, string $mensajeCorregido): bool
@@ -289,7 +324,7 @@ class ChatbotMessageProcessor
             $sugerencias = $this->suggestionGenerator->generarSugerencias($mensajeCorregido);
             $tokenHints = $this->suggestionGenerator->generarSugerenciasPorToken($mensajeOriginal);
         } catch (\Throwable $e) {
-            $sugerencias = ['alquiler', 'animacion', 'publicidad', 'luces', 'dj', 'audio'];
+            $sugerencias = [];
             $tokenHints = $this->suggestionGenerator->fallbackTokenHints($mensajeOriginal);
         }
 
