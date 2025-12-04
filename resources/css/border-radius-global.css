@@ -1,0 +1,102 @@
+/* ======================================= */
+/* --- Estilos Globales para Esquinas Redondeadas --- */
+/* ======================================= */
+
+/* Aplicar border-radius a todos los elementos con bordes o fondos - Cards y Contenedores */
+.producto-item:not([style*="border-radius"]),
+.producto-item.enhanced:not([style*="border-radius"]),
+.stat-item:not([style*="border-radius"]),
+.no-services:not([style*="border-radius"]),
+.alert:not([style*="border-radius"]),
+.modal-content:not([style*="border-radius"]),
+.modal-dialog .modal-content:not([style*="border-radius"]),
+.table-container:not([style*="border-radius"]),
+.content-card:not([style*="border-radius"]),
+.stats-card:not([style*="border-radius"]),
+.values-card:not([style*="border-radius"]),
+.presentacion-bloque:not([style*="border-radius"]),
+.presentacion-container:not([style*="border-radius"]),
+.galeria-grid .galeria-item:not([style*="border-radius"]),
+.servicio-detalle-container:not([style*="border-radius"]),
+.detalle-principal:not([style*="border-radius"]),
+.detalle-secundario:not([style*="border-radius"]),
+.empresa-presentacion:not([style*="border-radius"]),
+.productos-galeria .producto-item:not([style*="border-radius"]),
+.producto-imagen-placeholder:not([style*="border-radius"]),
+.sugerencias-dropdown:not([style*="border-radius"]) {
+    border-radius: 12px !important;
+}
+
+/* Elementos más pequeños con border-radius más pequeño */
+.btn-volver:not([style*="border-radius"]),
+.btn-volver-inline:not([style*="border-radius"]),
+.alert-hide:not([style*="border-radius"]),
+.carousel-btn:not([style*="border-radius"]),
+.dot:not([style*="border-radius"]),
+.search-btn:not([style*="border-radius"]),
+.mobile-menu-btn:not([style*="border-radius"]),
+.profile-btn-header:not([style*="border-radius"]),
+.btn-iniciar-sesion:not([style*="border-radius"]),
+.sidebar-btn:not([style*="border-radius"]) {
+    border-radius: 8px !important;
+}
+
+/* Inputs y selects con border-radius moderado */
+.form-group input:not([style*="border-radius"]):not(.search-input),
+.form-group select:not([style*="border-radius"]):not(.search-input),
+.form-group textarea:not([style*="border-radius"]),
+.form-control:not([style*="border-radius"]),
+input[type="text"]:not([style*="border-radius"]):not(.search-input),
+input[type="email"]:not([style*="border-radius"]):not(.search-input),
+input[type="password"]:not([style*="border-radius"]):not(.search-input),
+input[type="number"]:not([style*="border-radius"]):not(.search-input),
+input[type="date"]:not([style*="border-radius"]):not(.search-input),
+input[type="time"]:not([style*="border-radius"]):not(.search-input),
+select:not([style*="border-radius"]):not(.search-input),
+textarea:not([style*="border-radius"]) {
+    border-radius: 8px !important;
+}
+
+/* Search input con border-radius específico */
+.search-input:not([style*="border-radius"]) {
+    border-radius: 20px !important;
+}
+
+/* Imágenes con border-radius */
+.producto-imagen:not([style*="border-radius"]),
+.presentacion-img-pequena:not([style*="border-radius"]),
+.presentacion-img-grande:not([style*="border-radius"]),
+.featured-image-container img:not([style*="border-radius"]),
+.presentacion-video:not([style*="border-radius"]) {
+    border-radius: 8px !important;
+}
+
+/* Botones con border-radius */
+.btn-primary:not([style*="border-radius"]),
+.btn-secondary:not([style*="border-radius"]),
+.btn-action:not([style*="border-radius"]),
+.btn-submit:not([style*="border-radius"]),
+.btn-tab:not([style*="border-radius"]),
+.boton-registro:not([style*="border-radius"]) {
+    border-radius: 8px !important;
+}
+
+/* Sugerencias dropdown items */
+.sugerencias-item.select-option:not([style*="border-radius"]) {
+    border-radius: 6px !important;
+}
+
+/* Modal elementos */
+.modal-header:not([style*="border-radius"]),
+.modal-body:not([style*="border-radius"]),
+.modal-footer:not([style*="border-radius"]) {
+    border-radius: 0 !important; /* Los elementos dentro del modal no necesitan border-radius */
+}
+
+/* Imágenes dentro de cards */
+.content-card img:not([style*="border-radius"]),
+.stats-card img:not([style*="border-radius"]),
+.values-card img:not([style*="border-radius"]) {
+    border-radius: 8px !important;
+}
+

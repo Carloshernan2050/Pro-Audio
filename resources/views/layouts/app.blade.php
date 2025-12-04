@@ -11,6 +11,8 @@
     @vite('resources/css/app.css')
     {{-- CSS específico del layout (topbar, sidebar, fondo, estructura) --}}
     @vite('resources/css/layout.css')
+    {{-- CSS global para esquinas redondeadas en todos los elementos --}}
+    @vite('resources/css/border-radius-global.css')
 
     {{-- Stack opcional para estilos por-vista --}}
     @stack('styles')

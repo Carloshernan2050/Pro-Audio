@@ -123,8 +123,7 @@ body {
     background: #fff3f3; /* Hover blanco (ESTILO DESEADO) */
 }
 
-.profile-btn-header,
-.btn-iniciar-sesion {
+.profile-btn-header {
     background-color: transparent;
     color: white;
     border: 2px solid white;
@@ -139,6 +138,67 @@ body {
     transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
     flex-shrink: 0;
     margin-left: auto;
+}
+
+.btn-iniciar-sesion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: #e91c1c;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid #e91c1c;
+    margin-left: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-iniciar-sesion::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn-iniciar-sesion:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.btn-iniciar-sesion:hover {
+    background-color: #000000;
+    border-color: #000000;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.btn-iniciar-sesion:active {
+    transform: translateY(0);
+}
+
+.btn-iniciar-sesion i {
+    font-size: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-iniciar-sesion span {
+    position: relative;
+    z-index: 1;
 }
 
 .profile-btn-header:hover {
@@ -242,13 +302,14 @@ body {
 .main-content {
     grid-area: content;
     padding: 32px 24px; /* padding horizontal uniforme */
-    padding-top: 18px; /* ajuste fino: menos espacio arriba */
+    padding-top: 100px; /* Espacio suficiente para el header fijo */
     margin: 0; /* Sin márgenes, el grid maneja el posicionamiento */
+    margin-left: 240px; /* Margen izquierdo para compensar el sidebar fijo */
     border: 0; /* Sin bordes invisibles */
     outline: 0; /* Sin outline */
     color: white;
     max-width: none; /* ocupar el ancho disponible */
-    width: 100%;
+    width: calc(100% - 240px); /* Ancho ajustado para el sidebar */
     box-sizing: border-box;
     overflow-x: hidden;
     position: relative;
@@ -645,7 +706,8 @@ body {
     .main-content {
         padding: 20px;
         padding-top: 100px; /* Ajustado para el nuevo header */
-        /* El grid maneja el posicionamiento, no necesita padding-left adicional */
+        margin-left: 200px; /* Margen izquierdo ajustado para sidebar más estrecho */
+        width: calc(100% - 200px); /* Ancho ajustado para el sidebar */
     }
 }
 
@@ -828,8 +890,9 @@ body {
 
     .main-content {
         padding: 15px 12px !important; /* Padding uniforme */
-        padding-top: 20px !important;
+        padding-top: 100px !important; /* Espacio suficiente para el header fijo en móviles */
         margin: 0 !important;
+        margin-left: 0 !important; /* Sin margen izquierdo en móviles (sidebar oculto) */
         border: 0 !important; /* Sin bordes invisibles */
         width: 100% !important;
         max-width: 100% !important;
@@ -1107,8 +1170,9 @@ body {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important; /* Sin margin que pueda causar desplazamiento */
+        margin-left: 0 !important; /* Sin margen izquierdo en móviles pequeños */
         padding: 10px 8px !important;
-        padding-top: 15px !important;
+        padding-top: 100px !important; /* Espacio suficiente para el header fijo */
         border: 0 !important; /* Sin bordes invisibles */
         outline: 0 !important; /* Sin outline */
         box-sizing: border-box !important;
@@ -1696,7 +1760,7 @@ body {
 
     .main-content {
         padding: 20px 15px !important;
-        padding-top: 25px !important;
+        padding-top: 100px !important; /* Espacio suficiente para el header fijo */
     }
 
     .carousel-container {
@@ -1712,7 +1776,7 @@ body {
 @media (max-height: 600px) and (orientation: landscape) {
     .main-content {
         padding: 8px 10px !important;
-        padding-top: 12px !important;
+        padding-top: 80px !important; /* Espacio suficiente para el header fijo (reducido para landscape) */
     }
 
     .welcome-title {

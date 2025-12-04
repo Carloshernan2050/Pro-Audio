@@ -114,6 +114,8 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     align-items: center;
     color: white;
     box-shadow: 5px 0 10px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
 @media (min-width: 768px) {
@@ -166,7 +168,8 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     border: none;
     background-color: white;
     color: black;
-    border-radius: 5px;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
 .boton-registro {
@@ -179,7 +182,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     width: 100%;
     margin-top: 20px;
     transition: background-color 0.3s;
-    border-radius: 5px;
+    border-radius: 8px;
 }
 
 .boton-registro:hover {
@@ -3847,6 +3850,9 @@ tr:nth-child(even) {
     text-align: center;
     font-style: italic;
     color: #bbb;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
 /* Estilos de botones */
@@ -4180,9 +4186,9 @@ tr:nth-child(even) {
 /* Contenedor de servicios - similar al content-grid del dashboard */
 .productos-servicio {
     width: 100%;
-    max-width: 1200px;
+    max-width: 100%; /* Se ajusta automáticamente al contenedor padre */
     margin: 24px auto 0;
-    padding: 0;
+    padding: 0 16px; /* Padding lateral para evitar que toque los bordes */
     box-sizing: border-box;
 }
 
