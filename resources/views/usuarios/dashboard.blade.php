@@ -12,7 +12,7 @@
 
 @section('content')
         {{-- Contenido principal del dashboard --}}
-        <main class="main-content">
+        <div class="dashboard-content-wrapper">
             <h2 class="welcome-title">¡Bienvenido, {{ session('usuario_nombre') ? ucfirst(strtolower(session('usuario_nombre'))) : 'Invitado' }}!</h2>
             <p class="welcome-text">¡Tu solución profesional en sonido, iluminación y eventos!</p>
             
@@ -159,5 +159,5 @@
                 </aside>
 
             </div> {{-- Fin de .content-grid --}}
-        </main>
+        </div> {{-- Fin de .dashboard-content-wrapper --}}
 @endsection

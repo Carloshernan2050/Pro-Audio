@@ -31,7 +31,17 @@
     
     // Separar servicios predefinidos y servicios creados por el usuario
     $serviciosUsuario = $todosLosServicios->filter(function($servicio) use ($serviciosPredefinidos) {
-        return !isset($serviciosPredefinidos[$servicio->nombre_servicio]);
+        if (empty($servicio->nombre_servicio)) {
+            return false; // Excluir servicios sin nombre
+        }
+        // Comparación case-insensitive para evitar duplicados
+        $nombreNormalizado = strtolower(trim($servicio->nombre_servicio));
+        foreach ($serviciosPredefinidos as $nombrePredefinido => $ruta) {
+            if (strtolower(trim($nombrePredefinido)) === $nombreNormalizado) {
+                return false; // Es un servicio predefinido
+            }
+        }
+        return true; // Es un servicio creado por el usuario
     });
     
     // Iconos por servicio definidos manualmente (opcional)
@@ -62,13 +72,17 @@
             {{-- Servicios predefinidos --}}
             @foreach($serviciosPredefinidos as $nombre => $ruta)
                 @php
-                    $servicioExistente = $todosLosServicios->firstWhere('nombre_servicio', $nombre);
+                    // Buscar servicio en la base de datos (comparación case-insensitive)
+                    $servicioExistente = $todosLosServicios->first(function($servicio) use ($nombre) {
+                        return strtolower(trim($servicio->nombre_servicio)) === strtolower(trim($nombre));
+                    });
                 @endphp
                 @if($servicioExistente)
                     @php
-                        $icono = $servicioExistente->icono
+                        // Obtener icono: primero del servicio, luego del array de iconos, luego default
+                        $icono = !empty($servicioExistente->icono)
                             ? $servicioExistente->icono
-                            : ($iconos[$nombre] ?? $iconoDefault);
+                            : (!empty($iconos[$nombre]) ? $iconos[$nombre] : $iconoDefault);
                     @endphp
                     <a href="{{ $ruta }}" class="sidebar-btn">
                         <i class="{{ $icono }}"></i> {{ $nombre }}
@@ -80,9 +94,14 @@
             @foreach($serviciosUsuario as $servicio)
                 @php
                     try {
+                        if (empty($servicio->nombre_servicio)) {
+                            continue; // Saltar si no tiene nombre
+                        }
                         $slug = Str::slug($servicio->nombre_servicio, '_');
                         $ruta = route('usuarios.servicio', ['slug' => $slug]);
-                        $icono = $servicio->icono ?: ($iconos[$servicio->nombre_servicio] ?? $iconoDefault);
+                        $icono = !empty($servicio->icono)
+                            ? $servicio->icono
+                            : (!empty($iconos[$servicio->nombre_servicio]) ? $iconos[$servicio->nombre_servicio] : $iconoDefault);
                     } catch (\Exception $e) {
                         // Si hay error generando la ruta, saltar este servicio
                         continue;
