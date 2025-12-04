@@ -123,39 +123,87 @@ class UsuarioController extends Controller
 
     public function updatePhoto(Request $request)
     {
-        $usuarioId = session('usuario_id');
+        $response = null;
+        $statusCode = 200;
 
-        // Validar autenticación, permisos y existencia del usuario
-        $validationResult = $this->validatePhotoUpdate($usuarioId);
-        if ($validationResult['error']) {
-            return $validationResult['response'];
+        try {
+            $usuarioId = session('usuario_id');
+
+            // Validar autenticación, permisos y existencia del usuario
+            $validationResult = $this->validatePhotoUpdate($usuarioId);
+            if ($validationResult['error']) {
+                return $validationResult['response'];
+            }
+
+            $usuario = $validationResult['usuario'];
+
+            $request->validate([
+                'foto_perfil' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB máximo
+            ], [
+                'foto_perfil.required' => 'Debes seleccionar una imagen',
+                'foto_perfil.image' => 'El archivo debe ser una imagen válida',
+                'foto_perfil.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif o webp',
+                'foto_perfil.max' => 'La imagen no debe ser mayor a 5MB',
+            ]);
+
+            // Asegurar que el directorio existe
+            $directory = 'perfiles';
+            if (!Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory);
+            }
+
+            // Eliminar foto anterior si existe
+            if ($usuario->foto_perfil && Storage::disk('public')->exists($directory.'/'.$usuario->foto_perfil)) {
+                Storage::disk('public')->delete($directory.'/'.$usuario->foto_perfil);
+            }
+
+            // Guardar nueva foto
+            $file = $request->file('foto_perfil');
+            if (!$file || !$file->isValid()) {
+                $statusCode = 422;
+                $response = [
+                    'success' => false,
+                    'message' => 'Error al subir el archivo. Por favor, intenta nuevamente.',
+                ];
+            } else {
+                $filename = 'perfil_'.$usuarioId.'_'.time().'.'.$file->getClientOriginalExtension();
+                $path = $file->storeAs($directory, $filename, 'public');
+
+                if (!$path) {
+                    $statusCode = 500;
+                    $response = [
+                        'success' => false,
+                        'message' => 'Error al guardar la imagen. Verifica los permisos del directorio.',
+                    ];
+                } else {
+                    // Actualizar en la base de datos
+                    $usuario->foto_perfil = $filename;
+                    $usuario->save();
+
+                    $response = [
+                        'success' => true,
+                        'message' => 'Foto de perfil actualizada correctamente',
+                        'foto_url' => asset('storage/'.$directory.'/'.$filename),
+                    ];
+                }
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $statusCode = 422;
+            $response = [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar foto de perfil: '.$e->getMessage());
+            $statusCode = 500;
+            $response = [
+                'success' => false,
+                'message' => 'Error al actualizar la foto de perfil: '.$e->getMessage(),
+            ];
         }
 
-        $usuario = $validationResult['usuario'];
-
-        $request->validate([
-            'foto_perfil' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB máximo
-        ]);
-
-        // Eliminar foto anterior si existe
-        if ($usuario->foto_perfil && Storage::disk('public')->exists('perfiles/'.$usuario->foto_perfil)) {
-            Storage::disk('public')->delete('perfiles/'.$usuario->foto_perfil);
-        }
-
-        // Guardar nueva foto
-        $file = $request->file('foto_perfil');
-        $filename = 'perfil_'.$usuarioId.'_'.time().'.'.$file->getClientOriginalExtension();
-        $file->storeAs('perfiles', $filename, 'public');
-
-        // Actualizar en la base de datos
-        $usuario->foto_perfil = $filename;
-        $usuario->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Foto de perfil actualizada correctamente',
-            'foto_url' => asset('storage/perfiles/'.$filename),
-        ]);
+        return response()->json($response, $statusCode);
     }
 
     /**

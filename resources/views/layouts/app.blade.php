@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     
     {{-- Permite que cada vista hija defina su propio título --}}
-    <title>PRO AUDIO - @yield('title', 'Inicio')</title> 
+    <title>PRO AUDIO - @yield('title', 'Inicio')</title>
     
     {{-- Llamada al archivo CSS principal usando Vite --}}
     @vite('resources/css/app.css')
@@ -31,7 +31,7 @@
         @include('components.topbar')
 
         {{-- Overlay para cerrar el menú móvil --}}
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
+        <button type="button" class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()" onkeypress="if(event.key==='Enter'||event.key===' '){toggleMobileMenu();}" aria-label="Cerrar menú móvil" style="background:transparent; border:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:998; display:none;"></button>
 
         {{-- Barra lateral izquierda (Sidebar) --}}
         @include('components.sidebar')
@@ -39,7 +39,7 @@
         {{-- Contenido principal --}}
         <main class="main-content">
             {{-- Aquí es donde se insertará el contenido único de cada vista hija --}}
-            @yield('content') 
+            @yield('content')
         </main>
     </div>
     {{-- Botón flotante global para abrir el Chatbot --}}
@@ -85,13 +85,15 @@
                 <div class="profile-info-section">
                     <div class="profile-avatar-container">
                         @if($fotoPerfil)
-                            <img src="{{ $fotoPerfil }}" alt="Foto de perfil" class="profile-avatar-img" id="profileAvatarImg" onclick="openImageEnlargementModal('{{ $fotoPerfil }}')" style="cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            <button type="button" onclick="openImageEnlargementModal('{{ $fotoPerfil }}')" onkeypress="if(event.key==='Enter'||event.key===' '){openImageEnlargementModal('{{ $fotoPerfil }}');}" onfocus="this.querySelector('img').style.transform='scale(1.05)'" onblur="this.querySelector('img').style.transform='scale(1)'" aria-label="Ver foto de perfil ampliada" style="background:none; border:none; padding:0; cursor:pointer;">
+                                <img src="{{ $fotoPerfil }}" alt="Foto de perfil" class="profile-avatar-img" id="profileAvatarImg" style="cursor:pointer; transition:transform 0.2s;">
+                            </button>
                         @elseif($usuario && $iniciales)
                             <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder" style="background:linear-gradient(135deg, #e91c1c 0%, #c81a1a 100%); cursor:default;">
                                 {{ $iniciales }}
                             </div>
                         @else
-                            <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder" style="background:#000000; cursor:default; font-size:24px;">
+                            <div class="profile-avatar-placeholder" id="profileAvatarPlaceholderAlt" style="background:#000000; cursor:default; font-size:24px;">
                                 <i class="fas fa-user"></i>
                             </div>
                         @endif
@@ -99,7 +101,7 @@
                             <label for="profilePhotoInput" class="profile-photo-upload-btn" title="Cambiar foto">
                                 <i class="fas fa-camera"></i>
                             </label>
-                            <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="uploadProfilePhoto(this)">
+                            <input type="file" id="profilePhotoInput" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" style="display:none;" onchange="uploadProfilePhoto(this)">
                         @endif
                     </div>
                     
@@ -393,8 +395,8 @@
     </style>
 
     {{-- Modal de ampliación de imagen de perfil --}}
-    <div id="imageEnlargementModal" class="image-enlargement-modal" onclick="closeImageEnlargementModal()">
-        <div class="image-enlargement-content" onclick="event.stopPropagation()">
+    <dialog id="imageEnlargementModal" class="image-enlargement-modal" aria-labelledby="enlargedProfileImage">
+        <div class="image-enlargement-content">
             <button class="image-enlargement-close" onclick="closeImageEnlargementModal()">&times;</button>
             <img id="enlargedProfileImage" src="" alt="Foto de perfil ampliada">
         </div>
@@ -412,14 +414,48 @@
         function openImageEnlargementModal(imageUrl) {
             const modal = document.getElementById('imageEnlargementModal');
             const img = document.getElementById('enlargedProfileImage');
-            img.src = imageUrl;
-            modal.classList.add('active');
+            if (modal && img) {
+                img.src = imageUrl;
+                if (modal.showModal) {
+                    modal.showModal();
+                } else {
+                    modal.classList.add('active');
+                }
+            }
         }
         
         function closeImageEnlargementModal() {
             const modal = document.getElementById('imageEnlargementModal');
-            modal.classList.remove('active');
+            if (modal) {
+                if (modal.close) {
+                    modal.close();
+                } else {
+                    modal.classList.remove('active');
+                }
+            }
         }
+        
+        // Manejar eventos del modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('imageEnlargementModal');
+            const content = modal ? modal.querySelector('.image-enlargement-content') : null;
+            
+            if (modal) {
+                // Cerrar al hacer clic fuera del contenido
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeImageEnlargementModal();
+                    }
+                });
+                
+                // Prevenir cierre al hacer clic en el contenido
+                if (content) {
+                    content.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                }
+            }
+        });
         
         function uploadProfilePhoto(input) {
             if (!input.files || !input.files[0]) return;
@@ -904,7 +940,7 @@
                 header.classList.remove('header-compact');
                 document.body.classList.add('header-retracted');
                 document.body.classList.remove('header-compact');
-            } 
+            }
             // Si está scrolleando hacia arriba, mostrar el header compacto
             else if (scrollDifference < 0) {
                 header.classList.remove('header-retracted');
