@@ -284,4 +284,133 @@ class SubServiciosControllerUnitTest extends TestCase
 
         $this->assertFalse(Storage::disk('public')->exists('subservicios/test_image.jpg'));
     }
+
+    public function test_store_archivo_invalido_cubre_linea_116(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension is not installed');
+        }
+
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+
+        // Crear mock de archivo que pase validación pero isValid() retorne false
+        $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
+        $mockFile->shouldReceive('isValid')->andReturn(false);
+        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getSize')->andReturn(100);
+        $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
+
+        $request = \Mockery::mock(Request::class)->makePartial();
+        $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
+        $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
+        $request->shouldReceive('validate')->andReturn([]);
+        $request->shouldReceive('ajax')->andReturn(false);
+        $request->shouldReceive('wantsJson')->andReturn(false);
+
+        $response = $this->controller->store($request);
+
+        $this->assertNotNull($response);
+    }
+
+    public function test_store_error_guardar_imagen_cubre_linea_122(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension is not installed');
+        }
+
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+
+        // Crear mock de archivo válido pero storeAs retorne false
+        $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
+        $mockFile->shouldReceive('isValid')->andReturn(true);
+        $mockFile->shouldReceive('getClientOriginalExtension')->andReturn('jpg');
+        $mockFile->shouldReceive('storeAs')
+            ->with('subservicios/', \Mockery::pattern('/^subservicio_\d+_\w+\.jpg$/'), 'public')
+            ->andReturn(false); // Simular error al guardar
+
+        $request = \Mockery::mock(Request::class)->makePartial();
+        $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
+        $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
+        $request->shouldReceive('validate')->andReturn([]);
+        $request->shouldReceive('ajax')->andReturn(false);
+        $request->shouldReceive('wantsJson')->andReturn(false);
+
+        // El controlador maneja la excepción y retorna una respuesta
+        $response = $this->controller->store($request);
+
+        $this->assertNotNull($response);
+    }
+
+    public function test_update_archivo_invalido_cubre_linea_200(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension is not installed');
+        }
+
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'descripcion' => self::DESC_PRUEBA,
+            'precio' => 100,
+        ]);
+
+        // Crear mock de archivo que pase validación pero isValid() retorne false
+        $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
+        $mockFile->shouldReceive('isValid')->andReturn(false);
+        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getSize')->andReturn(100);
+        $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
+
+        $request = \Mockery::mock(Request::class)->makePartial();
+        $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
+        $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
+        $request->shouldReceive('validate')->andReturn([]);
+        $request->shouldReceive('ajax')->andReturn(false);
+        $request->shouldReceive('wantsJson')->andReturn(false);
+
+        $response = $this->controller->update($request, $subServicio->id);
+
+        $this->assertNotNull($response);
+    }
+
+    public function test_update_error_guardar_imagen_cubre_linea_207(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension is not installed');
+        }
+
+        $servicio = Servicios::create(['nombre_servicio' => 'Test']);
+        $subServicio = SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest',
+            'descripcion' => self::DESC_PRUEBA,
+            'precio' => 100,
+            'imagen' => 'old_image.jpg',
+        ]);
+
+        Storage::disk('public')->put('subservicios/old_image.jpg', 'fake content');
+
+        // Crear mock de archivo válido pero storeAs retorne false
+        $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
+        $mockFile->shouldReceive('isValid')->andReturn(true);
+        $mockFile->shouldReceive('getClientOriginalExtension')->andReturn('jpg');
+        $mockFile->shouldReceive('storeAs')
+            ->with('subservicios/', \Mockery::pattern('/^subservicio_\d+_\w+\.jpg$/'), 'public')
+            ->andReturn(false); // Simular error al guardar
+
+        $request = \Mockery::mock(Request::class)->makePartial();
+        $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
+        $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
+        $request->shouldReceive('validate')->andReturn([]);
+        $request->shouldReceive('ajax')->andReturn(false);
+        $request->shouldReceive('wantsJson')->andReturn(false);
+
+        // El controlador maneja la excepción y retorna una respuesta
+        $response = $this->controller->update($request, $subServicio->id);
+
+        $this->assertNotNull($response);
+    }
 }

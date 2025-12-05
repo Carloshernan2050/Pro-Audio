@@ -1052,6 +1052,147 @@ class UsuarioControllerUnitTest extends TestCase
         }
     }
 
+    public function test_update_photo_archivo_null_cubre_lineas_163_164(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'primer_apellido' => self::APELLIDO_PEREZ,
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
+
+        // Crear request mock que pase validación pero file() retorne null después
+        $request = \Mockery::mock(Request::class)->makePartial();
+        $request->shouldReceive('file')->with('foto_perfil')->andReturn(null);
+        $request->shouldReceive('validate')->andReturn([]);
+        $request->shouldReceive('expectsJson')->andReturn(true);
+        $request->shouldReceive('wantsJson')->andReturn(true);
+
+        $response = $this->controller->updatePhoto($request);
+        $responseData = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertFalse($responseData['success']);
+        $this->assertStringContainsString('Error al subir el archivo', $responseData['message']);
+    }
+
+    public function test_update_photo_archivo_invalido_isValid_false_cubre_lineas_169_173(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'primer_apellido' => self::APELLIDO_PEREZ,
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
+
+        // Crear mock de archivo que pase validación pero isValid() retorne false
+        $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
+        $mockFile->shouldReceive('isValid')->andReturn(false);
+        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getSize')->andReturn(100);
+        $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
+
+        $request = \Mockery::mock(Request::class)->makePartial();
+        $request->shouldReceive('file')->with('foto_perfil')->andReturn($mockFile);
+        $request->shouldReceive('validate')->andReturn([]);
+        $request->shouldReceive('expectsJson')->andReturn(true);
+        $request->shouldReceive('wantsJson')->andReturn(true);
+
+        $response = $this->controller->updatePhoto($request);
+        $responseData = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertFalse($responseData['success']);
+        $this->assertStringContainsString('Error al subir el archivo', $responseData['message']);
+    }
+
+    public function test_update_photo_error_guardar_imagen_cubre_lineas_173_177(): void
+    {
+        Storage::fake('public');
+        
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'primer_apellido' => self::APELLIDO_PEREZ,
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
+
+        // Crear un mock de UploadedFile que retorne false en storeAs
+        $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
+        $mockFile->shouldReceive('isValid')->andReturn(true);
+        $mockFile->shouldReceive('getClientOriginalExtension')->andReturn('jpg');
+        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getSize')->andReturn(100);
+        $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
+        $mockFile->shouldReceive('storeAs')
+            ->with('perfiles', \Mockery::pattern('/^perfil_\d+_\d+\.jpg$/'), 'public')
+            ->andReturn(false); // Simular error al guardar
+
+        $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
+            'foto_perfil' => $mockFile,
+        ]);
+        $request->headers->set('Accept', 'application/json');
+        $request->files->set('foto_perfil', $mockFile);
+
+        $response = $this->controller->updatePhoto($request);
+        $responseData = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertFalse($responseData['success']);
+        $this->assertStringContainsString('Error al guardar la imagen', $responseData['message']);
+    }
+
+    public function test_update_photo_excepcion_general_cubre_lineas_201_207(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Juan',
+            'primer_apellido' => self::APELLIDO_PEREZ,
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL_JUAN,
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('perfil.jpg', 100, 100);
+        
+        // Mock Storage para que lance una excepción al llamar disk()
+        Storage::shouldReceive('disk')
+            ->with('public')
+            ->andThrow(new \Exception('Error de almacenamiento'));
+
+        $request = Request::create(self::ROUTE_USUARIOS_PERFIL_PHOTO, 'POST', [], [], [
+            'foto_perfil' => $file,
+        ]);
+        $request->headers->set('Accept', 'application/json');
+
+        $response = $this->controller->updatePhoto($request);
+        $responseData = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertFalse($responseData['success']);
+        $this->assertStringContainsString('Error al actualizar la foto de perfil', $responseData['message']);
+    }
+
     public function test_store_completo_con_todos_los_campos(): void
     {
         DB::table('roles')->insertGetId([

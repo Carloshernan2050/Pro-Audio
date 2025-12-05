@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ImageStorageException;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +51,11 @@ class UsuarioController extends Controller
                 DB::table('personas_roles')->insert(['personas_id' => $persona->id, 'roles_id' => $rolId]);
             }
         } catch (\Throwable $e) {
-            // continuar sin romper el flujo
+            // Log del error pero continuar sin romper el flujo de registro
+            \Log::warning('Error al asignar rol Cliente al usuario: '.$e->getMessage(), [
+                'usuario_id' => $persona->id,
+                'exception' => get_class($e),
+            ]);
         }
 
         return redirect()
@@ -170,24 +175,24 @@ class UsuarioController extends Controller
                 $path = $file->storeAs($directory, $filename, 'public');
 
                 if (!$path) {
-                    $statusCode = 500;
-                    $response = [
-                        'success' => false,
-                        'message' => 'Error al guardar la imagen. Verifica los permisos del directorio.',
-                    ];
-                } else {
-                    // Actualizar en la base de datos
-                    $usuario->foto_perfil = $filename;
-                    $usuario->save();
-
-                    $response = [
-                        'success' => true,
-                        'message' => 'Foto de perfil actualizada correctamente',
-                        'foto_url' => asset('storage/'.$directory.'/'.$filename),
-                    ];
+                    throw new ImageStorageException();
                 }
+
+                // Actualizar en la base de datos
+                $usuario->foto_perfil = $filename;
+                $usuario->save();
+
+                $response = [
+                    'success' => true,
+                    'message' => 'Foto de perfil actualizada correctamente',
+                    'foto_url' => asset('storage/'.$directory.'/'.$filename),
+                ];
             }
         } catch (\Illuminate\Validation\ValidationException $e) {
+            // Relanzar la excepción si la request no espera JSON (como en tests unitarios)
+            if (!$request->expectsJson() && !$request->wantsJson()) {
+                throw $e;
+            }
             $statusCode = 422;
             $response = [
                 'success' => false,

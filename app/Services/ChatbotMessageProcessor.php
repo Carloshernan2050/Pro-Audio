@@ -134,8 +134,8 @@ class ChatbotMessageProcessor
 
         return in_array($mensajeLower, $saludos, true)
             || in_array($mensajeCorregidoLower, $saludos, true)
-            || preg_match('/^(hola|buenos?\s+d[ií]as?|buenas?\s+(tardes|noches|d[ií]as?)|saludos?)[\s\.\!]*$/i', $mensajeLower)
-            || preg_match('/^(hola|buenos?\s+d[ií]as?|buenas?\s+(tardes|noches|d[ií]as?)|saludos?)[\s\.\!]*$/i', $mensajeCorregidoLower);
+            || preg_match('/^(hola|buenos?\s+d[ií]as|buenas?\s+tardes|buenas?\s+noches|saludos?)\s*$/i', $mensajeLower)
+            || preg_match('/^(hola|buenos?\s+d[ií]as|buenas?\s+tardes|buenas?\s+noches|saludos?)\s*$/i', $mensajeCorregidoLower);
     }
 
     private function esSolicitudCatalogo(string $mensaje, string $mensajeCorregido): bool

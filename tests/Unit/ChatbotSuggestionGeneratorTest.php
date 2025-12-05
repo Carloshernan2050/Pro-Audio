@@ -1170,24 +1170,34 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     {
         $textProcessor = new ChatbotTextProcessor;
         
-        // Crear una clase anónima que sobrescriba encontrarTokenMasRaro para retornar null
+        // Crear una clase anónima que sobrescriba métodos para forzar que targetToken sea null
         $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
+            public function generarSugerenciasPorTokenNombresCompletos(string $mensajeOriginal): array
+            {
+                // Retornar array vacío para que no salga temprano en línea 46
+                return [];
+            }
+
+            protected function obtenerVocabularioCorreccion(): array
+            {
+                // Retornar array vacío para evitar consultas a BD
+                return [];
+            }
+
             protected function filtrarTokensValidos(string $mensajeOriginal): array
             {
-                // Retornar un array no vacío para que no salga temprano en línea 48
+                // Retornar un array no vacío para que no salga temprano en línea 53
                 return [['orig' => 'test', 'norm' => 'test']];
             }
 
-            protected function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
+            public function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
             {
-                return null; // Forzar retornar null para que línea 54 se ejecute
+                // Forzar retornar null para que línea 58-59 se ejecute
+                return null;
             }
-            
-            // El método generarSugerenciasPorToken usará los métodos sobrescritos
-            // y ejecutará el código original incluyendo línea 54
         };
 
-        // Ejecutar el método original que ahora ejecutará línea 54 porque targetToken es null
+        // Ejecutar el método que ahora ejecutará línea 58-59 porque targetToken es null (vocab vacío)
         $resultado = $generator->generarSugerenciasPorToken('test');
         $this->assertIsArray($resultado);
         $this->assertEmpty($resultado);

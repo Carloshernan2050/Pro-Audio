@@ -21,13 +21,11 @@ class ChatbotSuggestionGenerator
 
     public function generarSugerencias(string $mensajeCorregido): array
     {
-        // Primero intentar buscar nombres completos de subservicios
         $sugerenciasNombres = $this->generarSugerenciasNombresCompletos($mensajeCorregido);
         if (!empty($sugerenciasNombres)) {
             return array_slice($sugerenciasNombres, 0, 5);
         }
         
-        // Fallback al método anterior si no hay subservicios
         $vocab = $this->obtenerVocabularioCorreccion();
         if (empty($vocab)) {
             return [];
@@ -44,27 +42,20 @@ class ChatbotSuggestionGenerator
 
     public function generarSugerenciasPorToken(string $mensajeOriginal): array
     {
-        // Primero intentar buscar nombres completos de subservicios
         $sugerenciasNombres = $this->generarSugerenciasPorTokenNombresCompletos($mensajeOriginal);
         if (!empty($sugerenciasNombres)) {
             return $sugerenciasNombres;
         }
         
-        // Fallback al método anterior si no hay subservicios
         $vocab = $this->obtenerVocabularioCorreccion();
         $pairs = $this->filtrarTokensValidos($mensajeOriginal);
-        if (empty($pairs)) {
+        $targetToken = !empty($pairs) ? $this->encontrarTokenMasRaro($pairs, $vocab) : null;
+        
+        if (empty($pairs) || $targetToken === null) {
             return [];
         }
-
-        $targetToken = $this->encontrarTokenMasRaro($pairs, $vocab);
-        if ($targetToken === null) {
-            return [];
-        }
-
-        $sugs = $this->generarSugerenciasParaToken($targetToken, $vocab);
-
-        return [['token' => $targetToken, 'sugerencias' => $sugs]];
+        
+        return [['token' => $targetToken, 'sugerencias' => $this->generarSugerenciasParaToken($targetToken, $vocab)]];
     }
 
     public function fallbackTokenHints(string $mensajeCorregido): array
@@ -76,18 +67,14 @@ class ChatbotSuggestionGenerator
             return [];
         }
 
-        // Intentar obtener nombres completos de subservicios
         $subServicios = $this->buscarSubServiciosPorTokens($tokens);
         if ($subServicios->isNotEmpty()) {
             $nombres = $subServicios->pluck('nombre')->unique()->values()->toArray();
             return [['token' => $tokens[0], 'sugerencias' => array_slice($nombres, 0, 6)]];
         }
 
-        // Fallback: obtener sugerencias de la BD (tokens individuales)
         $vocab = $this->obtenerVocabularioCorreccion();
-        $sugerencias = !empty($vocab) ? array_slice($vocab, 0, 6) : [];
-
-        return [['token' => $tokens[0], 'sugerencias' => $sugerencias]];
+        return [['token' => $tokens[0], 'sugerencias' => !empty($vocab) ? array_slice($vocab, 0, 6) : []]];
     }
 
     public function extraerMejorSugerencia(array $tokenHints): array
@@ -102,43 +89,56 @@ class ChatbotSuggestionGenerator
         return $best ? ['token' => $token, 'sugerencia' => $best] : [];
     }
 
-    protected function obtenerVocabularioCorreccion(): array
+    public function generarSugerenciasNombresCompletos(string $mensajeCorregido): array
     {
-        $vocab = [];
+        $tokens = $this->extraerTokensDelMensaje($mensajeCorregido);
+        if (empty($tokens)) {
+            $tokens = [$this->textProcessor->normalizarTexto($mensajeCorregido)];
+        }
         
-        try {
-            $this->extraerTokensDeServicios($vocab);
-            $this->extraerTokensDeSubServicios($vocab);
-        } catch (\Exception $e) {
-            // Si falla la DB, retornar array vacío (no usar palabras hardcodeadas)
+        $subServicios = $this->buscarSubServiciosPorTokens($tokens);
+        return $subServicios->isEmpty() ? [] : $subServicios->pluck('nombre')->unique()->values()->toArray();
+    }
+
+    public function generarSugerenciasPorTokenNombresCompletos(string $mensajeOriginal): array
+    {
+        $pairs = $this->filtrarTokensValidos($mensajeOriginal);
+        $vocab = $this->obtenerVocabularioCorreccion();
+        $targetToken = !empty($pairs) ? $this->encontrarTokenMasRaro($pairs, $vocab) : null;
+        
+        if (empty($pairs) || $targetToken === null) {
             return [];
         }
+        
+        $subServicios = $this->buscarSubServiciosPorTokens([$targetToken]);
+        $nombres = $subServicios->isEmpty() ? [] : $subServicios->pluck('nombre')->unique()->values()->toArray();
+        
+        return empty($nombres) ? [] : [['token' => $targetToken, 'sugerencias' => array_slice($nombres, 0, 6)]];
+    }
 
+    private function obtenerVocabularioCorreccion(): array
+    {
+        $vocab = [];
+        try {
+            $servicios = \App\Models\Servicios::query()->select('nombre_servicio')->get();
+            foreach ($servicios as $servicio) {
+                $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $servicio->nombre_servicio ?? '');
+                foreach ($tokens as $tk) {
+                    $this->agregarTokenAlVocabulario($vocab, $tk, 3);
+                }
+            }
+            
+            $subServicios = \App\Models\SubServicios::query()->select('nombre')->limit(500)->get();
+            foreach ($subServicios as $ss) {
+                $tokensNombre = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $ss->nombre ?? '');
+                foreach ($tokensNombre as $tk) {
+                    $this->agregarTokenAlVocabulario($vocab, $tk, 3, true);
+                }
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
         return array_keys($vocab);
-    }
-
-    private function extraerTokensDeServicios(array &$vocab): void
-    {
-        $servicios = \App\Models\Servicios::query()->select('nombre_servicio')->get();
-        foreach ($servicios as $servicio) {
-            $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $servicio->nombre_servicio ?? '');
-            foreach ($tokens as $tk) {
-                $this->agregarTokenAlVocabulario($vocab, $tk, 3);
-            }
-        }
-    }
-
-    private function extraerTokensDeSubServicios(array &$vocab): void
-    {
-        // Solo extraer palabras de los NOMBRES de subservicios, NO de las descripciones
-        $subServicios = \App\Models\SubServicios::query()->select('nombre')->limit(500)->get();
-        foreach ($subServicios as $ss) {
-            $nombre = $ss->nombre ?? '';
-            $tokensNombre = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $nombre);
-            foreach ($tokensNombre as $tk) {
-                $this->agregarTokenAlVocabulario($vocab, $tk, 3, true);
-            }
-        }
     }
 
     private function agregarTokenAlVocabulario(array &$vocab, string $token, int $longitudMinima, bool $permitirDj = false): void
@@ -159,10 +159,8 @@ class ChatbotSuggestionGenerator
     private function extraerTokensDelMensaje(string $mensajeCorregido): array
     {
         $stop = self::STOPWORDS;
-
         return array_values(array_filter(preg_split(self::REGEX_WHITESPACE, $this->textProcessor->normalizarTexto($mensajeCorregido)), function ($t) use ($stop) {
             $t = trim($t);
-
             return $t !== '' && mb_strlen($t) >= 3 && ! in_array($t, $stop, true);
         }));
     }
@@ -171,7 +169,7 @@ class ChatbotSuggestionGenerator
     {
         $scores = [];
         $stop = self::STOPWORDS_EXT;
-        $umbralMinimo = 30.0; // Umbral mínimo de similitud (30%)
+        $umbralMinimo = 30.0;
         
         foreach ($tokens as $t) {
             foreach ($vocab as $term) {
@@ -184,7 +182,6 @@ class ChatbotSuggestionGenerator
                 if (mb_substr($t, 0, 1) !== mb_substr($term, 0, 1)) {
                     $percent *= 0.85;
                 }
-                // Aplicar umbral mínimo
                 if ($percent < $umbralMinimo) {
                     continue;
                 }
@@ -195,7 +192,7 @@ class ChatbotSuggestionGenerator
         return $scores;
     }
 
-    protected function filtrarTokensValidos(string $mensajeOriginal): array
+    private function filtrarTokensValidos(string $mensajeOriginal): array
     {
         $stop = self::STOPWORDS;
         $rawTokens = preg_split(self::REGEX_WHITESPACE, trim($mensajeOriginal));
@@ -203,49 +200,34 @@ class ChatbotSuggestionGenerator
         $genericos = self::TOKENS_GENERICOS;
         foreach ($rawTokens as $rt) {
             $norm = $this->textProcessor->normalizarTexto($rt);
-            if ($norm === '' || mb_strlen($norm) < 3) {
-                continue;
-            }
-            if (in_array($norm, $stop, true)) {
-                continue;
-            }
-            if (in_array($norm, $genericos, true)) {
-                continue;
-            }
-            if (preg_match('/^\d+$/', $norm)) {
+            if ($norm === '' || mb_strlen($norm) < 3 || in_array($norm, $stop, true) || in_array($norm, $genericos, true) || preg_match('/^\d+$/', $norm)) {
                 continue;
             }
             $pairs[] = ['orig' => $rt, 'norm' => $norm];
         }
-
         return $pairs;
     }
 
-    protected function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
+    private function encontrarTokenMasRaro(array $pairs, array $vocab): ?string
     {
+        if (empty($vocab)) {
+            return null;
+        }
         $tokenScores = [];
         foreach ($pairs as $p) {
-            $t = $p['norm'];
-            $maxSim = $this->calcularMaximaSimilitud($t, $vocab);
+            $maxSim = 0.0;
+            foreach ($vocab as $term) {
+                $percent = 0.0;
+                similar_text($p['norm'], $term, $percent);
+                if ($percent > $maxSim) {
+                    $maxSim = $percent;
+                }
+            }
             $tokenScores[$p['orig']] = $maxSim;
         }
         asort($tokenScores);
-
-        return array_key_first($tokenScores);
-    }
-
-    private function calcularMaximaSimilitud(string $token, array $vocab): float
-    {
-        $maxSim = 0.0;
-        foreach ($vocab as $term) {
-            $percent = 0.0;
-            similar_text($token, $term, $percent);
-            if ($percent > $maxSim) {
-                $maxSim = $percent;
-            }
-        }
-
-        return $maxSim;
+        $result = array_key_first($tokenScores);
+        return $result !== null ? $result : null;
     }
 
     private function generarSugerenciasParaToken(string $targetToken, array $vocab): array
@@ -253,58 +235,70 @@ class ChatbotSuggestionGenerator
         $candidatos = [];
         $targetNorm = $this->textProcessor->normalizarTexto($targetToken);
         $targetLen = mb_strlen($targetNorm);
-        
-        // Mapeo de conceptos relacionados (para mejorar sugerencias semánticas)
         $conceptosRelacionados = $this->obtenerConceptosRelacionados();
         
         foreach ($vocab as $term) {
-            $termNorm = $term;
-            $termLen = mb_strlen($termNorm);
-            
-            // Calcular similitud básica
-            $percent = 0.0;
-            similar_text($targetNorm, $termNorm, $percent);
-            
-            // Verificar si son conceptos relacionados semánticamente
-            $esRelacionado = $this->sonConceptosRelacionados($targetNorm, $termNorm, $conceptosRelacionados);
-            if ($esRelacionado) {
-                $percent = 100.0; // Prioridad máxima para conceptos relacionados
-            }
-            
-            // Bonus si comparten la primera letra
-            if (mb_substr($targetNorm, 0, 1) === mb_substr($termNorm, 0, 1)) {
-                $percent *= 1.15;
-            }
-            
-            // Bonus si hay subcadena común significativa (mínimo 3 caracteres)
-            $subcadenaComun = $this->encontrarSubcadenaComunMasLarga($targetNorm, $termNorm);
-            if (mb_strlen($subcadenaComun) >= 3) {
-                $percent += 15.0;
-            }
-            
-            // Penalizar si la diferencia de longitud es muy grande
-            $lenDiff = abs($targetLen - $termLen);
-            if ($lenDiff > max($targetLen, $termLen) * 0.6) {
-                $percent *= 0.7;
-            }
-            
-            // Umbral mínimo dinámico
-            $umbralMinimo = $targetLen <= 5 ? 30.0 : 35.0;
-            
-            // Si no hay relación semántica y la similitud es muy baja, no incluir
-            if (!$esRelacionado && $percent < 30.0) {
-                continue;
-            }
-            
-            if ($percent >= $umbralMinimo || $esRelacionado) {
-                // Los conceptos relacionados tienen prioridad absoluta
-                $score = $esRelacionado ? 1000.0 + $percent : $percent;
+            $score = $this->calcularScoreParaTermino($targetNorm, $targetLen, $term, $conceptosRelacionados);
+            if ($score !== null) {
                 $candidatos[$term] = $score;
             }
         }
         arsort($candidatos);
-
         return array_slice(array_keys($candidatos), 0, 6);
+    }
+
+    private function calcularScoreParaTermino(string $targetNorm, int $targetLen, string $term, array $conceptosRelacionados): ?float
+    {
+        $termNorm = $term;
+        $termLen = mb_strlen($termNorm);
+        
+        $percent = 0.0;
+        similar_text($targetNorm, $termNorm, $percent);
+        
+        $esRelacionado = $this->verificarConceptosRelacionados($targetNorm, $termNorm, $conceptosRelacionados);
+        if ($esRelacionado) {
+            $percent = 100.0;
+        }
+        
+        $percent = $this->aplicarAjustesScore($targetNorm, $targetLen, $termNorm, $termLen, $percent);
+        
+        $umbralMinimo = $targetLen <= 5 ? 30.0 : 35.0;
+        if (!$esRelacionado && $percent < 30.0) {
+            return null;
+        }
+        
+        if ($percent >= $umbralMinimo || $esRelacionado) {
+            return $esRelacionado ? 1000.0 + $percent : $percent;
+        }
+        
+        return null;
+    }
+
+    private function verificarConceptosRelacionados(string $targetNorm, string $termNorm, array $conceptosRelacionados): bool
+    {
+        $p1 = mb_strtolower($targetNorm);
+        $p2 = mb_strtolower($termNorm);
+        return (isset($conceptosRelacionados[$p1]) && in_array($p2, $conceptosRelacionados[$p1], true)) ||
+               (isset($conceptosRelacionados[$p2]) && in_array($p1, $conceptosRelacionados[$p2], true));
+    }
+
+    private function aplicarAjustesScore(string $targetNorm, int $targetLen, string $termNorm, int $termLen, float $percent): float
+    {
+        if (mb_substr($targetNorm, 0, 1) === mb_substr($termNorm, 0, 1)) {
+            $percent *= 1.15;
+        }
+        
+        $subcadenaComun = $this->encontrarSubcadenaComunMasLarga($targetNorm, $termNorm);
+        if (mb_strlen($subcadenaComun) >= 3) {
+            $percent += 15.0;
+        }
+        
+        $lenDiff = abs($targetLen - $termLen);
+        if ($lenDiff > max($targetLen, $termLen) * 0.6) {
+            $percent *= 0.7;
+        }
+        
+        return $percent;
     }
 
     private function obtenerConceptosRelacionados(): array
@@ -331,22 +325,6 @@ class ChatbotSuggestionGenerator
         ];
     }
 
-    private function sonConceptosRelacionados(string $palabra1, string $palabra2, array $conceptos): bool
-    {
-        $p1 = mb_strtolower($palabra1);
-        $p2 = mb_strtolower($palabra2);
-        
-        // Verificar si están en el mismo grupo de conceptos relacionados
-        if (isset($conceptos[$p1]) && in_array($p2, $conceptos[$p1], true)) {
-            return true;
-        }
-        if (isset($conceptos[$p2]) && in_array($p1, $conceptos[$p2], true)) {
-            return true;
-        }
-        
-        return false;
-    }
-
     private function encontrarSubcadenaComunMasLarga(string $str1, string $str2): string
     {
         $maxLen = 0;
@@ -371,58 +349,6 @@ class ChatbotSuggestionGenerator
         return $maxSubstr;
     }
 
-    /**
-     * Genera sugerencias basadas en nombres completos de subservicios que contienen los tokens
-     */
-    public function generarSugerenciasNombresCompletos(string $mensajeCorregido): array
-    {
-        $tokens = $this->extraerTokensDelMensaje($mensajeCorregido);
-        if (empty($tokens)) {
-            $tokens = [$this->textProcessor->normalizarTexto($mensajeCorregido)];
-        }
-        
-        // Buscar subservicios que contengan los tokens
-        $subServicios = $this->buscarSubServiciosPorTokens($tokens);
-        
-        if ($subServicios->isEmpty()) {
-            return [];
-        }
-        
-        // Retornar solo los nombres
-        return $subServicios->pluck('nombre')->unique()->values()->toArray();
-    }
-
-    /**
-     * Genera sugerencias por token basadas en nombres completos de subservicios
-     */
-    public function generarSugerenciasPorTokenNombresCompletos(string $mensajeOriginal): array
-    {
-        $pairs = $this->filtrarTokensValidos($mensajeOriginal);
-        if (empty($pairs)) {
-            return [];
-        }
-        
-        $vocab = $this->obtenerVocabularioCorreccion();
-        $targetToken = $this->encontrarTokenMasRaro($pairs, $vocab);
-        if ($targetToken === null) {
-            return [];
-        }
-        
-        // Buscar subservicios que contengan el token
-        $subServicios = $this->buscarSubServiciosPorTokens([$targetToken]);
-        
-        if ($subServicios->isEmpty()) {
-            return [];
-        }
-        
-        $nombres = $subServicios->pluck('nombre')->unique()->values()->toArray();
-        
-        return [['token' => $targetToken, 'sugerencias' => array_slice($nombres, 0, 6)]];
-    }
-
-    /**
-     * Busca subservicios que contengan los tokens en sus nombres
-     */
     private function buscarSubServiciosPorTokens(array $tokens): \Illuminate\Support\Collection
     {
         if (empty($tokens)) {

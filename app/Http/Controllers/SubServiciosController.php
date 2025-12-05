@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ImageStorageException;
 use App\Models\Servicios;
 use App\Models\SubServicios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use Symfony\Component\HttpKernel\Exception\InternalServerErrorHttpException;
+use Exception;
 
 class SubServiciosController extends Controller
 {
@@ -119,7 +120,7 @@ class SubServiciosController extends Controller
                 $path = $file->storeAs(self::STORAGE_PATH, $filename, 'public');
                 
                 if (!$path) {
-                    throw new InternalServerErrorHttpException('Error al guardar la imagen. Verifica los permisos del directorio.');
+                    throw new ImageStorageException();
                 }
                 
                 $imagenPath = $filename;
@@ -204,7 +205,7 @@ class SubServiciosController extends Controller
                 $path = $file->storeAs(self::STORAGE_PATH, $filename, 'public');
                 
                 if (!$path) {
-                    throw new InternalServerErrorHttpException('Error al guardar la imagen. Verifica los permisos del directorio.');
+                    throw new ImageStorageException();
                 }
                 
                 $imagenPath = $filename;
