@@ -107,11 +107,21 @@ class UsuarioController extends Controller
         }
     }
 
-    public function cerrarSesion()
+    public function cerrarSesion(Request $request)
     {
-        session()->flush(); // Limpiar la sesión
+        // Limpiar todos los datos de la sesión
+        $request->session()->flush();
+        
+        // Regenerar el ID de sesión para mayor seguridad (true = eliminar datos antiguos)
+        $request->session()->regenerate(true);
+        
+        // Regenerar el token CSRF para la nueva sesión
+        $request->session()->regenerateToken();
+        
+        // Guardar mensaje de éxito en la nueva sesión
+        $request->session()->flash('success', 'Sesión cerrada correctamente.');
 
-        return redirect()->route('usuarios.inicioSesion')->with('success', 'Sesión cerrada correctamente.');
+        return redirect()->route('usuarios.inicioSesion');
     }
 
     public function perfil()

@@ -5,21 +5,29 @@ namespace App\Http\Controllers;
 use App\Exceptions\ImageStorageException;
 use App\Models\Servicios;
 use App\Models\SubServicios;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use Exception;
 
 class SubServiciosController extends Controller
 {
     private const STORAGE_PATH = 'subservicios/';
+    private const CONTENT_TYPE_JSON = 'application/json';
 
     /**
      * Handle AJAX or redirect response for success messages.
      */
     private function handleSuccessResponse(Request $request, string $message)
     {
-        if ($request->ajax() || $request->wantsJson()) {
+        // Verificar múltiples formas de detectar peticiones AJAX/JSON
+        if ($request->ajax() ||
+            $request->wantsJson() ||
+            $request->expectsJson() ||
+            $request->header('X-Requested-With') === 'XMLHttpRequest' ||
+            $request->header('Accept') === self::CONTENT_TYPE_JSON ||
+            str_contains($request->header('Accept', ''), self::CONTENT_TYPE_JSON)) {
             return response()->json(['success' => $message]);
         }
 
@@ -31,7 +39,13 @@ class SubServiciosController extends Controller
      */
     private function handleValidationError(Request $request, \Illuminate\Validation\ValidationException $e)
     {
-        if ($request->ajax() || $request->wantsJson()) {
+        // Verificar múltiples formas de detectar peticiones AJAX/JSON
+        if ($request->ajax() ||
+            $request->wantsJson() ||
+            $request->expectsJson() ||
+            $request->header('X-Requested-With') === 'XMLHttpRequest' ||
+            $request->header('Accept') === self::CONTENT_TYPE_JSON ||
+            str_contains($request->header('Accept', ''), self::CONTENT_TYPE_JSON)) {
             return response()->json(['errors' => $e->errors(), 'error' => 'Error de validación'], 422);
         }
 
@@ -45,7 +59,13 @@ class SubServiciosController extends Controller
      */
     private function handleExceptionError(Request $request, \Exception $e, string $action)
     {
-        if ($request->ajax() || $request->wantsJson()) {
+        // Verificar múltiples formas de detectar peticiones AJAX/JSON
+        if ($request->ajax() ||
+            $request->wantsJson() ||
+            $request->expectsJson() ||
+            $request->header('X-Requested-With') === 'XMLHttpRequest' ||
+            $request->header('Accept') === self::CONTENT_TYPE_JSON ||
+            str_contains($request->header('Accept', ''), self::CONTENT_TYPE_JSON)) {
             return response()->json(['error' => "Error al {$action}: ".$e->getMessage()], 422);
         }
 
@@ -68,7 +88,7 @@ class SubServiciosController extends Controller
 
             return view('usuarios.subservicios', compact('subServicios', 'servicios'));
         } catch (\Exception $e) {
-            \Log::error('SubServiciosController@index Error: '.$e->getMessage());
+            Log::error('SubServiciosController@index Error: '.$e->getMessage());
 
             return view('usuarios.subservicios', [
                 'subServicios' => collect(),
@@ -233,10 +253,9 @@ class SubServiciosController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
-            $request = request();
             $subServicio = SubServicios::findOrFail($id);
 
             // Eliminar imagen si existe
@@ -248,7 +267,7 @@ class SubServiciosController extends Controller
 
             return $this->handleSuccessResponse($request, 'Subservicio eliminado exitosamente.');
         } catch (\Exception $e) {
-            return $this->handleExceptionError(request(), $e, 'eliminar el subservicio');
+            return $this->handleExceptionError($request, $e, 'eliminar el subservicio');
         }
     }
 }

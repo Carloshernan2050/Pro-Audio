@@ -16,6 +16,9 @@
 
     {{-- Stack opcional para estilos por-vista --}}
     @stack('styles')
+    
+    {{-- Meta tag CSRF para peticiones AJAX --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Enlace a la librería de Font Awesome para los íconos --}}
     {{-- Se eliminó el atributo integrity/xintegrity para asegurar la carga de los iconos --}}
@@ -555,17 +558,29 @@
     <style>
         /* Modales personalizados para confirmación y alertas */
         .custom-modal {
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed !important;
+            z-index: 10000 !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             backdrop-filter: blur(4px);
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .custom-modal[style*="display: none"] {
+            display: none !important;
+        }
+        
+        .custom-modal:not([style*="display: none"]) {
+            display: flex !important;
         }
 
         .custom-modal-content {
@@ -701,46 +716,172 @@
         };
 
         window.customConfirm = function(message) {
+            console.log('customConfirm llamado con mensaje:', message);
             return new Promise((resolve) => {
                 const modal = document.getElementById('customConfirmModal');
                 const messageEl = document.getElementById('customConfirmMessage');
                 const acceptBtn = document.getElementById('customConfirmAccept');
                 const cancelBtn = document.getElementById('customConfirmCancel');
                 
+                if (!modal || !messageEl || !acceptBtn || !cancelBtn) {
+                    console.error('Elementos del modal no encontrados:', {
+                        modal: !!modal,
+                        messageEl: !!messageEl,
+                        acceptBtn: !!acceptBtn,
+                        cancelBtn: !!cancelBtn
+                    });
+                    // Fallback a confirm nativo
+                    const result = confirm(message);
+                    resolve(result);
+                    return;
+                }
+                
+                console.log('Mostrando modal de confirmación...');
                 messageEl.textContent = message;
-                modal.style.display = 'flex';
                 
-                const closeModal = () => {
+                // Remover cualquier estilo inline que pueda estar ocultando el modal
+                modal.removeAttribute('style');
+                
+                // Asegurar que el modal sea visible con estilos explícitos
+                modal.style.cssText = `
+                    position: fixed !important;
+                    z-index: 10000 !important;
+                    left: 0 !important;
+                    top: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    min-width: 100% !important;
+                    min-height: 100% !important;
+                    background-color: rgba(0, 0, 0, 0.7) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                `;
+                modal.setAttribute('aria-hidden', 'false');
+                
+                // Forzar reflow para asegurar que los estilos se apliquen
+                void modal.offsetWidth;
+                
+                // Verificar que el modal sea visible
+                const modalRect = modal.getBoundingClientRect();
+                const computedStyle = window.getComputedStyle(modal);
+                console.log('Modal position:', {
+                    display: computedStyle.display,
+                    visibility: computedStyle.visibility,
+                    zIndex: computedStyle.zIndex,
+                    width: modalRect.width,
+                    height: modalRect.height,
+                    left: modalRect.left,
+                    top: modalRect.top
+                });
+                
+                // Si aún tiene dimensiones 0, intentar forzar el tamaño
+                if (modalRect.width === 0 || modalRect.height === 0) {
+                    console.warn('Modal tiene dimensiones 0, forzando tamaño...');
+                    
+                    // Verificar si el modal está dentro de un contenedor oculto
+                    let parent = modal.parentElement;
+                    let hiddenParent = null;
+                    while (parent && parent !== document.body) {
+                        const parentStyle = window.getComputedStyle(parent);
+                        if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden') {
+                            hiddenParent = parent;
+                            console.warn('Modal está dentro de un contenedor oculto:', parent);
+                            break;
+                        }
+                        parent = parent.parentElement;
+                    }
+                    
+                    // Mover el modal al body si está dentro de un contenedor oculto
+                    if (hiddenParent) {
+                        console.log('Moviendo modal al body...');
+                        document.body.appendChild(modal);
+                    }
+                    
+                    // Forzar dimensiones usando viewport units
+                    modal.style.width = window.innerWidth + 'px';
+                    modal.style.height = window.innerHeight + 'px';
+                    modal.style.minWidth = '100vw';
+                    modal.style.minHeight = '100vh';
+                    modal.style.maxWidth = '100vw';
+                    modal.style.maxHeight = '100vh';
+                    
+                    // Forzar reflow nuevamente
+                    void modal.offsetWidth;
+                    
+                    // Verificar dimensiones después del cambio
+                    const newRect = modal.getBoundingClientRect();
+                    console.log('Dimensiones después del ajuste:', {
+                        width: newRect.width,
+                        height: newRect.height
+                    });
+                }
+                
+                let resolved = false;
+                const resolveOnce = (value) => {
+                    if (resolved) {
+                        console.log('Ya resuelto, ignorando...');
+                        return;
+                    }
+                    resolved = true;
+                    console.log('Resolviendo customConfirm con:', value);
                     modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden', 'true');
+                    if (escapeHandler) {
+                        document.removeEventListener('keydown', escapeHandler);
+                    }
+                    if (modalClickHandler) {
+                        modal.removeEventListener('click', modalClickHandler);
+                    }
+                    resolve(value);
                 };
                 
-                acceptBtn.onclick = () => {
-                    closeModal();
-                    resolve(true);
+                // Limpiar event listeners anteriores
+                const oldAcceptHandler = acceptBtn.onclick;
+                const oldCancelHandler = cancelBtn.onclick;
+                acceptBtn.onclick = null;
+                cancelBtn.onclick = null;
+                
+                // Asignar nuevos event listeners
+                acceptBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botón Aceptar clickeado');
+                    resolveOnce(true);
                 };
                 
-                cancelBtn.onclick = () => {
-                    closeModal();
-                    resolve(false);
+                cancelBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botón Cancelar clickeado');
+                    resolveOnce(false);
                 };
                 
                 // Cerrar al hacer clic fuera del modal
-                modal.addEventListener('click', function(e) {
+                const modalClickHandler = function(e) {
                     if (e.target === modal) {
-                        closeModal();
-                        resolve(false);
+                        console.log('Clic fuera del modal');
+                        resolveOnce(false);
                     }
-                });
+                };
+                modal.addEventListener('click', modalClickHandler);
                 
                 // Cerrar con Escape
                 const escapeHandler = (e) => {
-                    if (e.key === 'Escape') {
-                        closeModal();
-                        resolve(false);
-                        document.removeEventListener('keydown', escapeHandler);
+                    if (e.key === 'Escape' && modal.style.display === 'flex') {
+                        console.log('Tecla Escape presionada');
+                        resolveOnce(false);
                     }
                 };
                 document.addEventListener('keydown', escapeHandler);
+                
+                console.log('Modal configurado, esperando respuesta del usuario...');
+                console.log('Botones disponibles:', {
+                    acceptBtn: acceptBtn ? 'Sí' : 'No',
+                    cancelBtn: cancelBtn ? 'Sí' : 'No'
+                });
             });
         };
 

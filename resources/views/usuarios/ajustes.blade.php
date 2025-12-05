@@ -4,7 +4,6 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/ajustes.css') }}">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 
 @section('content')
@@ -726,10 +725,21 @@
         };
 
         window.handleSubservicioDelete = function(button) {
-            if (!button) return;
-            const { id } = button.dataset;
+            if (!button) {
+                console.error('handleSubservicioDelete: button es null o undefined');
+                return;
+            }
+            const id = button.dataset.id;
+            console.log('handleSubservicioDelete llamado con id:', id);
             if (id) {
-                deleteSubservicio(id);
+                if (typeof window.deleteSubservicio === 'function') {
+                    window.deleteSubservicio(id);
+                } else {
+                    console.error('deleteSubservicio no está disponible');
+                    alert('Error: La función de eliminación no está disponible. Por favor, recarga la página.');
+                }
+            } else {
+                console.error('handleSubservicioDelete: No se encontró el id en dataset');
             }
         };
 
@@ -895,50 +905,134 @@
             });
         }
 
-        async function deleteSubservicio(id) {
-            const confirmed = await customConfirm('¿Estás seguro de que deseas eliminar este subservicio?');
-            if (confirmed) {
+        window.deleteSubservicio = async function(id) {
+            console.log('deleteSubservicio llamado con id:', id);
+            
+            // Verificar que customConfirm esté disponible
+            console.log('Verificando customConfirm...');
+            console.log('window.customConfirm:', typeof window.customConfirm);
+            console.log('customConfirm (global):', typeof customConfirm);
+            
+            const confirmFn = window.customConfirm || customConfirm;
+            if (typeof confirmFn !== 'function') {
+                console.error('customConfirm no está disponible');
+                // Intentar usar confirm nativo como fallback
+                const useNative = confirm('¿Estás seguro de que deseas eliminar este subservicio?');
+                if (!useNative) {
+                    console.log('Usuario canceló la eliminación (usando confirm nativo)');
+                    return;
+                }
+                console.log('Usuario confirmó la eliminación (usando confirm nativo), procediendo...');
+            } else {
+                try {
+                    console.log('Llamando a customConfirm...');
+                    const confirmed = await confirmFn('¿Estás seguro de que deseas eliminar este subservicio?');
+                    console.log('Resultado de customConfirm:', confirmed);
+                    if (!confirmed) {
+                        console.log('Usuario canceló la eliminación');
+                        return;
+                    }
+                    console.log('Usuario confirmó la eliminación, procediendo...');
+                } catch (confirmError) {
+                    console.error('Error al llamar customConfirm:', confirmError);
+                    // Fallback a confirm nativo
+                    const useNative = confirm('¿Estás seguro de que deseas eliminar este subservicio?');
+                    if (!useNative) {
+                        console.log('Usuario canceló la eliminación (fallback)');
+                        return;
+                    }
+                    console.log('Usuario confirmó la eliminación (fallback), procediendo...');
+                }
+            }
+            
+            try {
+                
+                // Usar la ruta de Laravel en lugar de URL hardcodeada
                 const url = `{{ url('subservicios') }}/${id}`;
+                console.log('URL de eliminación:', url);
+                
                 const formData = new FormData();
                 formData.append('_method', 'DELETE');
 
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-                                 document.querySelector('input[name="_token"]')?.value ||
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfInput = document.querySelector('input[name="_token"]');
+                const csrfToken = csrfMeta?.getAttribute('content') ||
+                                 csrfInput?.value ||
                                  '{{ csrf_token() }}';
 
-                fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                console.log('CSRF Token obtenido:', csrfToken ? 'Sí' : 'No');
+
+                if (!csrfToken) {
+                    showAlert('Error: No se pudo obtener el token de seguridad. Por favor, recarga la página.', 'error');
+                    return;
+                }
+
+                try {
+                    console.log('Enviando petición DELETE a:', url);
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    console.log('Respuesta recibida - Status:', response.status, 'OK:', response.ok);
+                    console.log('Content-Type:', response.headers.get('content-type'));
+
+                    const contentType = response.headers.get('content-type') || '';
+                    let data = {};
+
+                    if (contentType.includes('application/json')) {
+                        data = await response.json();
+                        console.log('Datos JSON recibidos:', data);
+                    } else {
+                        const text = await response.text();
+                        console.log('Respuesta texto recibida:', text);
+                        if (text) {
+                            try {
+                                data = JSON.parse(text);
+                            } catch (e) {
+                                data = { message: text };
+                            }
+                        }
                     }
-                })
-                .then(response => {
-                    const ct = response.headers.get('content-type') || '';
+
                     if (!response.ok) {
-                        if (ct.includes('application/json')) return response.json().then(err => Promise.reject(err));
-                        return response.text().then(text => Promise.reject({ message: text }));
+                        console.error('Error en respuesta:', data);
+                        throw new Error(data.error || data.message || `Error ${response.status}: ${response.statusText}`);
                     }
-                    return ct.includes('application/json') ? response.json() : {};
-                })
-                .then(data => {
+
                     if (data.success) {
+                        console.log('Eliminación exitosa:', data.success);
                         showAlert(data.success);
-                        // Asegurar que la pestaña de subservicios esté activa
                         showTab('subservicios');
-                        // Recargar solo los subservicios
                         loadSubservicios();
+                    } else if (data.error) {
+                        console.error('Error en datos:', data.error);
+                        showAlert(data.error, 'error');
+                    } else {
+                        console.warn('Respuesta sin success ni error:', data);
+                        showAlert('La eliminación se completó, pero no se recibió confirmación del servidor.', 'error');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const errorMsg = error.error || error.message || 'Error al eliminar el subservicio';
+                } catch (error) {
+                    console.error('Error al eliminar subservicio:', error);
+                    console.error('Stack trace:', error.stack);
+                    const errorMsg = error.message || 'Error al eliminar el subservicio. Por favor, intenta nuevamente.';
                     showAlert(errorMsg, 'error');
-                });
+                }
+            } catch (error) {
+                console.error('Error en deleteSubservicio (nivel superior):', error);
+                console.error('Stack trace:', error.stack);
+                const errorMsg = 'Error inesperado al intentar eliminar el subservicio: ' + (error.message || error);
+                console.error('Mensaje de error completo:', errorMsg);
+                showAlert(errorMsg, 'error');
             }
-        }
+        };
+
         function openInventarioModal(mode, id = null, descripcion = '', stock = '') {
             const inventarioModalTitle = document.getElementById('inventarioModalTitle');
             const inventarioForm = document.getElementById('inventarioForm');
@@ -1014,7 +1108,7 @@
                                     <button onclick="openInventarioModal('edit', ${item.id}, '${item.descripcion}', ${item.stock})" class="btn-action edit">
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
-                                    <button onclick="deleteInventario(${item.id})" class="btn-action delete">
+                                    <button onclick="if(typeof window.deleteInventario === 'function') { window.deleteInventario(${item.id}); } else { console.error('deleteInventario no disponible'); alert('Error: Función no disponible'); }" class="btn-action delete">
                                         <i class="fas fa-trash-alt"></i> Eliminar
                                     </button>
                                 </td>
@@ -1054,7 +1148,7 @@
                                     <button onclick="openMovimientoModal('edit', ${movimiento.id}, '${movimiento.inventario_id}', '${movimiento.tipo_movimiento}', '${movimiento.cantidad}')" class="btn-action edit">
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
-                                    <button onclick="deleteMovimiento(${movimiento.id})" class="btn-action delete">
+                                    <button onclick="if(typeof window.deleteMovimiento === 'function') { window.deleteMovimiento(${movimiento.id}); } else { console.error('deleteMovimiento no disponible'); alert('Error: Función no disponible'); }" class="btn-action delete">
                                         <i class="fas fa-trash-alt"></i> Eliminar
                                     </button>
                                 </td>
@@ -1156,79 +1250,161 @@
         }
 
         // Funciones de eliminación
-        async function deleteInventario(id) {
-            const confirmed = await customConfirm('¿Estás seguro de que deseas eliminar este item?');
-            if (confirmed) {
+        window.deleteInventario = async function(id) {
+            console.log('deleteInventario llamado con id:', id);
+            
+            // Verificar que customConfirm esté disponible
+            const confirmFn = window.customConfirm || customConfirm;
+            if (typeof confirmFn !== 'function') {
+                console.error('customConfirm no está disponible');
+                alert('Error: La función de confirmación no está disponible. Por favor, recarga la página.');
+                return;
+            }
+            
+            try {
+                const confirmed = await confirmFn('¿Estás seguro de que deseas eliminar este item?');
+                if (!confirmed) {
+                    console.log('Usuario canceló la eliminación');
+                    return;
+                }
                 const url = `{{ url('inventario') }}/${id}`;
                 const formData = new FormData();
                 formData.append('_method', 'DELETE');
 
-                fetch(url, {
-                    method: 'POST', // usar POST y spoofear _method para compatibilidad con form-data
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}';
+
+                if (!csrfToken) {
+                    showAlert('Error: No se pudo obtener el token de seguridad. Por favor, recarga la página.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    const contentType = response.headers.get('content-type') || '';
+                    let data = {};
+
+                    if (contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const text = await response.text();
+                        if (text) {
+                            try {
+                                data = JSON.parse(text);
+                            } catch (e) {
+                                data = { message: text };
+                            }
+                        }
                     }
-                })
-                .then(response => {
-                    const ct = response.headers.get('content-type') || '';
+
                     if (!response.ok) {
-                        if (ct.includes('application/json')) return response.json().then(err => Promise.reject(err));
-                        return response.text().then(text => Promise.reject({ message: text }));
+                        throw new Error(data.error || data.message || `Error ${response.status}: ${response.statusText}`);
                     }
-                    return ct.includes('application/json') ? response.json() : {};
-                })
-                .then(data => {
+
                     if (data.success) {
                         showAlert(data.success);
                         loadInventario();
+                    } else if (data.error) {
+                        showAlert(data.error, 'error');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const errorMsg = error.error || error.message || 'Error al eliminar el artículo del inventario';
+                } catch (error) {
+                    console.error('Error al eliminar inventario:', error);
+                    const errorMsg = error.message || 'Error al eliminar el artículo del inventario. Por favor, intenta nuevamente.';
                     showAlert(errorMsg, 'error');
-                });
+                }
+            } catch (error) {
+                console.error('Error en deleteInventario:', error);
+                showAlert('Error inesperado al intentar eliminar el artículo', 'error');
             }
-        }
+        };
 
-        async function deleteMovimiento(id) {
-            const confirmed = await customConfirm('¿Estás seguro de que deseas eliminar este movimiento?');
-            if (confirmed) {
+        window.deleteMovimiento = async function(id) {
+            console.log('deleteMovimiento llamado con id:', id);
+            
+            // Verificar que customConfirm esté disponible
+            const confirmFn = window.customConfirm || customConfirm;
+            if (typeof confirmFn !== 'function') {
+                console.error('customConfirm no está disponible');
+                alert('Error: La función de confirmación no está disponible. Por favor, recarga la página.');
+                return;
+            }
+            
+            try {
+                const confirmed = await confirmFn('¿Estás seguro de que deseas eliminar este movimiento?');
+                if (!confirmed) {
+                    console.log('Usuario canceló la eliminación');
+                    return;
+                }
                 const url = `{{ url('movimientos') }}/${id}`;
                 const formData = new FormData();
                 formData.append('_method', 'DELETE');
 
-                fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}';
+
+                if (!csrfToken) {
+                    showAlert('Error: No se pudo obtener el token de seguridad. Por favor, recarga la página.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    const contentType = response.headers.get('content-type') || '';
+                    let data = {};
+
+                    if (contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const text = await response.text();
+                        if (text) {
+                            try {
+                                data = JSON.parse(text);
+                            } catch (e) {
+                                data = { message: text };
+                            }
+                        }
                     }
-                })
-                .then(response => {
-                    const ct = response.headers.get('content-type') || '';
+
                     if (!response.ok) {
-                        if (ct.includes('application/json')) return response.json().then(err => Promise.reject(err));
-                        return response.text().then(text => Promise.reject({ message: text }));
+                        throw new Error(data.error || data.message || `Error ${response.status}: ${response.statusText}`);
                     }
-                    return ct.includes('application/json') ? response.json() : {};
-                })
-                .then(data => {
+
                     if (data.success) {
                         showAlert(data.success);
                         loadMovimientos();
+                    } else if (data.error) {
+                        showAlert(data.error, 'error');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const errorMsg = error.error || error.message || 'Error al eliminar el movimiento';
+                } catch (error) {
+                    console.error('Error al eliminar movimiento:', error);
+                    const errorMsg = error.message || 'Error al eliminar el movimiento. Por favor, intenta nuevamente.';
                     showAlert(errorMsg, 'error');
-                });
+                }
+            } catch (error) {
+                console.error('Error en deleteMovimiento:', error);
+                showAlert('Error inesperado al intentar eliminar el movimiento', 'error');
             }
-        }
+        };
         
         // Cierra los modales si se hace clic fuera de ellos
         window.onclick = function(event) {
@@ -1438,6 +1614,29 @@
                         loadSubservicios();
                     });
                 });
+            }
+        });
+        
+        // Verificación de funciones de eliminación al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Verificando funciones de eliminación...');
+            console.log('window.deleteSubservicio:', typeof window.deleteSubservicio);
+            console.log('window.deleteInventario:', typeof window.deleteInventario);
+            console.log('window.deleteMovimiento:', typeof window.deleteMovimiento);
+            console.log('window.customConfirm:', typeof window.customConfirm);
+            console.log('window.handleSubservicioDelete:', typeof window.handleSubservicioDelete);
+            
+            if (typeof window.deleteSubservicio !== 'function') {
+                console.error('ERROR: window.deleteSubservicio no está definida');
+            }
+            if (typeof window.deleteInventario !== 'function') {
+                console.error('ERROR: window.deleteInventario no está definida');
+            }
+            if (typeof window.deleteMovimiento !== 'function') {
+                console.error('ERROR: window.deleteMovimiento no está definida');
+            }
+            if (typeof window.customConfirm !== 'function') {
+                console.error('ERROR: window.customConfirm no está definida');
             }
         });
         
