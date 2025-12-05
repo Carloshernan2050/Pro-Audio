@@ -256,7 +256,9 @@ class SubServiciosControllerUnitTest extends TestCase
             'precio' => 100,
         ]);
 
-        $response = $this->controller->destroy($subServicio->id);
+        $request = Request::create("/subservicios/{$subServicio->id}", 'DELETE');
+        $request->headers->set('Accept', 'application/json');
+        $response = $this->controller->destroy($request, $subServicio->id);
 
         $this->assertNotNull($response);
 
@@ -278,7 +280,9 @@ class SubServiciosControllerUnitTest extends TestCase
 
         Storage::disk('public')->put('subservicios/test_image.jpg', 'fake content');
 
-        $response = $this->controller->destroy($subServicio->id);
+        $request = Request::create("/subservicios/{$subServicio->id}", 'DELETE');
+        $request->headers->set('Accept', 'application/json');
+        $response = $this->controller->destroy($request, $subServicio->id);
 
         $this->assertNotNull($response);
 
@@ -301,12 +305,25 @@ class SubServiciosControllerUnitTest extends TestCase
         $mockFile->shouldReceive('getSize')->andReturn(100);
         $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
 
-        $request = \Mockery::mock(Request::class)->makePartial();
+        $request = Request::create('/subservicios', 'POST', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Nuevo Subservicio',
+            'descripcion' => 'Descripción',
+            'precio' => 150,
+        ]);
+        $request->files->set('imagen', $mockFile);
+        $request->headers->set('Accept', 'text/html');
+
+        // Mockear los métodos necesarios
+        $request = \Mockery::mock($request)->makePartial();
         $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
         $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
         $request->shouldReceive('validate')->andReturn([]);
         $request->shouldReceive('ajax')->andReturn(false);
         $request->shouldReceive('wantsJson')->andReturn(false);
+        $request->shouldReceive('expectsJson')->andReturn(false);
+        $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
+        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
 
         $response = $this->controller->store($request);
 
@@ -329,12 +346,25 @@ class SubServiciosControllerUnitTest extends TestCase
             ->with('subservicios/', \Mockery::pattern('/^subservicio_\d+_\w+\.jpg$/'), 'public')
             ->andReturn(false); // Simular error al guardar
 
-        $request = \Mockery::mock(Request::class)->makePartial();
+        $request = Request::create('/subservicios', 'POST', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Nuevo Subservicio',
+            'descripcion' => 'Descripción',
+            'precio' => 150,
+        ]);
+        $request->files->set('imagen', $mockFile);
+        $request->headers->set('Accept', 'text/html');
+
+        // Mockear los métodos necesarios
+        $request = \Mockery::mock($request)->makePartial();
         $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
         $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
         $request->shouldReceive('validate')->andReturn([]);
         $request->shouldReceive('ajax')->andReturn(false);
         $request->shouldReceive('wantsJson')->andReturn(false);
+        $request->shouldReceive('expectsJson')->andReturn(false);
+        $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
+        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
 
         // El controlador maneja la excepción y retorna una respuesta
         $response = $this->controller->store($request);
@@ -364,12 +394,25 @@ class SubServiciosControllerUnitTest extends TestCase
         $mockFile->shouldReceive('getSize')->andReturn(100);
         $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
 
-        $request = \Mockery::mock(Request::class)->makePartial();
+        $request = Request::create("/subservicios/{$subServicio->id}", 'PUT', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest Actualizado',
+            'descripcion' => self::DESC_PRUEBA,
+            'precio' => 200,
+        ]);
+        $request->files->set('imagen', $mockFile);
+        $request->headers->set('Accept', 'text/html');
+
+        // Mockear los métodos necesarios
+        $request = \Mockery::mock($request)->makePartial();
         $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
         $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
         $request->shouldReceive('validate')->andReturn([]);
         $request->shouldReceive('ajax')->andReturn(false);
         $request->shouldReceive('wantsJson')->andReturn(false);
+        $request->shouldReceive('expectsJson')->andReturn(false);
+        $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
+        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
 
         $response = $this->controller->update($request, $subServicio->id);
 
@@ -401,12 +444,25 @@ class SubServiciosControllerUnitTest extends TestCase
             ->with('subservicios/', \Mockery::pattern('/^subservicio_\d+_\w+\.jpg$/'), 'public')
             ->andReturn(false); // Simular error al guardar
 
-        $request = \Mockery::mock(Request::class)->makePartial();
+        $request = Request::create("/subservicios/{$subServicio->id}", 'PUT', [
+            'servicios_id' => $servicio->id,
+            'nombre' => 'SubTest Actualizado',
+            'descripcion' => self::DESC_PRUEBA,
+            'precio' => 200,
+        ]);
+        $request->files->set('imagen', $mockFile);
+        $request->headers->set('Accept', 'text/html');
+
+        // Mockear los métodos necesarios
+        $request = \Mockery::mock($request)->makePartial();
         $request->shouldReceive('hasFile')->with('imagen')->andReturn(true);
         $request->shouldReceive('file')->with('imagen')->andReturn($mockFile);
         $request->shouldReceive('validate')->andReturn([]);
         $request->shouldReceive('ajax')->andReturn(false);
         $request->shouldReceive('wantsJson')->andReturn(false);
+        $request->shouldReceive('expectsJson')->andReturn(false);
+        $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
+        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
 
         // El controlador maneja la excepción y retorna una respuesta
         $response = $this->controller->update($request, $subServicio->id);
