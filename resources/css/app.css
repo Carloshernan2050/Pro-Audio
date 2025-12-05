@@ -3563,12 +3563,14 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     font-weight: bold;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    text-align: center;
 }
 
 .page-subtitle {
     color: white;
     font-size: 1.2rem;
     margin-bottom: 40px;
+    text-align: center;
 }
 
 .productos-galeria {
@@ -3810,10 +3812,69 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 /* Estilos específicos para la página de ajustes */
 
+/* Asegurar que el contenido tenga espacio adecuado sin romper el grid */
+/* Centrar el contenido con un ancho máximo */
+.main-content {
+    padding: 20px 30px;
+    text-align: left;
+    overflow-x: hidden;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Estilos para tabs */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Botones de tabs */
+.btn-tab {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 16px;
+    margin-right: 8px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-tab:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-tab.active {
+    background-color: #e91c1c;
+    color: white;
+    border-color: #e91c1c;
+    box-shadow: 0 4px 15px rgba(233, 28, 28, 0.4);
+}
+
+.btn-tab i {
+    font-size: 0.9rem;
+}
+
 /* Contenedor principal de la tabla y botones */
 .button-container {
     margin-bottom: 20px;
-    text-align: right;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
 }
 
 .table-container {
