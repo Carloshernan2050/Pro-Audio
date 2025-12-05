@@ -313,8 +313,13 @@ class UsuarioControllerUnitTest extends TestCase
     public function test_cerrar_sesion(): void
     {
         session(['usuario_id' => 1, 'usuario_nombre' => 'Juan']);
+        
+        $request = Request::create('/usuarios/cerrarSesion', 'POST');
+        // Obtener el store de sesión directamente
+        $sessionStore = app('session.store');
+        $request->setLaravelSession($sessionStore);
 
-        $response = $this->controller->cerrarSesion();
+        $response = $this->controller->cerrarSesion($request);
 
         $this->assertNotNull($response);
         $this->assertFalse(session()->has('usuario_id'));
@@ -715,8 +720,13 @@ class UsuarioControllerUnitTest extends TestCase
     public function test_cerrar_sesion_redirige_con_mensaje(): void
     {
         session(['usuario_id' => 1, 'usuario_nombre' => 'Juan']);
+        
+        $request = Request::create('/usuarios/cerrarSesion', 'POST');
+        // Obtener el store de sesión directamente
+        $sessionStore = app('session.store');
+        $request->setLaravelSession($sessionStore);
 
-        $response = $this->controller->cerrarSesion();
+        $response = $this->controller->cerrarSesion($request);
 
         $this->assertNotNull($response);
         $this->assertTrue($response->isRedirect());
