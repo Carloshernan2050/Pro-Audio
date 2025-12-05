@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Animación')
+@section('title', 'Alquiler')
 
 @section('content')
        <main class="main-content">
-            <h2 class="page-title">H</h2>
+            <h2 class="page-title">Alquiler de Equipos</h2>
             <p class="page-subtitle"></p>
             
             <section class="productos-servicio">
@@ -27,10 +27,11 @@
                         </div>
                     @empty
                         <div class="no-services">
-                            <p>No hay sub-servicios disponibles para H en este momento.</p>
+                            <p>No hay sub-servicios disponibles para alquiler en este momento.</p>
                         </div>
                     @endforelse
                 </div>
             </section>
         </main>
 @endsection
+

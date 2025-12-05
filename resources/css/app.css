@@ -1212,11 +1212,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-item {
-        min-height: 220px;
+        min-height: auto;
     }
 
     .producto-imagen {
-        height: 180px;
+        height: 200px;
+    }
+
+    .producto-imagen-placeholder {
+        height: 200px;
     }
 }
 
@@ -1633,11 +1637,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-item {
-        min-height: 220px;
+        min-height: auto;
     }
 
     .producto-imagen {
-        height: 180px;
+        height: 200px;
+    }
+
+    .producto-imagen-placeholder {
+        height: 200px;
     }
 
     .table-container {
@@ -1871,7 +1879,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     
     .producto-imagen {
         width: 100% !important;
-        height: 160px !important;
+        height: 200px !important;
         object-fit: cover !important;
     }
     
@@ -2198,15 +2206,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-item {
-        min-height: 190px;
+        min-height: auto;
     }
 
     .producto-imagen {
-        height: 170px;
+        height: 200px;
     }
 
     .producto-imagen-placeholder {
-        height: 170px;
+        height: 200px;
         font-size: 2.3rem;
     }
 
@@ -2678,7 +2686,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-imagen {
-        height: 160px !important;
+        height: 200px !important;
         width: 100% !important;
         object-fit: cover !important;
     }
@@ -2894,11 +2902,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-item {
-        min-height: 180px;
+        min-height: auto;
     }
 
     .producto-imagen {
-        height: 160px;
+        height: 200px;
+    }
+
+    .producto-imagen-placeholder {
+        height: 200px;
     }
 }
 
@@ -3059,11 +3071,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-item {
-        min-height: 185px !important;
+        min-height: auto !important;
     }
 
     .producto-imagen {
-        height: 165px !important;
+        height: 200px !important;
+    }
+
+    .producto-imagen-placeholder {
+        height: 200px !important;
     }
 }
 
@@ -3097,15 +3113,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-item {
-        min-height: 200px !important;
+        min-height: auto !important;
     }
 
     .producto-imagen {
-        height: 180px !important;
+        height: 200px !important;
     }
 
     .producto-imagen-placeholder {
-        height: 180px !important;
+        height: 200px !important;
         font-size: 2.5rem !important;
     }
 
@@ -3376,7 +3392,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-item {
-        min-height: 200px;
+        min-height: auto;
     }
 
     .producto-nombre {
@@ -3385,11 +3401,11 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     }
 
     .producto-imagen {
-        height: 180px;
+        height: 200px;
     }
 
     .producto-imagen-placeholder {
-        height: 180px;
+        height: 200px;
         font-size: 2.5rem;
     }
 
@@ -3573,8 +3589,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    min-height: 300px;
+    justify-content: flex-start;
 }
 
 .producto-item:hover {
@@ -3584,14 +3599,14 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 .producto-imagen {
     width: 100%;
-    height: 100%;
+    height: 220px;
     object-fit: cover;
+    display: block;
 }
 
 .producto-imagen-placeholder {
     width: 100%;
-    height: 100%;
-    min-height: 200px;
+    height: 220px;
     background-color: rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;

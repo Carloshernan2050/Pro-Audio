@@ -553,8 +553,8 @@
                         </div>
                         <div class="form-group">
                             <label for="imagen_subservicio">Imagen:</label>
-                            <input type="file" id="imagen_subservicio" name="imagen" accept="image/jpeg,image/png,image/jpg,image/gif">
-                            <small style="display: block; margin-top: 5px; color: #666;">Formatos permitidos: JPEG, PNG, JPG, GIF. Tamaño máximo: 5MB</small>
+                            <input type="file" id="imagen_subservicio" name="imagen" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp">
+                            <small style="display: block; margin-top: 5px; color: #666;">Formatos permitidos: JPEG, PNG, JPG, GIF, WEBP. Tamaño máximo: 5MB</small>
                             <div id="imagen-preview-subservicio" style="margin-top: 10px; display: none;">
                                 <img id="imagen-preview-img-subservicio" src="" alt="Vista previa" style="max-width: 200px; max-height: 200px; border-radius: 4px;">
                             </div>

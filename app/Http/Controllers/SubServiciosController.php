@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ImageStorageException;
 use App\Models\Servicios;
 use App\Models\SubServicios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Exception;
 
 class SubServiciosController extends Controller
 {
@@ -95,14 +98,31 @@ class SubServiciosController extends Controller
                 'nombre' => 'required|string|max:100',
                 'descripcion' => 'nullable|string',
                 'precio' => 'required|numeric|min:0',
-                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB máximo
+                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB máximo
+            ], [
+                'imagen.image' => 'El archivo debe ser una imagen válida',
+                'imagen.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif o webp',
+                'imagen.max' => 'La imagen no debe ser mayor a 5MB',
             ]);
+
+            // Asegurar que el directorio existe
+            if (!Storage::disk('public')->exists(self::STORAGE_PATH)) {
+                Storage::disk('public')->makeDirectory(self::STORAGE_PATH);
+            }
 
             $imagenPath = null;
             if ($request->hasFile('imagen')) {
                 $file = $request->file('imagen');
+                if (!$file || !$file->isValid()) {
+                    throw new UnprocessableEntityHttpException('El archivo de imagen no es válido');
+                }
                 $filename = 'subservicio_'.time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-                $file->storeAs(self::STORAGE_PATH, $filename, 'public');
+                $path = $file->storeAs(self::STORAGE_PATH, $filename, 'public');
+                
+                if (!$path) {
+                    throw new ImageStorageException();
+                }
+                
                 $imagenPath = $filename;
             }
 
@@ -156,8 +176,17 @@ class SubServiciosController extends Controller
                 'nombre' => 'required|string|max:100',
                 'descripcion' => 'nullable|string',
                 'precio' => 'required|numeric|min:0',
-                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB máximo
+                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB máximo
+            ], [
+                'imagen.image' => 'El archivo debe ser una imagen válida',
+                'imagen.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif o webp',
+                'imagen.max' => 'La imagen no debe ser mayor a 5MB',
             ]);
+
+            // Asegurar que el directorio existe
+            if (!Storage::disk('public')->exists(self::STORAGE_PATH)) {
+                Storage::disk('public')->makeDirectory(self::STORAGE_PATH);
+            }
 
             // Manejar la imagen
             if ($request->hasFile('imagen')) {
@@ -168,8 +197,17 @@ class SubServiciosController extends Controller
 
                 // Guardar nueva imagen
                 $file = $request->file('imagen');
+                if (!$file || !$file->isValid()) {
+                    throw new UnprocessableEntityHttpException('El archivo de imagen no es válido');
+                }
+                
                 $filename = 'subservicio_'.time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-                $file->storeAs(self::STORAGE_PATH, $filename, 'public');
+                $path = $file->storeAs(self::STORAGE_PATH, $filename, 'public');
+                
+                if (!$path) {
+                    throw new ImageStorageException();
+                }
+                
                 $imagenPath = $filename;
             } else {
                 // Mantener la imagen existente si no se sube una nueva
