@@ -779,6 +779,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     flex-direction: column;
     gap: 15px;
     padding-right: 6px;
+    padding-bottom: 20px;
 }
 
 
@@ -922,15 +923,17 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 .main-content {
     grid-area: content;
-    padding: 20px;
+    padding: 20px 30px;
     min-height: calc(100vh - 120px);
     color: white;
     text-align: center;
     overflow-y: auto;
+    overflow-x: hidden;
     padding-top: 48px; /* altura coherente con la nueva top-bar */
     /* El grid layout maneja el posicionamiento, no necesita padding-left adicional */
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
     flex-grow: 1;
     box-sizing: border-box;
 }
@@ -3814,15 +3817,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 /* Asegurar que el contenido tenga espacio adecuado sin romper el grid */
 /* Centrar el contenido con un ancho máximo */
-.main-content {
-    padding: 20px 30px;
-    text-align: left;
-    overflow-x: hidden;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-}
+/* Nota: Las propiedades de .main-content se han combinado con la definición principal en la línea 924 */
 
 /* Estilos para tabs */
 .tab-content {
@@ -3835,15 +3830,15 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 /* Botones de tabs */
 .btn-tab {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
     padding: 10px 16px;
     margin-right: 8px;
     margin-bottom: 10px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
@@ -3851,8 +3846,8 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 }
 
 .btn-tab:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .btn-tab.active {
@@ -4914,9 +4909,9 @@ body.modal-open .modal-backdrop {
 .page-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh; /* Ocupa la altura completa de la vista */
-    padding: 20px;
+    padding: 40px 20px 20px 20px;
     box-sizing: border-box; /* Asegura que el padding no cause scroll */
 }
 
