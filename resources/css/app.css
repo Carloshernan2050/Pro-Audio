@@ -931,7 +931,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     overflow-x: hidden;
     padding-top: 48px; /* altura coherente con la nueva top-bar */
     /* El grid layout maneja el posicionamiento, no necesita padding-left adicional */
-    max-width: 1400px;
+    max-width: 1800px; /* aumentado de 1400px para más espacio horizontal */
     margin: 0 auto;
     width: 100%;
     flex-grow: 1;
@@ -948,12 +948,12 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
     align-items: center;
     gap: 48px;
     margin: 40px auto;
-    max-width: 900px;
+    max-width: 1400px; /* aumentado de 900px para más espacio */
 }
 
 .presentacion-bloque-media {
     width: 100%;
-    max-width: 600px;
+    max-width: 1000px; /* aumentado de 600px para imágenes y videos más grandes */
 }
 
 .presentacion-img-grande {
@@ -981,7 +981,7 @@ h1, h2, h3, .page-title, .titulo-formulario, .producto-nombre {
 
 .presentacion-bloque-texto {
     width: 100%;
-    max-width: 600px;
+    max-width: 1000px; /* aumentado de 600px para más espacio */
     text-align: left;
     color: white;
 }
@@ -4940,6 +4940,9 @@ body.modal-open .modal-backdrop {
     margin-bottom: 10px;
     display: flex;
     align-items: center;
+    flex-shrink: 0; /* Fijo, no se encoge */
+    background-color: #000;
+    z-index: 10;
 }
 
 .chat-profile {
@@ -4960,12 +4963,14 @@ body.modal-open .modal-backdrop {
 
 /* Contenedor de mensajes para permitir el scroll */
 .messages-container {
-    flex-grow: 1; /* Esto hace que el contenedor se estire y ocupe el espacio sobrante */
+    flex: 1; /* Ocupa el espacio disponible */
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    min-height: 0; /* Permite que el scroll funcione correctamente */
 }
 
 /* Estilo para los íconos de perfil en los mensajes */
@@ -5009,6 +5014,9 @@ body.modal-open .modal-backdrop {
     border-radius: 8px;
     padding: 5px;
     margin-top: 10px;
+    flex-shrink: 0; /* Fijo, no se encoge */
+    background-color: #000;
+    z-index: 10;
 }
 
 /* Campo de entrada de texto */
@@ -5095,9 +5103,11 @@ body.modal-open .modal-backdrop {
 .chatbot-widget {
     position: fixed;
     right: 22px;
-    bottom: 86px; /* deja espacio para la FAB */
-    width: 420px;
-    height: 600px;
+    bottom: 80px; /* espacio para la FAB (56px) + margen (24px) - posiciona más abajo */
+    width: 750px; /* aumentado significativamente */
+    height: calc(100vh - 120px); /* ocupa casi toda la altura disponible */
+    max-height: calc(100vh - 120px); /* limita altura para no tocar arriba */
+    max-width: calc(100vw - 280px); /* respeta el sidebar (240px) + margen (40px) */
     background: #0b0b0b;
     border: 2px solid #e91c1c;
     border-radius: 14px;
@@ -5118,10 +5128,11 @@ body.modal-open .modal-backdrop {
 
 /* Estado expandido (casi pantalla completa) */
 .chatbot-widget.is-expanded {
-    width: min(calc(100vw - 44px), 1000px);
-    height: min(calc(100vh - 120px), 820px);
+    width: min(calc(100vw - 280px), 1200px); /* respeta el sidebar (240px) + margen (40px) */
+    height: calc(100vh - 120px); /* ocupa casi toda la altura */
     right: 22px;
-    bottom: 86px;
+    bottom: 80px;
+    max-width: calc(100vw - 280px); /* asegura que no se superponga al sidebar */
 }
 
 .chatbot-widget__body { height: 100%; }
@@ -5130,6 +5141,8 @@ body.modal-open .modal-backdrop {
     height: 100%;
     border: 0;
     background: #000;
+    overflow: hidden; /* Elimina scroll del iframe */
+    display: block;
 }
 
 /* Barra de control y agarre para arrastrar (minimalista) */
@@ -5168,3 +5181,40 @@ body.modal-open .modal-backdrop {
 }
 
 .chatbot-ctrl:hover { background: rgba(0,0,0,0.75); }
+
+/* Media queries para ajustar el chatbot según el tamaño de pantalla */
+@media (max-width: 1400px) {
+    .chatbot-widget {
+        width: 650px;
+        height: calc(100vh - 120px);
+        max-width: calc(100vw - 280px); /* respeta el sidebar */
+    }
+}
+
+@media (max-width: 1200px) {
+    .chatbot-widget {
+        width: 550px;
+        height: calc(100vh - 120px);
+        max-width: calc(100vw - 280px);
+    }
+    
+    .chatbot-widget.is-expanded {
+        width: min(calc(100vw - 280px), 1000px);
+        height: calc(100vh - 120px);
+        max-width: calc(100vw - 280px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .chatbot-widget {
+        width: 450px;
+        height: calc(100vh - 120px);
+        max-width: calc(100vw - 250px); /* menos espacio para sidebar móvil */
+    }
+    
+    .chatbot-widget.is-expanded {
+        width: min(calc(100vw - 250px), 900px);
+        height: calc(100vh - 120px);
+        max-width: calc(100vw - 250px);
+    }
+}

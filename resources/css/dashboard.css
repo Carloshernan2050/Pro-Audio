@@ -324,7 +324,7 @@ body {
 /* Wrapper para centrar y distribuir el contenido del dashboard */
 .dashboard-content-wrapper {
     width: 100% !important;
-    max-width: 1200px !important;
+    max-width: 1600px !important; /* aumentado de 1200px para más espacio horizontal */
     margin: 0 auto !important;
     box-sizing: border-box;
     display: flex;
@@ -489,6 +489,33 @@ body {
     object-fit: cover;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Estilos específicos para la sección Misión */
+.mission-text {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.mission-image {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 20px;
+}
+
+.presentacion-img-grande-mision {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    max-height: 600px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.presentacion-img-grande-mision:hover {
+    transform: scale(1.02);
 }
 
 /* Bloque Valores (dentro de Card) */

@@ -17,6 +17,10 @@
         $roles = is_array($roles) ? $roles : [$roles];
         $esInvitado = in_array('Invitado', $roles, true) || !$usuarioId;
         $usuario = $usuarioId ? \App\Models\Usuario::find($usuarioId) : null;
+        $fotoPerfil = null;
+        if ($usuario && $usuario->foto_perfil) {
+            $fotoPerfil = asset('storage/perfiles/' . $usuario->foto_perfil);
+        }
     @endphp
     
     @if($esInvitado)
@@ -27,17 +31,6 @@
     @else
         <button onclick="openProfileModal()" class="profile-btn-header" title="Perfil" style="background:none; border:none; cursor:pointer; padding:0;">
             @php
-                $fotoPerfil = null;
-                if ($usuario && $usuario->foto_perfil) {
-                    // Si el usuario tiene foto_perfil en la BD, intentar mostrarla
-                    // Verificar múltiples ubicaciones posibles del archivo
-                    $path1 = storage_path('app/public/perfiles/' . $usuario->foto_perfil);
-                    $path2 = public_path('storage/perfiles/' . $usuario->foto_perfil);
-                    
-                    // Intentar mostrar la imagen siempre que exista en BD
-                    // El navegador mostrará un ícono roto si el archivo realmente no existe
-                        $fotoPerfil = asset('storage/perfiles/' . $usuario->foto_perfil);
-                }
                 $iniciales = $usuario ? strtoupper(substr($usuario->primer_nombre ?? 'U', 0, 1) . substr($usuario->primer_apellido ?? 'S', 0, 1)) : null;
             @endphp
             @if($fotoPerfil)
