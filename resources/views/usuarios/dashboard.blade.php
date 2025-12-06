@@ -64,15 +64,13 @@
                     {{-- Bloque de la Misión --}}
                     <div class="content-card mission-card">
                         <h3>Nuestra Misión</h3>
-                        <div class="presentacion-bloque row">
-                            <div class="presentacion-bloque-media">
-                                <img src="/images/consola.jpg" alt="Consola de Sonido" class="presentacion-img-pequena">
-                            </div>
-                            <div class="presentacion-bloque-texto">
-                                <p>
-                                    Ser la empresa de referencia en el sector de eventos a nivel nacional, reconocida por la innovación, la calidad y el compromiso social. Proveemos tecnología de punta y personal altamente capacitado.
-                                </p>
-                            </div>
+                        <div class="presentacion-bloque-texto mission-text">
+                            <p>
+                                Ser la empresa de referencia en el sector de eventos a nivel nacional, reconocida por la innovación, la calidad y el compromiso social. Proveemos tecnología de punta y personal altamente capacitado.
+                            </p>
+                        </div>
+                        <div class="presentacion-bloque-media mission-image">
+                            <img src="/images/consola.jpg" alt="Consola de Sonido" class="presentacion-img-grande-mision">
                         </div>
                     </div>
 

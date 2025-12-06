@@ -17,6 +17,10 @@
         $roles = is_array($roles) ? $roles : [$roles];
         $esInvitado = in_array('Invitado', $roles, true) || !$usuarioId;
         $usuario = $usuarioId ? \App\Models\Usuario::find($usuarioId) : null;
+        $fotoPerfil = null;
+        if ($usuario && $usuario->foto_perfil) {
+            $fotoPerfil = asset('storage/perfiles/' . $usuario->foto_perfil);
+        }
     @endphp
     
     @if($esInvitado)
@@ -27,17 +31,13 @@
     @else
         <button onclick="openProfileModal()" class="profile-btn-header" title="Perfil" style="background:none; border:none; cursor:pointer; padding:0;">
             @php
-                $fotoPerfil = null;
-                if ($usuario && $usuario->foto_perfil) {
-                    $path = storage_path('app/public/perfiles/' . $usuario->foto_perfil);
-                    if (file_exists($path)) {
-                        $fotoPerfil = asset('storage/perfiles/' . $usuario->foto_perfil);
-                    }
-                }
                 $iniciales = $usuario ? strtoupper(substr($usuario->primer_nombre ?? 'U', 0, 1) . substr($usuario->primer_apellido ?? 'S', 0, 1)) : null;
             @endphp
             @if($fotoPerfil)
-                <img src="{{ $fotoPerfil }}" alt="Perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e91c1c;">
+                <img id="profile-img-{{ $usuarioId ?? 'default' }}" src="{{ $fotoPerfil }}" alt="Perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e91c1c;">
+                <div id="profile-fallback-{{ $usuarioId ?? 'default' }}" style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, #e91c1c 0%, #c81a1a 100%); display:none; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:16px; border:2px solid #e91c1c;">
+                    {{ $iniciales ?? 'U' }}
+                </div>
             @elseif($usuario && $iniciales)
                 <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, #e91c1c 0%, #c81a1a 100%); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:16px; border:2px solid #e91c1c;">
                     {{ $iniciales }}
@@ -50,3 +50,27 @@
         </button>
     @endif
 </header>
+
+@if($fotoPerfil && !$esInvitado)
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileImg = document.getElementById('profile-img-{{ $usuarioId ?? 'default' }}');
+        const profileFallback = document.getElementById('profile-fallback-{{ $usuarioId ?? 'default' }}');
+        
+        if (profileImg && profileFallback) {
+            profileImg.addEventListener('error', function() {
+                this.style.display = 'none';
+                if (profileFallback) {
+                    profileFallback.style.display = 'flex';
+                }
+            });
+            
+            profileImg.addEventListener('load', function() {
+                if (profileFallback) {
+                    profileFallback.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+@endif

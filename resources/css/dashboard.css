@@ -324,7 +324,7 @@ body {
 /* Wrapper para centrar y distribuir el contenido del dashboard */
 .dashboard-content-wrapper {
     width: 100% !important;
-    max-width: 1200px !important;
+    max-width: 1600px !important; /* aumentado de 1200px para más espacio horizontal */
     margin: 0 auto !important;
     box-sizing: border-box;
     display: flex;
@@ -383,10 +383,10 @@ body {
 
 .content-grid {
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 380px;
     gap: 28px;
     margin: 24px auto 0;
-    max-width: 1100px;
+    max-width: 1400px;
     padding: 0;
     width: 100%;
     box-sizing: border-box;
@@ -453,6 +453,8 @@ body {
 .featured-image-container img {
     width: 100%;
     height: auto;
+    min-height: 400px;
+    max-height: 500px;
     object-fit: cover;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -476,14 +478,44 @@ body {
 
 .presentacion-bloque-media {
     flex-shrink: 0;
-    max-width: 150px;
+    max-width: 250px;
 }
 
 .presentacion-img-pequena {
     width: 100%;
     height: auto;
+    min-height: 200px;
+    max-height: 280px;
+    object-fit: cover;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Estilos específicos para la sección Misión */
+.mission-text {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.mission-image {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 20px;
+}
+
+.presentacion-img-grande-mision {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    max-height: 600px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.presentacion-img-grande-mision:hover {
+    transform: scale(1.02);
 }
 
 /* Bloque Valores (dentro de Card) */
@@ -519,6 +551,9 @@ body {
 .presentacion-video {
     width: 100%;
     height: auto;
+    min-height: 300px;
+    max-height: 400px;
+    object-fit: contain;
     border-radius: 8px;
 }
 
@@ -650,12 +685,13 @@ body {
 .carousel-container {
     position: relative;
     width: 100% !important;
-    max-width: 900px !important;
+    max-width: 1100px !important;
     margin: 40px auto !important;
     overflow: hidden;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     aspect-ratio: 16/9;
+    min-height: 450px;
     display: block;
     box-sizing: border-box;
     padding: 0 !important;

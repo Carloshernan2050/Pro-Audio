@@ -77,10 +77,14 @@
                     $isInvitado = in_array('Invitado', $roles) || !session()->has('usuario_id');
                     $fotoPerfil = null;
                     if ($usuario && $usuario->foto_perfil) {
-                        $path = storage_path('app/public/perfiles/' . $usuario->foto_perfil);
-                        if (file_exists($path)) {
+                        // Si el usuario tiene foto_perfil en la BD, intentar mostrarla
+                        // Verificar múltiples ubicaciones posibles del archivo
+                        $path1 = storage_path('app/public/perfiles/' . $usuario->foto_perfil);
+                        $path2 = public_path('storage/perfiles/' . $usuario->foto_perfil);
+                        
+                        // Intentar mostrar la imagen siempre que exista en BD
+                        // El navegador mostrará un ícono roto si el archivo realmente no existe
                             $fotoPerfil = asset('storage/perfiles/' . $usuario->foto_perfil);
-                        }
                     }
                     $iniciales = $usuario ? strtoupper(substr($usuario->primer_nombre ?? 'U', 0, 1) . substr($usuario->primer_apellido ?? 'S', 0, 1)) : null;
                 @endphp
