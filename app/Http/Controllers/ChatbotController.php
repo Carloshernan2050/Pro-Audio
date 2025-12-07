@@ -28,14 +28,27 @@ class ChatbotController extends Controller
 
     private ChatbotSessionManager $sessionManager;
 
-    public function __construct(
+    private CotizacionController $cotizacionController;
+
+    /**
+     * @param  ChatbotTextProcessor  $textProcessor
+     * @param  ChatbotIntentionDetector  $intentionDetector
+     * @param  ChatbotSuggestionGenerator  $suggestionGenerator
+     * @param  ChatbotResponseBuilder  $responseBuilder
+     * @param  ChatbotMessageProcessor  $messageProcessor
+     * @param  ChatbotSubServicioService  $subServicioService
+     * @param  ChatbotSessionManager  $sessionManager
+     * @param  CotizacionController  $cotizacionController
+     */
+    public function __construct( // NOSONAR - S107: All 8 parameters are required services for chatbot functionality
         ChatbotTextProcessor $textProcessor,
         ChatbotIntentionDetector $intentionDetector,
         ChatbotSuggestionGenerator $suggestionGenerator,
         ChatbotResponseBuilder $responseBuilder,
         ChatbotMessageProcessor $messageProcessor,
         ChatbotSubServicioService $subServicioService,
-        ChatbotSessionManager $sessionManager
+        ChatbotSessionManager $sessionManager,
+        CotizacionController $cotizacionController
     ) {
         $this->textProcessor = $textProcessor;
         $this->intentionDetector = $intentionDetector;
@@ -44,6 +57,7 @@ class ChatbotController extends Controller
         $this->messageProcessor = $messageProcessor;
         $this->subServicioService = $subServicioService;
         $this->sessionManager = $sessionManager;
+        $this->cotizacionController = $cotizacionController;
     }
 
     /**
@@ -259,7 +273,16 @@ class ChatbotController extends Controller
         $selecciones = (array) session('chat.selecciones', []);
         $dias = (int) session('chat.days', 1);
         $personasId = session('usuario_id');
-        $this->sessionManager->guardarCotizacion($personasId, $selecciones, $dias);
+
+        // Usar el método store() del CotizacionController siguiendo estándares RESTful
+        $request = new Request([
+            'selecciones' => $selecciones,
+            'dias' => $dias,
+            'personas_id' => $personasId,
+        ]);
+        $request->setMethod('POST');
+        $this->cotizacionController->store($request);
+
         $this->sessionManager->limpiarSesionChat();
 
         return response()->json([

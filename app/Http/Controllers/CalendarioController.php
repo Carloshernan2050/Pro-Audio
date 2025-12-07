@@ -377,18 +377,19 @@ class CalendarioController extends Controller
 
             if ($reserva) {
                 $reserva->update([
-                    'estado' => 'devuelta',
+                    'estado' => 'finalizada',
                     'calendario_id' => null,
                     'meta' => array_merge($reserva->meta ?? [], [
-                        'devuelta_en' => now()->toDateTimeString(),
+                        'finalizada_en' => now()->toDateTimeString(),
                     ]),
                 ]);
 
                 Historial::create([
+                    'calendario_id' => $calendario->id,
                     'reserva_id' => $reserva->id,
-                    'accion' => 'devuelta',
+                    'accion' => 'finalizada',
                     'confirmado_en' => now(),
-                    'observaciones' => 'Reserva devuelta y evento eliminado del calendario.',
+                    'observaciones' => 'Reserva finalizada y evento eliminado del calendario.',
                 ]);
             }
 

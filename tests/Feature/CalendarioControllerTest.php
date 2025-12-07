@@ -620,7 +620,7 @@ class CalendarioControllerTest extends TestCase
         // Puede retornar 200 o 500 dependiendo de si la tabla historial tiene las columnas
         if ($response->status() === 200) {
             $reserva->refresh();
-            $this->assertEquals('devuelta', $reserva->estado);
+            $this->assertEquals('finalizada', $reserva->estado);
             $this->assertNull($reserva->calendario_id);
             $this->assertDatabaseMissing('calendario', ['id' => $calendario->id]);
         } else {

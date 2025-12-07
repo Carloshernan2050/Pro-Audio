@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cotizacion;
+use App\Models\Historial;
 use App\Models\Servicios;
 use App\Models\SubServicios;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -17,10 +18,19 @@ class AjustesController extends Controller
 
         $groupBy = $request->query('group_by'); // null | 'consulta' | 'dia'
         $requestedTab = $request->query('tab'); // null | servicios | inventario | movimientos | historial | subservicios
+        $historialType = $request->query('historial_type', 'cotizaciones'); // 'cotizaciones' | 'reservas'
 
-        // Cargar cotizaciones con relaciones para el historial
-        $cotizaciones = $this->getCotizaciones();
-        $grouped = $this->groupCotizaciones($cotizaciones, $groupBy);
+        // Cargar cotizaciones o reservas según el tipo seleccionado
+        $cotizaciones = null;
+        $reservas = null;
+        $grouped = null;
+
+        if ($historialType === 'reservas') {
+            $reservas = $this->getReservas();
+        } else {
+            $cotizaciones = $this->getCotizaciones();
+            $grouped = $this->groupCotizaciones($cotizaciones, $groupBy);
+        }
 
         // Tab activo por defecto: si hay agrupación, abrir historial
         $activeTab = $groupBy ? 'historial' : 'servicios';
@@ -32,9 +42,11 @@ class AjustesController extends Controller
             'servicios' => $servicios,
             'subServicios' => $subServicios,
             'cotizaciones' => $cotizaciones,
+            'reservas' => $reservas,
             'groupBy' => $groupBy,
             'groupedCotizaciones' => $grouped,
             'activeTab' => $activeTab,
+            'historialType' => $historialType,
         ]);
     }
 
@@ -71,6 +83,21 @@ class AjustesController extends Controller
     {
         return Cotizacion::with(['persona', 'subServicio.servicio'])
             ->orderBy('fecha_cotizacion', 'desc')
+            ->get();
+    }
+
+    /**
+     * Obtiene las reservas confirmadas del historial con sus relaciones cargadas.
+     * Solo muestra reservas que tienen fecha de confirmación.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getReservas()
+    {
+        return Historial::with(['reserva.persona'])
+            ->whereNotNull('confirmado_en')
+            ->orderBy('confirmado_en', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
     }
 

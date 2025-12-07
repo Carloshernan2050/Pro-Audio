@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../_css/bootstrap.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../_css/nv.d3.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Services</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="CalendarioDataService.php.html#9">App\Services\CalendarioDataService</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#7">App\Services\CalendarioEventService</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#9">App\Services\CalendarioItemService</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#10">App\Services\CalendarioValidationService</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#7">App\Services\ChatbotIntentionDetector</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#7">App\Services\ChatbotMessageProcessor</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#7">App\Services\ChatbotResponseBuilder</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#9">App\Services\ChatbotSessionManager</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#9">App\Services\ChatbotSubServicioService</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#5">App\Services\ChatbotSuggestionGenerator</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#5">App\Services\ChatbotTextProcessor</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="RagService.php.html#7">App\Services\RagService</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ReservaService.php.html#9">App\Services\ReservaService</a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#5">App\Services\ChatbotSuggestionGenerator</a></td><td class="text-right">9506</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#7">App\Services\ChatbotMessageProcessor</a></td><td class="text-right">5550</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#7">App\Services\ChatbotIntentionDetector</a></td><td class="text-right">3306</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#5">App\Services\ChatbotTextProcessor</a></td><td class="text-right">2450</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#7">App\Services\ChatbotResponseBuilder</a></td><td class="text-right">702</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#9">App\Services\CalendarioDataService</a></td><td class="text-right">342</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#7">App\Services\CalendarioEventService</a></td><td class="text-right">342</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#10">App\Services\CalendarioValidationService</a></td><td class="text-right">342</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#9">App\Services\ChatbotSessionManager</a></td><td class="text-right">272</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#9">App\Services\ChatbotSubServicioService</a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#9">App\Services\CalendarioItemService</a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ReservaService.php.html#9">App\Services\ReservaService</a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="RagService.php.html#7">App\Services\RagService</a></td><td class="text-right">12</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="CalendarioDataService.php.html#16"><abbr title="App\Services\CalendarioDataService::eliminarDuplicadosRegistros">eliminarDuplicadosRegistros</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#36"><abbr title="App\Services\CalendarioDataService::generarClaveUnicaRegistro">generarClaveUnicaRegistro</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#48"><abbr title="App\Services\CalendarioDataService::transformarRegistroAData">transformarRegistroAData</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#71"><abbr title="App\Services\CalendarioDataService::obtenerProductosYCantidad">obtenerProductosYCantidad</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#83"><abbr title="App\Services\CalendarioDataService::obtenerProductosDesdeItems">obtenerProductosDesdeItems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#107"><abbr title="App\Services\CalendarioDataService::obtenerProductoFormatoAntiguo">obtenerProductoFormatoAntiguo</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#131"><abbr title="App\Services\CalendarioDataService::obtenerRegistrosUnicos">obtenerRegistrosUnicos</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#144"><abbr title="App\Services\CalendarioDataService::cargarMovimientosEInventarios">cargarMovimientosEInventarios</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#38"><abbr title="App\Services\CalendarioEventService::construirEvento">construirEvento</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#72"><abbr title="App\Services\CalendarioEventService::construirEventoDesdeItems">construirEventoDesdeItems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#98"><abbr title="App\Services\CalendarioEventService::construirEventoFormatoAntiguo">construirEventoFormatoAntiguo</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#129"><abbr title="App\Services\CalendarioEventService::nextPaletteColor">nextPaletteColor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#147"><abbr title="App\Services\CalendarioEventService::resetPaletteCursor">resetPaletteCursor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#14"><abbr title="App\Services\CalendarioItemService::crearItemsCalendario">crearItemsCalendario</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#30"><abbr title="App\Services\CalendarioItemService::obtenerOCrearMovimientoInventario">obtenerOCrearMovimientoInventario</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#55"><abbr title="App\Services\CalendarioItemService::crearItemsCalendarioParaActualizacion">crearItemsCalendarioParaActualizacion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#43"><abbr title="App\Services\CalendarioValidationService::getValidationRulesForItems">getValidationRulesForItems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#58"><abbr title="App\Services\CalendarioValidationService::getValidationMessagesForItems">getValidationMessagesForItems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#81"><abbr title="App\Services\CalendarioValidationService::getValidationRulesForOldFormat">getValidationRulesForOldFormat</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#94"><abbr title="App\Services\CalendarioValidationService::getValidationMessagesForOldFormat">getValidationMessagesForOldFormat</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#112"><abbr title="App\Services\CalendarioValidationService::getValidationRulesForUpdateItems">getValidationRulesForUpdateItems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#128"><abbr title="App\Services\CalendarioValidationService::getValidationMessagesForUpdateItems">getValidationMessagesForUpdateItems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#138"><abbr title="App\Services\CalendarioValidationService::getValidationRulesForUpdateOldFormat">getValidationRulesForUpdateOldFormat</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#153"><abbr title="App\Services\CalendarioValidationService::getValidationMessagesForUpdateOldFormat">getValidationMessagesForUpdateOldFormat</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#168"><abbr title="App\Services\CalendarioValidationService::validarStockParaItems">validarStockParaItems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#197"><abbr title="App\Services\CalendarioValidationService::validarStockParaActualizacion">validarStockParaActualizacion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#224"><abbr title="App\Services\CalendarioValidationService::calcularReservadas">calcularReservadas</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#238"><abbr title="App\Services\CalendarioValidationService::calcularReservadasExcluyendo">calcularReservadasExcluyendo</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#28"><abbr title="App\Services\ChatbotIntentionDetector::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#33"><abbr title="App\Services\ChatbotIntentionDetector::detectarIntenciones">detectarIntenciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#48"><abbr title="App\Services\ChatbotIntentionDetector::clasificarPorTfidf">clasificarPorTfidf</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#63"><abbr title="App\Services\ChatbotIntentionDetector::validarIntencionesContraMensaje">validarIntencionesContraMensaje</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#87"><abbr title="App\Services\ChatbotIntentionDetector::esRelacionado">esRelacionado</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#105"><abbr title="App\Services\ChatbotIntentionDetector::getPalabras">getPalabras</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#150"><abbr title="App\Services\ChatbotIntentionDetector::calcularPuntajesIntenciones">calcularPuntajesIntenciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#165"><abbr title="App\Services\ChatbotIntentionDetector::filtrarIntencionesPorUmbral">filtrarIntencionesPorUmbral</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#185"><abbr title="App\Services\ChatbotIntentionDetector::verificarPalabras">verificarPalabras</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#203"><abbr title="App\Services\ChatbotIntentionDetector::ordenarIntencionesPorPuntaje">ordenarIntencionesPorPuntaje</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#211"><abbr title="App\Services\ChatbotIntentionDetector::obtenerCacheTfidf">obtenerCacheTfidf</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#239"><abbr title="App\Services\ChatbotIntentionDetector::procesarDocumentosParaCache">procesarDocumentosParaCache</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#258"><abbr title="App\Services\ChatbotIntentionDetector::extraerTokens">extraerTokens</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#270"><abbr title="App\Services\ChatbotIntentionDetector::calcularFrecuenciaTerminos">calcularFrecuenciaTerminos</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#280"><abbr title="App\Services\ChatbotIntentionDetector::calcularYObtenerMejorIntencion">calcularYObtenerMejorIntencion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#294"><abbr title="App\Services\ChatbotIntentionDetector::calcularScoreServicio">calcularScoreServicio</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#21"><abbr title="App\Services\ChatbotMessageProcessor::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#35"><abbr title="App\Services\ChatbotMessageProcessor::procesarMensajeTexto">procesarMensajeTexto</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#49"><abbr title="App\Services\ChatbotMessageProcessor::procesarMensajesEspeciales">procesarMensajesEspeciales</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#71"><abbr title="App\Services\ChatbotMessageProcessor::procesarMensajeNormal">procesarMensajeNormal</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#111"><abbr title="App\Services\ChatbotMessageProcessor::esSaludo">esSaludo</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#141"><abbr title="App\Services\ChatbotMessageProcessor::esSolicitudCatalogo">esSolicitudCatalogo</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#147"><abbr title="App\Services\ChatbotMessageProcessor::verificarMensajeFueraDeTema">verificarMensajeFueraDeTema</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#164"><abbr title="App\Services\ChatbotMessageProcessor::detectarIntencionesDelMensaje">detectarIntencionesDelMensaje</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#181"><abbr title="App\Services\ChatbotMessageProcessor::procesarActualizacionDias">procesarActualizacionDias</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#191"><abbr title="App\Services\ChatbotMessageProcessor::actualizarCotizacionConDias">actualizarCotizacionConDias</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#219"><abbr title="App\Services\ChatbotMessageProcessor::combinarIntenciones">combinarIntenciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#241"><abbr title="App\Services\ChatbotMessageProcessor::calcularDiasParaRespuesta">calcularDiasParaRespuesta</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#253"><abbr title="App\Services\ChatbotMessageProcessor::procesarIntencionesDetectadas">procesarIntencionesDetectadas</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#266"><abbr title="App\Services\ChatbotMessageProcessor::responderConIntenciones">responderConIntenciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#286"><abbr title="App\Services\ChatbotMessageProcessor::buscarSubServiciosRelacionados">buscarSubServiciosRelacionados</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#307"><abbr title="App\Services\ChatbotMessageProcessor::responderFueraDeTema">responderFueraDeTema</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#321"><abbr title="App\Services\ChatbotMessageProcessor::obtenerSugerenciasConHints">obtenerSugerenciasConHints</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#9"><abbr title="App\Services\ChatbotResponseBuilder::responderConOpciones">responderConOpciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#18"><abbr title="App\Services\ChatbotResponseBuilder::mostrarCatalogoJson">mostrarCatalogoJson</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#25"><abbr title="App\Services\ChatbotResponseBuilder::responderOpciones">responderOpciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#35"><abbr title="App\Services\ChatbotResponseBuilder::solicitarConfirmacionIntencion">solicitarConfirmacionIntencion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#51"><abbr title="App\Services\ChatbotResponseBuilder::mostrarOpcionesConIntenciones">mostrarOpcionesConIntenciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#68"><abbr title="App\Services\ChatbotResponseBuilder::responderCotizacion">responderCotizacion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#90"><abbr title="App\Services\ChatbotResponseBuilder::construirDetalleCotizacion">construirDetalleCotizacion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#118"><abbr title="App\Services\ChatbotResponseBuilder::subServiciosQuery">subServiciosQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#125"><abbr title="App\Services\ChatbotResponseBuilder::ordenarSubServicios">ordenarSubServicios</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#132"><abbr title="App\Services\ChatbotResponseBuilder::formatearOpciones">formatearOpciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#11"><abbr title="App\Services\ChatbotSessionManager::limpiarSesionChat">limpiarSesionChat</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#18"><abbr title="App\Services\ChatbotSessionManager::guardarCotizacion">guardarCotizacion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#44"><abbr title="App\Services\ChatbotSessionManager::obtenerDiasParaRespuesta">obtenerDiasParaRespuesta</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#56"><abbr title="App\Services\ChatbotSessionManager::extraerDiasDelRequest">extraerDiasDelRequest</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#15"><abbr title="App\Services\ChatbotSubServicioService::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#21"><abbr title="App\Services\ChatbotSubServicioService::obtenerSubServiciosPorIntenciones">obtenerSubServiciosPorIntenciones</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#35"><abbr title="App\Services\ChatbotSubServicioService::obtenerItemsSeleccionados">obtenerItemsSeleccionados</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#47"><abbr title="App\Services\ChatbotSubServicioService::buscarSubServiciosRelacionados">buscarSubServiciosRelacionados</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#17"><abbr title="App\Services\ChatbotSuggestionGenerator::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#22"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerencias">generarSugerencias</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#43"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasPorToken">generarSugerenciasPorToken</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#61"><abbr title="App\Services\ChatbotSuggestionGenerator::fallbackTokenHints">fallbackTokenHints</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#80"><abbr title="App\Services\ChatbotSuggestionGenerator::extraerMejorSugerencia">extraerMejorSugerencia</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#92"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasNombresCompletos">generarSugerenciasNombresCompletos</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#103"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasPorTokenNombresCompletos">generarSugerenciasPorTokenNombresCompletos</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#119"><abbr title="App\Services\ChatbotSuggestionGenerator::obtenerVocabularioCorreccion">obtenerVocabularioCorreccion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#144"><abbr title="App\Services\ChatbotSuggestionGenerator::agregarTokenAlVocabulario">agregarTokenAlVocabulario</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#159"><abbr title="App\Services\ChatbotSuggestionGenerator::extraerTokensDelMensaje">extraerTokensDelMensaje</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#168"><abbr title="App\Services\ChatbotSuggestionGenerator::calcularScoresSugerencias">calcularScoresSugerencias</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#195"><abbr title="App\Services\ChatbotSuggestionGenerator::filtrarTokensValidos">filtrarTokensValidos</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#211"><abbr title="App\Services\ChatbotSuggestionGenerator::encontrarTokenMasRaro">encontrarTokenMasRaro</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#233"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasParaToken">generarSugerenciasParaToken</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#250"><abbr title="App\Services\ChatbotSuggestionGenerator::calcularScoreParaTermino">calcularScoreParaTermino</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#277"><abbr title="App\Services\ChatbotSuggestionGenerator::verificarConceptosRelacionados">verificarConceptosRelacionados</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#285"><abbr title="App\Services\ChatbotSuggestionGenerator::aplicarAjustesScore">aplicarAjustesScore</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#304"><abbr title="App\Services\ChatbotSuggestionGenerator::obtenerConceptosRelacionados">obtenerConceptosRelacionados</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#328"><abbr title="App\Services\ChatbotSuggestionGenerator::encontrarSubcadenaComunMasLarga">encontrarSubcadenaComunMasLarga</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#352"><abbr title="App\Services\ChatbotSuggestionGenerator::buscarSubServiciosPorTokens">buscarSubServiciosPorTokens</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#23"><abbr title="App\Services\ChatbotTextProcessor::normalizarTexto">normalizarTexto</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#33"><abbr title="App\Services\ChatbotTextProcessor::corregirOrtografia">corregirOrtografia</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#98"><abbr title="App\Services\ChatbotTextProcessor::extraerTokens">extraerTokens</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#113"><abbr title="App\Services\ChatbotTextProcessor::esContinuacion">esContinuacion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#132"><abbr title="App\Services\ChatbotTextProcessor::verificarSiEsAgregado">verificarSiEsAgregado</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#144"><abbr title="App\Services\ChatbotTextProcessor::verificarSoloDias">verificarSoloDias</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#152"><abbr title="App\Services\ChatbotTextProcessor::extraerDiasDesdePalabras">extraerDiasDesdePalabras</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#176"><abbr title="App\Services\ChatbotTextProcessor::obtenerVocabularioCorreccion">obtenerVocabularioCorreccion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#212"><abbr title="App\Services\ChatbotTextProcessor::buscarCorreccionCercana">buscarCorreccionCercana</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#237"><abbr title="App\Services\ChatbotTextProcessor::esTerminoValidoParaCorreccion">esTerminoValidoParaCorreccion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#247"><abbr title="App\Services\ChatbotTextProcessor::calcularSimilitud">calcularSimilitud</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#256"><abbr title="App\Services\ChatbotTextProcessor::esMejorCorreccion">esMejorCorreccion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#261"><abbr title="App\Services\ChatbotTextProcessor::validarCorreccion">validarCorreccion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="RagService.php.html#13"><abbr title="App\Services\RagService::recuperarContexto">recuperarContexto</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ReservaService.php.html#14"><abbr title="App\Services\ReservaService::actualizarReservaVinculada">actualizarReservaVinculada</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ReservaService.php.html#41"><abbr title="App\Services\ReservaService::actualizarReservaFormatoAntiguo">actualizarReservaFormatoAntiguo</abbr></a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="ChatbotTextProcessor.php.html#176"><abbr title="App\Services\ChatbotTextProcessor::obtenerVocabularioCorreccion">obtenerVocabularioCorreccion</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#71"><abbr title="App\Services\ChatbotMessageProcessor::procesarMensajeNormal">procesarMensajeNormal</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#164"><abbr title="App\Services\ChatbotMessageProcessor::detectarIntencionesDelMensaje">detectarIntencionesDelMensaje</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#90"><abbr title="App\Services\ChatbotResponseBuilder::construirDetalleCotizacion">construirDetalleCotizacion</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#250"><abbr title="App\Services\ChatbotSuggestionGenerator::calcularScoreParaTermino">calcularScoreParaTermino</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#98"><abbr title="App\Services\CalendarioEventService::construirEventoFormatoAntiguo">construirEventoFormatoAntiguo</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#266"><abbr title="App\Services\ChatbotMessageProcessor::responderConIntenciones">responderConIntenciones</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#56"><abbr title="App\Services\ChatbotSessionManager::extraerDiasDelRequest">extraerDiasDelRequest</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#144"><abbr title="App\Services\ChatbotSuggestionGenerator::agregarTokenAlVocabulario">agregarTokenAlVocabulario</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#168"><abbr title="App\Services\ChatbotSuggestionGenerator::calcularScoresSugerencias">calcularScoresSugerencias</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#195"><abbr title="App\Services\ChatbotSuggestionGenerator::filtrarTokensValidos">filtrarTokensValidos</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#328"><abbr title="App\Services\ChatbotSuggestionGenerator::encontrarSubcadenaComunMasLarga">encontrarSubcadenaComunMasLarga</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#33"><abbr title="App\Services\ChatbotTextProcessor::corregirOrtografia">corregirOrtografia</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#63"><abbr title="App\Services\ChatbotIntentionDetector::validarIntencionesContraMensaje">validarIntencionesContraMensaje</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#294"><abbr title="App\Services\ChatbotIntentionDetector::calcularScoreServicio">calcularScoreServicio</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#147"><abbr title="App\Services\ChatbotMessageProcessor::verificarMensajeFueraDeTema">verificarMensajeFueraDeTema</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#219"><abbr title="App\Services\ChatbotMessageProcessor::combinarIntenciones">combinarIntenciones</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#103"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasPorTokenNombresCompletos">generarSugerenciasPorTokenNombresCompletos</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#119"><abbr title="App\Services\ChatbotSuggestionGenerator::obtenerVocabularioCorreccion">obtenerVocabularioCorreccion</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#211"><abbr title="App\Services\ChatbotSuggestionGenerator::encontrarTokenMasRaro">encontrarTokenMasRaro</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#352"><abbr title="App\Services\ChatbotSuggestionGenerator::buscarSubServiciosPorTokens">buscarSubServiciosPorTokens</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#72"><abbr title="App\Services\CalendarioEventService::construirEventoDesdeItems">construirEventoDesdeItems</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#150"><abbr title="App\Services\ChatbotIntentionDetector::calcularPuntajesIntenciones">calcularPuntajesIntenciones</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#165"><abbr title="App\Services\ChatbotIntentionDetector::filtrarIntencionesPorUmbral">filtrarIntencionesPorUmbral</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#185"><abbr title="App\Services\ChatbotIntentionDetector::verificarPalabras">verificarPalabras</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#191"><abbr title="App\Services\ChatbotMessageProcessor::actualizarCotizacionConDias">actualizarCotizacionConDias</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#241"><abbr title="App\Services\ChatbotMessageProcessor::calcularDiasParaRespuesta">calcularDiasParaRespuesta</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#132"><abbr title="App\Services\ChatbotResponseBuilder::formatearOpciones">formatearOpciones</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#18"><abbr title="App\Services\ChatbotSessionManager::guardarCotizacion">guardarCotizacion</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#47"><abbr title="App\Services\ChatbotSubServicioService::buscarSubServiciosRelacionados">buscarSubServiciosRelacionados</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#43"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasPorToken">generarSugerenciasPorToken</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#61"><abbr title="App\Services\ChatbotSuggestionGenerator::fallbackTokenHints">fallbackTokenHints</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#212"><abbr title="App\Services\ChatbotTextProcessor::buscarCorreccionCercana">buscarCorreccionCercana</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#83"><abbr title="App\Services\CalendarioDataService::obtenerProductosDesdeItems">obtenerProductosDesdeItems</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#168"><abbr title="App\Services\CalendarioValidationService::validarStockParaItems">validarStockParaItems</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="CalendarioValidationService.php.html#197"><abbr title="App\Services\CalendarioValidationService::validarStockParaActualizacion">validarStockParaActualizacion</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#48"><abbr title="App\Services\ChatbotIntentionDetector::clasificarPorTfidf">clasificarPorTfidf</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#87"><abbr title="App\Services\ChatbotIntentionDetector::esRelacionado">esRelacionado</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#211"><abbr title="App\Services\ChatbotIntentionDetector::obtenerCacheTfidf">obtenerCacheTfidf</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#280"><abbr title="App\Services\ChatbotIntentionDetector::calcularYObtenerMejorIntencion">calcularYObtenerMejorIntencion</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#49"><abbr title="App\Services\ChatbotMessageProcessor::procesarMensajesEspeciales">procesarMensajesEspeciales</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#111"><abbr title="App\Services\ChatbotMessageProcessor::esSaludo">esSaludo</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#181"><abbr title="App\Services\ChatbotMessageProcessor::procesarActualizacionDias">procesarActualizacionDias</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#253"><abbr title="App\Services\ChatbotMessageProcessor::procesarIntencionesDetectadas">procesarIntencionesDetectadas</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#35"><abbr title="App\Services\ChatbotResponseBuilder::solicitarConfirmacionIntencion">solicitarConfirmacionIntencion</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#22"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerencias">generarSugerencias</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#80"><abbr title="App\Services\ChatbotSuggestionGenerator::extraerMejorSugerencia">extraerMejorSugerencia</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#277"><abbr title="App\Services\ChatbotSuggestionGenerator::verificarConceptosRelacionados">verificarConceptosRelacionados</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#285"><abbr title="App\Services\ChatbotSuggestionGenerator::aplicarAjustesScore">aplicarAjustesScore</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#113"><abbr title="App\Services\ChatbotTextProcessor::esContinuacion">esContinuacion</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#261"><abbr title="App\Services\ChatbotTextProcessor::validarCorreccion">validarCorreccion</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#16"><abbr title="App\Services\CalendarioDataService::eliminarDuplicadosRegistros">eliminarDuplicadosRegistros</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#71"><abbr title="App\Services\CalendarioDataService::obtenerProductosYCantidad">obtenerProductosYCantidad</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#107"><abbr title="App\Services\CalendarioDataService::obtenerProductoFormatoAntiguo">obtenerProductoFormatoAntiguo</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#38"><abbr title="App\Services\CalendarioEventService::construirEvento">construirEvento</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#30"><abbr title="App\Services\CalendarioItemService::obtenerOCrearMovimientoInventario">obtenerOCrearMovimientoInventario</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#239"><abbr title="App\Services\ChatbotIntentionDetector::procesarDocumentosParaCache">procesarDocumentosParaCache</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#258"><abbr title="App\Services\ChatbotIntentionDetector::extraerTokens">extraerTokens</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#35"><abbr title="App\Services\ChatbotMessageProcessor::procesarMensajeTexto">procesarMensajeTexto</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#286"><abbr title="App\Services\ChatbotMessageProcessor::buscarSubServiciosRelacionados">buscarSubServiciosRelacionados</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotResponseBuilder.php.html#51"><abbr title="App\Services\ChatbotResponseBuilder::mostrarOpcionesConIntenciones">mostrarOpcionesConIntenciones</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotSessionManager.php.html#44"><abbr title="App\Services\ChatbotSessionManager::obtenerDiasParaRespuesta">obtenerDiasParaRespuesta</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#92"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasNombresCompletos">generarSugerenciasNombresCompletos</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#159"><abbr title="App\Services\ChatbotSuggestionGenerator::extraerTokensDelMensaje">extraerTokensDelMensaje</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotSuggestionGenerator.php.html#233"><abbr title="App\Services\ChatbotSuggestionGenerator::generarSugerenciasParaToken">generarSugerenciasParaToken</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#98"><abbr title="App\Services\ChatbotTextProcessor::extraerTokens">extraerTokens</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#132"><abbr title="App\Services\ChatbotTextProcessor::verificarSiEsAgregado">verificarSiEsAgregado</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#152"><abbr title="App\Services\ChatbotTextProcessor::extraerDiasDesdePalabras">extraerDiasDesdePalabras</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#256"><abbr title="App\Services\ChatbotTextProcessor::esMejorCorreccion">esMejorCorreccion</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="RagService.php.html#13"><abbr title="App\Services\RagService::recuperarContexto">recuperarContexto</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ReservaService.php.html#14"><abbr title="App\Services\ReservaService::actualizarReservaVinculada">actualizarReservaVinculada</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="CalendarioDataService.php.html#48"><abbr title="App\Services\CalendarioDataService::transformarRegistroAData">transformarRegistroAData</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="CalendarioEventService.php.html#129"><abbr title="App\Services\CalendarioEventService::nextPaletteColor">nextPaletteColor</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#14"><abbr title="App\Services\CalendarioItemService::crearItemsCalendario">crearItemsCalendario</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="CalendarioItemService.php.html#55"><abbr title="App\Services\CalendarioItemService::crearItemsCalendarioParaActualizacion">crearItemsCalendarioParaActualizacion</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#33"><abbr title="App\Services\ChatbotIntentionDetector::detectarIntenciones">detectarIntenciones</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#105"><abbr title="App\Services\ChatbotIntentionDetector::getPalabras">getPalabras</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotIntentionDetector.php.html#270"><abbr title="App\Services\ChatbotIntentionDetector::calcularFrecuenciaTerminos">calcularFrecuenciaTerminos</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#141"><abbr title="App\Services\ChatbotMessageProcessor::esSolicitudCatalogo">esSolicitudCatalogo</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotMessageProcessor.php.html#321"><abbr title="App\Services\ChatbotMessageProcessor::obtenerSugerenciasConHints">obtenerSugerenciasConHints</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#21"><abbr title="App\Services\ChatbotSubServicioService::obtenerSubServiciosPorIntenciones">obtenerSubServiciosPorIntenciones</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotSubServicioService.php.html#35"><abbr title="App\Services\ChatbotSubServicioService::obtenerItemsSeleccionados">obtenerItemsSeleccionados</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#144"><abbr title="App\Services\ChatbotTextProcessor::verificarSoloDias">verificarSoloDias</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#237"><abbr title="App\Services\ChatbotTextProcessor::esTerminoValidoParaCorreccion">esTerminoValidoParaCorreccion</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChatbotTextProcessor.php.html#247"><abbr title="App\Services\ChatbotTextProcessor::calcularSimilitud">calcularSimilitud</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ReservaService.php.html#41"><abbr title="App\Services\ReservaService::actualizarReservaFormatoAntiguo">actualizarReservaFormatoAntiguo</abbr></a></td><td class="text-right">6</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 11.0.11</a> using <a href="https://www.php.net/" target="_top">PHP 8.4.15</a> and <a href="https://phpunit.de/">PHPUnit 11.5.44</a> at Sun Dec 7 19:44:55 UTC 2025.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../_js/jquery.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../_js/d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../_js/nv.d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([13,0,0,0,0,0,0,0,0,0,0,0], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([115,0,0,0,0,0,0,0,0,0,0,0], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[0,18,"<a href=\"CalendarioDataService.php.html#9\">App\\Services\\CalendarioDataService<\/a>"],[0,18,"<a href=\"CalendarioEventService.php.html#7\">App\\Services\\CalendarioEventService<\/a>"],[0,7,"<a href=\"CalendarioItemService.php.html#9\">App\\Services\\CalendarioItemService<\/a>"],[0,18,"<a href=\"CalendarioValidationService.php.html#10\">App\\Services\\CalendarioValidationService<\/a>"],[0,57,"<a href=\"ChatbotIntentionDetector.php.html#7\">App\\Services\\ChatbotIntentionDetector<\/a>"],[0,74,"<a href=\"ChatbotMessageProcessor.php.html#7\">App\\Services\\ChatbotMessageProcessor<\/a>"],[0,26,"<a href=\"ChatbotResponseBuilder.php.html#7\">App\\Services\\ChatbotResponseBuilder<\/a>"],[0,16,"<a href=\"ChatbotSessionManager.php.html#9\">App\\Services\\ChatbotSessionManager<\/a>"],[0,10,"<a href=\"ChatbotSubServicioService.php.html#9\">App\\Services\\ChatbotSubServicioService<\/a>"],[0,97,"<a href=\"ChatbotSuggestionGenerator.php.html#5\">App\\Services\\ChatbotSuggestionGenerator<\/a>"],[0,49,"<a href=\"ChatbotTextProcessor.php.html#5\">App\\Services\\ChatbotTextProcessor<\/a>"],[0,3,"<a href=\"RagService.php.html#7\">App\\Services\\RagService<\/a>"],[0,5,"<a href=\"ReservaService.php.html#9\">App\\Services\\ReservaService<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[0,3,"<a href=\"CalendarioDataService.php.html#16\">App\\Services\\CalendarioDataService::eliminarDuplicadosRegistros<\/a>"],[0,1,"<a href=\"CalendarioDataService.php.html#36\">App\\Services\\CalendarioDataService::generarClaveUnicaRegistro<\/a>"],[0,2,"<a href=\"CalendarioDataService.php.html#48\">App\\Services\\CalendarioDataService::transformarRegistroAData<\/a>"],[0,3,"<a href=\"CalendarioDataService.php.html#71\">App\\Services\\CalendarioDataService::obtenerProductosYCantidad<\/a>"],[0,4,"<a href=\"CalendarioDataService.php.html#83\">App\\Services\\CalendarioDataService::obtenerProductosDesdeItems<\/a>"],[0,3,"<a href=\"CalendarioDataService.php.html#107\">App\\Services\\CalendarioDataService::obtenerProductoFormatoAntiguo<\/a>"],[0,1,"<a href=\"CalendarioDataService.php.html#131\">App\\Services\\CalendarioDataService::obtenerRegistrosUnicos<\/a>"],[0,1,"<a href=\"CalendarioDataService.php.html#144\">App\\Services\\CalendarioDataService::cargarMovimientosEInventarios<\/a>"],[0,3,"<a href=\"CalendarioEventService.php.html#38\">App\\Services\\CalendarioEventService::construirEvento<\/a>"],[0,5,"<a href=\"CalendarioEventService.php.html#72\">App\\Services\\CalendarioEventService::construirEventoDesdeItems<\/a>"],[0,7,"<a href=\"CalendarioEventService.php.html#98\">App\\Services\\CalendarioEventService::construirEventoFormatoAntiguo<\/a>"],[0,2,"<a href=\"CalendarioEventService.php.html#129\">App\\Services\\CalendarioEventService::nextPaletteColor<\/a>"],[0,1,"<a href=\"CalendarioEventService.php.html#147\">App\\Services\\CalendarioEventService::resetPaletteCursor<\/a>"],[0,2,"<a href=\"CalendarioItemService.php.html#14\">App\\Services\\CalendarioItemService::crearItemsCalendario<\/a>"],[0,3,"<a href=\"CalendarioItemService.php.html#30\">App\\Services\\CalendarioItemService::obtenerOCrearMovimientoInventario<\/a>"],[0,2,"<a href=\"CalendarioItemService.php.html#55\">App\\Services\\CalendarioItemService::crearItemsCalendarioParaActualizacion<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#43\">App\\Services\\CalendarioValidationService::getValidationRulesForItems<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#58\">App\\Services\\CalendarioValidationService::getValidationMessagesForItems<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#81\">App\\Services\\CalendarioValidationService::getValidationRulesForOldFormat<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#94\">App\\Services\\CalendarioValidationService::getValidationMessagesForOldFormat<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#112\">App\\Services\\CalendarioValidationService::getValidationRulesForUpdateItems<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#128\">App\\Services\\CalendarioValidationService::getValidationMessagesForUpdateItems<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#138\">App\\Services\\CalendarioValidationService::getValidationRulesForUpdateOldFormat<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#153\">App\\Services\\CalendarioValidationService::getValidationMessagesForUpdateOldFormat<\/a>"],[0,4,"<a href=\"CalendarioValidationService.php.html#168\">App\\Services\\CalendarioValidationService::validarStockParaItems<\/a>"],[0,4,"<a href=\"CalendarioValidationService.php.html#197\">App\\Services\\CalendarioValidationService::validarStockParaActualizacion<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#224\">App\\Services\\CalendarioValidationService::calcularReservadas<\/a>"],[0,1,"<a href=\"CalendarioValidationService.php.html#238\">App\\Services\\CalendarioValidationService::calcularReservadasExcluyendo<\/a>"],[0,1,"<a href=\"ChatbotIntentionDetector.php.html#28\">App\\Services\\ChatbotIntentionDetector::__construct<\/a>"],[0,2,"<a href=\"ChatbotIntentionDetector.php.html#33\">App\\Services\\ChatbotIntentionDetector::detectarIntenciones<\/a>"],[0,4,"<a href=\"ChatbotIntentionDetector.php.html#48\">App\\Services\\ChatbotIntentionDetector::clasificarPorTfidf<\/a>"],[0,6,"<a href=\"ChatbotIntentionDetector.php.html#63\">App\\Services\\ChatbotIntentionDetector::validarIntencionesContraMensaje<\/a>"],[0,4,"<a href=\"ChatbotIntentionDetector.php.html#87\">App\\Services\\ChatbotIntentionDetector::esRelacionado<\/a>"],[0,2,"<a href=\"ChatbotIntentionDetector.php.html#105\">App\\Services\\ChatbotIntentionDetector::getPalabras<\/a>"],[0,5,"<a href=\"ChatbotIntentionDetector.php.html#150\">App\\Services\\ChatbotIntentionDetector::calcularPuntajesIntenciones<\/a>"],[0,5,"<a href=\"ChatbotIntentionDetector.php.html#165\">App\\Services\\ChatbotIntentionDetector::filtrarIntencionesPorUmbral<\/a>"],[0,5,"<a href=\"ChatbotIntentionDetector.php.html#185\">App\\Services\\ChatbotIntentionDetector::verificarPalabras<\/a>"],[0,1,"<a href=\"ChatbotIntentionDetector.php.html#203\">App\\Services\\ChatbotIntentionDetector::ordenarIntencionesPorPuntaje<\/a>"],[0,4,"<a href=\"ChatbotIntentionDetector.php.html#211\">App\\Services\\ChatbotIntentionDetector::obtenerCacheTfidf<\/a>"],[0,3,"<a href=\"ChatbotIntentionDetector.php.html#239\">App\\Services\\ChatbotIntentionDetector::procesarDocumentosParaCache<\/a>"],[0,3,"<a href=\"ChatbotIntentionDetector.php.html#258\">App\\Services\\ChatbotIntentionDetector::extraerTokens<\/a>"],[0,2,"<a href=\"ChatbotIntentionDetector.php.html#270\">App\\Services\\ChatbotIntentionDetector::calcularFrecuenciaTerminos<\/a>"],[0,4,"<a href=\"ChatbotIntentionDetector.php.html#280\">App\\Services\\ChatbotIntentionDetector::calcularYObtenerMejorIntencion<\/a>"],[0,6,"<a href=\"ChatbotIntentionDetector.php.html#294\">App\\Services\\ChatbotIntentionDetector::calcularScoreServicio<\/a>"],[0,1,"<a href=\"ChatbotMessageProcessor.php.html#21\">App\\Services\\ChatbotMessageProcessor::__construct<\/a>"],[0,3,"<a href=\"ChatbotMessageProcessor.php.html#35\">App\\Services\\ChatbotMessageProcessor::procesarMensajeTexto<\/a>"],[0,4,"<a href=\"ChatbotMessageProcessor.php.html#49\">App\\Services\\ChatbotMessageProcessor::procesarMensajesEspeciales<\/a>"],[0,9,"<a href=\"ChatbotMessageProcessor.php.html#71\">App\\Services\\ChatbotMessageProcessor::procesarMensajeNormal<\/a>"],[0,4,"<a href=\"ChatbotMessageProcessor.php.html#111\">App\\Services\\ChatbotMessageProcessor::esSaludo<\/a>"],[0,2,"<a href=\"ChatbotMessageProcessor.php.html#141\">App\\Services\\ChatbotMessageProcessor::esSolicitudCatalogo<\/a>"],[0,6,"<a href=\"ChatbotMessageProcessor.php.html#147\">App\\Services\\ChatbotMessageProcessor::verificarMensajeFueraDeTema<\/a>"],[0,8,"<a href=\"ChatbotMessageProcessor.php.html#164\">App\\Services\\ChatbotMessageProcessor::detectarIntencionesDelMensaje<\/a>"],[0,4,"<a href=\"ChatbotMessageProcessor.php.html#181\">App\\Services\\ChatbotMessageProcessor::procesarActualizacionDias<\/a>"],[0,5,"<a href=\"ChatbotMessageProcessor.php.html#191\">App\\Services\\ChatbotMessageProcessor::actualizarCotizacionConDias<\/a>"],[0,6,"<a href=\"ChatbotMessageProcessor.php.html#219\">App\\Services\\ChatbotMessageProcessor::combinarIntenciones<\/a>"],[0,5,"<a href=\"ChatbotMessageProcessor.php.html#241\">App\\Services\\ChatbotMessageProcessor::calcularDiasParaRespuesta<\/a>"],[0,4,"<a href=\"ChatbotMessageProcessor.php.html#253\">App\\Services\\ChatbotMessageProcessor::procesarIntencionesDetectadas<\/a>"],[0,7,"<a href=\"ChatbotMessageProcessor.php.html#266\">App\\Services\\ChatbotMessageProcessor::responderConIntenciones<\/a>"],[0,3,"<a href=\"ChatbotMessageProcessor.php.html#286\">App\\Services\\ChatbotMessageProcessor::buscarSubServiciosRelacionados<\/a>"],[0,1,"<a href=\"ChatbotMessageProcessor.php.html#307\">App\\Services\\ChatbotMessageProcessor::responderFueraDeTema<\/a>"],[0,2,"<a href=\"ChatbotMessageProcessor.php.html#321\">App\\Services\\ChatbotMessageProcessor::obtenerSugerenciasConHints<\/a>"],[0,1,"<a href=\"ChatbotResponseBuilder.php.html#9\">App\\Services\\ChatbotResponseBuilder::responderConOpciones<\/a>"],[0,1,"<a href=\"ChatbotResponseBuilder.php.html#18\">App\\Services\\ChatbotResponseBuilder::mostrarCatalogoJson<\/a>"],[0,1,"<a href=\"ChatbotResponseBuilder.php.html#25\">App\\Services\\ChatbotResponseBuilder::responderOpciones<\/a>"],[0,4,"<a href=\"ChatbotResponseBuilder.php.html#35\">App\\Services\\ChatbotResponseBuilder::solicitarConfirmacionIntencion<\/a>"],[0,3,"<a href=\"ChatbotResponseBuilder.php.html#51\">App\\Services\\ChatbotResponseBuilder::mostrarOpcionesConIntenciones<\/a>"],[0,1,"<a href=\"ChatbotResponseBuilder.php.html#68\">App\\Services\\ChatbotResponseBuilder::responderCotizacion<\/a>"],[0,8,"<a href=\"ChatbotResponseBuilder.php.html#90\">App\\Services\\ChatbotResponseBuilder::construirDetalleCotizacion<\/a>"],[0,1,"<a href=\"ChatbotResponseBuilder.php.html#118\">App\\Services\\ChatbotResponseBuilder::subServiciosQuery<\/a>"],[0,1,"<a href=\"ChatbotResponseBuilder.php.html#125\">App\\Services\\ChatbotResponseBuilder::ordenarSubServicios<\/a>"],[0,5,"<a href=\"ChatbotResponseBuilder.php.html#132\">App\\Services\\ChatbotResponseBuilder::formatearOpciones<\/a>"],[0,1,"<a href=\"ChatbotSessionManager.php.html#11\">App\\Services\\ChatbotSessionManager::limpiarSesionChat<\/a>"],[0,5,"<a href=\"ChatbotSessionManager.php.html#18\">App\\Services\\ChatbotSessionManager::guardarCotizacion<\/a>"],[0,3,"<a href=\"ChatbotSessionManager.php.html#44\">App\\Services\\ChatbotSessionManager::obtenerDiasParaRespuesta<\/a>"],[0,7,"<a href=\"ChatbotSessionManager.php.html#56\">App\\Services\\ChatbotSessionManager::extraerDiasDelRequest<\/a>"],[0,1,"<a href=\"ChatbotSubServicioService.php.html#15\">App\\Services\\ChatbotSubServicioService::__construct<\/a>"],[0,2,"<a href=\"ChatbotSubServicioService.php.html#21\">App\\Services\\ChatbotSubServicioService::obtenerSubServiciosPorIntenciones<\/a>"],[0,2,"<a href=\"ChatbotSubServicioService.php.html#35\">App\\Services\\ChatbotSubServicioService::obtenerItemsSeleccionados<\/a>"],[0,5,"<a href=\"ChatbotSubServicioService.php.html#47\">App\\Services\\ChatbotSubServicioService::buscarSubServiciosRelacionados<\/a>"],[0,1,"<a href=\"ChatbotSuggestionGenerator.php.html#17\">App\\Services\\ChatbotSuggestionGenerator::__construct<\/a>"],[0,4,"<a href=\"ChatbotSuggestionGenerator.php.html#22\">App\\Services\\ChatbotSuggestionGenerator::generarSugerencias<\/a>"],[0,5,"<a href=\"ChatbotSuggestionGenerator.php.html#43\">App\\Services\\ChatbotSuggestionGenerator::generarSugerenciasPorToken<\/a>"],[0,5,"<a href=\"ChatbotSuggestionGenerator.php.html#61\">App\\Services\\ChatbotSuggestionGenerator::fallbackTokenHints<\/a>"],[0,4,"<a href=\"ChatbotSuggestionGenerator.php.html#80\">App\\Services\\ChatbotSuggestionGenerator::extraerMejorSugerencia<\/a>"],[0,3,"<a href=\"ChatbotSuggestionGenerator.php.html#92\">App\\Services\\ChatbotSuggestionGenerator::generarSugerenciasNombresCompletos<\/a>"],[0,6,"<a href=\"ChatbotSuggestionGenerator.php.html#103\">App\\Services\\ChatbotSuggestionGenerator::generarSugerenciasPorTokenNombresCompletos<\/a>"],[0,6,"<a href=\"ChatbotSuggestionGenerator.php.html#119\">App\\Services\\ChatbotSuggestionGenerator::obtenerVocabularioCorreccion<\/a>"],[0,7,"<a href=\"ChatbotSuggestionGenerator.php.html#144\">App\\Services\\ChatbotSuggestionGenerator::agregarTokenAlVocabulario<\/a>"],[0,3,"<a href=\"ChatbotSuggestionGenerator.php.html#159\">App\\Services\\ChatbotSuggestionGenerator::extraerTokensDelMensaje<\/a>"],[0,7,"<a href=\"ChatbotSuggestionGenerator.php.html#168\">App\\Services\\ChatbotSuggestionGenerator::calcularScoresSugerencias<\/a>"],[0,7,"<a href=\"ChatbotSuggestionGenerator.php.html#195\">App\\Services\\ChatbotSuggestionGenerator::filtrarTokensValidos<\/a>"],[0,6,"<a href=\"ChatbotSuggestionGenerator.php.html#211\">App\\Services\\ChatbotSuggestionGenerator::encontrarTokenMasRaro<\/a>"],[0,3,"<a href=\"ChatbotSuggestionGenerator.php.html#233\">App\\Services\\ChatbotSuggestionGenerator::generarSugerenciasParaToken<\/a>"],[0,8,"<a href=\"ChatbotSuggestionGenerator.php.html#250\">App\\Services\\ChatbotSuggestionGenerator::calcularScoreParaTermino<\/a>"],[0,4,"<a href=\"ChatbotSuggestionGenerator.php.html#277\">App\\Services\\ChatbotSuggestionGenerator::verificarConceptosRelacionados<\/a>"],[0,4,"<a href=\"ChatbotSuggestionGenerator.php.html#285\">App\\Services\\ChatbotSuggestionGenerator::aplicarAjustesScore<\/a>"],[0,1,"<a href=\"ChatbotSuggestionGenerator.php.html#304\">App\\Services\\ChatbotSuggestionGenerator::obtenerConceptosRelacionados<\/a>"],[0,7,"<a href=\"ChatbotSuggestionGenerator.php.html#328\">App\\Services\\ChatbotSuggestionGenerator::encontrarSubcadenaComunMasLarga<\/a>"],[0,6,"<a href=\"ChatbotSuggestionGenerator.php.html#352\">App\\Services\\ChatbotSuggestionGenerator::buscarSubServiciosPorTokens<\/a>"],[0,1,"<a href=\"ChatbotTextProcessor.php.html#23\">App\\Services\\ChatbotTextProcessor::normalizarTexto<\/a>"],[0,7,"<a href=\"ChatbotTextProcessor.php.html#33\">App\\Services\\ChatbotTextProcessor::corregirOrtografia<\/a>"],[0,3,"<a href=\"ChatbotTextProcessor.php.html#98\">App\\Services\\ChatbotTextProcessor::extraerTokens<\/a>"],[0,4,"<a href=\"ChatbotTextProcessor.php.html#113\">App\\Services\\ChatbotTextProcessor::esContinuacion<\/a>"],[0,3,"<a href=\"ChatbotTextProcessor.php.html#132\">App\\Services\\ChatbotTextProcessor::verificarSiEsAgregado<\/a>"],[0,2,"<a href=\"ChatbotTextProcessor.php.html#144\">App\\Services\\ChatbotTextProcessor::verificarSoloDias<\/a>"],[0,3,"<a href=\"ChatbotTextProcessor.php.html#152\">App\\Services\\ChatbotTextProcessor::extraerDiasDesdePalabras<\/a>"],[0,10,"<a href=\"ChatbotTextProcessor.php.html#176\">App\\Services\\ChatbotTextProcessor::obtenerVocabularioCorreccion<\/a>"],[0,5,"<a href=\"ChatbotTextProcessor.php.html#212\">App\\Services\\ChatbotTextProcessor::buscarCorreccionCercana<\/a>"],[0,2,"<a href=\"ChatbotTextProcessor.php.html#237\">App\\Services\\ChatbotTextProcessor::esTerminoValidoParaCorreccion<\/a>"],[0,2,"<a href=\"ChatbotTextProcessor.php.html#247\">App\\Services\\ChatbotTextProcessor::calcularSimilitud<\/a>"],[0,3,"<a href=\"ChatbotTextProcessor.php.html#256\">App\\Services\\ChatbotTextProcessor::esMejorCorreccion<\/a>"],[0,4,"<a href=\"ChatbotTextProcessor.php.html#261\">App\\Services\\ChatbotTextProcessor::validarCorreccion<\/a>"],[0,3,"<a href=\"RagService.php.html#13\">App\\Services\\RagService::recuperarContexto<\/a>"],[0,3,"<a href=\"ReservaService.php.html#14\">App\\Services\\ReservaService::actualizarReservaVinculada<\/a>"],[0,2,"<a href=\"ReservaService.php.html#41\">App\\Services\\ReservaService::actualizarReservaFormatoAntiguo<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

@@ -220,6 +220,7 @@ class ReservaController extends Controller
         ]);
 
         Historial::create([
+            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => self::ACCION_CONFIRMADA,
             'confirmado_en' => now(),

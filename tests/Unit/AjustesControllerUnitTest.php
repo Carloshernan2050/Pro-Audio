@@ -612,4 +612,105 @@ class AjustesControllerUnitTest extends TestCase
         $this->assertEquals('dia', $data['groupBy']);
         $this->assertEquals('servicios', $data['activeTab']); // El tab tiene prioridad
     }
+
+    public function test_index_con_historial_type_reservas(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TELEFONO_PRUEBA,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        // Crear una reserva
+        $reserva = \App\Models\Reserva::create([
+            'personas_id' => $usuario->id,
+            'servicio' => 'Test Service',
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDay(),
+            'estado' => 'confirmada',
+        ]);
+
+        // Crear un historial con confirmado_en para que sea visible
+        \App\Models\Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => 'confirmada',
+            'confirmado_en' => now(),
+        ]);
+
+        $request = Request::create(self::ROUTE_AJUSTES, 'GET', [
+            'historial_type' => 'reservas',
+        ]);
+        $response = $this->controller->index($request);
+
+        $this->assertNotNull($response);
+        $data = $response->getData();
+        $this->assertArrayHasKey('reservas', $data);
+        $this->assertArrayHasKey('historialType', $data);
+        $this->assertEquals('reservas', $data['historialType']);
+        $this->assertNotNull($data['reservas']);
+    }
+
+    public function test_get_reservas_metodo_privado(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TELEFONO_PRUEBA,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => 'password',
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        // Crear una reserva
+        $reserva = \App\Models\Reserva::create([
+            'personas_id' => $usuario->id,
+            'servicio' => 'Test Service',
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDay(),
+            'estado' => 'confirmada',
+        ]);
+
+        // Crear un historial con confirmado_en para que sea visible
+        \App\Models\Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => 'confirmada',
+            'confirmado_en' => now(),
+        ]);
+
+        // Crear otro historial sin confirmado_en (no debería aparecer)
+        \App\Models\Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => 'pendiente',
+            'confirmado_en' => null,
+        ]);
+
+        $reservas = $this->invokePrivateMethod($this->controller, 'getReservas');
+
+        $this->assertNotNull($reservas);
+        $this->assertGreaterThanOrEqual(1, $reservas->count());
+        // Verificar que solo se obtienen las reservas con confirmado_en
+        foreach ($reservas as $historial) {
+            $this->assertNotNull($historial->confirmado_en);
+        }
+    }
+
+    public function test_get_reservas_metodo_privado_sin_reservas_confirmadas(): void
+    {
+        // Crear historial sin confirmado_en (no debería aparecer)
+        \App\Models\Historial::create([
+            'reserva_id' => null,
+            'accion' => 'pendiente',
+            'confirmado_en' => null,
+        ]);
+
+        $reservas = $this->invokePrivateMethod($this->controller, 'getReservas');
+
+        $this->assertNotNull($reservas);
+        $this->assertEquals(0, $reservas->count());
+    }
 }
