@@ -35,7 +35,8 @@ class HistorialTest extends TestCase
 
     private const ROUTE_HISTORIAL = '/historial';
 
-    private const ROUTE_HISTORIAL_PDF = '/historial/pdf';
+    private const ROUTE_HISTORIAL_PDF_RESERVAS = '/historial/pdf/reservas';
+    private const ROUTE_HISTORIAL_PDF_COTIZACIONES = '/historial/pdf/cotizaciones';
 
     protected function setUp(): void
     {
@@ -176,19 +177,9 @@ class HistorialTest extends TestCase
     // TESTS PARA EXPORTAR PDF
     // ============================================
 
-    public function test_export_pdf_genera_descarga(): void
+    public function test_export_pdf_reservas_genera_descarga(): void
     {
         $usuario = $this->crearUsuarioAutenticado();
-
-        $calendario = Calendario::create([
-            'personas_id' => $usuario->id,
-            'fecha' => now(),
-            'descripcion_evento' => self::TEST_EVENTO,
-            'fecha_inicio' => now(),
-            'fecha_fin' => now()->addDays(1),
-            'evento' => 'test',
-            'cantidad' => 1,
-        ]);
 
         $reserva = Reserva::create([
             'personas_id' => $usuario->id,
@@ -199,23 +190,64 @@ class HistorialTest extends TestCase
         ]);
 
         Historial::create([
-            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
-            'accion' => 'creada',
+            'accion' => 'confirmada',
+            'confirmado_en' => now(),
         ]);
 
-        $response = $this->get(self::ROUTE_HISTORIAL_PDF);
+        $response = $this->get(self::ROUTE_HISTORIAL_PDF_RESERVAS);
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/pdf');
-        $response->assertHeader('Content-Disposition', 'attachment; filename=historial.pdf');
+        $this->assertStringContainsString('historial_reservas.pdf', $response->headers->get('Content-Disposition'));
     }
 
-    public function test_export_pdf_sin_historial(): void
+    public function test_export_pdf_reservas_sin_historial(): void
     {
         $this->crearUsuarioAutenticado();
 
-        $response = $this->get(self::ROUTE_HISTORIAL_PDF);
+        $response = $this->get(self::ROUTE_HISTORIAL_PDF_RESERVAS);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+    }
+
+    public function test_export_pdf_cotizaciones_genera_descarga(): void
+    {
+        $usuario = $this->crearUsuarioAutenticado();
+
+        $servicio = \App\Models\Servicios::create([
+            'nombre_servicio' => 'Test Servicio',
+            'descripcion' => 'Test descripción',
+            'icono' => 'test-icon',
+        ]);
+
+        $subServicio = \App\Models\SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Test SubServicio',
+            'descripcion' => 'Test descripción',
+            'precio' => 100000,
+        ]);
+
+        \App\Models\Cotizacion::create([
+            'personas_id' => $usuario->id,
+            'sub_servicios_id' => $subServicio->id,
+            'monto' => 100000,
+            'fecha_cotizacion' => now(),
+        ]);
+
+        $response = $this->get(self::ROUTE_HISTORIAL_PDF_COTIZACIONES);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringContainsString('historial_cotizaciones.pdf', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_export_pdf_cotizaciones_sin_datos(): void
+    {
+        $this->crearUsuarioAutenticado();
+
+        $response = $this->get(self::ROUTE_HISTORIAL_PDF_COTIZACIONES);
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/pdf');
@@ -233,9 +265,17 @@ class HistorialTest extends TestCase
         $this->assertTrue($response->isRedirect() || $response->status() === 403);
     }
 
-    public function test_export_pdf_requiere_autenticacion(): void
+    public function test_export_pdf_reservas_requiere_autenticacion(): void
     {
-        $response = $this->get(self::ROUTE_HISTORIAL_PDF);
+        $response = $this->get(self::ROUTE_HISTORIAL_PDF_RESERVAS);
+
+        // Debería redirigir o denegar acceso
+        $this->assertTrue($response->isRedirect() || $response->status() === 403);
+    }
+
+    public function test_export_pdf_cotizaciones_requiere_autenticacion(): void
+    {
+        $response = $this->get(self::ROUTE_HISTORIAL_PDF_COTIZACIONES);
 
         // Debería redirigir o denegar acceso
         $this->assertTrue($response->isRedirect() || $response->status() === 403);

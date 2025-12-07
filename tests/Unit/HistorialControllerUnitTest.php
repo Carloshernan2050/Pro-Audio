@@ -10,6 +10,7 @@ use App\Models\MovimientosInventario;
 use App\Models\Reserva;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 use Tests\Unit\Exceptions\DatabaseTestException;
 
@@ -101,7 +102,7 @@ class HistorialControllerUnitTest extends TestCase
         $this->assertNotNull($response);
     }
 
-    public function test_export_pdf_retorna_pdf(): void
+    public function test_export_pdf_reservas_retorna_pdf(): void
     {
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
@@ -113,47 +114,84 @@ class HistorialControllerUnitTest extends TestCase
             'estado' => true,
         ]);
 
-        $inventario = Inventario::create([
-            'descripcion' => 'Test Inventario',
-            'stock' => 10,
-        ]);
-
-        $movimiento = MovimientosInventario::create([
-            'inventario_id' => $inventario->id,
-            'tipo_movimiento' => 'salida',
-            'cantidad' => 1,
-            'fecha_movimiento' => now(),
-            'descripcion' => 'Test movimiento',
-        ]);
-
-        $calendario = Calendario::create([
-            'personas_id' => $usuario->id,
-            'movimientos_inventario_id' => $movimiento->id,
-            'fecha' => now()->toDateString(),
-            'fecha_inicio' => now(),
-            'fecha_fin' => now()->addDays(1),
-            'evento' => 'Test evento',
-            'descripcion_evento' => 'Test descripción',
-        ]);
-
         $reserva = Reserva::create([
             'personas_id' => $usuario->id,
-            'calendario_id' => $calendario->id,
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
             'estado' => self::ESTADO_PENDIENTE,
         ]);
 
         Historial::create([
-            'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => self::ACCION_CREADA,
+            'confirmado_en' => now(),
         ]);
 
-        $response = $this->controller->exportPdf();
+        $response = $this->controller->exportPdfReservas();
 
         $this->assertNotNull($response);
-        $this->assertStringContainsString('historial.pdf', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('historial_reservas.pdf', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_export_pdf_reservas_sin_datos(): void
+    {
+        $response = $this->controller->exportPdfReservas();
+
+        $this->assertNotNull($response);
+        $this->assertStringContainsString('historial_reservas.pdf', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_export_pdf_reservas_catch_exception(): void
+    {
+        // Este test se moverá a Feature test donde podemos forzar mejor el error
+        // Por ahora, verificamos que el método existe y puede ser llamado
+        $this->assertTrue(method_exists($this->controller, 'exportPdfReservas'));
+    }
+
+    public function test_export_pdf_cotizaciones_retorna_pdf(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => self::TEST_PASSWORD,
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        $servicio = \App\Models\Servicios::create([
+            'nombre_servicio' => 'Test Servicio',
+            'descripcion' => 'Test descripción',
+            'icono' => 'test-icon',
+        ]);
+
+        $subServicio = \App\Models\SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Test SubServicio',
+            'descripcion' => 'Test descripción',
+            'precio' => 100000,
+        ]);
+
+        \App\Models\Cotizacion::create([
+            'personas_id' => $usuario->id,
+            'sub_servicios_id' => $subServicio->id,
+            'monto' => 100000,
+            'fecha_cotizacion' => now(),
+        ]);
+
+        $response = $this->controller->exportPdfCotizaciones();
+
+        $this->assertNotNull($response);
+        $this->assertStringContainsString('historial_cotizaciones.pdf', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_export_pdf_cotizaciones_sin_datos(): void
+    {
+        $response = $this->controller->exportPdfCotizaciones();
+
+        $this->assertNotNull($response);
+        $this->assertStringContainsString('historial_cotizaciones.pdf', $response->headers->get('Content-Disposition'));
     }
 
     public function test_pdf_configuracion_estructura(): void

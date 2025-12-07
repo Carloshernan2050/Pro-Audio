@@ -9,54 +9,53 @@
         <style>
             body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
             h1 { font-size: 16px; margin: 0 0 8px 0; }
-            .muted { color: #666; font-size: 10px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-            th { background: #f5f5f5; }
+            .muted { color: #666; font-size: 10px; margin-bottom: 15px; }
+            .item { margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #eee; }
+            .item-title { font-weight: bold; font-size: 12px; margin-bottom: 5px; }
+            .item-detail { margin: 3px 0; font-size: 10px; }
+            .item-label { font-weight: bold; display: inline-block; min-width: 120px; }
         </style>
     </head>
     <body>
         <h1>Historial de Cotizaciones</h1>
         <div class="muted">Generado: {{ $generatedAt->format('Y-m-d H:i') }}</div>
 
-        <table aria-label="Historial detallado de cotizaciones generadas para clientes">
-            <caption>Resumen de cotizaciones emitidas.</caption>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha y Hora</th>
-                    <th>Cliente</th>
-                    <th>Subservicio</th>
-                    <th>Servicio</th>
-                    <th>Monto</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($cotizaciones as $c)
-                    <tr>
-                        <td>{{ $c->id }}</td>
-                        <td>{{ optional($c->fecha_cotizacion)->format('d/m/Y H:i:s') }}</td>
-                        <td>
-                            @if($c->persona)
-                                {{ $c->persona->primer_nombre }} {{ $c->persona->primer_apellido }}
-                                @if($c->persona->correo)
-                                    <br><small>{{ $c->persona->correo }}</small>
-                                @endif
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                        <td>{{ $c->subServicio->nombre ?? 'N/A' }}</td>
-                        <td>{{ optional(optional($c->subServicio)->servicio)->nombre_servicio ?? 'N/A' }}</td>
-                        <td>${{ number_format($c->monto ?? 0, 0, ',', '.') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6">No hay cotizaciones en el historial.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+        @forelse($cotizaciones as $c)
+            <div class="item">
+                <div class="item-title">Cotización #{{ $c->id }}</div>
+                <div class="item-detail">
+                    <span class="item-label">Fecha y Hora:</span>
+                    {{ optional($c->fecha_cotizacion)->format('d/m/Y H:i:s') }}
+                </div>
+                <div class="item-detail">
+                    <span class="item-label">Cliente:</span>
+                    @if($c->persona)
+                        {{ $c->persona->primer_nombre }} {{ $c->persona->primer_apellido }}
+                        @if($c->persona->correo)
+                            ({{ $c->persona->correo }})
+                        @endif
+                    @else
+                        N/A
+                    @endif
+                </div>
+                <div class="item-detail">
+                    <span class="item-label">Subservicio:</span>
+                    {{ $c->subServicio->nombre ?? 'N/A' }}
+                </div>
+                <div class="item-detail">
+                    <span class="item-label">Servicio:</span>
+                    {{ optional(optional($c->subServicio)->servicio)->nombre_servicio ?? 'N/A' }}
+                </div>
+                <div class="item-detail">
+                    <span class="item-label">Monto:</span>
+                    ${{ number_format($c->monto ?? 0, 0, ',', '.') }}
+                </div>
+            </div>
+        @empty
+            <div class="item">
+                <p>No hay cotizaciones en el historial.</p>
+            </div>
+        @endforelse
     </body>
 </html>
 

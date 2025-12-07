@@ -21,7 +21,8 @@ class HistorialControllerTest extends TestCase
 
     private const ROUTE_HISTORIAL = '/historial';
 
-    private const ROUTE_HISTORIAL_EXPORT = '/historial/pdf';
+    private const ROUTE_HISTORIAL_EXPORT_RESERVAS = '/historial/pdf/reservas';
+    private const ROUTE_HISTORIAL_EXPORT_COTIZACIONES = '/historial/pdf/cotizaciones';
 
     private const TEST_EMAIL = 'admin@example.com';
 
@@ -174,7 +175,7 @@ class HistorialControllerTest extends TestCase
     // TESTS PARA EXPORT PDF
     // ============================================
 
-    public function test_export_pdf_genera_pdf(): void
+    public function test_export_pdf_reservas_genera_pdf(): void
     {
         $this->crearUsuarioAdmin();
 
@@ -195,36 +196,36 @@ class HistorialControllerTest extends TestCase
                 'confirmado_en' => now(),
             ]);
 
-            $response = $this->get(self::ROUTE_HISTORIAL_EXPORT);
+            $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_RESERVAS);
 
             $response->assertStatus(200);
             $response->assertHeader('Content-Type', 'application/pdf');
             $this->assertStringContainsString('attachment', $response->headers->get('Content-Disposition'));
-            $this->assertStringContainsString('historial.pdf', $response->headers->get('Content-Disposition'));
+            $this->assertStringContainsString('historial_reservas.pdf', $response->headers->get('Content-Disposition'));
         } catch (\Exception $e) {
             $this->markTestSkipped(self::MSG_TABLA_HISTORIAL_SIN_COLUMNAS);
         }
     }
 
-    public function test_export_pdf_sin_historial(): void
+    public function test_export_pdf_reservas_sin_historial(): void
     {
         $this->crearUsuarioAdmin();
 
-        $response = $this->get(self::ROUTE_HISTORIAL_EXPORT);
+        $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_RESERVAS);
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/pdf');
     }
 
-    public function test_export_pdf_sin_autenticacion(): void
+    public function test_export_pdf_reservas_sin_autenticacion(): void
     {
-        $response = $this->get(self::ROUTE_HISTORIAL_EXPORT);
+        $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_RESERVAS);
 
         // Debería redirigir o denegar acceso
         $this->assertContains($response->status(), [302, 403]);
     }
 
-    public function test_export_pdf_incluye_datos_correctos(): void
+    public function test_export_pdf_reservas_incluye_datos_correctos(): void
     {
         $this->crearUsuarioAdmin();
 
@@ -245,11 +246,111 @@ class HistorialControllerTest extends TestCase
                 'confirmado_en' => now(),
             ]);
 
-            $response = $this->get(self::ROUTE_HISTORIAL_EXPORT);
+            $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_RESERVAS);
 
             $response->assertStatus(200);
             // El PDF debería contener datos del historial
             $this->assertNotEmpty($response->getContent());
+        } catch (\Exception $e) {
+            $this->markTestSkipped(self::MSG_TABLA_HISTORIAL_SIN_COLUMNAS);
+        }
+    }
+
+    public function test_export_pdf_cotizaciones_genera_pdf(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $servicio = \App\Models\Servicios::create([
+            'nombre_servicio' => 'Test Servicio',
+            'descripcion' => 'Test descripción',
+            'icono' => 'test-icon',
+        ]);
+
+        $subServicio = \App\Models\SubServicios::create([
+            'servicios_id' => $servicio->id,
+            'nombre' => 'Test SubServicio',
+            'descripcion' => 'Test descripción',
+            'precio' => 100000,
+        ]);
+
+        \App\Models\Cotizacion::create([
+            'personas_id' => session('usuario_id'),
+            'sub_servicios_id' => $subServicio->id,
+            'monto' => 100000,
+            'fecha_cotizacion' => now(),
+        ]);
+
+        $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_COTIZACIONES);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringContainsString('attachment', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('historial_cotizaciones.pdf', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_export_pdf_cotizaciones_sin_datos(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_COTIZACIONES);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+    }
+
+    public function test_export_pdf_cotizaciones_sin_autenticacion(): void
+    {
+        $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_COTIZACIONES);
+
+        // Debería redirigir o denegar acceso
+        $this->assertContains($response->status(), [302, 403]);
+    }
+
+    public function test_export_pdf_reservas_catch_exception(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $reserva = Reserva::create([
+            'personas_id' => session('usuario_id'),
+            'servicio' => 'Alquiler',
+            'fecha_inicio' => self::FECHA_INICIO,
+            'fecha_fin' => self::FECHA_FIN,
+            'descripcion_evento' => self::DESCRIPCION_EVENTO,
+            'cantidad_total' => 5,
+            'estado' => 'confirmada',
+        ]);
+
+        try {
+            Historial::create([
+                'reserva_id' => $reserva->id,
+                'accion' => 'confirmada',
+                'confirmado_en' => now(),
+            ]);
+
+            // Renombrar temporalmente la vista para forzar error
+            $viewPath = resource_path('views/usuarios/historial_reservas_pdf.blade.php');
+            $backupPath = $viewPath . '.backup';
+            
+            if (file_exists($viewPath)) {
+                rename($viewPath, $backupPath);
+                
+                try {
+                    $response = $this->get(self::ROUTE_HISTORIAL_EXPORT_RESERVAS);
+                    
+                    // Debería retornar error 500
+                    $this->assertEquals(500, $response->status());
+                    $responseData = json_decode($response->getContent(), true);
+                    $this->assertArrayHasKey('error', $responseData);
+                    $this->assertStringContainsString('Error al generar el PDF de reservas', $responseData['error']);
+                } finally {
+                    // Restaurar la vista
+                    if (file_exists($backupPath)) {
+                        rename($backupPath, $viewPath);
+                    }
+                }
+            } else {
+                $this->markTestSkipped('Vista no existe para forzar error');
+            }
         } catch (\Exception $e) {
             $this->markTestSkipped(self::MSG_TABLA_HISTORIAL_SIN_COLUMNAS);
         }

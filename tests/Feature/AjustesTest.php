@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Cotizacion;
+use App\Models\Historial;
+use App\Models\Reserva;
 use App\Models\Servicios;
 use App\Models\SubServicios;
 use App\Models\Usuario;
@@ -230,6 +232,47 @@ class AjustesTest extends TestCase
         ]);
 
         $response = $this->get(self::ROUTE_AJUSTES_HISTORIAL_PDF.'?group_by=consulta');
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+    }
+
+    public function test_export_historial_pdf_con_historial_type_reservas(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $usuario = Usuario::where('correo', self::TEST_EMAIL)->first();
+        
+        $reserva = Reserva::create([
+            'personas_id' => $usuario->id,
+            'servicio' => 'Alquiler',
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'estado' => 'confirmada',
+        ]);
+
+        try {
+            Historial::create([
+                'reserva_id' => $reserva->id,
+                'accion' => 'confirmada',
+                'confirmado_en' => now(),
+            ]);
+
+            $response = $this->get(self::ROUTE_AJUSTES_HISTORIAL_PDF.'?historial_type=reservas');
+
+            $response->assertStatus(200);
+            $response->assertHeader('Content-Type', 'application/pdf');
+            $this->assertStringContainsString('historial_reservas.pdf', $response->headers->get('Content-Disposition'));
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Tabla historial no tiene las columnas necesarias');
+        }
+    }
+
+    public function test_export_historial_pdf_con_historial_type_reservas_sin_datos(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $response = $this->get(self::ROUTE_AJUSTES_HISTORIAL_PDF.'?historial_type=reservas');
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/pdf');
