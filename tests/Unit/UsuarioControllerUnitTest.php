@@ -38,6 +38,8 @@ class UsuarioControllerUnitTest extends TestCase
 
     private const MSG_EXPECTED_VALIDATION_EXCEPTION = 'Se esperaba una ValidationException';
 
+    private const TMP_TEST_PATH = '/tmp/test';
+
     protected $controller;
 
     protected function setUp(): void
@@ -1108,8 +1110,8 @@ class UsuarioControllerUnitTest extends TestCase
         // Crear mock de archivo que pase validación pero isValid() retorne false
         $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
         $mockFile->shouldReceive('isValid')->andReturn(false);
-        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
-        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getPath')->andReturn(self::TMP_TEST_PATH);
+        $mockFile->shouldReceive('getRealPath')->andReturn(self::TMP_TEST_PATH);
         $mockFile->shouldReceive('getSize')->andReturn(100);
         $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
 
@@ -1147,8 +1149,8 @@ class UsuarioControllerUnitTest extends TestCase
         $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
         $mockFile->shouldReceive('isValid')->andReturn(true);
         $mockFile->shouldReceive('getClientOriginalExtension')->andReturn('jpg');
-        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
-        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getPath')->andReturn(self::TMP_TEST_PATH);
+        $mockFile->shouldReceive('getRealPath')->andReturn(self::TMP_TEST_PATH);
         $mockFile->shouldReceive('getSize')->andReturn(100);
         $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
         $mockFile->shouldReceive('storeAs')

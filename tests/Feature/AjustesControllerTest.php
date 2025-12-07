@@ -336,4 +336,35 @@ class AjustesControllerTest extends TestCase
         // El middleware redirige a inicio cuando no hay acceso
         $this->assertContains($response->status(), [302, 404]);
     }
+
+    public function test_index_con_historial_type_reservas(): void
+    {
+        $usuario = $this->crearUsuarioAdmin();
+
+        // Crear una reserva
+        $reserva = \App\Models\Reserva::create([
+            'personas_id' => $usuario->id,
+            'servicio' => 'Test Service',
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDay(),
+            'estado' => 'confirmada',
+        ]);
+
+        // Crear un historial con confirmado_en para que sea visible
+        \App\Models\Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => 'confirmada',
+            'confirmado_en' => now(),
+        ]);
+
+        $response = $this->withoutVite()->get(self::ROUTE_AJUSTES.'?historial_type=reservas');
+
+        $response->assertStatus(200);
+        $response->assertViewIs('usuarios.ajustes');
+        $response->assertViewHas('historialType', 'reservas');
+        $response->assertViewHas('reservas');
+        $reservas = $response->viewData('reservas');
+        $this->assertNotNull($reservas);
+        $this->assertGreaterThanOrEqual(1, $reservas->count());
+    }
 }

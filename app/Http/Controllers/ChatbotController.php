@@ -30,7 +30,17 @@ class ChatbotController extends Controller
 
     private CotizacionController $cotizacionController;
 
-    public function __construct(
+    /**
+     * @param  ChatbotTextProcessor  $textProcessor
+     * @param  ChatbotIntentionDetector  $intentionDetector
+     * @param  ChatbotSuggestionGenerator  $suggestionGenerator
+     * @param  ChatbotResponseBuilder  $responseBuilder
+     * @param  ChatbotMessageProcessor  $messageProcessor
+     * @param  ChatbotSubServicioService  $subServicioService
+     * @param  ChatbotSessionManager  $sessionManager
+     * @param  CotizacionController  $cotizacionController
+     */
+    public function __construct( // NOSONAR - S107: All 8 parameters are required services for chatbot functionality
         ChatbotTextProcessor $textProcessor,
         ChatbotIntentionDetector $intentionDetector,
         ChatbotSuggestionGenerator $suggestionGenerator,

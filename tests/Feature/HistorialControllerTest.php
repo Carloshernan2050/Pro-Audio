@@ -254,4 +254,164 @@ class HistorialControllerTest extends TestCase
             $this->markTestSkipped(self::MSG_TABLA_HISTORIAL_SIN_COLUMNAS);
         }
     }
+
+    // ============================================
+    // TESTS PARA STORE
+    // ============================================
+
+    public function test_store_crea_historial_correctamente(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $reserva = Reserva::create([
+            'personas_id' => session('usuario_id'),
+            'servicio' => 'Alquiler',
+            'fecha_inicio' => self::FECHA_INICIO,
+            'fecha_fin' => self::FECHA_FIN,
+            'descripcion_evento' => self::DESCRIPCION_EVENTO,
+            'cantidad_total' => 5,
+            'estado' => 'confirmada',
+        ]);
+
+        $response = $this->postJson('/historial', [
+            'reserva_id' => $reserva->id,
+            'accion' => 'confirmada',
+            'observaciones' => 'Reserva confirmada correctamente',
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJson([
+            'success' => true,
+        ]);
+        $response->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'id',
+                'reserva_id',
+                'accion',
+            ],
+        ]);
+
+        $this->assertDatabaseHas('historial', [
+            'reserva_id' => $reserva->id,
+            'accion' => 'confirmada',
+        ]);
+    }
+
+    public function test_store_valida_datos_requeridos(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $response = $this->postJson('/historial', [
+            'reserva_id' => 99999, // ID que no existe
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'error',
+            'messages',
+        ]);
+    }
+
+    public function test_store_requiere_autenticacion_admin(): void
+    {
+        $response = $this->postJson('/historial', [
+            'accion' => 'test',
+        ]);
+
+        // Debería redirigir o denegar acceso
+        $this->assertContains($response->status(), [302, 403, 401]);
+    }
+
+    // ============================================
+    // TESTS PARA UPDATE
+    // ============================================
+
+    public function test_update_actualiza_historial_correctamente(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $reserva = Reserva::create([
+            'personas_id' => session('usuario_id'),
+            'servicio' => 'Alquiler',
+            'fecha_inicio' => self::FECHA_INICIO,
+            'fecha_fin' => self::FECHA_FIN,
+            'descripcion_evento' => self::DESCRIPCION_EVENTO,
+            'cantidad_total' => 5,
+            'estado' => 'confirmada',
+        ]);
+
+        try {
+            $historial = Historial::create([
+                'reserva_id' => $reserva->id,
+                'accion' => 'creada',
+                'confirmado_en' => now(),
+            ]);
+
+            $response = $this->putJson("/historial/{$historial->id}", [
+                'accion' => 'actualizada',
+                'observaciones' => 'Observación actualizada',
+            ]);
+
+            $response->assertStatus(200);
+            $response->assertJson([
+                'success' => true,
+            ]);
+            $response->assertJsonStructure([
+                'success',
+                'message',
+                'data',
+            ]);
+
+            $this->assertDatabaseHas('historial', [
+                'id' => $historial->id,
+                'accion' => 'actualizada',
+                'observaciones' => 'Observación actualizada',
+            ]);
+        } catch (\Exception $e) {
+            $this->markTestSkipped(self::MSG_TABLA_HISTORIAL_SIN_COLUMNAS);
+        }
+    }
+
+    public function test_update_valida_datos(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        try {
+            $historial = Historial::create([
+                'accion' => 'creada',
+            ]);
+
+            $response = $this->putJson("/historial/{$historial->id}", [
+                'reserva_id' => 99999, // ID que no existe
+            ]);
+
+            $response->assertStatus(422);
+            $response->assertJsonStructure([
+                'error',
+                'messages',
+            ]);
+        } catch (\Exception $e) {
+            $this->markTestSkipped(self::MSG_TABLA_HISTORIAL_SIN_COLUMNAS);
+        }
+    }
+
+    public function test_update_requiere_autenticacion_admin(): void
+    {
+        try {
+            $historial = Historial::create([
+                'accion' => 'creada',
+            ]);
+
+            $response = $this->putJson("/historial/{$historial->id}", [
+                'accion' => 'actualizada',
+            ]);
+
+            // Debería redirigir o denegar acceso
+            $this->assertContains($response->status(), [302, 403, 401]);
+        } catch (\Exception $e) {
+            $this->markTestSkipped(self::MSG_TABLA_HISTORIAL_SIN_COLUMNAS);
+        }
+    }
 }

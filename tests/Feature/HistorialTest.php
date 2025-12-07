@@ -115,7 +115,6 @@ class HistorialTest extends TestCase
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada',
-            'fecha' => now(),
         ]);
 
         $response = $this->get(self::ROUTE_HISTORIAL);
@@ -161,7 +160,6 @@ class HistorialTest extends TestCase
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada',
-            'fecha' => now(),
         ]);
 
         $response = $this->get(self::ROUTE_HISTORIAL);
@@ -204,7 +202,6 @@ class HistorialTest extends TestCase
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => 'creada',
-            'fecha' => now(),
         ]);
 
         $response = $this->get(self::ROUTE_HISTORIAL_PDF);

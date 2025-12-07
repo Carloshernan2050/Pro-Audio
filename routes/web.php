@@ -4,6 +4,7 @@ use App\Http\Controllers\AjustesController;
 use App\Http\Controllers\BusquedaController;
 use App\Http\Controllers\CalendarioController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\MovimientosInventarioController;
@@ -118,6 +119,11 @@ Route::post('/role/admin-key/verify', [RoleController::class, 'adminKeyVerify'])
 Route::get('/admin/roles', [RoleAdminController::class, 'index'])->name('admin.roles.index')->middleware('role:Superadmin');
 Route::post('/admin/roles', [RoleAdminController::class, 'update'])->name('admin.roles.update')->middleware('role:Superadmin');
 
+// Cotizaciones
+Route::post('/cotizaciones', [CotizacionController::class, 'store'])->name('cotizaciones.store')->middleware('role:Superadmin,Admin,Usuario');
+
 // Historial
 Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index')->middleware('role:Superadmin,Admin,Usuario');
+Route::post('/historial', [HistorialController::class, 'store'])->name('historial.store')->middleware('role:Superadmin,Admin');
+Route::put('/historial/{historial}', [HistorialController::class, 'update'])->name('historial.update')->middleware('role:Superadmin,Admin');
 Route::get('/historial/pdf', [HistorialController::class, 'exportPdf'])->name('historial.pdf')->middleware('role:Superadmin,Admin,Usuario');

@@ -11,6 +11,7 @@ use App\Models\Reserva;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Unit\Exceptions\DatabaseTestException;
 
 /**
  * Tests Unitarios para HistorialController
@@ -20,6 +21,18 @@ use Tests\TestCase;
 class HistorialControllerUnitTest extends TestCase
 {
     use RefreshDatabase;
+
+    private const TEST_TELEFONO = '1234567890';
+
+    private const TEST_EMAIL = 'test@test.com';
+
+    private const ROUTE_HISTORIAL = '/historial';
+
+    private const TEST_PASSWORD = 'password';
+
+    private const ESTADO_PENDIENTE = 'pendiente';
+
+    private const ACCION_CREADA = 'creada';
 
     protected $controller;
 
@@ -39,9 +52,9 @@ class HistorialControllerUnitTest extends TestCase
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'Usuario',
-            'telefono' => '1234567890',
-            'correo' => 'test@test.com',
-            'contrasena' => 'password',
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => self::TEST_PASSWORD,
             'fecha_registro' => now(),
             'estado' => true,
         ]);
@@ -74,13 +87,13 @@ class HistorialControllerUnitTest extends TestCase
             'calendario_id' => $calendario->id,
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
-            'estado' => 'pendiente',
+            'estado' => self::ESTADO_PENDIENTE,
         ]);
 
         Historial::create([
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
-            'accion' => 'creada',
+            'accion' => self::ACCION_CREADA,
         ]);
 
         $response = $this->controller->index();
@@ -93,9 +106,9 @@ class HistorialControllerUnitTest extends TestCase
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'Usuario',
-            'telefono' => '1234567890',
-            'correo' => 'test@test.com',
-            'contrasena' => 'password',
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => self::TEST_PASSWORD,
             'fecha_registro' => now(),
             'estado' => true,
         ]);
@@ -128,13 +141,13 @@ class HistorialControllerUnitTest extends TestCase
             'calendario_id' => $calendario->id,
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
-            'estado' => 'pendiente',
+            'estado' => self::ESTADO_PENDIENTE,
         ]);
 
         Historial::create([
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
-            'accion' => 'creada',
+            'accion' => self::ACCION_CREADA,
         ]);
 
         $response = $this->controller->exportPdf();
@@ -162,5 +175,195 @@ class HistorialControllerUnitTest extends TestCase
 
         $this->assertIsString($vista);
         $this->assertStringStartsWith('usuarios.', $vista);
+    }
+
+    public function test_store_crea_historial(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => self::TEST_PASSWORD,
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        $reserva = Reserva::create([
+            'personas_id' => $usuario->id,
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'estado' => self::ESTADO_PENDIENTE,
+        ]);
+
+        $request = \Illuminate\Http\Request::create(self::ROUTE_HISTORIAL, 'POST', [
+            'reserva_id' => $reserva->id,
+            'accion' => self::ACCION_CREADA,
+            'observaciones' => 'Test observación',
+        ]);
+
+        $response = $this->controller->store($request);
+        $responseData = json_decode($response->getContent(), true);
+
+        $this->assertEquals(201, $response->getStatusCode());
+        $this->assertTrue($responseData['success']);
+        $this->assertDatabaseHas('historial', [
+            'reserva_id' => $reserva->id,
+            'accion' => self::ACCION_CREADA,
+        ]);
+    }
+
+    public function test_store_valida_datos(): void
+    {
+        $request = \Illuminate\Http\Request::create(self::ROUTE_HISTORIAL, 'POST', [
+            'reserva_id' => 99999, // ID que no existe
+        ]);
+
+        $response = $this->controller->store($request);
+        $responseData = json_decode($response->getContent(), true);
+
+        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertArrayHasKey('error', $responseData);
+    }
+
+    public function test_update_actualiza_historial(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => self::TEST_PASSWORD,
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        $reserva = Reserva::create([
+            'personas_id' => $usuario->id,
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'estado' => self::ESTADO_PENDIENTE,
+        ]);
+
+        $historial = Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => self::ACCION_CREADA,
+        ]);
+
+        $request = \Illuminate\Http\Request::create(self::ROUTE_HISTORIAL."/{$historial->id}", 'PUT', [
+            'accion' => 'actualizada',
+            'observaciones' => 'Observación actualizada',
+        ]);
+
+        $response = $this->controller->update($request, $historial);
+        $responseData = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertTrue($responseData['success']);
+        $this->assertDatabaseHas('historial', [
+            'id' => $historial->id,
+            'accion' => 'actualizada',
+        ]);
+    }
+
+    public function test_update_valida_datos(): void
+    {
+        $historial = Historial::create([
+            'accion' => self::ACCION_CREADA,
+        ]);
+
+        $request = \Illuminate\Http\Request::create(self::ROUTE_HISTORIAL."/{$historial->id}", 'PUT', [
+            'reserva_id' => 99999, // ID que no existe
+        ]);
+
+        $response = $this->controller->update($request, $historial);
+        $responseData = json_decode($response->getContent(), true);
+
+        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertArrayHasKey('error', $responseData);
+    }
+
+    public function test_store_catch_exception(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => self::TEST_PASSWORD,
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        $reserva = Reserva::create([
+            'personas_id' => $usuario->id,
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'estado' => self::ESTADO_PENDIENTE,
+        ]);
+
+        // Forzar excepción usando un evento de Eloquent que falle
+        Historial::creating(function () {
+            throw new DatabaseTestException('Database error');
+        });
+
+        $request = \Illuminate\Http\Request::create(self::ROUTE_HISTORIAL, 'POST', [
+            'reserva_id' => $reserva->id,
+            'accion' => self::ACCION_CREADA,
+        ]);
+
+        $response = $this->controller->store($request);
+        $responseData = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertArrayHasKey('error', $responseData);
+        $this->assertStringContainsString('Error al crear el historial', $responseData['error']);
+
+        // Limpiar el evento
+        Historial::unsetEventDispatcher();
+    }
+
+    public function test_update_catch_exception(): void
+    {
+        $usuario = Usuario::create([
+            'primer_nombre' => 'Test',
+            'primer_apellido' => 'Usuario',
+            'telefono' => self::TEST_TELEFONO,
+            'correo' => self::TEST_EMAIL,
+            'contrasena' => self::TEST_PASSWORD,
+            'fecha_registro' => now(),
+            'estado' => true,
+        ]);
+
+        $reserva = Reserva::create([
+            'personas_id' => $usuario->id,
+            'fecha_inicio' => now(),
+            'fecha_fin' => now()->addDays(1),
+            'estado' => self::ESTADO_PENDIENTE,
+        ]);
+
+        $historial = Historial::create([
+            'reserva_id' => $reserva->id,
+            'accion' => self::ACCION_CREADA,
+        ]);
+
+        // Forzar excepción usando un evento de Eloquent que falle
+        Historial::updating(function () {
+            throw new DatabaseTestException('Database update error');
+        });
+
+        $request = \Illuminate\Http\Request::create(self::ROUTE_HISTORIAL."/{$historial->id}", 'PUT', [
+            'accion' => 'actualizada',
+        ]);
+
+        $response = $this->controller->update($request, $historial);
+        $responseData = json_decode($response->getContent(), true);
+
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertArrayHasKey('error', $responseData);
+        $this->assertStringContainsString('Error al actualizar el historial', $responseData['error']);
+
+        // Limpiar el evento
+        Historial::unsetEventDispatcher();
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\CotizacionController;
 use App\Services\ChatbotIntentionDetector;
 use App\Services\ChatbotMessageProcessor;
 use App\Services\ChatbotResponseBuilder;
@@ -41,6 +42,8 @@ class ChatbotControllerUnitTest extends TestCase
 
     protected $sessionManager;
 
+    protected $cotizacionController;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -53,6 +56,7 @@ class ChatbotControllerUnitTest extends TestCase
         $this->messageProcessor = Mockery::mock(ChatbotMessageProcessor::class);
         $this->subServicioService = Mockery::mock(ChatbotSubServicioService::class);
         $this->sessionManager = Mockery::mock(ChatbotSessionManager::class);
+        $this->cotizacionController = Mockery::mock(CotizacionController::class);
 
         // Instanciar el controlador con los mocks
         $this->controller = new ChatbotController(
@@ -62,7 +66,8 @@ class ChatbotControllerUnitTest extends TestCase
             $this->responseBuilder,
             $this->messageProcessor,
             $this->subServicioService,
-            $this->sessionManager
+            $this->sessionManager,
+            $this->cotizacionController
         );
     }
 
@@ -294,15 +299,17 @@ class ChatbotControllerUnitTest extends TestCase
             'terminar_cotizacion' => true,
         ]);
 
-        $this->sessionManager
-            ->shouldReceive('guardarCotizacion')
-            ->once();
+        session(['chat.selecciones' => [1, 2], 'chat.days' => 3, 'usuario_id' => 1]);
+
+        // Ahora se usa CotizacionController::store() en lugar de guardarCotizacion directamente
+        $this->cotizacionController
+            ->shouldReceive('store')
+            ->once()
+            ->andReturn(response()->json(['success' => true], 201));
 
         $this->sessionManager
             ->shouldReceive('limpiarSesionChat')
             ->once();
-
-        session(['chat.selecciones' => [1, 2], 'chat.days' => 3, 'usuario_id' => 1]);
 
         $response = $this->controller->enviar($request);
 
