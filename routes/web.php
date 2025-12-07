@@ -126,4 +126,5 @@ Route::post('/cotizaciones', [CotizacionController::class, 'store'])->name('coti
 Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index')->middleware('role:Superadmin,Admin,Usuario');
 Route::post('/historial', [HistorialController::class, 'store'])->name('historial.store')->middleware('role:Superadmin,Admin');
 Route::put('/historial/{historial}', [HistorialController::class, 'update'])->name('historial.update')->middleware('role:Superadmin,Admin');
-Route::get('/historial/pdf', [HistorialController::class, 'exportPdf'])->name('historial.pdf')->middleware('role:Superadmin,Admin,Usuario');
+Route::get('/historial/pdf/reservas', [HistorialController::class, 'exportPdfReservas'])->name('historial.pdf.reservas')->middleware('role:Superadmin,Admin,Usuario');
+Route::get('/historial/pdf/cotizaciones', [HistorialController::class, 'exportPdfCotizaciones'])->name('historial.pdf.cotizaciones')->middleware('role:Superadmin,Admin,Usuario');

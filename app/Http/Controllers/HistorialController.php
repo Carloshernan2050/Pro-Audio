@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cotizacion;
 use App\Models\Historial;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class HistorialController extends Controller
@@ -92,15 +94,51 @@ class HistorialController extends Controller
         }
     }
 
-    public function exportPdf()
+    /**
+     * Exporta el historial de reservas confirmadas a PDF
+     */
+    public function exportPdfReservas()
     {
-        $items = Historial::with(['reserva'])->get();
+        try {
+            $reservas = Historial::with(['reserva.persona'])
+                ->whereNotNull('confirmado_en')
+                ->whereNotNull('reserva_id')
+                ->orderBy('confirmado_en', 'desc')
+                ->orderBy('id', 'desc')
+                ->get();
 
-        $pdf = Pdf::loadView('usuarios.historial', [
-            'items' => $items,
+            Log::info('Generando PDF de reservas. Total de reservas encontradas: '.$reservas->count());
+
+            $pdf = Pdf::loadView('usuarios.historial_reservas_pdf', [
+                'reservas' => $reservas,
+                'generatedAt' => now(),
+            ])->setPaper('a4', 'portrait');
+
+            return $pdf->download('historial_reservas.pdf');
+        } catch (\Exception $e) {
+            Log::error('Error al generar PDF de reservas: '.$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
+            
+            return response()->json([
+                'error' => 'Error al generar el PDF de reservas: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Exporta el historial de cotizaciones a PDF
+     */
+    public function exportPdfCotizaciones()
+    {
+        $cotizaciones = Cotizacion::with(['persona', 'subServicio.servicio'])
+            ->orderBy('fecha_cotizacion', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('usuarios.historial_cotizaciones_pdf', [
+            'cotizaciones' => $cotizaciones,
             'generatedAt' => now(),
-        ])->setPaper('a4', 'portrait');
+        ])->setPaper('a4', 'landscape');
 
-        return $pdf->download('historial.pdf');
+        return $pdf->download('historial_cotizaciones.pdf');
     }
 }

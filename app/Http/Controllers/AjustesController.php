@@ -53,7 +53,21 @@ class AjustesController extends Controller
     public function exportHistorialPdf(Request $request)
     {
         $groupBy = $request->query('group_by');
+        $historialType = $request->query('historial_type', 'cotizaciones');
 
+        // Si es reservas, generar PDF de reservas
+        if ($historialType === 'reservas') {
+            $reservas = $this->getReservas();
+
+            $pdf = Pdf::loadView('usuarios.historial_reservas_pdf', [
+                'reservas' => $reservas,
+                'generatedAt' => now(),
+            ])->setPaper('a4', 'portrait');
+
+            return $pdf->download('historial_reservas.pdf');
+        }
+
+        // Si es cotizaciones (por defecto), generar PDF de cotizaciones
         $cotizaciones = $this->getCotizaciones();
         $grouped = $this->groupCotizaciones($cotizaciones, $groupBy);
 

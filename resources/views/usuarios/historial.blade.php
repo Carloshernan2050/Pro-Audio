@@ -5,7 +5,10 @@
 <div class="container" style="padding: 1rem;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
         <h2 style="margin:0;">Historial</h2>
-        <a href="{{ route('historial.pdf') }}" class="btn btn-primary">Descargar PDF</a>
+        <div style="display:flex; gap:0.5rem;">
+            <a href="{{ route('historial.pdf.reservas') }}" class="btn btn-primary">Descargar PDF Reservas</a>
+            <a href="{{ route('historial.pdf.cotizaciones') }}" class="btn btn-primary">Descargar PDF Cotizaciones</a>
+        </div>
     </div>
 
     @if(!$hasItems)
