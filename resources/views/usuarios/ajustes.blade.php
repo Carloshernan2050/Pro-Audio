@@ -281,29 +281,63 @@
                 </div>
             </div>
 
-            {{-- Tab de Historial de Cotizaciones --}}
+            {{-- Tab de Historial (Cotizaciones o Reservas) --}}
             <div id="tab-historial" class="tab-content">
-                <div class="button-container" style="margin-bottom: 12px; gap: 8px; display: flex; align-items: center;">
-                    <a href="{{ route('usuarios.ajustes.historial.pdf', ['group_by' => $groupBy ?? null]) }}" class="btn-primary">
+                <div class="button-container" style="margin-bottom: 12px; gap: 8px; display: flex; align-items: center; flex-wrap: wrap;">
+                    {{-- Botones para cambiar entre Cotizaciones y Reservas --}}
+                    <div style="display: flex; gap: 8px; align-items: center; margin-right: auto;">
+                        <form method="GET" action="{{ route('usuarios.ajustes') }}" style="display: inline-flex; gap: 8px; align-items: center;">
+                            <input type="hidden" name="tab" value="historial">
+                            <input type="hidden" name="group_by" value="{{ $groupBy ?? '' }}">
+                            @php
+                                $isCotizacionesActive = ($historialType ?? 'cotizaciones') === 'cotizaciones';
+                                $isReservasActive = ($historialType ?? 'cotizaciones') === 'reservas';
+                            @endphp
+                            <button
+                                type="submit"
+                                name="historial_type"
+                                value="cotizaciones"
+                                class="btn-primary @if(!$isCotizacionesActive) btn-primary-inactive @endif">
+                                <i class="fas fa-file-invoice-dollar"></i> Cotizaciones
+                            </button>
+                            <button
+                                type="submit"
+                                name="historial_type"
+                                value="reservas"
+                                class="btn-primary @if(!$isReservasActive) btn-primary-inactive @endif">
+                                <i class="fas fa-calendar-check"></i> Reservas
+                            </button>
+                        </form>
+                    </div>
+
+                    {{-- Botón de descarga PDF --}}
+                    <a href="{{ route('usuarios.ajustes.historial.pdf', ['group_by' => $groupBy ?? null, 'historial_type' => $historialType ?? 'cotizaciones']) }}" class="btn-primary">
                         <i class="fas fa-file-pdf"></i> Descargar PDF
                     </a>
-                    <form method="GET" action="{{ route('usuarios.ajustes') }}" class="historial-filter-form">
-                        <input type="hidden" name="tab" value="historial">
-                        <label for="group_by">Agrupar por:</label>
-                        <select id="group_by" name="group_by" onchange="this.form.submit()">
-                            <option value="" {{ empty($groupBy) ? 'selected' : '' }}>Sin agrupación</option>
-                            <option value="consulta" {{ ($groupBy ?? '') === 'consulta' ? 'selected' : '' }}>Consulta</option>
-                            <option value="dia" {{ ($groupBy ?? '') === 'dia' ? 'selected' : '' }}>Día</option>
-                        </select>
-                    </form>
+
+                    {{-- Selector de agrupación (solo para cotizaciones) --}}
+                    @if(($historialType ?? 'cotizaciones') === 'cotizaciones')
+                        <form method="GET" action="{{ route('usuarios.ajustes') }}" class="historial-filter-form">
+                            <input type="hidden" name="tab" value="historial">
+                            <input type="hidden" name="historial_type" value="cotizaciones">
+                            <label for="group_by">Agrupar por:</label>
+                            <select id="group_by" name="group_by" onchange="this.form.submit()">
+                                <option value="" {{ empty($groupBy) ? 'selected' : '' }}>Sin agrupación</option>
+                                <option value="consulta" {{ ($groupBy ?? '') === 'consulta' ? 'selected' : '' }}>Consulta</option>
+                                <option value="dia" {{ ($groupBy ?? '') === 'dia' ? 'selected' : '' }}>Día</option>
+                            </select>
+                        </form>
+                    @endif
                 </div>
 
-                @php
-                    $cotizacionesList = isset($cotizaciones) ? $cotizaciones : collect([]);
-                    $groupedData = isset($groupedCotizaciones) ? $groupedCotizaciones : null;
-                @endphp
+                {{-- Vista de Cotizaciones --}}
+                @if(($historialType ?? 'cotizaciones') === 'cotizaciones')
+                    @php
+                        $cotizacionesList = isset($cotizaciones) ? $cotizaciones : collect([]);
+                        $groupedData = isset($groupedCotizaciones) ? $groupedCotizaciones : null;
+                    @endphp
 
-                @if(empty($groupBy))
+                    @if(empty($groupBy))
                     <div class="table-container">
                         <table>
                             <thead>
@@ -416,6 +450,62 @@
                                 @empty
                                     <tr>
                                         <td colspan="3" class="no-services">No hay cotizaciones en el historial.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
+                @endif
+
+                {{-- Vista de Reservas --}}
+                @if(($historialType ?? 'cotizaciones') === 'reservas')
+                    @php
+                        $reservasList = isset($reservas) ? $reservas : collect([]);
+                    @endphp
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha Confirmación</th>
+                                    <th>Cliente</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($reservasList as $historial)
+                                    @php
+                                        $persona = $historial->reserva?->persona;
+                                        $descripcion = $historial->reserva?->descripcion_evento ?? 'N/A';
+                                        // Si la reserva fue eliminada (reserva es null) o la acción es 'finalizada', mostrar "Finalizada"
+                                        // En caso contrario, mostrar "Confirmada" (ya que solo mostramos reservas confirmadas)
+                                        if (!$historial->reserva || $historial->accion === 'finalizada') {
+                                            $estado = 'Finalizada';
+                                        } else {
+                                            $estado = 'Confirmada';
+                                        }
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $historial->id }}</td>
+                                        <td>{{ $historial->confirmado_en ? $historial->confirmado_en->format('d/m/Y H:i:s') : 'N/A' }}</td>
+                                        <td>
+                                            @if($persona)
+                                                {{ $persona->primer_nombre }} {{ $persona->primer_apellido }}
+                                                <br>
+                                                <small style="color: #999;">{{ $persona->correo ?? '' }}</small>
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td>{{ $descripcion }}</td>
+                                        <td style="text-transform: capitalize;">{{ $estado }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="no-services">No hay reservas en el historial.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

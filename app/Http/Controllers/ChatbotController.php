@@ -28,6 +28,8 @@ class ChatbotController extends Controller
 
     private ChatbotSessionManager $sessionManager;
 
+    private CotizacionController $cotizacionController;
+
     public function __construct(
         ChatbotTextProcessor $textProcessor,
         ChatbotIntentionDetector $intentionDetector,
@@ -35,7 +37,8 @@ class ChatbotController extends Controller
         ChatbotResponseBuilder $responseBuilder,
         ChatbotMessageProcessor $messageProcessor,
         ChatbotSubServicioService $subServicioService,
-        ChatbotSessionManager $sessionManager
+        ChatbotSessionManager $sessionManager,
+        CotizacionController $cotizacionController
     ) {
         $this->textProcessor = $textProcessor;
         $this->intentionDetector = $intentionDetector;
@@ -44,6 +47,7 @@ class ChatbotController extends Controller
         $this->messageProcessor = $messageProcessor;
         $this->subServicioService = $subServicioService;
         $this->sessionManager = $sessionManager;
+        $this->cotizacionController = $cotizacionController;
     }
 
     /**
@@ -259,7 +263,16 @@ class ChatbotController extends Controller
         $selecciones = (array) session('chat.selecciones', []);
         $dias = (int) session('chat.days', 1);
         $personasId = session('usuario_id');
-        $this->sessionManager->guardarCotizacion($personasId, $selecciones, $dias);
+
+        // Usar el método store() del CotizacionController siguiendo estándares RESTful
+        $request = new Request([
+            'selecciones' => $selecciones,
+            'dias' => $dias,
+            'personas_id' => $personasId,
+        ]);
+        $request->setMethod('POST');
+        $this->cotizacionController->store($request);
+
         $this->sessionManager->limpiarSesionChat();
 
         return response()->json([
