@@ -46,7 +46,7 @@ class UsuarioControllerUnitTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        $this->controller = new UsuarioController;
+        $this->controller = app(UsuarioController::class);
     }
 
     // ============================================

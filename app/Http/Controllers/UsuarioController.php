@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ImageStorageException;
-use App\Models\Usuario;
+use App\Repositories\Interfaces\UsuarioRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
 {
+    private UsuarioRepositoryInterface $usuarioRepository;
+
+    public function __construct(UsuarioRepositoryInterface $usuarioRepository)
+    {
+        $this->usuarioRepository = $usuarioRepository;
+    }
     public function registro()
     {
         return view('usuarios.registroUsuario');
@@ -39,7 +45,8 @@ class UsuarioController extends Controller
         // Guardar contraseña hasheada en la columna 'contrasena'
         $data['contrasena'] = Hash::make($request->contrasena);
 
-        $persona = Usuario::create($data);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $persona = $this->usuarioRepository->create($data);
 
         // Asignar rol por defecto "Cliente"
         try {
@@ -75,7 +82,8 @@ class UsuarioController extends Controller
             'contrasena' => 'required|string',
         ]);
 
-        $usuario = Usuario::where('correo', $request->correo)->first();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $usuario = $this->usuarioRepository->findByCorreo($request->correo);
 
         if ($usuario && Hash::check($request->contrasena, $usuario->contrasena)) {
             // Iniciar sesión
@@ -129,8 +137,13 @@ class UsuarioController extends Controller
         // Obtiene el ID guardado en la sesión al iniciar sesión
         $usuarioId = session('usuario_id');
 
-        // Busca al usuario
-        $usuario = Usuario::find($usuarioId);
+        // Si no hay usuario en sesión, retornar vista sin usuario
+        if (!$usuarioId) {
+            return view('usuarios.perfil', ['usuario' => null]);
+        }
+
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $usuario = $this->usuarioRepository->find((int) $usuarioId);
 
         // Envía los datos a la vista
         return view('usuarios.perfil', compact('usuario'));
@@ -242,7 +255,8 @@ class UsuarioController extends Controller
                 $errorCode = 403;
                 $errorMessage = 'Los usuarios invitados no pueden subir foto de perfil';
             } else {
-                $usuario = Usuario::find($usuarioId);
+                // Usar repositorio en lugar de modelo directo (DIP)
+                $usuario = $this->usuarioRepository->find($usuarioId);
                 if (! $usuario) {
                     $errorCode = 404;
                     $errorMessage = 'Usuario no encontrado';

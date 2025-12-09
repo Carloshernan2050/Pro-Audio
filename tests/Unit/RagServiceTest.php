@@ -16,7 +16,7 @@ class RagServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new RagService;
+        $this->service = app(RagService::class);
     }
 
     public function test_recuperar_contexto_encontra_resultados(): void

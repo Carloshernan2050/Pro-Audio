@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\InventarioController;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para InventarioController
@@ -17,7 +17,7 @@ class InventarioControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new InventarioController;
+        $this->controller = app(InventarioController::class);
     }
 
     // ============================================

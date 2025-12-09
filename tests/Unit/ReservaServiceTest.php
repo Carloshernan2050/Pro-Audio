@@ -40,7 +40,7 @@ class ReservaServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new ReservaService;
+        $this->service = app(ReservaService::class);
         $this->persona = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'User',
@@ -231,5 +231,74 @@ class ReservaServiceTest extends TestCase
         $this->assertDatabaseMissing('reservas', [
             'calendario_id' => $calendario->id,
         ]);
+    }
+
+    public function test_actualizar_reserva_formato_antiguo_calendario_no_es_objeto(): void
+    {
+        $calendario = Calendario::create([
+            'personas_id' => $this->persona->id,
+            'fecha' => now(),
+            'fecha_inicio' => self::FECHA_INICIO_ORIGINAL,
+            'fecha_fin' => self::FECHA_FIN_ORIGINAL,
+            'cantidad' => 15,
+            'evento' => self::EVENTO_DE_PRUEBA,
+        ]);
+
+        $reserva = Reserva::create([
+            'calendario_id' => $calendario->id,
+            'servicio' => 'Servicio Original',
+            'fecha_inicio' => self::FECHA_INICIO_ORIGINAL,
+            'fecha_fin' => self::FECHA_FIN_ORIGINAL,
+            'cantidad_total' => 5,
+        ]);
+
+        $request = Request::create(self::TEST_PATH, 'POST', [
+            'servicio' => self::NUEVO_SERVICIO,
+            'fecha_inicio' => self::FECHA_INICIO_NUEVA,
+            'fecha_fin' => self::FECHA_FIN_NUEVA,
+            'descripcion_evento' => self::NUEVO_EVENTO,
+        ]);
+
+        // Pasar null en lugar de objeto para cubrir línea 76-78
+        $this->service->actualizarReservaFormatoAntiguo($request, $calendario->id, null);
+
+        $reserva->refresh();
+        $this->assertEquals(self::NUEVO_SERVICIO, $reserva->servicio);
+        $this->assertEquals(15, $reserva->cantidad_total); // Debe usar cantidad del calendario
+    }
+
+    public function test_actualizar_reserva_formato_antiguo_calendario_sin_cantidad(): void
+    {
+        $calendario = Calendario::create([
+            'personas_id' => $this->persona->id,
+            'fecha' => now(),
+            'fecha_inicio' => self::FECHA_INICIO_ORIGINAL,
+            'fecha_fin' => self::FECHA_FIN_ORIGINAL,
+            'cantidad' => 20,
+            'evento' => self::EVENTO_DE_PRUEBA,
+        ]);
+
+        $reserva = Reserva::create([
+            'calendario_id' => $calendario->id,
+            'servicio' => 'Servicio Original',
+            'fecha_inicio' => self::FECHA_INICIO_ORIGINAL,
+            'fecha_fin' => self::FECHA_FIN_ORIGINAL,
+            'cantidad_total' => 5,
+        ]);
+
+        $request = Request::create(self::TEST_PATH, 'POST', [
+            'servicio' => self::NUEVO_SERVICIO,
+            'fecha_inicio' => self::FECHA_INICIO_NUEVA,
+            'fecha_fin' => self::FECHA_FIN_NUEVA,
+            'descripcion_evento' => self::NUEVO_EVENTO,
+        ]);
+
+        // Pasar un objeto sin propiedad cantidad para cubrir línea 76-78
+        $objetoSinCantidad = (object) ['otra_propiedad' => 'valor'];
+        $this->service->actualizarReservaFormatoAntiguo($request, $calendario->id, $objetoSinCantidad);
+
+        $reserva->refresh();
+        $this->assertEquals(self::NUEVO_SERVICIO, $reserva->servicio);
+        $this->assertEquals(20, $reserva->cantidad_total); // Debe usar cantidad del calendario obtenido del repositorio
     }
 }

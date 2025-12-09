@@ -40,7 +40,7 @@ class ChatbotTextProcessorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->processor = new ChatbotTextProcessor;
+        $this->processor = app(ChatbotTextProcessor::class);
     }
 
     // ============================================

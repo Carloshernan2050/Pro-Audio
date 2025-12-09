@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Servicios;
-use App\Models\SubServicios;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 use Illuminate\Http\Request;
 
 class BusquedaController extends Controller
 {
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    public function __construct(SubServicioRepositoryInterface $subServicioRepository)
+    {
+        $this->subServicioRepository = $subServicioRepository;
+    }
     /**
      * Busca servicios y sub-servicios según el término de búsqueda
      */
@@ -27,31 +32,8 @@ class BusquedaController extends Controller
         $terminoNormalizado = $this->normalizarTexto($termino);
         $tokens = explode(' ', $terminoNormalizado);
 
-        // Buscar en sub-servicios (nombre y descripción)
-        $resultados = SubServicios::query()
-            ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio',
-                'sub_servicios.descripcion', 'servicios.nombre_servicio')
-            ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
-            ->where(function ($query) use ($terminoNormalizado, $tokens) {
-                // Búsqueda en el término completo
-                $query->where('sub_servicios.nombre', 'like', "%{$terminoNormalizado}%")
-                    ->orWhere('sub_servicios.descripcion', 'like', "%{$terminoNormalizado}%");
-
-                // Búsqueda por palabras individuales
-                foreach ($tokens as $token) {
-                    $token = trim($token);
-                    if ($token !== '') {
-                        $query->orWhere('sub_servicios.nombre', 'like', "%{$token}%")
-                            ->orWhere('sub_servicios.descripcion', 'like', "%{$token}%");
-                    }
-                }
-
-                // También buscar en el nombre del servicio
-                $query->orWhere('servicios.nombre_servicio', 'like', "%{$terminoNormalizado}%");
-            })
-            ->orderBy('servicios.nombre_servicio')
-            ->orderBy('sub_servicios.nombre')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $resultados = $this->subServicioRepository->buscarPorTermino($terminoNormalizado, $tokens);
 
         return view('usuarios.busqueda', [
             'termino' => $termino,

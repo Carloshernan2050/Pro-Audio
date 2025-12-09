@@ -37,7 +37,7 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_calcular_dias_para_respuesta_mensaje_vacio_cubre_linea_209(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
         $processor = new ChatbotMessageProcessor(
             $textProcessor,
             app(\App\Services\ChatbotIntentionDetector::class),
@@ -61,7 +61,10 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_guardar_cotizacion_selecciones_vacias_cubre_linea_21(): void
     {
-        $sessionManager = new ChatbotSessionManager;
+        // Usar repositorios reales para test de integración
+        $cotizacionRepo = app(\App\Repositories\Interfaces\CotizacionRepositoryInterface::class);
+        $subServicioRepo = app(\App\Repositories\Interfaces\SubServicioRepositoryInterface::class);
+        $sessionManager = new ChatbotSessionManager($cotizacionRepo, $subServicioRepo);
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'User',
@@ -86,7 +89,10 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_guardar_cotizacion_personas_id_cero_cubre_linea_21(): void
     {
-        $sessionManager = new ChatbotSessionManager;
+        // Usar repositorios reales para test de integración
+        $cotizacionRepo = app(\App\Repositories\Interfaces\CotizacionRepositoryInterface::class);
+        $subServicioRepo = app(\App\Repositories\Interfaces\SubServicioRepositoryInterface::class);
+        $sessionManager = new ChatbotSessionManager($cotizacionRepo, $subServicioRepo);
 
         // personasId = 0 debería retornar temprano (línea 21)
         $sessionManager->guardarCotizacion(0, [1, 2], 5);
@@ -102,7 +108,10 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_guardar_cotizacion_catch_exception_cubre_lineas_39_40(): void
     {
-        $sessionManager = new ChatbotSessionManager;
+        // Usar repositorios reales para test de integración
+        $cotizacionRepo = app(\App\Repositories\Interfaces\CotizacionRepositoryInterface::class);
+        $subServicioRepo = app(\App\Repositories\Interfaces\SubServicioRepositoryInterface::class);
+        $sessionManager = new ChatbotSessionManager($cotizacionRepo, $subServicioRepo);
         $usuario = Usuario::create([
             'primer_nombre' => 'Test',
             'primer_apellido' => 'User',
@@ -157,12 +166,15 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_generar_sugerencias_vocab_vacio_cubre_linea_28(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
         
         // Crear una clase anónima que extienda ChatbotSuggestionGenerator
         // y sobrescriba obtenerVocabularioCorreccion para retornar array vacío
         // Nota: obtenerVocabularioCorreccion es privado, así que necesitamos usar Reflection
-        $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
+        $servicioRepo = app(\App\Repositories\Interfaces\ServicioRepositoryInterface::class);
+        $subServicioRepo = app(\App\Repositories\Interfaces\SubServicioRepositoryInterface::class);
+        $generator = new class($textProcessor, $servicioRepo, $subServicioRepo) extends ChatbotSuggestionGenerator {
             public function generarSugerencias(string $mensajeCorregido): array
             {
                 // Forzar vocab vacío usando Reflection
@@ -198,8 +210,7 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_generar_sugerencias_por_token_target_token_null_cubre_linea_54(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
-        $generator = new ChatbotSuggestionGenerator($textProcessor);
+        $generator = app(\App\Services\ChatbotSuggestionGenerator::class);
 
         // En un entorno normal, el método debería funcionar
         // Para cubrir línea 54, necesitaríamos forzar que encontrarTokenMasRaro retorne null
@@ -219,8 +230,7 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_obtener_vocabulario_correccion_catch_exception_cubre_linea_113(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
-        $generator = new ChatbotSuggestionGenerator($textProcessor);
+        $generator = app(\App\Services\ChatbotSuggestionGenerator::class);
 
         $reflection = new \ReflectionClass($generator);
         $method = $reflection->getMethod('obtenerVocabularioCorreccion');
@@ -243,7 +253,7 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_obtener_vocabulario_correccion_token_vacio_cubre_linea_195(): void
     {
-        $processor = new ChatbotTextProcessor;
+        $processor = app(\App\Services\ChatbotTextProcessor::class);
 
         // Crear un SubServicio con nombre/descripción que genere tokens vacíos después de trim
         // El regex /[^a-zA-Z0-9áéíóúñ]+/u divide por caracteres no alfanuméricos
@@ -285,7 +295,7 @@ class ChatbotServicesCoverageTest extends TestCase
      */
     public function test_obtener_vocabulario_correccion_catch_exception_cubre_linea_203(): void
     {
-        $processor = new ChatbotTextProcessor;
+        $processor = app(\App\Services\ChatbotTextProcessor::class);
 
         $reflection = new \ReflectionClass($processor);
         $method = $reflection->getMethod('obtenerVocabularioCorreccion');

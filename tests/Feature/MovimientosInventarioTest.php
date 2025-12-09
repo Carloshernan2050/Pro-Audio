@@ -430,17 +430,17 @@ class MovimientosInventarioTest extends TestCase
             'stock' => 10,
         ]);
 
-        $movimiento = MovimientosInventario::create([
+        // Crear movimiento usando el controlador para que actualice el stock
+        $response = $this->postJson(self::ROUTE_MOVIMIENTOS, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_ENTRADA,
             'cantidad' => 5,
-            'fecha_movimiento' => now(),
-            'descripcion' => self::DESCRIPCION_MOVIMIENTO,
         ]);
 
+        $movimientoId = $response->json('movimiento_id');
         $inventario->refresh();
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimiento->id, [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimientoId, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_ENTRADA,
             'cantidad' => 8,
@@ -465,17 +465,17 @@ class MovimientosInventarioTest extends TestCase
             'stock' => 10,
         ]);
 
-        $movimiento = MovimientosInventario::create([
+        // Crear movimiento usando el controlador para que actualice el stock
+        $response = $this->postJson(self::ROUTE_MOVIMIENTOS, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_ENTRADA,
             'cantidad' => 5,
-            'fecha_movimiento' => now(),
-            'descripcion' => self::DESCRIPCION_MOVIMIENTO,
         ]);
 
+        $movimientoId = $response->json('movimiento_id');
         $inventario->refresh();
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimiento->id, [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimientoId, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_SALIDA,
             'cantidad' => 3,
@@ -538,17 +538,17 @@ class MovimientosInventarioTest extends TestCase
             'stock' => 10,
         ]);
 
-        $movimiento = MovimientosInventario::create([
+        // Crear movimiento usando el controlador para que actualice el stock
+        $response = $this->postJson(self::ROUTE_MOVIMIENTOS, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_ENTRADA,
             'cantidad' => 5,
-            'fecha_movimiento' => now(),
-            'descripcion' => self::DESCRIPCION_MOVIMIENTO,
         ]);
 
+        $movimientoId = $response->json('movimiento_id');
         $inventario->refresh();
 
-        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimiento->id, [
+        $response = $this->putJson(self::ROUTE_MOVIMIENTOS.'/'.$movimientoId, [
             'inventario_id' => $inventario->id,
             'tipo_movimiento' => self::TIPO_SALIDA,
             'cantidad' => 20, // Más que el stock disponible (15)

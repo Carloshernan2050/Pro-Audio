@@ -2,8 +2,16 @@
 
 namespace App\Services;
 
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
+
 class ChatbotTextProcessor
 {
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    public function __construct(SubServicioRepositoryInterface $subServicioRepository)
+    {
+        $this->subServicioRepository = $subServicioRepository;
+    }
     private const STOPWORDS = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al'];
 
     private const STOPWORDS_EXT = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al', 'par'];
@@ -186,8 +194,8 @@ class ChatbotTextProcessor
         }
 
         try {
-            // Solo usar NOMBRES de subservicios, NO descripciones
-            $subServicios = \App\Models\SubServicios::query()->select('nombre')->limit(500)->get();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $subServicios = $this->subServicioRepository->obtenerNombres(500);
             foreach ($subServicios as $ss) {
                 // Solo extraer tokens del nombre, no de la descripción
                 $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', ($ss->nombre ?? ''));

@@ -23,8 +23,8 @@ class ChatbotIntentionDetectorCoverageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->textProcessor = new ChatbotTextProcessor;
-        $this->detector = new ChatbotIntentionDetector($this->textProcessor);
+        $this->textProcessor = app(ChatbotTextProcessor::class);
+        $this->detector = app(ChatbotIntentionDetector::class);
     }
 
     // ============================================

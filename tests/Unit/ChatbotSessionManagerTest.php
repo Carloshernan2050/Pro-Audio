@@ -2,6 +2,8 @@
 
 namespace Tests\Unit;
 
+use App\Repositories\Interfaces\CotizacionRepositoryInterface;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 use App\Services\ChatbotSessionManager;
 use App\Services\ChatbotTextProcessor;
 use Tests\TestCase;
@@ -13,10 +15,20 @@ class ChatbotSessionManagerTest extends TestCase
 {
     protected ChatbotSessionManager $sessionManager;
 
+    protected CotizacionRepositoryInterface $cotizacionRepository;
+
+    protected SubServicioRepositoryInterface $subServicioRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sessionManager = new ChatbotSessionManager;
+        // Mock de repositorios (Dependency Inversion Principle)
+        $this->cotizacionRepository = \Mockery::mock(CotizacionRepositoryInterface::class);
+        $this->subServicioRepository = \Mockery::mock(SubServicioRepositoryInterface::class);
+        $this->sessionManager = new ChatbotSessionManager(
+            $this->cotizacionRepository,
+            $this->subServicioRepository
+        );
     }
 
     // ============================================
@@ -74,7 +86,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_con_numero(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
         $resultado = $this->sessionManager->extraerDiasDelRequest(
             'necesito por 3 dias',
             false,
@@ -86,7 +98,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_con_palabras(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
         $resultado = $this->sessionManager->extraerDiasDelRequest(
             'necesito por tres dias',
             false,
@@ -98,7 +110,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_con_continuacion(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
         session(['chat.days' => 5]);
         $resultado = $this->sessionManager->extraerDiasDelRequest(
             'tambien',
@@ -111,7 +123,7 @@ class ChatbotSessionManagerTest extends TestCase
 
     public function test_extraer_dias_del_request_guarda_en_session(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
         session()->forget('chat.days');
         $this->sessionManager->extraerDiasDelRequest(
             'por 4 dias',

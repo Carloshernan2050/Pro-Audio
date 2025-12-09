@@ -36,7 +36,7 @@ class AjustesControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new AjustesController;
+        $this->controller = app(AjustesController::class);
     }
 
     /**

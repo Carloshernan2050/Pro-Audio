@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Http\Controllers\ServiciosController;
 use Illuminate\Support\Str;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ServiciosController
@@ -18,7 +18,7 @@ class ServiciosControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new ServiciosController;
+        $this->controller = app(ServiciosController::class);
     }
 
     // ============================================

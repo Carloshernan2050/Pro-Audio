@@ -3,23 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ServiceCreationException;
-use App\Models\Cotizacion;
-use App\Models\Servicios;
+use App\Repositories\Interfaces\CotizacionRepositoryInterface;
+use App\Repositories\Interfaces\ServicioRepositoryInterface;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
+use App\Services\BladeGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ServiciosController extends Controller
 {
+    private ServicioRepositoryInterface $servicioRepository;
+
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    private CotizacionRepositoryInterface $cotizacionRepository;
+
+    private BladeGeneratorService $bladeGeneratorService;
+
+    public function __construct(
+        ServicioRepositoryInterface $servicioRepository,
+        SubServicioRepositoryInterface $subServicioRepository,
+        CotizacionRepositoryInterface $cotizacionRepository,
+        BladeGeneratorService $bladeGeneratorService
+    ) {
+        $this->servicioRepository = $servicioRepository;
+        $this->subServicioRepository = $subServicioRepository;
+        $this->cotizacionRepository = $cotizacionRepository;
+        $this->bladeGeneratorService = $bladeGeneratorService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         try {
-            $servicios = Servicios::orderBy('id', 'desc')->get();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $servicios = $this->servicioRepository->all();
 
             // Debug: verificar que hay servicios
             if ($servicios->isEmpty()) {
@@ -57,8 +78,8 @@ class ServiciosController extends Controller
         ]);
 
         try {
-            // PASO 1: Primero guardar en la base de datos
-            $servicio = Servicios::create([
+            // PASO 1: Primero guardar en la base de datos usando repositorio (DIP)
+            $servicio = $this->servicioRepository->create([
                 'nombre_servicio' => $request->nombre_servicio,
                 'descripcion' => $request->descripcion ?? '',
                 'icono' => $request->icono ?: null,
@@ -69,9 +90,9 @@ class ServiciosController extends Controller
                 throw new ServiceCreationException('El servicio no se guardó correctamente en la base de datos.');
             }
 
-            // PASO 2: Después de guardar en DB, generar el archivo blade
+            // PASO 2: Después de guardar en DB, generar el archivo blade usando servicio (SRP)
             try {
-                $this->generarBlade($servicio);
+                $this->bladeGeneratorService->generar($servicio);
             } catch (\Exception $bladeError) {
                 // Si falla la generación del blade, el servicio ya está guardado en DB
                 // Solo mostramos un mensaje de advertencia
@@ -98,7 +119,8 @@ class ServiciosController extends Controller
      */
     public function show($id)
     {
-        $servicio = Servicios::findOrFail($id);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $servicio = $this->servicioRepository->findWithRelations($id);
         $subServicios = $servicio->subServicios;
 
         // Nombre normalizado para la vista
@@ -112,7 +134,8 @@ class ServiciosController extends Controller
      */
     public function edit($id)
     {
-        $servicio = Servicios::findOrFail($id);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $servicio = $this->servicioRepository->find($id);
 
         return view('usuarios.ajustes', compact('servicio'));
     }
@@ -122,7 +145,8 @@ class ServiciosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $servicio = Servicios::findOrFail($id);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $servicio = $this->servicioRepository->find($id);
 
         $request->validate([
             'nombre_servicio' => 'required|string|max:100|unique:servicios,nombre_servicio,'.$id,
@@ -133,19 +157,24 @@ class ServiciosController extends Controller
         try {
             $nombreAnterior = $servicio->nombre_servicio;
 
-            $servicio->update([
+            // Usar repositorio para actualizar (DIP)
+            $this->servicioRepository->update($id, [
                 'nombre_servicio' => $request->nombre_servicio,
                 'descripcion' => $request->descripcion ?? '',
                 'icono' => $request->icono ?: null,
             ]);
 
-            // Si cambió el nombre, regenerar el blade con el nuevo nombre
+            // Recargar el servicio actualizado
+            $servicio = $this->servicioRepository->find($id);
+
+            // Si cambió el nombre, regenerar el blade con el nuevo nombre usando servicio (SRP)
             if ($nombreAnterior !== $request->nombre_servicio) {
-                $this->eliminarBladeAnterior($nombreAnterior);
-                $this->generarBlade($servicio);
+                $nombreVistaAnterior = Str::slug($nombreAnterior, '_');
+                $this->bladeGeneratorService->eliminar($nombreVistaAnterior);
+                $this->bladeGeneratorService->generar($servicio);
             } else {
-                // Si solo cambió la descripción, actualizar el blade existente
-                $this->actualizarDescripcionBlade($servicio);
+                // Si solo cambió la descripción, actualizar el blade existente usando servicio (SRP)
+                $this->bladeGeneratorService->actualizarDescripcion($servicio);
             }
 
             return redirect()->route('servicios.index')
@@ -162,22 +191,25 @@ class ServiciosController extends Controller
     public function destroy($id)
     {
         try {
-            $servicio = Servicios::with('subServicios')->findOrFail($id);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $servicio = $this->servicioRepository->findWithRelations($id);
             $nombreVista = Str::slug($servicio->nombre_servicio, '_');
 
             DB::transaction(function () use ($servicio) {
-                $subServicioIds = $servicio->subServicios->pluck('id');
+                $subServicioIds = $servicio->subServicios->pluck('id')->toArray();
 
-                if ($subServicioIds->isNotEmpty()) {
-                    Cotizacion::whereIn('sub_servicios_id', $subServicioIds)->delete();
-                    $servicio->subServicios()->delete();
+                if (! empty($subServicioIds)) {
+                    // Usar repositorios en lugar de modelos directos (DIP)
+                    $this->cotizacionRepository->deleteBySubServicioIds($subServicioIds);
+                    $this->subServicioRepository->deleteByServicioId($servicio->id);
                 }
 
-                $servicio->delete();
+                // Usar repositorio para eliminar (DIP)
+                $this->servicioRepository->delete($servicio->id);
             });
 
-            // Eliminar el archivo blade asociado (fuera de la transacción)
-            $this->eliminarBlade($nombreVista);
+            // Eliminar el archivo blade asociado usando servicio (SRP)
+            $this->bladeGeneratorService->eliminar($nombreVista);
 
             return redirect()->route('servicios.index')
                 ->with('success', 'Servicio eliminado exitosamente.');
@@ -187,151 +219,4 @@ class ServiciosController extends Controller
         }
     }
 
-    /**
-     * Genera automáticamente el archivo blade para un servicio
-     */
-    private function generarBlade($servicio)
-    {
-        $nombreVista = Str::slug($servicio->nombre_servicio, '_');
-        $nombreServicio = $servicio->nombre_servicio;
-        $descripcion = $servicio->descripcion ?? 'Servicios profesionales de alta calidad para tus eventos.';
-
-        $rutaVista = resource_path("views/usuarios/{$nombreVista}.blade.php");
-        $directorioVista = resource_path('views/usuarios');
-
-        // Asegurar que el directorio existe
-        if (! File::exists($directorioVista)) {
-            File::makeDirectory($directorioVista, 0755, true);
-        }
-
-        // Usar una plantilla existente como base y personalizarla
-        $plantillaBase = resource_path('views/usuarios/animacion.blade.php');
-
-        if (File::exists($plantillaBase)) {
-            // Leer la plantilla base
-            $contenidoBlade = File::get($plantillaBase);
-
-            // Reemplazar los valores específicos
-            $contenidoBlade = str_replace('PRO AUDIO - Animación', 'PRO AUDIO - '.e($nombreServicio), $contenidoBlade);
-            $contenidoBlade = str_replace('Animación de Eventos', e($nombreServicio), $contenidoBlade);
-            $contenidoBlade = str_replace('Personal capacitado y sistemas de última generación para crear el ambiente perfecto en tu evento.', e($descripcion), $contenidoBlade);
-            $contenidoBlade = str_replace('/images/animacion/', '/images/'.e($nombreVista).'/', $contenidoBlade);
-            $contenidoBlade = str_replace('para animación', 'para '.e($nombreServicio), $contenidoBlade);
-        } else {
-            // Si no existe la plantilla, crear una desde cero
-            $contenidoBlade = $this->crearContenidoBladeDesdeCero($nombreServicio, $descripcion, $nombreVista);
-        }
-
-        File::put($rutaVista, $contenidoBlade);
-    }
-
-    /**
-     * Actualiza solo la descripción en el blade existente
-     */
-    private function actualizarDescripcionBlade($servicio)
-    {
-        $nombreVista = Str::slug($servicio->nombre_servicio, '_');
-        $rutaVista = resource_path("views/usuarios/{$nombreVista}.blade.php");
-
-        if (File::exists($rutaVista)) {
-            $contenido = File::get($rutaVista);
-            $descripcion = $servicio->descripcion ?? 'Servicios profesionales de alta calidad para tus eventos.';
-
-            // Reemplazar la descripción en el blade usando regex más específico
-            $contenido = preg_replace(
-                '/<p class="page-subtitle">[^<]*<\/p>/',
-                '<p class="page-subtitle">'.e($descripcion).'</p>',
-                $contenido
-            );
-
-            File::put($rutaVista, $contenido);
-        }
-    }
-
-    /**
-     * Elimina el archivo blade asociado
-     */
-    private function eliminarBlade($nombreVista)
-    {
-        $rutaVista = resource_path("views/usuarios/{$nombreVista}.blade.php");
-        if (File::exists($rutaVista)) {
-            File::delete($rutaVista);
-        }
-    }
-
-    /**
-     * Elimina el blade con el nombre anterior
-     */
-    private function eliminarBladeAnterior($nombreAnterior)
-    {
-        $nombreVistaAnterior = Str::slug($nombreAnterior, '_');
-        $this->eliminarBlade($nombreVistaAnterior);
-    }
-
-    /**
-     * Crea el contenido del blade desde cero usando la misma estructura de las vistas existentes
-     */
-    private function crearContenidoBladeDesdeCero($nombreServicio, $descripcion, $nombreVista)
-    {
-        $contenido = <<<'BLADE'
-@extends('layouts.app')
-
-@section('title', '{NOMBRE_SERVICIO}')
-
-@section('content')
-       <main class="main-content">
-            <h2 class="page-title">{NOMBRE_SERVICIO}</h2>
-            <p class="page-subtitle">{DESCRIPCION}</p>
-
-            <section class="productos-servicio">
-                <div class="productos-grid">
-                    @php
-                        $rolesSesion = session('roles');
-                        $rolesSesion = is_array($rolesSesion) ? $rolesSesion : array_filter([$rolesSesion]);
-                        $puedeVerPrecios = count(array_intersect($rolesSesion, ['Superadmin', 'Admin', 'Usuario'])) > 0;
-                    @endphp
-                    @forelse($subServicios as $subServicio)
-                        <div class="producto-item">
-                            @php
-                                $nombreImagen = strtolower(str_replace(' ', '_', $subServicio->nombre)) . '.jpg';
-                                $rutaImagen = public_path('images/{NOMBRE_VISTA}/' . $nombreImagen);
-                                $existeImagen = file_exists($rutaImagen);
-                            @endphp
-                            @if($existeImagen)
-                                <img src="/images/{NOMBRE_VISTA}/{{ $nombreImagen }}"
-                                     alt="{{ $subServicio->nombre }}"
-                                     class="producto-imagen">
-                            @else
-                                <div class="producto-imagen-placeholder">
-                                    <i class="fas fa-image"></i>
-                                </div>
-                            @endif
-                            <h4 class="producto-nombre">{{ $subServicio->nombre }}</h4>
-                            @if($puedeVerPrecios && $subServicio->precio)
-                                <p style="color: #2563eb; font-weight: bold; font-size: 1.1em; margin: 8px 0;">
-                                    ${{ number_format($subServicio->precio, 0, ',', '.') }}
-                                </p>
-                            @endif
-                            @if($subServicio->descripcion)
-                                <p class="producto-descripcion">{{ $subServicio->descripcion }}</p>
-                            @endif
-                        </div>
-                    @empty
-                        <div class="no-services">
-                            <p>No hay sub-servicios disponibles para {NOMBRE_SERVICIO} en este momento.</p>
-                        </div>
-                    @endforelse
-                </div>
-            </section>
-        </main>
-@endsection
-BLADE;
-
-        // Reemplazar los placeholders
-        $contenido = str_replace('{NOMBRE_SERVICIO}', e($nombreServicio), $contenido);
-        $contenido = str_replace('{DESCRIPCION}', e($descripcion), $contenido);
-        $contenido = str_replace('{NOMBRE_VISTA}', e($nombreVista), $contenido);
-
-        return $contenido;
-    }
 }

@@ -2,19 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cotizacion;
-use App\Models\Historial;
-use App\Models\Servicios;
-use App\Models\SubServicios;
+use App\Repositories\Interfaces\CotizacionRepositoryInterface;
+use App\Repositories\Interfaces\HistorialRepositoryInterface;
+use App\Repositories\Interfaces\ServicioRepositoryInterface;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class AjustesController extends Controller
 {
+    private ServicioRepositoryInterface $servicioRepository;
+
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    private CotizacionRepositoryInterface $cotizacionRepository;
+
+    private HistorialRepositoryInterface $historialRepository;
+
+    public function __construct(
+        ServicioRepositoryInterface $servicioRepository,
+        SubServicioRepositoryInterface $subServicioRepository,
+        CotizacionRepositoryInterface $cotizacionRepository,
+        HistorialRepositoryInterface $historialRepository
+    ) {
+        $this->servicioRepository = $servicioRepository;
+        $this->subServicioRepository = $subServicioRepository;
+        $this->cotizacionRepository = $cotizacionRepository;
+        $this->historialRepository = $historialRepository;
+    }
     public function index(Request $request)
     {
-        $servicios = Servicios::all();
-        $subServicios = SubServicios::with('servicio')->orderBy('id', 'asc')->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $servicios = $this->servicioRepository->all();
+        $subServicios = $this->subServicioRepository->allWithRelations();
 
         $groupBy = $request->query('group_by'); // null | 'consulta' | 'dia'
         $requestedTab = $request->query('tab'); // null | servicios | inventario | movimientos | historial | subservicios
@@ -83,7 +103,8 @@ class AjustesController extends Controller
 
     public function getSubservicios()
     {
-        $subServicios = SubServicios::with('servicio')->orderBy('id', 'asc')->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $subServicios = $this->subServicioRepository->allWithRelations();
 
         return response()->json($subServicios);
     }
@@ -95,9 +116,8 @@ class AjustesController extends Controller
      */
     private function getCotizaciones()
     {
-        return Cotizacion::with(['persona', 'subServicio.servicio'])
-            ->orderBy('fecha_cotizacion', 'desc')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        return $this->cotizacionRepository->allWithRelations();
     }
 
     /**
@@ -108,11 +128,8 @@ class AjustesController extends Controller
      */
     private function getReservas()
     {
-        return Historial::with(['reserva.persona'])
-            ->whereNotNull('confirmado_en')
-            ->orderBy('confirmado_en', 'desc')
-            ->orderBy('id', 'desc')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        return $this->historialRepository->getReservasConfirmadas();
     }
 
     /**

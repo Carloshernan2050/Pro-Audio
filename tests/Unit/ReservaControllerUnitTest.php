@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\ReservaController;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ReservaController
@@ -17,7 +17,7 @@ class ReservaControllerUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new ReservaController;
+        $this->controller = app(ReservaController::class);
     }
 
     // ============================================

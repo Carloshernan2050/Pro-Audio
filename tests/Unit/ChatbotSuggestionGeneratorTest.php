@@ -37,8 +37,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $textProcessor = new ChatbotTextProcessor;
-        $this->generator = new ChatbotSuggestionGenerator($textProcessor);
+        $this->generator = app(\App\Services\ChatbotSuggestionGenerator::class);
     }
 
     // ============================================
@@ -1141,11 +1140,14 @@ class ChatbotSuggestionGeneratorTest extends TestCase
      */
     public function test_generar_sugerencias_vocab_vacio_cubre_linea_28(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
         
         // Crear una clase anónima que sobrescriba obtenerVocabularioCorreccion
         // para retornar array vacío, permitiendo que el código original ejecute línea 28
-        $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
+        $servicioRepo = app(\App\Repositories\Interfaces\ServicioRepositoryInterface::class);
+        $subServicioRepo = app(\App\Repositories\Interfaces\SubServicioRepositoryInterface::class);
+        $generator = new class($textProcessor, $servicioRepo, $subServicioRepo) extends ChatbotSuggestionGenerator {
             protected function obtenerVocabularioCorreccion(): array
             {
                 return []; // Forzar retornar vacío para que línea 28 se ejecute
@@ -1168,10 +1170,12 @@ class ChatbotSuggestionGeneratorTest extends TestCase
      */
     public function test_generar_sugerencias_por_token_target_token_null_cubre_linea_54(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
+        $servicioRepo = app(\App\Repositories\Interfaces\ServicioRepositoryInterface::class);
+        $subServicioRepo = app(\App\Repositories\Interfaces\SubServicioRepositoryInterface::class);
         
         // Crear una clase anónima que sobrescriba métodos para forzar que targetToken sea null
-        $generator = new class($textProcessor) extends ChatbotSuggestionGenerator {
+        $generator = new class($textProcessor, $servicioRepo, $subServicioRepo) extends ChatbotSuggestionGenerator {
             public function generarSugerenciasPorTokenNombresCompletos(string $mensajeOriginal): array
             {
                 // Retornar array vacío para que no salga temprano en línea 46
@@ -1209,8 +1213,7 @@ class ChatbotSuggestionGeneratorTest extends TestCase
      */
     public function test_obtener_vocabulario_correccion_catch_exception_cubre_linea_113(): void
     {
-        $textProcessor = new ChatbotTextProcessor;
-        $generator = new ChatbotSuggestionGenerator($textProcessor);
+        $generator = app(\App\Services\ChatbotSuggestionGenerator::class);
 
         $reflection = new \ReflectionClass($generator);
         $method = $reflection->getMethod('obtenerVocabularioCorreccion');

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ImageStorageException;
-use App\Models\Servicios;
-use App\Models\SubServicios;
+use App\Repositories\Interfaces\ServicioRepositoryInterface;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +15,18 @@ class SubServiciosController extends Controller
 {
     private const STORAGE_PATH = 'subservicios/';
     private const CONTENT_TYPE_JSON = 'application/json';
+
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    private ServicioRepositoryInterface $servicioRepository;
+
+    public function __construct(
+        SubServicioRepositoryInterface $subServicioRepository,
+        ServicioRepositoryInterface $servicioRepository
+    ) {
+        $this->subServicioRepository = $subServicioRepository;
+        $this->servicioRepository = $servicioRepository;
+    }
 
     /**
      * Handle AJAX or redirect response for success messages.
@@ -79,12 +91,16 @@ class SubServiciosController extends Controller
     public function index()
     {
         try {
-            $subServicios = SubServicios::with('servicio')
+            // Usar repositorio en lugar de modelo directo (DIP)
+            // Nota: Necesitamos obtener con relaciones, pero el repositorio actual no tiene ese método
+            // Por ahora usamos el repositorio básico y cargamos relaciones después si es necesario
+            $subServicios = \App\Models\SubServicios::with('servicio')
                 ->orderBy('servicios_id')
                 ->orderBy('nombre')
                 ->get();
 
-            $servicios = Servicios::orderBy('nombre_servicio')->get();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $servicios = $this->servicioRepository->all();
 
             return view('usuarios.subservicios', compact('subServicios', 'servicios'));
         } catch (\Exception $e) {
@@ -102,7 +118,8 @@ class SubServiciosController extends Controller
      */
     public function create()
     {
-        $servicios = Servicios::orderBy('nombre_servicio')->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $servicios = $this->servicioRepository->all();
 
         return view('usuarios.subservicios', compact('servicios'));
     }
@@ -146,7 +163,8 @@ class SubServiciosController extends Controller
                 $imagenPath = $filename;
             }
 
-            SubServicios::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->subServicioRepository->create([
                 'servicios_id' => $request->servicios_id,
                 'nombre' => $request->nombre,
                 'descripcion' => $request->descripcion ?? '',
@@ -167,7 +185,8 @@ class SubServiciosController extends Controller
      */
     public function show($id)
     {
-        $subServicio = SubServicios::with('servicio')->findOrFail($id);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $subServicio = $this->subServicioRepository->findWithRelations($id);
 
         return view('usuarios.subservicios', compact('subServicio'));
     }
@@ -177,8 +196,9 @@ class SubServiciosController extends Controller
      */
     public function edit($id)
     {
-        $subServicio = SubServicios::findOrFail($id);
-        $servicios = Servicios::orderBy('nombre_servicio')->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $subServicio = $this->subServicioRepository->find($id);
+        $servicios = $this->servicioRepository->all();
 
         return view('usuarios.subservicios', compact('subServicio', 'servicios'));
     }
@@ -189,7 +209,8 @@ class SubServiciosController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $subServicio = SubServicios::findOrFail($id);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $subServicio = $this->subServicioRepository->find($id);
 
             $request->validate([
                 'servicios_id' => 'required|exists:servicios,id',
@@ -234,7 +255,8 @@ class SubServiciosController extends Controller
                 $imagenPath = $subServicio->imagen;
             }
 
-            $subServicio->update([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->subServicioRepository->update($id, [
                 'servicios_id' => $request->servicios_id,
                 'nombre' => $request->nombre,
                 'descripcion' => $request->descripcion ?? '',
@@ -256,14 +278,16 @@ class SubServiciosController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
-            $subServicio = SubServicios::findOrFail($id);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $subServicio = $this->subServicioRepository->find($id);
 
             // Eliminar imagen si existe
             if ($subServicio->imagen && Storage::disk('public')->exists(self::STORAGE_PATH.$subServicio->imagen)) {
                 Storage::disk('public')->delete(self::STORAGE_PATH.$subServicio->imagen);
             }
 
-            $subServicio->delete();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->subServicioRepository->delete($id);
 
             return $this->handleSuccessResponse($request, 'Subservicio eliminado exitosamente.');
         } catch (\Exception $e) {

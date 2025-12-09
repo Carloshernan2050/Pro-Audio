@@ -2,18 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Calendario;
-use App\Models\CalendarioItem;
-use App\Models\Historial;
-use App\Models\Inventario;
-use App\Models\MovimientosInventario;
-use App\Models\Reserva;
-use App\Models\ReservaItem;
+use App\Repositories\Interfaces\CalendarioItemRepositoryInterface;
+use App\Repositories\Interfaces\CalendarioRepositoryInterface;
+use App\Repositories\Interfaces\HistorialRepositoryInterface;
+use App\Repositories\Interfaces\InventarioRepositoryInterface;
+use App\Repositories\Interfaces\MovimientoInventarioRepositoryInterface;
+use App\Repositories\Interfaces\ReservaItemRepositoryInterface;
+use App\Repositories\Interfaces\ReservaRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReservaController extends Controller
 {
+    private ReservaRepositoryInterface $reservaRepository;
+
+    private ReservaItemRepositoryInterface $reservaItemRepository;
+
+    private InventarioRepositoryInterface $inventarioRepository;
+
+    private CalendarioRepositoryInterface $calendarioRepository;
+
+    private CalendarioItemRepositoryInterface $calendarioItemRepository;
+
+    private MovimientoInventarioRepositoryInterface $movimientoInventarioRepository;
+
+    private HistorialRepositoryInterface $historialRepository;
+
+    public function __construct(
+        ReservaRepositoryInterface $reservaRepository,
+        ReservaItemRepositoryInterface $reservaItemRepository,
+        InventarioRepositoryInterface $inventarioRepository,
+        CalendarioRepositoryInterface $calendarioRepository,
+        CalendarioItemRepositoryInterface $calendarioItemRepository,
+        MovimientoInventarioRepositoryInterface $movimientoInventarioRepository,
+        HistorialRepositoryInterface $historialRepository
+    ) {
+        $this->reservaRepository = $reservaRepository;
+        $this->reservaItemRepository = $reservaItemRepository;
+        $this->inventarioRepository = $inventarioRepository;
+        $this->calendarioRepository = $calendarioRepository;
+        $this->calendarioItemRepository = $calendarioItemRepository;
+        $this->movimientoInventarioRepository = $movimientoInventarioRepository;
+        $this->historialRepository = $historialRepository;
+    }
     private const ESTADO_PENDIENTE = 'pendiente';
 
     private const ESTADO_CONFIRMADA = 'confirmada';
@@ -36,10 +67,8 @@ class ReservaController extends Controller
     {
         $this->authorizeAdminLike();
 
-        $reservas = Reserva::with(['items.inventario'])
-            ->orderBy('estado')
-            ->orderByDesc('created_at')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $reservas = $this->reservaRepository->allWithRelations();
 
         return response()->json($reservas);
     }
@@ -71,9 +100,9 @@ class ReservaController extends Controller
             'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
         ]);
 
-        // Validar que la cantidad solicitada no supere el stock actual
+        // Validar que la cantidad solicitada no supere el stock actual usando repositorio (DIP)
         foreach ($items as $item) {
-            $inventario = Inventario::findOrFail($item['inventario_id']);
+            $inventario = $this->inventarioRepository->find($item['inventario_id']);
             if ($item['cantidad'] > $inventario->stock) {
                 return response()->json([
                     'error' => "La cantidad solicitada para '{$inventario->descripcion}' supera el stock disponible ({$inventario->stock}).",
@@ -84,7 +113,8 @@ class ReservaController extends Controller
         return DB::transaction(function () use ($request, $items) {
             $cantidadTotal = array_sum(array_column($items, 'cantidad'));
 
-            $reserva = Reserva::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $reserva = $this->reservaRepository->create([
                 'personas_id' => session('usuario_id'),
                 'servicio' => $request->input('servicio'),
                 'fecha_inicio' => $request->fecha_inicio,
@@ -97,8 +127,9 @@ class ReservaController extends Controller
                 ],
             ]);
 
+            // Usar repositorio en lugar de modelo directo (DIP)
             foreach ($items as $item) {
-                ReservaItem::create([
+                $this->reservaItemRepository->create([
                     'reserva_id' => $reserva->id,
                     'inventario_id' => $item['inventario_id'],
                     'cantidad' => $item['cantidad'],
@@ -113,17 +144,20 @@ class ReservaController extends Controller
         });
     }
 
-    public function confirm(Reserva $reserva)
+    public function confirm(\App\Models\Reserva $reserva)
     {
         $this->authorizeAdminLike();
+
+        // Cargar relaciones si es necesario
+        if (! $reserva->relationLoaded('items')) {
+            $reserva = $this->reservaRepository->findWithRelations($reserva->id);
+        }
 
         if ($reserva->estado !== self::ESTADO_PENDIENTE) {
             return response()->json(['error' => self::MENSAJE_SOLO_PENDIENTES_CONFIRMAR], 422);
         }
 
         return DB::transaction(function () use ($reserva) {
-            $reserva->load('items.inventario');
-
             $validationError = $this->validateReservaItems($reserva);
             if ($validationError) {
                 return $validationError;
@@ -141,7 +175,7 @@ class ReservaController extends Controller
         });
     }
 
-    private function validateReservaItems(Reserva $reserva)
+    private function validateReservaItems($reserva)
     {
         if ($reserva->items->isEmpty()) {
             return response()->json(['error' => 'La reserva no tiene items asociados.'], 422);
@@ -168,9 +202,10 @@ class ReservaController extends Controller
         return null;
     }
 
-    private function createCalendarioFromReserva(Reserva $reserva): Calendario
+    private function createCalendarioFromReserva($reserva)
     {
-        return Calendario::create([
+        // Usar repositorio en lugar de modelo directo (DIP)
+        return $this->calendarioRepository->create([
             'personas_id' => $reserva->personas_id,
             'movimientos_inventario_id' => null,
             'fecha' => now(),
@@ -182,7 +217,7 @@ class ReservaController extends Controller
         ]);
     }
 
-    private function processReservaItems(Reserva $reserva, Calendario $calendario): void
+    private function processReservaItems($reserva, $calendario): void
     {
         foreach ($reserva->items as $item) {
             $inventario = $item->inventario;
@@ -190,9 +225,11 @@ class ReservaController extends Controller
                 continue;
             }
 
-            $inventario->decrement('stock', $item->cantidad);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->inventarioRepository->decrementStock($inventario->id, $item->cantidad);
 
-            $movimiento = MovimientosInventario::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $movimiento = $this->movimientoInventarioRepository->create([
                 'inventario_id' => $inventario->id,
                 'tipo_movimiento' => self::TIPO_MOVIMIENTO_ALQUILADO,
                 'cantidad' => $item->cantidad,
@@ -200,7 +237,8 @@ class ReservaController extends Controller
                 'descripcion' => self::EVENTO_RESERVA_CONFIRMADA.' #'.$reserva->id,
             ]);
 
-            CalendarioItem::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->calendarioItemRepository->create([
                 'calendario_id' => $calendario->id,
                 'movimientos_inventario_id' => $movimiento->id,
                 'cantidad' => $item->cantidad,
@@ -208,9 +246,10 @@ class ReservaController extends Controller
         }
     }
 
-    private function updateReservaAndCreateHistorial(Reserva $reserva, Calendario $calendario): void
+    private function updateReservaAndCreateHistorial($reserva, $calendario): void
     {
-        $reserva->update([
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->reservaRepository->update($reserva->id, [
             'estado' => self::ESTADO_CONFIRMADA,
             'calendario_id' => $calendario->id,
             'meta' => array_merge($reserva->meta ?? [], [
@@ -219,7 +258,8 @@ class ReservaController extends Controller
             ]),
         ]);
 
-        Historial::create([
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->historialRepository->create([
             'calendario_id' => $calendario->id,
             'reserva_id' => $reserva->id,
             'accion' => self::ACCION_CONFIRMADA,
@@ -227,15 +267,26 @@ class ReservaController extends Controller
         ]);
     }
 
-    public function destroy(Reserva $reserva)
+    public function destroy($reserva)
     {
         $this->authorizeAdminLike();
+
+        // Laravel puede pasar el modelo directamente o el ID
+        if (is_numeric($reserva)) {
+            $reserva = $this->reservaRepository->findWithRelations($reserva);
+        } elseif (is_object($reserva) && isset($reserva->id)) {
+            // Si ya es un modelo, cargar relaciones si es necesario
+            if (! $reserva->relationLoaded('items')) {
+                $reserva = $this->reservaRepository->findWithRelations($reserva->id);
+            }
+        }
 
         if ($reserva->estado !== self::ESTADO_PENDIENTE) {
             return response()->json(['error' => self::MENSAJE_SOLO_PENDIENTES_CANCELAR], 422);
         }
 
-        $reserva->delete();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->reservaRepository->delete($reserva->id);
 
         return response()->json([
             'success' => true,
