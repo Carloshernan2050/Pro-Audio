@@ -80,7 +80,7 @@ class CalendarioController extends Controller
         $eventos = [];
 
         foreach ($registros as $registro) {
-            $eventos[] = $this->eventService()->construirEvento($registro, $movimientos, $inventarios)['evento'];
+            $eventos[] = $this->dependencies->eventService->construirEvento($registro, $movimientos, $inventarios)['evento'];
         }
 
         return response()->json($eventos);
