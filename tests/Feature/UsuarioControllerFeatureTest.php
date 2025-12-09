@@ -43,11 +43,17 @@ class UsuarioControllerFeatureTest extends TestCase
         parent::setUp();
         Storage::fake('public');
 
-        // Crear rol Cliente si no existe
-        if (! DB::table('roles')->where('nombre_rol', 'Cliente')->exists()) {
-            DB::table('roles')->insert([
-                'nombre_rol' => 'Cliente',
-            ]);
+        // Crear rol Cliente si no existe (solo si la tabla existe)
+        if (DB::getSchemaBuilder()->hasTable('roles')) {
+            if (! DB::table('roles')->where('nombre_rol', 'Cliente')->exists()) {
+                try {
+                    DB::table('roles')->insert([
+                        'nombre_rol' => 'Cliente',
+                    ]);
+                } catch (\Exception $e) {
+                    // Ignorar errores si la tabla no está lista
+                }
+            }
         }
     }
 
@@ -817,8 +823,18 @@ class UsuarioControllerFeatureTest extends TestCase
             'estado' => true,
         ]);
 
-        $rol1Id = DB::table('roles')->insertGetId(['nombre_rol' => 'Cliente']);
-        $rol2Id = DB::table('roles')->insertGetId(['nombre_rol' => 'Administrador']);
+        $rol1Data = ['nombre_rol' => 'Cliente'];
+        $rol2Data = ['nombre_rol' => 'Administrador'];
+        if (DB::getSchemaBuilder()->hasColumn('roles', 'name')) {
+            $rol1Data['name'] = 'Cliente';
+            $rol2Data['name'] = 'Administrador';
+        }
+        if (DB::getSchemaBuilder()->hasColumn('roles', 'guard_name')) {
+            $rol1Data['guard_name'] = 'web';
+            $rol2Data['guard_name'] = 'web';
+        }
+        $rol1Id = DB::table('roles')->insertGetId($rol1Data);
+        $rol2Id = DB::table('roles')->insertGetId($rol2Data);
 
         DB::table('personas_roles')->insert([
             ['personas_id' => $usuario->id, 'roles_id' => $rol1Id],
@@ -851,9 +867,14 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         // Usar un rol válido del enum
-        $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => 'Administrador',
-        ]);
+        $rolData = ['nombre_rol' => 'Administrador'];
+        if (DB::getSchemaBuilder()->hasColumn('roles', 'name')) {
+            $rolData['name'] = 'Administrador';
+        }
+        if (DB::getSchemaBuilder()->hasColumn('roles', 'guard_name')) {
+            $rolData['guard_name'] = 'web';
+        }
+        $rolId = DB::table('roles')->insertGetId($rolData);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
@@ -866,6 +887,8 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $roles = session('roles');
+        $this->assertNotNull($roles, 'Roles should be set in session after authentication');
+        $this->assertIsArray($roles, 'Roles should be an array');
         $this->assertContains('Administrador', $roles);
     }
 
@@ -882,9 +905,14 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         // Usar un rol válido del enum (nombre_rol es NOT NULL)
-        $rolId = DB::table('roles')->insertGetId([
-            'nombre_rol' => 'Invitado',
-        ]);
+        $rolData = ['nombre_rol' => 'Invitado'];
+        if (DB::getSchemaBuilder()->hasColumn('roles', 'name')) {
+            $rolData['name'] = 'Invitado';
+        }
+        if (DB::getSchemaBuilder()->hasColumn('roles', 'guard_name')) {
+            $rolData['guard_name'] = 'web';
+        }
+        $rolId = DB::table('roles')->insertGetId($rolData);
 
         DB::table('personas_roles')->insert([
             'personas_id' => $usuario->id,
@@ -897,6 +925,8 @@ class UsuarioControllerFeatureTest extends TestCase
         ]);
 
         $roles = session('roles');
+        $this->assertNotNull($roles, 'Roles should be set in session after authentication');
+        $this->assertIsArray($roles, 'Roles should be an array');
         $this->assertContains('Invitado', $roles);
     }
 
@@ -967,7 +997,7 @@ class UsuarioControllerFeatureTest extends TestCase
 
     public function test_update_photo_sin_foto_anterior(): void
     {
-        $usuario = Usuario::create([
+        $usuarioData = [
             'primer_nombre' => self::TEST_NOMBRE,
             'primer_apellido' => self::TEST_APELLIDO,
             'telefono' => self::TEST_TELEFONO,
@@ -975,8 +1005,12 @@ class UsuarioControllerFeatureTest extends TestCase
             'contrasena' => Hash::make(self::TEST_PASSWORD),
             'fecha_registro' => now(),
             'estado' => true,
-            'foto_perfil' => null,
-        ]);
+        ];
+        // Solo agregar foto_perfil si la columna existe
+        if (DB::getSchemaBuilder()->hasColumn('personas', 'foto_perfil')) {
+            $usuarioData['foto_perfil'] = null;
+        }
+        $usuario = Usuario::create($usuarioData);
 
         session(['usuario_id' => $usuario->id, 'roles' => [self::ROL_CLIENTE]]);
 
