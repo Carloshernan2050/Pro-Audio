@@ -2,10 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\SubServicios;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 
 class ChatbotResponseBuilder
 {
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    public function __construct(SubServicioRepositoryInterface $subServicioRepository)
+    {
+        $this->subServicioRepository = $subServicioRepository;
+    }
     public function responderConOpciones(): \Illuminate\Http\JsonResponse
     {
         return $this->mostrarCatalogoJson(
@@ -117,9 +123,8 @@ class ChatbotResponseBuilder
 
     public function subServiciosQuery()
     {
-        return SubServicios::query()
-            ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 'servicios.nombre_servicio')
-            ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id');
+        // Usar repositorio en lugar de modelo directo (DIP)
+        return $this->subServicioRepository->queryWithServicioJoin();
     }
 
     public function ordenarSubServicios($query)

@@ -32,7 +32,7 @@ class ChatbotResponseBuilderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->builder = new ChatbotResponseBuilder;
+        $this->builder = app(ChatbotResponseBuilder::class);
     }
 
     // ============================================

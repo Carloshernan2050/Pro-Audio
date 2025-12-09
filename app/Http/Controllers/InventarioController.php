@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inventario;
+use App\Repositories\Interfaces\InventarioRepositoryInterface;
 use Illuminate\Http\Request;
 
 class InventarioController extends Controller
 {
+    private InventarioRepositoryInterface $inventarioRepository;
+
+    public function __construct(InventarioRepositoryInterface $inventarioRepository)
+    {
+        $this->inventarioRepository = $inventarioRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $inventario = Inventario::all();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $inventario = $this->inventarioRepository->all();
 
         return response()->json($inventario);
     }
@@ -34,7 +42,8 @@ class InventarioController extends Controller
             'stock.min' => 'El stock no puede ser menor a 0.',
         ]);
 
-        Inventario::create($request->only('descripcion', 'stock'));
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->inventarioRepository->create($request->only('descripcion', 'stock'));
 
         return response()->json(['success' => 'Artículo del inventario creado correctamente.']);
     }
@@ -56,8 +65,8 @@ class InventarioController extends Controller
             'stock.min' => 'El stock no puede ser menor a 0.',
         ]);
 
-        $inventario = Inventario::findOrFail($id);
-        $inventario->update($request->only('descripcion', 'stock'));
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->inventarioRepository->update((int) $id, $request->only('descripcion', 'stock'));
 
         return response()->json(['success' => 'Artículo del inventario actualizado correctamente.']);
     }
@@ -67,8 +76,8 @@ class InventarioController extends Controller
      */
     public function destroy(string $id)
     {
-        $inventario = Inventario::findOrFail($id);
-        $inventario->delete();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->inventarioRepository->delete((int) $id);
 
         return response()->json(['success' => 'Artículo del inventario eliminado correctamente.']);
     }

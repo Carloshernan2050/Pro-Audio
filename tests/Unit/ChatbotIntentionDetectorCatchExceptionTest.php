@@ -27,8 +27,8 @@ class ChatbotIntentionDetectorCatchExceptionTest extends TestCase
     {
         // Crear una nueva instancia del detector en un proceso aislado
         // para asegurar que el cache estático esté vacío
-        $textProcessor = new ChatbotTextProcessor;
-        $detector = new ChatbotIntentionDetector($textProcessor);
+        $textProcessor = app(\App\Services\ChatbotTextProcessor::class);
+        $detector = app(\App\Services\ChatbotIntentionDetector::class);
 
         // Usar reflection para acceder al método obtenerCacheTfidf
         $reflection = new \ReflectionClass($detector);

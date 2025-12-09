@@ -2,12 +2,28 @@
 
 namespace App\Services;
 
-use App\Models\CalendarioItem;
-use App\Models\MovimientosInventario;
+use App\Repositories\Interfaces\CalendarioItemRepositoryInterface;
+use App\Repositories\Interfaces\InventarioRepositoryInterface;
+use App\Repositories\Interfaces\MovimientoInventarioRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 class CalendarioItemService
 {
+    private CalendarioItemRepositoryInterface $calendarioItemRepository;
+
+    private MovimientoInventarioRepositoryInterface $movimientoInventarioRepository;
+
+    private InventarioRepositoryInterface $inventarioRepository;
+
+    public function __construct(
+        CalendarioItemRepositoryInterface $calendarioItemRepository,
+        MovimientoInventarioRepositoryInterface $movimientoInventarioRepository,
+        InventarioRepositoryInterface $inventarioRepository
+    ) {
+        $this->calendarioItemRepository = $calendarioItemRepository;
+        $this->movimientoInventarioRepository = $movimientoInventarioRepository;
+        $this->inventarioRepository = $inventarioRepository;
+    }
     /**
      * Crea los items de calendario asociados.
      */
@@ -16,7 +32,8 @@ class CalendarioItemService
         foreach ($items as $item) {
             $movimientoId = $this->obtenerOCrearMovimientoInventario($item['inventario_id']);
 
-            CalendarioItem::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->calendarioItemRepository->create([
                 'calendario_id' => $calendarioId,
                 'movimientos_inventario_id' => $movimientoId,
                 'cantidad' => $item['cantidad'] ?? 1,
@@ -37,16 +54,20 @@ class CalendarioItemService
             return $movimiento->id;
         }
 
-        $inventario = DB::table('inventario')->where('id', $inventarioId)->first();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $inventario = $this->inventarioRepository->find($inventarioId);
         $stockActual = $inventario->stock ?? 0;
 
-        return MovimientosInventario::create([
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $movimiento = $this->movimientoInventarioRepository->create([
             'inventario_id' => $inventarioId,
             'tipo_movimiento' => 'entrada',
             'cantidad' => $stockActual > 0 ? $stockActual : 1,
             'fecha_movimiento' => now(),
             'descripcion' => 'Movimiento automático al crear alquiler',
-        ])->id;
+        ]);
+
+        return $movimiento->id;
     }
 
     /**
@@ -61,9 +82,11 @@ class CalendarioItemService
             $cantidad = $item['cantidad'] ?? 1;
             $movimientoId = $this->obtenerOCrearMovimientoInventario($inventarioId);
 
-            \App\Models\Inventario::where('id', $inventarioId)->decrement('stock', $cantidad);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->inventarioRepository->decrementStock($inventarioId, $cantidad);
 
-            MovimientosInventario::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->movimientoInventarioRepository->create([
                 'inventario_id' => $inventarioId,
                 'tipo_movimiento' => 'alquilado',
                 'cantidad' => $cantidad,
@@ -71,7 +94,8 @@ class CalendarioItemService
                 'descripcion' => 'Ajuste de reserva #'.$calendarioId.' (nueva cantidad)',
             ]);
 
-            CalendarioItem::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->calendarioItemRepository->create([
                 'calendario_id' => $calendarioId,
                 'movimientos_inventario_id' => $movimientoId,
                 'cantidad' => $cantidad,

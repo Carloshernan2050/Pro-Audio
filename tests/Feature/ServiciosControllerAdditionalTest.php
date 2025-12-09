@@ -578,15 +578,12 @@ class ServiciosControllerAdditionalTest extends TestCase
                 }
             }
 
-            // Paso 2: Usar reflection para llamar al método privado generarBlade
-            $controller = new \App\Http\Controllers\ServiciosController();
-            $reflection = new \ReflectionClass($controller);
-            $method = $reflection->getMethod('generarBlade');
-            // @phpstan-ignore-next-line
-            $method->setAccessible(true);
-
-            // Paso 3: Llamar al método - esto debería crear el directorio (línea 204-205)
-            $method->invoke($controller, $servicio);
+            // Paso 2: Usar el servicio BladeGeneratorService directamente
+            // El método generarBlade fue movido a BladeGeneratorService durante la refactorización SOLID
+            $bladeGeneratorService = app(\App\Services\BladeGeneratorService::class);
+            
+            // Paso 3: Llamar al método generar - esto debería crear el directorio
+            $bladeGeneratorService->generar($servicio);
 
             // Paso 4: Verificar que el directorio fue creado
             $this->assertTrue(

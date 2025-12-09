@@ -2,12 +2,23 @@
 
 namespace App\Services;
 
-use App\Models\Cotizacion;
-use App\Models\SubServicios;
+use App\Repositories\Interfaces\CotizacionRepositoryInterface;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 class ChatbotSessionManager
 {
+    private CotizacionRepositoryInterface $cotizacionRepository;
+
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    public function __construct(
+        CotizacionRepositoryInterface $cotizacionRepository,
+        SubServicioRepositoryInterface $subServicioRepository
+    ) {
+        $this->cotizacionRepository = $cotizacionRepository;
+        $this->subServicioRepository = $subServicioRepository;
+    }
     public function limpiarSesionChat(): void
     {
         session()->forget('chat.selecciones');
@@ -22,14 +33,16 @@ class ChatbotSessionManager
         }
 
         try {
-            $items = SubServicios::whereIn('id', $selecciones)->get(['id', 'precio']);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $items = $this->subServicioRepository->obtenerPorIds($selecciones);
             $fechaCotizacion = now();
             $diasValidos = max(1, $dias);
 
             foreach ($items as $item) {
                 $monto = (float) $item->precio * $diasValidos;
 
-                Cotizacion::create([
+                // Usar repositorio en lugar de modelo directo (DIP)
+                $this->cotizacionRepository->crear([
                     'personas_id' => $personasId,
                     'sub_servicios_id' => $item->id,
                     'monto' => $monto,

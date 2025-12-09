@@ -2,18 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inventario;
-use App\Models\MovimientosInventario;
+use App\Repositories\Interfaces\InventarioRepositoryInterface;
+use App\Repositories\Interfaces\MovimientoInventarioRepositoryInterface;
 use Illuminate\Http\Request;
 
 class MovimientosInventarioController extends Controller
 {
+    private MovimientoInventarioRepositoryInterface $movimientoInventarioRepository;
+
+    private InventarioRepositoryInterface $inventarioRepository;
+
+    public function __construct(
+        MovimientoInventarioRepositoryInterface $movimientoInventarioRepository,
+        InventarioRepositoryInterface $inventarioRepository
+    ) {
+        $this->movimientoInventarioRepository = $movimientoInventarioRepository;
+        $this->inventarioRepository = $inventarioRepository;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $movimientos = MovimientosInventario::with('inventario')->get();
+        $movimientos = \App\Models\MovimientosInventario::with('inventario')->get();
 
         return response()->json($movimientos);
     }
@@ -37,22 +48,22 @@ class MovimientosInventarioController extends Controller
             'cantidad.min' => 'La cantidad debe ser mayor a 0.',
         ]);
 
-        $inventario = Inventario::findOrFail($request->inventario_id);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $inventario = $this->inventarioRepository->find($request->inventario_id);
         $incrementaStock = in_array($request->tipo_movimiento, ['entrada', 'devuelto'], true);
 
-        // Actualizar stock según el tipo de movimiento
+        // Actualizar stock según el tipo de movimiento usando repositorio (DIP)
         if ($incrementaStock) {
-            $inventario->stock += $request->cantidad;
+            $this->inventarioRepository->incrementStock($inventario->id, $request->cantidad);
         } else {
             if ($inventario->stock < $request->cantidad) {
                 return response()->json(['error' => 'No hay suficiente stock disponible para realizar esta operación.'], 400);
             }
-            $inventario->stock -= $request->cantidad;
+            $this->inventarioRepository->decrementStock($inventario->id, $request->cantidad);
         }
 
-        $inventario->save();
-
-        $movimiento = MovimientosInventario::create([
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $movimiento = $this->movimientoInventarioRepository->create([
             'inventario_id' => $request->inventario_id,
             'tipo_movimiento' => $request->tipo_movimiento,
             'cantidad' => $request->cantidad,
@@ -85,33 +96,32 @@ class MovimientosInventarioController extends Controller
             'cantidad.min' => 'La cantidad debe ser mayor a 0.',
         ]);
 
-        $movimiento = MovimientosInventario::findOrFail($id);
-        $inventarioOriginal = $movimiento->inventario;
-        $nuevoInventario = Inventario::findOrFail($request->inventario_id);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $movimiento = $this->movimientoInventarioRepository->find($id);
+        $inventarioOriginal = $this->inventarioRepository->find($movimiento->inventario_id);
+        $nuevoInventario = $this->inventarioRepository->find($request->inventario_id);
         $incrementaStockNuevo = in_array($request->tipo_movimiento, ['entrada', 'devuelto'], true);
         $incrementaStockOriginal = in_array($movimiento->tipo_movimiento, ['entrada', 'devuelto'], true);
 
-        // Revertir el movimiento original
+        // Revertir el movimiento original usando repositorio (DIP)
         if ($incrementaStockOriginal) {
-            $inventarioOriginal->stock -= $movimiento->cantidad;
+            $this->inventarioRepository->decrementStock($inventarioOriginal->id, $movimiento->cantidad);
         } else {
-            $inventarioOriginal->stock += $movimiento->cantidad;
+            $this->inventarioRepository->incrementStock($inventarioOriginal->id, $movimiento->cantidad);
         }
-        $inventarioOriginal->save();
 
-        // Aplicar el nuevo movimiento
+        // Aplicar el nuevo movimiento usando repositorio (DIP)
         if ($incrementaStockNuevo) {
-            $nuevoInventario->stock += $request->cantidad;
+            $this->inventarioRepository->incrementStock($nuevoInventario->id, $request->cantidad);
         } else {
             if ($nuevoInventario->stock < $request->cantidad) {
                 return response()->json(['error' => 'No hay suficiente stock disponible para realizar esta operación.'], 400);
             }
-            $nuevoInventario->stock -= $request->cantidad;
+            $this->inventarioRepository->decrementStock($nuevoInventario->id, $request->cantidad);
         }
-        $nuevoInventario->save();
 
-        // Actualizar el movimiento
-        $movimiento->update([
+        // Actualizar el movimiento usando repositorio (DIP)
+        $this->movimientoInventarioRepository->update($id, [
             'inventario_id' => $request->inventario_id,
             'tipo_movimiento' => $request->tipo_movimiento,
             'cantidad' => $request->cantidad,
@@ -125,19 +135,20 @@ class MovimientosInventarioController extends Controller
      */
     public function destroy(string $id)
     {
-        $movimiento = MovimientosInventario::findOrFail($id);
-        $inventario = $movimiento->inventario;
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $movimiento = $this->movimientoInventarioRepository->find($id);
+        $inventario = $this->inventarioRepository->find($movimiento->inventario_id);
         $incrementaStock = in_array($movimiento->tipo_movimiento, ['entrada', 'devuelto'], true);
 
-        // Revertir el movimiento en el stock
+        // Revertir el movimiento en el stock usando repositorio (DIP)
         if ($incrementaStock) {
-            $inventario->stock -= $movimiento->cantidad;
+            $this->inventarioRepository->decrementStock($inventario->id, $movimiento->cantidad);
         } else {
-            $inventario->stock += $movimiento->cantidad;
+            $this->inventarioRepository->incrementStock($inventario->id, $movimiento->cantidad);
         }
 
-        $inventario->save();
-        $movimiento->delete();
+        // Usar repositorio para eliminar (DIP)
+        $this->movimientoInventarioRepository->delete($id);
 
         return response()->json(['success' => 'Movimiento de inventario eliminado correctamente.']);
     }

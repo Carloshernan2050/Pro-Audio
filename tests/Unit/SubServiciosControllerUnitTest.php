@@ -20,6 +20,14 @@ class SubServiciosControllerUnitTest extends TestCase
     use RefreshDatabase;
 
     private const DESC_PRUEBA = 'Descripción de prueba';
+    private const ROUTE_SUBSERVICIOS = '/subservicios';
+    private const NOMBRE_NUEVO_SUBSERVICIO = 'Nuevo Subservicio';
+    private const DESCRIPCION = 'Descripción';
+    private const MSG_GD_NOT_INSTALLED = 'GD extension is not installed';
+    private const NOMBRE_SUBTEST_ACTUALIZADO = 'SubTest Actualizado';
+    private const FAKE_CONTENT = 'fake content';
+    private const TMP_TEST_PATH = '/tmp/test';
+    private const CONTENT_TYPE_TEXT_HTML = 'text/html';
 
     protected $controller;
 
@@ -27,7 +35,7 @@ class SubServiciosControllerUnitTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        $this->controller = new SubServiciosController;
+        $this->controller = app(SubServiciosController::class);
     }
 
     // ============================================
@@ -121,10 +129,10 @@ class SubServiciosControllerUnitTest extends TestCase
     {
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
 
-        $request = Request::create('/subservicios', 'POST', [
+        $request = Request::create(self::ROUTE_SUBSERVICIOS, 'POST', [
             'servicios_id' => $servicio->id,
-            'nombre' => 'Nuevo Subservicio',
-            'descripcion' => 'Descripción',
+            'nombre' => self::NOMBRE_NUEVO_SUBSERVICIO,
+            'descripcion' => self::DESCRIPCION,
             'precio' => 150,
         ]);
 
@@ -133,7 +141,7 @@ class SubServiciosControllerUnitTest extends TestCase
         $this->assertNotNull($response);
 
         $this->assertDatabaseHas('sub_servicios', [
-            'nombre' => 'Nuevo Subservicio',
+            'nombre' => self::NOMBRE_NUEVO_SUBSERVICIO,
             'precio' => 150,
         ]);
     }
@@ -141,14 +149,14 @@ class SubServiciosControllerUnitTest extends TestCase
     public function test_store_con_imagen(): void
     {
         if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD extension is not installed');
+            $this->markTestSkipped(self::MSG_GD_NOT_INSTALLED);
         }
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
 
         $file = \Illuminate\Http\UploadedFile::fake()->image('test.jpg', 100, 100);
 
-        $request = Request::create('/subservicios', 'POST', [
+        $request = Request::create(self::ROUTE_SUBSERVICIOS, 'POST', [
             'servicios_id' => $servicio->id,
             'nombre' => 'Subservicio con imagen',
             'precio' => 200,
@@ -201,7 +209,7 @@ class SubServiciosControllerUnitTest extends TestCase
 
         $request = Request::create("/subservicios/{$subServicio->id}", 'PUT', [
             'servicios_id' => $servicio->id,
-            'nombre' => 'SubTest Actualizado',
+            'nombre' => self::NOMBRE_SUBTEST_ACTUALIZADO,
             'precio' => 150,
         ]);
 
@@ -211,7 +219,7 @@ class SubServiciosControllerUnitTest extends TestCase
 
         $this->assertDatabaseHas('sub_servicios', [
             'id' => $subServicio->id,
-            'nombre' => 'SubTest Actualizado',
+            'nombre' => self::NOMBRE_SUBTEST_ACTUALIZADO,
             'precio' => 150,
         ]);
     }
@@ -219,7 +227,7 @@ class SubServiciosControllerUnitTest extends TestCase
     public function test_update_actualiza_imagen(): void
     {
         if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD extension is not installed');
+            $this->markTestSkipped(self::MSG_GD_NOT_INSTALLED);
         }
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -231,7 +239,7 @@ class SubServiciosControllerUnitTest extends TestCase
             'imagen' => 'old_image.jpg',
         ]);
 
-        Storage::disk('public')->put('subservicios/old_image.jpg', 'fake content');
+        Storage::disk('public')->put('subservicios/old_image.jpg', self::FAKE_CONTENT);
 
         $file = \Illuminate\Http\UploadedFile::fake()->image('new_test.jpg', 100, 100);
 
@@ -278,7 +286,7 @@ class SubServiciosControllerUnitTest extends TestCase
             'imagen' => 'test_image.jpg',
         ]);
 
-        Storage::disk('public')->put('subservicios/test_image.jpg', 'fake content');
+        Storage::disk('public')->put('subservicios/test_image.jpg', self::FAKE_CONTENT);
 
         $request = Request::create("/subservicios/{$subServicio->id}", 'DELETE');
         $request->headers->set('Accept', 'application/json');
@@ -292,7 +300,7 @@ class SubServiciosControllerUnitTest extends TestCase
     public function test_store_archivo_invalido_cubre_linea_116(): void
     {
         if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD extension is not installed');
+            $this->markTestSkipped(self::MSG_GD_NOT_INSTALLED);
         }
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -300,19 +308,19 @@ class SubServiciosControllerUnitTest extends TestCase
         // Crear mock de archivo que pase validación pero isValid() retorne false
         $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
         $mockFile->shouldReceive('isValid')->andReturn(false);
-        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
-        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getPath')->andReturn(self::TMP_TEST_PATH);
+        $mockFile->shouldReceive('getRealPath')->andReturn(self::TMP_TEST_PATH);
         $mockFile->shouldReceive('getSize')->andReturn(100);
         $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
 
-        $request = Request::create('/subservicios', 'POST', [
+        $request = Request::create(self::ROUTE_SUBSERVICIOS, 'POST', [
             'servicios_id' => $servicio->id,
-            'nombre' => 'Nuevo Subservicio',
-            'descripcion' => 'Descripción',
+            'nombre' => self::NOMBRE_NUEVO_SUBSERVICIO,
+            'descripcion' => self::DESCRIPCION,
             'precio' => 150,
         ]);
         $request->files->set('imagen', $mockFile);
-        $request->headers->set('Accept', 'text/html');
+        $request->headers->set('Accept', self::CONTENT_TYPE_TEXT_HTML);
 
         // Mockear los métodos necesarios
         $request = \Mockery::mock($request)->makePartial();
@@ -323,7 +331,7 @@ class SubServiciosControllerUnitTest extends TestCase
         $request->shouldReceive('wantsJson')->andReturn(false);
         $request->shouldReceive('expectsJson')->andReturn(false);
         $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
-        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
+        $request->shouldReceive('header')->with('Accept', '')->andReturn(self::CONTENT_TYPE_TEXT_HTML);
 
         $response = $this->controller->store($request);
 
@@ -333,7 +341,7 @@ class SubServiciosControllerUnitTest extends TestCase
     public function test_store_error_guardar_imagen_cubre_linea_122(): void
     {
         if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD extension is not installed');
+            $this->markTestSkipped(self::MSG_GD_NOT_INSTALLED);
         }
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -346,14 +354,14 @@ class SubServiciosControllerUnitTest extends TestCase
             ->with('subservicios/', \Mockery::pattern('/^subservicio_\d+_\w+\.jpg$/'), 'public')
             ->andReturn(false); // Simular error al guardar
 
-        $request = Request::create('/subservicios', 'POST', [
+        $request = Request::create(self::ROUTE_SUBSERVICIOS, 'POST', [
             'servicios_id' => $servicio->id,
-            'nombre' => 'Nuevo Subservicio',
-            'descripcion' => 'Descripción',
+            'nombre' => self::NOMBRE_NUEVO_SUBSERVICIO,
+            'descripcion' => self::DESCRIPCION,
             'precio' => 150,
         ]);
         $request->files->set('imagen', $mockFile);
-        $request->headers->set('Accept', 'text/html');
+        $request->headers->set('Accept', self::CONTENT_TYPE_TEXT_HTML);
 
         // Mockear los métodos necesarios
         $request = \Mockery::mock($request)->makePartial();
@@ -364,7 +372,7 @@ class SubServiciosControllerUnitTest extends TestCase
         $request->shouldReceive('wantsJson')->andReturn(false);
         $request->shouldReceive('expectsJson')->andReturn(false);
         $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
-        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
+        $request->shouldReceive('header')->with('Accept', '')->andReturn(self::CONTENT_TYPE_TEXT_HTML);
 
         // El controlador maneja la excepción y retorna una respuesta
         $response = $this->controller->store($request);
@@ -375,7 +383,7 @@ class SubServiciosControllerUnitTest extends TestCase
     public function test_update_archivo_invalido_cubre_linea_200(): void
     {
         if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD extension is not installed');
+            $this->markTestSkipped(self::MSG_GD_NOT_INSTALLED);
         }
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -389,19 +397,19 @@ class SubServiciosControllerUnitTest extends TestCase
         // Crear mock de archivo que pase validación pero isValid() retorne false
         $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
         $mockFile->shouldReceive('isValid')->andReturn(false);
-        $mockFile->shouldReceive('getPath')->andReturn('/tmp/test');
-        $mockFile->shouldReceive('getRealPath')->andReturn('/tmp/test');
+        $mockFile->shouldReceive('getPath')->andReturn(self::TMP_TEST_PATH);
+        $mockFile->shouldReceive('getRealPath')->andReturn(self::TMP_TEST_PATH);
         $mockFile->shouldReceive('getSize')->andReturn(100);
         $mockFile->shouldReceive('getMimeType')->andReturn('image/jpeg');
 
         $request = Request::create("/subservicios/{$subServicio->id}", 'PUT', [
             'servicios_id' => $servicio->id,
-            'nombre' => 'SubTest Actualizado',
+            'nombre' => self::NOMBRE_SUBTEST_ACTUALIZADO,
             'descripcion' => self::DESC_PRUEBA,
             'precio' => 200,
         ]);
         $request->files->set('imagen', $mockFile);
-        $request->headers->set('Accept', 'text/html');
+        $request->headers->set('Accept', self::CONTENT_TYPE_TEXT_HTML);
 
         // Mockear los métodos necesarios
         $request = \Mockery::mock($request)->makePartial();
@@ -412,7 +420,7 @@ class SubServiciosControllerUnitTest extends TestCase
         $request->shouldReceive('wantsJson')->andReturn(false);
         $request->shouldReceive('expectsJson')->andReturn(false);
         $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
-        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
+        $request->shouldReceive('header')->with('Accept', '')->andReturn(self::CONTENT_TYPE_TEXT_HTML);
 
         $response = $this->controller->update($request, $subServicio->id);
 
@@ -422,7 +430,7 @@ class SubServiciosControllerUnitTest extends TestCase
     public function test_update_error_guardar_imagen_cubre_linea_207(): void
     {
         if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD extension is not installed');
+            $this->markTestSkipped(self::MSG_GD_NOT_INSTALLED);
         }
 
         $servicio = Servicios::create(['nombre_servicio' => 'Test']);
@@ -434,7 +442,7 @@ class SubServiciosControllerUnitTest extends TestCase
             'imagen' => 'old_image.jpg',
         ]);
 
-        Storage::disk('public')->put('subservicios/old_image.jpg', 'fake content');
+        Storage::disk('public')->put('subservicios/old_image.jpg', self::FAKE_CONTENT);
 
         // Crear mock de archivo válido pero storeAs retorne false
         $mockFile = \Mockery::mock(\Illuminate\Http\UploadedFile::class)->makePartial();
@@ -446,12 +454,12 @@ class SubServiciosControllerUnitTest extends TestCase
 
         $request = Request::create("/subservicios/{$subServicio->id}", 'PUT', [
             'servicios_id' => $servicio->id,
-            'nombre' => 'SubTest Actualizado',
+            'nombre' => self::NOMBRE_SUBTEST_ACTUALIZADO,
             'descripcion' => self::DESC_PRUEBA,
             'precio' => 200,
         ]);
         $request->files->set('imagen', $mockFile);
-        $request->headers->set('Accept', 'text/html');
+        $request->headers->set('Accept', self::CONTENT_TYPE_TEXT_HTML);
 
         // Mockear los métodos necesarios
         $request = \Mockery::mock($request)->makePartial();
@@ -462,7 +470,7 @@ class SubServiciosControllerUnitTest extends TestCase
         $request->shouldReceive('wantsJson')->andReturn(false);
         $request->shouldReceive('expectsJson')->andReturn(false);
         $request->shouldReceive('header')->with('X-Requested-With')->andReturn(null);
-        $request->shouldReceive('header')->with('Accept', '')->andReturn('text/html');
+        $request->shouldReceive('header')->with('Accept', '')->andReturn(self::CONTENT_TYPE_TEXT_HTML);
 
         // El controlador maneja la excepción y retorna una respuesta
         $response = $this->controller->update($request, $subServicio->id);

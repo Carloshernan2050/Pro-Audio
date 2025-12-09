@@ -62,7 +62,7 @@ class ServiciosControllerFinalCoverageTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $controller = new \App\Http\Controllers\ServiciosController();
+        $controller = app(\App\Http\Controllers\ServiciosController::class);
         
         // Guardar información de la conexión original
         $connection = DB::connection();
@@ -179,7 +179,7 @@ class ServiciosControllerFinalCoverageTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $controller = new \App\Http\Controllers\ServiciosController();
+        $controller = app(\App\Http\Controllers\ServiciosController::class);
         $request = \Illuminate\Http\Request::create(route('servicios.store'), 'POST', [
             'nombre_servicio' => 'Test General Exception',
             'descripcion' => 'Test',

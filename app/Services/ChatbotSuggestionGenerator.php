@@ -2,9 +2,26 @@
 
 namespace App\Services;
 
+use App\Repositories\Interfaces\ServicioRepositoryInterface;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
+
 class ChatbotSuggestionGenerator
 {
     private ChatbotTextProcessor $textProcessor;
+
+    private ServicioRepositoryInterface $servicioRepository;
+
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    public function __construct(
+        ChatbotTextProcessor $textProcessor,
+        ServicioRepositoryInterface $servicioRepository,
+        SubServicioRepositoryInterface $subServicioRepository
+    ) {
+        $this->textProcessor = $textProcessor;
+        $this->servicioRepository = $servicioRepository;
+        $this->subServicioRepository = $subServicioRepository;
+    }
 
     private const STOPWORDS = ['para', 'por', 'con', 'sin', 'del', 'de', 'la', 'las', 'el', 'los', 'una', 'unos', 'unas', 'que', 'y', 'o', 'en', 'al'];
 
@@ -13,11 +30,6 @@ class ChatbotSuggestionGenerator
     private const TOKENS_GENERICOS = ['necesito', 'nececito', 'nesecito', 'necesitar', 'requiero', 'quiero', 'busco', 'hola', 'buenas', 'gracias', 'dias', 'dia'];
 
     private const REGEX_WHITESPACE = '/\s+/';
-
-    public function __construct(ChatbotTextProcessor $textProcessor)
-    {
-        $this->textProcessor = $textProcessor;
-    }
 
     public function generarSugerencias(string $mensajeCorregido): array
     {
@@ -120,7 +132,8 @@ class ChatbotSuggestionGenerator
     {
         $vocab = [];
         try {
-            $servicios = \App\Models\Servicios::query()->select('nombre_servicio')->get();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $servicios = $this->servicioRepository->obtenerNombres();
             foreach ($servicios as $servicio) {
                 $tokens = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $servicio->nombre_servicio ?? '');
                 foreach ($tokens as $tk) {
@@ -128,9 +141,11 @@ class ChatbotSuggestionGenerator
                 }
             }
             
-            $subServicios = \App\Models\SubServicios::query()->select('nombre')->limit(500)->get();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $subServicios = $this->subServicioRepository->obtenerNombres(500);
             foreach ($subServicios as $ss) {
-                $tokensNombre = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $ss->nombre ?? '');
+                $nombre = is_object($ss) ? ($ss->nombre ?? '') : ($ss['nombre'] ?? '');
+                $tokensNombre = preg_split('/[^a-zA-Z0-9áéíóúñ]+/u', $nombre);
                 foreach ($tokensNombre as $tk) {
                     $this->agregarTokenAlVocabulario($vocab, $tk, 3, true);
                 }
@@ -365,24 +380,12 @@ class ChatbotSuggestionGenerator
             return collect();
         }
         
+        // Preparar columna normalizada para búsqueda sin tildes
         $grammar = \Illuminate\Support\Facades\DB::getQueryGrammar();
         $columnaWrapped = $grammar->wrap('sub_servicios.nombre');
         $columnaNormalizada = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE({$columnaWrapped}, 'á', 'a'), 'é', 'e'), 'í', 'i'), 'ó', 'o'), 'ú', 'u'), 'ñ', 'n'))";
         
-        return \App\Models\SubServicios::query()
-            ->select('sub_servicios.nombre')
-            ->where(function ($q) use ($tokensNormalizados, $columnaNormalizada) {
-                foreach ($tokensNormalizados as $index => $termino) {
-                    if ($termino !== '') {
-                        if ($index === 0) {
-                            $q->whereRaw("{$columnaNormalizada} LIKE ?", ["%{$termino}%"]);
-                        } else {
-                            $q->orWhereRaw("{$columnaNormalizada} LIKE ?", ["%{$termino}%"]);
-                        }
-                    }
-                }
-            })
-            ->limit(12)
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        return $this->subServicioRepository->buscarPorTokensNormalizados($tokensNormalizados, $columnaNormalizada, 12);
     }
 }

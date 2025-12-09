@@ -93,7 +93,7 @@ class ServiciosControllerCoverageTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $controller = new ServiciosController();
+        $controller = app(ServiciosController::class);
         
         // Guardar información de la conexión original
         $connection = DB::connection();
@@ -138,7 +138,7 @@ class ServiciosControllerCoverageTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $controller = new ServiciosController();
+        $controller = app(ServiciosController::class);
         $request = Request::create(self::ROUTE_SERVICIOS, 'POST', [
             'nombre_servicio' => 'Test Servicio Fallido',
             'descripcion' => 'Test descripción',
@@ -181,7 +181,7 @@ class ServiciosControllerCoverageTest extends TestCase
     {
         $this->crearUsuarioAdmin();
 
-        $controller = new ServiciosController();
+        $controller = app(ServiciosController::class);
         $request = Request::create(self::ROUTE_SERVICIOS, 'POST', [
             'nombre_servicio' => 'Test General Exception',
             'descripcion' => 'Test',

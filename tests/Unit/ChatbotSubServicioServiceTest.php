@@ -29,9 +29,7 @@ class ChatbotSubServicioServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $responseBuilder = new ChatbotResponseBuilder;
-        $textProcessor = new \App\Services\ChatbotTextProcessor();
-        $this->service = new ChatbotSubServicioService($responseBuilder, $textProcessor);
+        $this->service = app(\App\Services\ChatbotSubServicioService::class);
     }
 
     // ============================================

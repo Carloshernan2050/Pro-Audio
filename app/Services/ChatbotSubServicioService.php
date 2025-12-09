@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\SubServicios;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -12,10 +12,16 @@ class ChatbotSubServicioService
 
     private ChatbotTextProcessor $textProcessor;
 
-    public function __construct(ChatbotResponseBuilder $responseBuilder, ChatbotTextProcessor $textProcessor)
-    {
+    private SubServicioRepositoryInterface $subServicioRepository;
+
+    public function __construct(
+        ChatbotResponseBuilder $responseBuilder,
+        ChatbotTextProcessor $textProcessor,
+        SubServicioRepositoryInterface $subServicioRepository
+    ) {
         $this->responseBuilder = $responseBuilder;
         $this->textProcessor = $textProcessor;
+        $this->subServicioRepository = $subServicioRepository;
     }
 
     public function obtenerSubServiciosPorIntenciones(array $intenciones): Collection
@@ -24,10 +30,8 @@ class ChatbotSubServicioService
             return collect();
         }
 
-        $query = SubServicios::query()
-            ->select('sub_servicios.id', 'sub_servicios.nombre', 'sub_servicios.precio', 'servicios.nombre_servicio')
-            ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
-            ->whereIn('servicios.nombre_servicio', $intenciones);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $query = $this->subServicioRepository->queryPorIntenciones($intenciones);
 
         return $this->responseBuilder->ordenarSubServicios($query)->get();
     }
@@ -38,10 +42,12 @@ class ChatbotSubServicioService
             return collect();
         }
 
-        return SubServicios::query()
-            ->whereIn('id', $ids)
-            ->with('servicio')
-            ->get(['id', 'servicios_id', 'nombre', 'precio']);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $subServicios = $this->subServicioRepository->obtenerPorIds($ids);
+        // Cargar relaciones si es necesario
+        $subServicios->load('servicio');
+        
+        return $subServicios;
     }
 
     public function buscarSubServiciosRelacionados(string $mensajeCorregido, array $tokens, array $intenciones): Collection

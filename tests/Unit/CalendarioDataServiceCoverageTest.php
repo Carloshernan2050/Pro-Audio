@@ -25,7 +25,7 @@ class CalendarioDataServiceCoverageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CalendarioDataService;
+        $this->service = app(CalendarioDataService::class);
 
         $this->persona = Usuario::create([
             'primer_nombre' => 'Test',

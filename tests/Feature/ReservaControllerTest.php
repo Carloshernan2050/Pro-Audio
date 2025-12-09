@@ -956,4 +956,35 @@ class ReservaControllerTest extends TestCase
         $this->assertDatabaseMissing('reservas', ['id' => $reserva->id]);
         $this->assertDatabaseMissing('reserva_items', ['id' => $reservaItem->id]);
     }
+
+    public function test_destroy_con_modelo_sin_items_cargados(): void
+    {
+        $this->crearUsuarioAdmin();
+
+        $reserva = Reserva::create([
+            'personas_id' => session('usuario_id'),
+            'servicio' => self::SERVICIO_TEST,
+            'fecha_inicio' => self::FECHA_INICIO,
+            'fecha_fin' => self::FECHA_FIN,
+            'descripcion_evento' => self::DESCRIPCION_EVENTO,
+            'cantidad_total' => 5,
+            'estado' => 'pendiente',
+        ]);
+
+        // Obtener el modelo sin relaciones cargadas (simula route model binding)
+        $reservaSinRelaciones = Reserva::find($reserva->id);
+        $this->assertFalse($reservaSinRelaciones->relationLoaded('items'));
+
+        // Usar reflection para llamar directamente al método destroy con el modelo
+        $controller = app(\App\Http\Controllers\ReservaController::class);
+        $reflection = new \ReflectionClass($controller);
+        $method = $reflection->getMethod('destroy');
+        $method->setAccessible(true);
+
+        // Esto debería cubrir las líneas 277-280
+        $result = $method->invoke($controller, $reservaSinRelaciones);
+
+        $this->assertNotNull($result);
+        $this->assertDatabaseMissing('reservas', ['id' => $reserva->id]);
+    }
 }

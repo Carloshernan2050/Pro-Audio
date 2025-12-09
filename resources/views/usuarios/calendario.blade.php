@@ -611,7 +611,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body alquiler-box" style="overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; max-height: calc(90vh - 120px);">
-                        <div id="alertCrear" class="alert alert-danger" style="display: none;"></div>
+                        <div id="alertCrear" class="alert alert-danger" style="display: none; margin-bottom: 15px; padding: 15px; border-radius: 6px; background-color: #f8d7da; border: 2px solid #dc3545; color: #721c24; font-weight: bold; position: relative; z-index: 9999; transition: all 0.3s ease;"></div>
                         <div class="mb-2">
                             <label for="servicio_crear">Servicio *</label>
                             <select id="servicio_crear" name="servicio" class="form-control" required>
@@ -1096,6 +1096,42 @@
             
             .alert {
                 transition: all 0.3s ease;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 15px 18px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                font-weight: 500;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            .alert-danger {
+                background-color: #f8d7da !important;
+                color: #721c24 !important;
+                border: 2px solid #dc3545 !important;
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+            }
+            
+            .alert-danger i {
+                color: #dc3545;
+                font-size: 1.1rem;
+                margin-right: 4px;
+            }
+            
+            .alert-success {
+                background-color: #d4edda !important;
+                color: #155724 !important;
+                border: 2px solid #c3e6cb !important;
+                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+            }
+            
+            .alert-success i {
+                color: #28a745;
+                font-size: 1.1rem;
+                margin-right: 4px;
             }
         </style>
 
@@ -1239,7 +1275,11 @@
                         var inicio = new Date(info.event.start).toLocaleString('es-ES');
                         var fin = info.event.end ? new Date(info.event.end).toLocaleString('es-ES') : 'Sin fecha de fin';
                         const mensaje = "Producto: " + info.event.title + "\nDescripción: " + descripcion + "\nFecha de inicio: " + inicio + "\nFecha de fin: " + fin;
-                        customAlert(mensaje);
+                        if (typeof window.customAlert === 'function') {
+                            window.customAlert(mensaje);
+                        } else {
+                            alert(mensaje);
+                        }
                     },
                     buttonText: {
                         today: 'Hoy',
@@ -2348,7 +2388,7 @@
                 }
 
                 function actualizarBadge() {
-                    const total = contSeleccionados ? contSeleccionados.querySelectorAll('input[type="hidden"][name^="items"]').length : 0;
+                    const total = contSeleccionados ? contSeleccionados.querySelectorAll('.item-row').length : 0;
                     if (badgeCount) badgeCount.textContent = String(total);
                 }
 
@@ -2433,28 +2473,134 @@
                     
                     // Crear handler nombrado
                     formCrearNew._submitHandler = async function(e){
+                        console.log('🚀 [SUBMIT] Handler de submit ejecutado');
                         e.preventDefault();
                         e.stopImmediatePropagation(); // Prevenir que otros listeners se ejecuten
                         e.stopPropagation();
                         
                         // Prevenir doble envío
                         if (isSubmittingCrear) {
+                            console.log('⏸️ [SUBMIT] Ya se está procesando, cancelando...');
                             showToast('Ya se está procesando la solicitud, por favor espere...', 'warning');
                             return false;
                         }
+                        console.log('✅ [SUBMIT] Continuando con validación...');
                     
-                    const alertBox = document.getElementById('alertCrear');
-                    if (alertBox) { alertBox.style.display = 'none'; alertBox.textContent = ''; }
+                    // Obtener alertBox al inicio para uso en toda la función
+                    let alertBox = document.getElementById('alertCrear');
+                    console.log('🔍 [VALIDACIÓN] Buscando alertBox inicial:', alertBox);
+                    if (!alertBox) {
+                        // Esperar un frame si no se encuentra inmediatamente
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+                        alertBox = document.getElementById('alertCrear');
+                        console.log('🔍 [VALIDACIÓN] AlertBox después de esperar:', alertBox);
+                    }
                     
-                    // Validar fechas
-                    if (!validarFechas('fecha_inicio_crear', 'fecha_fin_crear', 'alertCrear', 'formCrear')) {
+                    // Validar productos PRIMERO (antes de validar fechas)
+                    const total = contSeleccionados ? contSeleccionados.querySelectorAll('.item-row').length : 0;
+                    console.log('📊 [VALIDACIÓN] Total de productos seleccionados:', total);
+                    console.log('📊 [VALIDACIÓN] contSeleccionados:', contSeleccionados);
+                    console.log('📊 [VALIDACIÓN] Elementos .item-row encontrados:', contSeleccionados ? contSeleccionados.querySelectorAll('.item-row').length : 'N/A');
+                    
+                    if (total === 0) {
+                        const errorMsg = 'Debe seleccionar al menos un producto.';
+                        console.log('❌ [ERROR] No hay productos seleccionados. Mostrando mensaje...');
+                        console.log('❌ [ERROR] AlertBox disponible:', alertBox);
+                        
+                        // Mostrar toast
+                        if (typeof showToast === 'function') {
+                            showToast(errorMsg, 'error');
+                        }
+                        
+                        // Mostrar en alertBox con estilos consistentes con otros mensajes
+                        if (alertBox) {
+                            console.log('✅ [ALERTBOX] Mostrando mensaje en alertBox existente');
+                            // Aplicar clases primero
+                            alertBox.className = 'alert alert-danger';
+                            
+                            // Establecer contenido
+                            alertBox.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + errorMsg;
+                            
+                            // Aplicar estilos base y animación
+                            alertBox.style.display = 'block';
+                            alertBox.style.visibility = 'visible';
+                            alertBox.style.opacity = '1';
+                            alertBox.style.animation = 'slideInDown 0.3s ease-out';
+                            alertBox.style.transition = 'all 0.3s ease';
+                            alertBox.removeAttribute('hidden');
+                            alertBox.setAttribute('aria-hidden', 'false');
+                            
+                            // Forzar que los estilos CSS se apliquen
+                            alertBox.offsetHeight; // Trigger reflow
+                            
+                            console.log('✅ [ALERTBOX] Estilos aplicados. Display:', alertBox.style.display, 'Visibility:', alertBox.style.visibility);
+                            
+                            // Scroll inmediato
+                            requestAnimationFrame(() => {
+                                alertBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                const modalBody = alertBox.closest('.modal-body');
+                                if (modalBody) {
+                                    modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            });
+                        } else {
+                            console.error('❌ [ERROR CRÍTICO] alertBox no encontrado en el DOM! Creando uno nuevo...');
+                            // Intentar crear el alertBox si no existe
+                            const modalBody = document.querySelector('#modalCrear .modal-body');
+                            if (modalBody) {
+                                console.log('✅ [ALERTBOX] Creando nuevo alertBox en modalBody');
+                                alertBox = document.createElement('div');
+                                alertBox.id = 'alertCrear';
+                                alertBox.className = 'alert alert-danger';
+                                alertBox.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + errorMsg;
+                                alertBox.style.display = 'block';
+                                alertBox.style.visibility = 'visible';
+                                alertBox.style.opacity = '1';
+                                alertBox.style.animation = 'slideInDown 0.3s ease-out';
+                                alertBox.style.transition = 'all 0.3s ease';
+                                modalBody.insertBefore(alertBox, modalBody.firstChild);
+                                alertBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                console.log('✅ [ALERTBOX] Nuevo alertBox creado y mostrado');
+                            } else {
+                                console.error('❌ [ERROR CRÍTICO] No se pudo encontrar modalBody para crear alertBox');
+                            }
+                        }
+                        
+                        // Resaltar el campo de productos
+                        const productosDiv = document.getElementById('productos_crear');
+                        const selectProducto = document.getElementById('select_producto');
+                        if (productosDiv) {
+                            productosDiv.style.cssText += 'border: 2px solid #dc3545 !important; border-radius: 6px !important; padding: 10px !important; background-color: rgba(220, 53, 69, 0.1) !important;';
+                            setTimeout(() => {
+                                productosDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }, 100);
+                            setTimeout(() => {
+                                productosDiv.style.border = '';
+                                productosDiv.style.borderRadius = '';
+                                productosDiv.style.padding = '';
+                                productosDiv.style.backgroundColor = '';
+                            }, 5000);
+                        }
+                        if (selectProducto) {
+                            selectProducto.style.cssText += 'border: 2px solid #dc3545 !important; background-color: rgba(220, 53, 69, 0.1) !important;';
+                            setTimeout(() => {
+                                selectProducto.style.border = '';
+                                selectProducto.style.backgroundColor = '';
+                            }, 5000);
+                        }
+                        
                         return false;
                     }
                     
-                    const total = contSeleccionados ? contSeleccionados.querySelectorAll('input[type="hidden"][name^="items"]').length : 0;
-                    if (total === 0) {
-                        showToast('Seleccione al menos un producto', 'error');
-                        if (alertBox) { alertBox.textContent = 'Seleccione al menos un producto.'; alertBox.style.display = 'block'; }
+                    // Limpiar alertBox solo si hay productos seleccionados
+                    if (alertBox) { 
+                        alertBox.style.display = 'none'; 
+                        alertBox.innerHTML = ''; 
+                        alertBox.style.visibility = 'hidden';
+                    }
+                    
+                    // Validar fechas DESPUÉS de validar productos
+                    if (!validarFechas('fecha_inicio_crear', 'fecha_fin_crear', 'alertCrear', 'formCrear')) {
                         return false;
                     }
                     if (!validarTodo()) {
@@ -2615,8 +2761,14 @@
                             // Mostrar el primer error en el toast y todos en el alert
                             showToast(errorMessages[0] || 'Error de validación', 'error');
                             if (alertBox) {
-                                alertBox.innerHTML = mensajeCompleto.replace(/\n/g, '<br>');
+                                alertBox.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + mensajeCompleto.replace(/\n/g, '<br>');
                                 alertBox.style.display = 'block';
+                                alertBox.style.visibility = 'visible';
+                                alertBox.style.opacity = '1';
+                                // Hacer scroll al alert
+                                setTimeout(() => {
+                                    alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                }, 100);
                             }
                         } else if (resp.status === 400 || resp.status === 500) {
                             // Error del servidor
@@ -2656,6 +2808,9 @@
                     
                     // Agregar el listener
                     formCrearNew.addEventListener('submit', formCrearNew._submitHandler);
+                    console.log('✅ [INIT] Listener de submit agregado al formulario formCrear');
+                } else {
+                    console.error('❌ [INIT] No se encontró el formulario formCrear');
                 }
 
                 // Toasts

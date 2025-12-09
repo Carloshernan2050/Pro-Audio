@@ -2,12 +2,18 @@
 
 namespace App\Services;
 
-use App\Models\Calendario;
+use App\Repositories\Interfaces\CalendarioRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CalendarioDataService
 {
+    private CalendarioRepositoryInterface $calendarioRepository;
+
+    public function __construct(CalendarioRepositoryInterface $calendarioRepository)
+    {
+        $this->calendarioRepository = $calendarioRepository;
+    }
     private const DEFAULT_PRODUCT_LABEL = 'Sin producto';
 
     /**
@@ -130,10 +136,8 @@ class CalendarioDataService
      */
     public function obtenerRegistrosUnicos(): Collection
     {
-        $registros = Calendario::with(['items', 'reserva'])
-            ->orderBy('fecha', 'desc')
-            ->orderBy('id', 'desc')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $registros = $this->calendarioRepository->allWithRelations();
 
         return $this->eliminarDuplicadosRegistros($registros);
     }

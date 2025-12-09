@@ -35,12 +35,14 @@ class HistorialControllerUnitTest extends TestCase
 
     private const ACCION_CREADA = 'creada';
 
+    private const TEST_DESCRIPCION = 'Test descripción';
+
     protected $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new HistorialController;
+        $this->controller = app(HistorialController::class);
     }
 
     public function test_controller_instancia_correctamente(): void
@@ -80,7 +82,7 @@ class HistorialControllerUnitTest extends TestCase
             'fecha_inicio' => now(),
             'fecha_fin' => now()->addDays(1),
             'evento' => 'Test evento',
-            'descripcion_evento' => 'Test descripción',
+            'descripcion_evento' => self::TEST_DESCRIPCION,
         ]);
 
         $reserva = Reserva::create([
@@ -162,14 +164,14 @@ class HistorialControllerUnitTest extends TestCase
 
         $servicio = \App\Models\Servicios::create([
             'nombre_servicio' => 'Test Servicio',
-            'descripcion' => 'Test descripción',
+            'descripcion' => self::TEST_DESCRIPCION,
             'icono' => 'test-icon',
         ]);
 
         $subServicio = \App\Models\SubServicios::create([
             'servicios_id' => $servicio->id,
             'nombre' => 'Test SubServicio',
-            'descripcion' => 'Test descripción',
+            'descripcion' => self::TEST_DESCRIPCION,
             'precio' => 100000,
         ]);
 

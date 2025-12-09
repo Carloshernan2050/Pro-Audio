@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\SubServicios;
+use App\Repositories\Interfaces\SubServicioRepositoryInterface;
 
 class ChatbotIntentionDetector
 {
     private ChatbotTextProcessor $textProcessor;
+
+    private SubServicioRepositoryInterface $subServicioRepository;
 
     private const PAR_LED = 'par led';
 
@@ -25,9 +27,12 @@ class ChatbotIntentionDetector
     // Cache estático para arrays de palabras
     private static array $cachePalabras = [];
 
-    public function __construct(ChatbotTextProcessor $textProcessor)
-    {
+    public function __construct(
+        ChatbotTextProcessor $textProcessor,
+        SubServicioRepositoryInterface $subServicioRepository
+    ) {
         $this->textProcessor = $textProcessor;
+        $this->subServicioRepository = $subServicioRepository;
     }
 
     public function detectarIntenciones(string $mensaje): array
@@ -214,10 +219,8 @@ class ChatbotIntentionDetector
         if ($cache === null) {
             try {
                 // Solo usar NOMBRES de subservicios y servicios, NO descripciones
-                $rows = SubServicios::query()
-                    ->select('sub_servicios.nombre', 'servicios.nombre_servicio')
-                    ->join('servicios', 'servicios.id', '=', 'sub_servicios.servicios_id')
-                    ->get();
+                // Usar repositorio en lugar de modelo directo (DIP)
+                $rows = $this->subServicioRepository->obtenerParaTfidf();
 
                 $docsBySvc = [];
                 foreach ($rows as $r) {

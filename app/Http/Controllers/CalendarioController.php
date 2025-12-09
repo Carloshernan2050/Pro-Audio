@@ -2,46 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Calendario;
-use App\Models\CalendarioItem;
-use App\Models\Historial;
-use App\Models\Inventario;
-use App\Models\MovimientosInventario;
-use App\Models\Reserva;
-use App\Services\CalendarioDataService;
-use App\Services\CalendarioEventService;
-use App\Services\CalendarioItemService;
-use App\Services\CalendarioValidationService;
-use App\Services\ReservaService;
+use App\Services\CalendarioDependencies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CalendarioController extends Controller
 {
-    private CalendarioValidationService $validationService;
-
-    private CalendarioDataService $dataService;
-
-    private CalendarioEventService $eventService;
-
-    private CalendarioItemService $itemService;
-
-    private ReservaService $reservaService;
+    private CalendarioDependencies $dependencies;
 
     public const DEFAULT_EVENT_TITLE = 'Alquiler';
 
-    public function __construct(
-        CalendarioValidationService $validationService,
-        CalendarioDataService $dataService,
-        CalendarioEventService $eventService,
-        CalendarioItemService $itemService,
-        ReservaService $reservaService
-    ) {
-        $this->validationService = $validationService;
-        $this->dataService = $dataService;
-        $this->eventService = $eventService;
-        $this->itemService = $itemService;
-        $this->reservaService = $reservaService;
+    public function __construct(CalendarioDependencies $dependencies)
+    {
+        $this->dependencies = $dependencies;
     }
 
     private function isAdminLike(): bool
@@ -67,26 +40,24 @@ class CalendarioController extends Controller
     // Mostrar el calendario
     public function inicio()
     {
-        $registros = $this->dataService->obtenerRegistrosUnicos();
-        [$movimientos, $inventarios] = $this->dataService->cargarMovimientosEInventarios();
+        $registros = $this->dependencies->dataService->obtenerRegistrosUnicos();
+        [$movimientos, $inventarios] = $this->dependencies->dataService->cargarMovimientosEInventarios();
 
-        $this->eventService->resetPaletteCursor();
+        $this->dependencies->eventService->resetPaletteCursor();
 
         $eventos = [];
         $eventosItems = [];
 
         foreach ($registros as $registro) {
-            $eventoData = $this->eventService->construirEvento($registro, $movimientos, $inventarios);
+            $eventoData = $this->dependencies->eventService->construirEvento($registro, $movimientos, $inventarios);
             $eventos[] = $eventoData['evento'];
             if (! empty($eventoData['items'])) {
                 $eventosItems[$registro->id] = $eventoData['items'];
             }
         }
 
-        $reservasPendientes = Reserva::with(['items.inventario'])
-            ->where('estado', 'pendiente')
-            ->orderByDesc('created_at')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $reservasPendientes = $this->dependencies->reservaRepository->getPendientes();
 
         return view('usuarios.calendario', [
             'registros' => $registros,
@@ -101,15 +72,15 @@ class CalendarioController extends Controller
     // Obtener eventos en formato JSON para recargar el calendario
     public function getEventos()
     {
-        $registros = $this->dataService->obtenerRegistrosUnicos();
-        [$movimientos, $inventarios] = $this->dataService->cargarMovimientosEInventarios();
+        $registros = $this->dependencies->dataService->obtenerRegistrosUnicos();
+        [$movimientos, $inventarios] = $this->dependencies->dataService->cargarMovimientosEInventarios();
 
-        $this->eventService->resetPaletteCursor();
+        $this->dependencies->eventService->resetPaletteCursor();
 
         $eventos = [];
 
         foreach ($registros as $registro) {
-            $eventos[] = $this->eventService->construirEvento($registro, $movimientos, $inventarios)['evento'];
+            $eventos[] = $this->eventService()->construirEvento($registro, $movimientos, $inventarios)['evento'];
         }
 
         return response()->json($eventos);
@@ -118,17 +89,15 @@ class CalendarioController extends Controller
     // Obtener registros para el sidebar en formato JSON
     public function getRegistros()
     {
-        $registros = Calendario::with(['items', 'reserva'])
-            ->orderBy('fecha', 'desc')
-            ->orderBy('id', 'desc')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $registros = $this->dependencies->calendarioRepository->allWithRelations();
 
-        $registrosUnicos = $this->dataService->eliminarDuplicadosRegistros($registros);
-        [$movimientos, $inventarios] = $this->dataService->cargarMovimientosEInventarios();
+        $registrosUnicos = $this->dependencies->dataService->eliminarDuplicadosRegistros($registros);
+        [$movimientos, $inventarios] = $this->dependencies->dataService->cargarMovimientosEInventarios();
 
         $registrosData = [];
         foreach ($registrosUnicos as $registro) {
-            $registrosData[] = $this->dataService->transformarRegistroAData($registro, $movimientos, $inventarios);
+            $registrosData[] = $this->dependencies->dataService->transformarRegistroAData($registro, $movimientos, $inventarios);
         }
 
         return response()->json([
@@ -183,15 +152,16 @@ class CalendarioController extends Controller
     /**
      * Guarda un calendario con items (nuevo formato).
      */
-    private function guardarConItems(Request $request, array $items): Calendario
+    private function guardarConItems(Request $request, array $items): \App\Models\Calendario
     {
-        $request->validate($this->validationService->getValidationRulesForItems(), $this->validationService->getValidationMessagesForItems());
+        $request->validate($this->dependencies->validationService->getValidationRulesForItems(), $this->dependencies->validationService->getValidationMessagesForItems());
 
-        $this->validationService->validarStockParaItems($request, $items);
+        $this->dependencies->validationService->validarStockParaItems($request, $items);
 
         $cantidadTotal = array_sum(array_column($items, 'cantidad'));
 
-        $calendario = Calendario::create([
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $calendario = $this->dependencies->calendarioRepository->create([
             'personas_id' => session('usuario_id'),
             'movimientos_inventario_id' => null,
             'fecha' => now(),
@@ -202,7 +172,7 @@ class CalendarioController extends Controller
             'evento' => self::DEFAULT_EVENT_TITLE,
         ]);
 
-        $this->itemService->crearItemsCalendario($calendario->id, $items);
+        $this->dependencies->itemService->crearItemsCalendario($calendario->id, $items);
 
         return $calendario;
     }
@@ -210,11 +180,12 @@ class CalendarioController extends Controller
     /**
      * Guarda un calendario en formato antiguo.
      */
-    private function guardarFormatoAntiguo(Request $request): Calendario
+    private function guardarFormatoAntiguo(Request $request): \App\Models\Calendario
     {
-        $request->validate($this->validationService->getValidationRulesForOldFormat(), $this->validationService->getValidationMessagesForOldFormat());
+        $request->validate($this->dependencies->validationService->getValidationRulesForOldFormat(), $this->dependencies->validationService->getValidationMessagesForOldFormat());
 
-        return Calendario::create([
+        // Usar repositorio en lugar de modelo directo (DIP)
+        return $this->dependencies->calendarioRepository->create([
             'personas_id' => session('usuario_id'),
             'movimientos_inventario_id' => $request->movimientos_inventario_id,
             'fecha' => now(),
@@ -233,7 +204,8 @@ class CalendarioController extends Controller
         DB::beginTransaction();
 
         try {
-            $calendario = Calendario::with(['items.movimientoInventario', 'reserva'])->findOrFail($id);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $calendario = $this->dependencies->calendarioRepository->findWithRelations($id);
             $tieneItems = $calendario->items && $calendario->items->count() > 0;
 
             if ($tieneItems) {
@@ -259,40 +231,43 @@ class CalendarioController extends Controller
     /**
      * Actualiza un calendario con items (nuevo formato).
      */
-    private function actualizarConItems(Request $request, Calendario $calendario, int $id): void
+    private function actualizarConItems(Request $request, $calendario, int $id): void
     {
         $items = $this->normalizarItems($request->input('items', []));
 
         $request->validate(
-            $this->validationService->getValidationRulesForUpdateItems(),
-            $this->validationService->getValidationMessagesForUpdateItems()
+            $this->dependencies->validationService->getValidationRulesForUpdateItems(),
+            $this->dependencies->validationService->getValidationMessagesForUpdateItems()
         );
 
         $itemsActuales = $this->obtenerItemsActuales($calendario);
-        $this->validationService->validarStockParaActualizacion($request, $items, $itemsActuales, $id);
+        $this->dependencies->validationService->validarStockParaActualizacion($request, $items, $itemsActuales, $id);
         $this->devolverStockActual($itemsActuales, $id);
 
         $cantidadTotal = array_sum(array_column($items, 'cantidad'));
-        $calendario->update([
+        
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->dependencies->calendarioRepository->update($id, [
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'descripcion_evento' => $request->descripcion_evento,
             'cantidad' => $cantidadTotal,
         ]);
 
-        CalendarioItem::where('calendario_id', $id)->delete();
-        $nuevosItemsReserva = $this->itemService->crearItemsCalendarioParaActualizacion($id, $items);
-        $this->reservaService->actualizarReservaVinculada($request, $id, $cantidadTotal, $nuevosItemsReserva);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->dependencies->calendarioItemRepository->deleteByCalendarioId($id);
+        $nuevosItemsReserva = $this->dependencies->itemService->crearItemsCalendarioParaActualizacion($id, $items);
+        $this->dependencies->reservaService->actualizarReservaVinculada($request, $id, $cantidadTotal, $nuevosItemsReserva);
     }
 
     /**
      * Actualiza un calendario en formato antiguo.
      */
-    private function actualizarFormatoAntiguo(Request $request, Calendario $calendario, int $id): void
+    private function actualizarFormatoAntiguo(Request $request, $calendario, int $id): void
     {
         $request->validate(
-            $this->validationService->getValidationRulesForUpdateOldFormat(),
-            $this->validationService->getValidationMessagesForUpdateOldFormat()
+            $this->dependencies->validationService->getValidationRulesForUpdateOldFormat(),
+            $this->dependencies->validationService->getValidationMessagesForUpdateOldFormat()
         );
 
         $updateData = [
@@ -306,14 +281,15 @@ class CalendarioController extends Controller
             $updateData['cantidad'] = $request->cantidad;
         }
 
-        $calendario->update($updateData);
-        $this->reservaService->actualizarReservaFormatoAntiguo($request, $id, $calendario);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $this->dependencies->calendarioRepository->update($id, $updateData);
+        $this->dependencies->reservaService->actualizarReservaFormatoAntiguo($request, $id, $calendario);
     }
 
     /**
      * Obtiene los items actuales del calendario agrupados por inventario.
      */
-    private function obtenerItemsActuales(Calendario $calendario): array
+    private function obtenerItemsActuales($calendario): array
     {
         $itemsActuales = [];
         foreach ($calendario->items as $itemActual) {
@@ -337,9 +313,11 @@ class CalendarioController extends Controller
                 continue;
             }
 
-            Inventario::where('id', $invId)->increment('stock', $cant);
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->dependencies->inventarioRepository->incrementStock($invId, $cant);
 
-            MovimientosInventario::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->dependencies->movimientoInventarioRepository->create([
                 'inventario_id' => $invId,
                 'tipo_movimiento' => 'devuelto',
                 'cantidad' => $cant,
@@ -354,16 +332,19 @@ class CalendarioController extends Controller
     {
         $this->ensureAdminLike();
 
-        $calendario = Calendario::with(['items.movimientoInventario', 'reserva'])->findOrFail($id);
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $calendario = $this->dependencies->calendarioRepository->findWithRelations($id);
 
         DB::transaction(function () use ($calendario) {
             foreach ($calendario->items as $item) {
                 $movimiento = $item->movimientoInventario;
 
                 if ($movimiento && $movimiento->inventario_id) {
-                    Inventario::where('id', $movimiento->inventario_id)->increment('stock', $item->cantidad);
+                    // Usar repositorio en lugar de modelo directo (DIP)
+                    $this->dependencies->inventarioRepository->incrementStock($movimiento->inventario_id, $item->cantidad);
 
-                    MovimientosInventario::create([
+                    // Usar repositorio en lugar de modelo directo (DIP)
+                    $this->dependencies->movimientoInventarioRepository->create([
                         'inventario_id' => $movimiento->inventario_id,
                         'tipo_movimiento' => 'devuelto',
                         'cantidad' => $item->cantidad,
@@ -373,10 +354,12 @@ class CalendarioController extends Controller
                 }
             }
 
-            $reserva = Reserva::where('calendario_id', $calendario->id)->first();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $reserva = $this->dependencies->reservaRepository->findByCalendarioId($calendario->id);
 
             if ($reserva) {
-                $reserva->update([
+                // Usar repositorio en lugar de modelo directo (DIP)
+                $this->dependencies->reservaRepository->update($reserva->id, [
                     'estado' => 'finalizada',
                     'calendario_id' => null,
                     'meta' => array_merge($reserva->meta ?? [], [
@@ -384,7 +367,8 @@ class CalendarioController extends Controller
                     ]),
                 ]);
 
-                Historial::create([
+                // Usar repositorio en lugar de modelo directo (DIP)
+                $this->dependencies->historialRepository->create([
                     'calendario_id' => $calendario->id,
                     'reserva_id' => $reserva->id,
                     'accion' => 'finalizada',
@@ -393,7 +377,8 @@ class CalendarioController extends Controller
                 ]);
             }
 
-            $calendario->delete();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->dependencies->calendarioRepository->delete($calendario->id);
         });
 
         if (request()->ajax() || request()->wantsJson()) {

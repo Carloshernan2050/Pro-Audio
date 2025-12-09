@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Http\Controllers\ServiciosViewController;
 use Illuminate\Support\Str;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 /**
  * Tests Unitarios para ServiciosViewController
@@ -13,12 +13,14 @@ use PHPUnit\Framework\TestCase;
  */
 class ServiciosViewControllerUnitTest extends TestCase
 {
+    private const SERVICIO_ANIMACION = 'Animación';
+
     protected $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new ServiciosViewController;
+        $this->controller = app(ServiciosViewController::class);
     }
 
     // ============================================
@@ -71,7 +73,7 @@ class ServiciosViewControllerUnitTest extends TestCase
 
     public function test_slug_generacion_con_acentos(): void
     {
-        $servicio = 'Animación';
+        $servicio = self::SERVICIO_ANIMACION;
         $slug = Str::slug($servicio, '_');
 
         $this->assertIsString($slug);
@@ -96,11 +98,11 @@ class ServiciosViewControllerUnitTest extends TestCase
     public function test_nombres_servicios_validos(): void
     {
         // Los servicios principales son: Alquiler, Animación, Publicidad
-        $servicios = ['Alquiler', 'Animación', 'Publicidad'];
+        $servicios = ['Alquiler', self::SERVICIO_ANIMACION, 'Publicidad'];
 
         $this->assertCount(3, $servicios);
         $this->assertContains('Alquiler', $servicios);
-        $this->assertContains('Animación', $servicios);
+        $this->assertContains(self::SERVICIO_ANIMACION, $servicios);
         $this->assertContains('Publicidad', $servicios);
     }
 
@@ -135,7 +137,7 @@ class ServiciosViewControllerUnitTest extends TestCase
         // Verificar lógica de búsqueda de servicios
         $servicios = [
             (object)['nombre_servicio' => 'Alquiler'],
-            (object)['nombre_servicio' => 'Animación'],
+            (object)['nombre_servicio' => self::SERVICIO_ANIMACION],
             (object)['nombre_servicio' => 'Publicidad'],
         ];
 
@@ -151,7 +153,7 @@ class ServiciosViewControllerUnitTest extends TestCase
     {
         $servicios = [
             (object)['nombre_servicio' => 'Alquiler'],
-            (object)['nombre_servicio' => 'Animación'],
+            (object)['nombre_servicio' => self::SERVICIO_ANIMACION],
         ];
 
         $slug = 'alquiler';

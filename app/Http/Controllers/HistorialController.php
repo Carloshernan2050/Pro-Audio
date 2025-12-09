@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cotizacion;
-use App\Models\Historial;
+use App\Repositories\Interfaces\CotizacionRepositoryInterface;
+use App\Repositories\Interfaces\HistorialRepositoryInterface;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,9 +11,21 @@ use Illuminate\Support\Facades\Validator;
 
 class HistorialController extends Controller
 {
+    private HistorialRepositoryInterface $historialRepository;
+
+    private CotizacionRepositoryInterface $cotizacionRepository;
+
+    public function __construct(
+        HistorialRepositoryInterface $historialRepository,
+        CotizacionRepositoryInterface $cotizacionRepository
+    ) {
+        $this->historialRepository = $historialRepository;
+        $this->cotizacionRepository = $cotizacionRepository;
+    }
     public function index()
     {
-        $items = Historial::with(['reserva'])->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $items = $this->historialRepository->allWithRelations();
 
         return view('usuarios.historial', compact('items'));
     }
@@ -36,7 +48,8 @@ class HistorialController extends Controller
         }
 
         try {
-            $historial = Historial::create([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $historial = $this->historialRepository->create([
                 'calendario_id' => $request->input('calendario_id'),
                 'reserva_id' => $request->input('reserva_id'),
                 'accion' => $request->input('accion'),
@@ -56,7 +69,7 @@ class HistorialController extends Controller
         }
     }
 
-    public function update(Request $request, Historial $historial)
+    public function update(Request $request, \App\Models\Historial $historial)
     {
         $validator = Validator::make($request->all(), [
             'calendario_id' => 'nullable|exists:calendario,id',
@@ -74,7 +87,8 @@ class HistorialController extends Controller
         }
 
         try {
-            $historial->update([
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $this->historialRepository->update($historial->id, [
                 'calendario_id' => $request->has('calendario_id') ? $request->input('calendario_id') : $historial->calendario_id,
                 'reserva_id' => $request->has('reserva_id') ? $request->input('reserva_id') : $historial->reserva_id,
                 'accion' => $request->has('accion') ? $request->input('accion') : $historial->accion,
@@ -100,12 +114,8 @@ class HistorialController extends Controller
     public function exportPdfReservas()
     {
         try {
-            $reservas = Historial::with(['reserva.persona'])
-                ->whereNotNull('confirmado_en')
-                ->whereNotNull('reserva_id')
-                ->orderBy('confirmado_en', 'desc')
-                ->orderBy('id', 'desc')
-                ->get();
+            // Usar repositorio en lugar de modelo directo (DIP)
+            $reservas = $this->historialRepository->getReservasConfirmadas();
 
             Log::info('Generando PDF de reservas. Total de reservas encontradas: '.$reservas->count());
 
@@ -130,9 +140,8 @@ class HistorialController extends Controller
      */
     public function exportPdfCotizaciones()
     {
-        $cotizaciones = Cotizacion::with(['persona', 'subServicio.servicio'])
-            ->orderBy('fecha_cotizacion', 'desc')
-            ->get();
+        // Usar repositorio en lugar de modelo directo (DIP)
+        $cotizaciones = $this->cotizacionRepository->allWithRelations();
 
         $pdf = Pdf::loadView('usuarios.historial_cotizaciones_pdf', [
             'cotizaciones' => $cotizaciones,
