@@ -131,7 +131,7 @@ Editar el archivo `.env` con las configuraciones correspondientes a la base de d
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=3005
 DB_DATABASE=pro_audio
 DB_USERNAME=tu_usuario
 DB_PASSWORD=tu_contraseña
