@@ -18,10 +18,105 @@
     <div class="page-container">
         <div class="chatbot-container">
             {{-- Encabezado del chat (puedes quitarlo si deseas solo el área de mensajes) --}}
-            <div class="chat-header">
-                <div class="chat-profile">
+            <div class="chat-header" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-right: 80px;">
+                <div class="chat-profile" style="display: flex; align-items: center; flex: 1; min-width: 0;">
                     <i class="fas fa-user-circle chat-icon"></i>
                     <span class="chat-username">Chat</span>
+                </div>
+                <button type="button" id="btn-terminos-condiciones" 
+                   style="display: inline-flex; align-items: center; padding: 5px 10px; background-color: #dc2626; 
+                          color: #fff; border: 2px solid #000; border-radius: 6px; font-size: 0.7rem; 
+                          font-weight: 500; cursor: pointer; transition: background-color 0.2s; white-space: nowrap; 
+                          flex-shrink: 0; margin-left: auto; max-width: 180px;"
+                   onmouseover="this.style.backgroundColor='#b91c1c'" 
+                   onmouseout="this.style.backgroundColor='#dc2626'"
+                   title="Ver Términos y Condiciones">
+                    <i class="fas fa-file-contract" style="margin-right: 4px; font-size: 0.7rem;"></i>
+                    <span style="overflow: hidden; text-overflow: ellipsis;">Términos y Condiciones</span>
+                </button>
+            </div>
+
+            {{-- Modal para Términos y Condiciones --}}
+            <div id="modal-terminos" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                 background-color: rgba(0, 0, 0, 0.5); z-index: 10000; align-items: center; justify-content: center;">
+                <div style="background-color: #000; border: 2px solid #dc2626; border-radius: 12px; max-width: 700px; max-height: 80vh; 
+                            width: 90%; margin: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3); 
+                            display: flex; flex-direction: column; overflow: hidden;">
+                    <div style="padding: 20px; border-bottom: 2px solid #000; display: flex; justify-content: space-between; align-items: center; background-color: #dc2626; color: #fff;">
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #fff;">Términos y Condiciones</h3>
+                        <button type="button" id="cerrar-modal-terminos" 
+                                style="background: none; border: 2px solid #000; color: #000; font-size: 1.5rem; 
+                                       cursor: pointer; padding: 0; width: 30px; height: 30px; 
+                                       display: flex; align-items: center; justify-content: center; 
+                                       border-radius: 4px; transition: background-color 0.2s; background-color: #fff;"
+                                onmouseover="this.style.backgroundColor='#f3f4f6'; this.style.borderColor='#000';" 
+                                onmouseout="this.style.backgroundColor='#fff'; this.style.borderColor='#000';">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="padding: 24px; overflow-y: auto; flex: 1; background-color: #000;">
+                        <div style="line-height: 1.6; color: #e5e7eb;">
+                            <h4 style="margin-top: 0; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">1. Aceptación de los Términos</h4>
+                            <p style="margin-bottom: 20px; color: #e5e7eb;">
+                                Al utilizar los servicios de PRO AUDIO, aceptas estos términos y condiciones en su totalidad. 
+                                Si no estás de acuerdo con alguna parte de estos términos, no debes utilizar nuestros servicios.
+                            </p>
+
+                            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">2. Servicios Ofrecidos</h4>
+                            <p style="margin-bottom: 20px; color: #e5e7eb;">
+                                PRO AUDIO ofrece servicios profesionales de sonido, iluminación y eventos. Todos los servicios 
+                                están sujetos a disponibilidad y pueden variar según la ubicación y el tipo de evento.
+                            </p>
+
+                            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">3. Cotizaciones</h4>
+                            <p style="margin-bottom: 20px; color: #e5e7eb;">
+                                Las cotizaciones proporcionadas son estimaciones basadas en la información proporcionada. 
+                                Los precios finales pueden variar según los detalles específicos del evento y están sujetos 
+                                a confirmación mediante un contrato formal.
+                            </p>
+
+                            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">4. Reservas y Pagos</h4>
+                            <p style="margin-bottom: 20px; color: #e5e7eb;">
+                                Las reservas requieren un depósito para confirmar la fecha. El pago restante debe realizarse 
+                                según lo acordado en el contrato de servicio. Los términos de pago específicos se establecerán 
+                                en el momento de la confirmación.
+                            </p>
+
+                            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">5. Cancelaciones</h4>
+                            <p style="margin-bottom: 20px; color: #e5e7eb;">
+                                Las cancelaciones deben notificarse con al menos 48 horas de anticipación. Las cancelaciones 
+                                con menos tiempo pueden estar sujetas a cargos según lo establecido en el contrato.
+                            </p>
+
+                            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">6. Responsabilidad</h4>
+                            <p style="margin-bottom: 20px; color: #e5e7eb;">
+                                PRO AUDIO se compromete a proporcionar servicios de calidad. Sin embargo, no nos hacemos 
+                                responsables de daños indirectos o consecuentes que puedan resultar del uso de nuestros servicios.
+                            </p>
+
+                            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">7. Modificaciones</h4>
+                            <p style="margin-bottom: 20px; color: #e5e7eb;">
+                                Nos reservamos el derecho de modificar estos términos y condiciones en cualquier momento. 
+                                Los cambios entrarán en vigor inmediatamente después de su publicación.
+                            </p>
+
+                            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #dc2626; font-size: 1.1rem; font-weight: 600;">8. Contacto</h4>
+                            <p style="margin-bottom: 0; color: #e5e7eb;">
+                                Para cualquier pregunta sobre estos términos y condiciones, puedes contactarnos a través 
+                                de nuestros canales de comunicación oficiales.
+                            </p>
+                        </div>
+                    </div>
+                    <div style="padding: 16px 24px; border-top: 2px solid #dc2626; background-color: #000; text-align: center;">
+                        <button type="button" id="cerrar-modal-terminos-footer" 
+                                style="padding: 10px 24px; background-color: #dc2626; color: #fff; border: 2px solid #000; 
+                                       border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; 
+                                       transition: background-color 0.2s;"
+                                onmouseover="this.style.backgroundColor='#b91c1c'" 
+                                onmouseout="this.style.backgroundColor='#dc2626'">
+                            Cerrar
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -41,6 +136,54 @@
 
     {{-- Script para manejar el envío del chat --}}
     <script>
+    // Manejo del modal de términos y condiciones
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnTerminos = document.getElementById('btn-terminos-condiciones');
+        const modalTerminos = document.getElementById('modal-terminos');
+        const cerrarModalBtn = document.getElementById('cerrar-modal-terminos');
+        const cerrarModalFooterBtn = document.getElementById('cerrar-modal-terminos-footer');
+
+        if (btnTerminos) {
+            btnTerminos.addEventListener('click', function() {
+                if (modalTerminos) {
+                    modalTerminos.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        }
+
+        function cerrarModal() {
+            if (modalTerminos) {
+                modalTerminos.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (cerrarModalBtn) {
+            cerrarModalBtn.addEventListener('click', cerrarModal);
+        }
+
+        if (cerrarModalFooterBtn) {
+            cerrarModalFooterBtn.addEventListener('click', cerrarModal);
+        }
+
+        // Cerrar al hacer clic fuera del modal
+        if (modalTerminos) {
+            modalTerminos.addEventListener('click', function(e) {
+                if (e.target === modalTerminos) {
+                    cerrarModal();
+                }
+            });
+        }
+
+        // Cerrar con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modalTerminos && modalTerminos.style.display === 'flex') {
+                cerrarModal();
+            }
+        });
+    });
+
     document.getElementById('send-btn').addEventListener('click', enviarMensaje);
     document.getElementById('mensaje').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') enviarMensaje();
@@ -84,7 +227,13 @@
             contenedor.innerHTML += `
                 <div class="message-wrapper incoming">
                     <i class="fas fa-robot chat-avatar"></i>
-                    <div class="message-bubble">¡Hola! Soy tu asistente de PRO AUDIO. Puedo ayudarte a estimar una cotización con base en nuestros servicios. Elige opciones del catálogo para comenzar.</div>
+                    <div class="message-bubble">
+                        ¡Hola! 👋 Soy tu asistente de PRO AUDIO. Estoy aquí para ayudarte a crear la cotización perfecta para tu evento. 
+                        <br><br>
+                        Puedes explorar nuestro catálogo de servicios y seleccionar lo que necesites. Te guiaré paso a paso para que encuentres exactamente lo que buscas.
+                        <br><br>
+                        <span style="color: #dc2626; font-weight: 600;">💡 Recuerda:</span> Las cotizaciones que te muestro son aproximaciones iniciales. El precio final puede ajustarse según factores como la ubicación del evento, el número de asistentes, condiciones especiales y otros detalles que revisaremos juntos. La cotización definitiva se confirmará cuando realices tu reserva.
+                    </div>
                 </div>
             `;
             try {
@@ -747,7 +896,13 @@
                                 contenedor.innerHTML = `
                                     <div class="message-wrapper incoming">
                                         <i class="fas fa-robot chat-avatar"></i>
-                                        <div class="message-bubble">¡Hola! Soy tu asistente de PRO AUDIO. Puedo ayudarte a estimar una cotización con base en nuestros servicios. Elige opciones del catálogo para comenzar.</div>
+                                        <div class="message-bubble">
+                                            ¡Hola! 👋 Soy tu asistente de PRO AUDIO. Estoy aquí para ayudarte a crear la cotización perfecta para tu evento. 
+                                            <br><br>
+                                            Puedes explorar nuestro catálogo de servicios y seleccionar lo que necesites. Te guiaré paso a paso para que encuentres exactamente lo que buscas.
+                                            <br><br>
+                                            <span style="color: #dc2626; font-weight: 600;">💡 Recuerda:</span> Las cotizaciones que te muestro son aproximaciones iniciales. El precio final puede ajustarse según factores como la ubicación del evento, el número de asistentes, condiciones especiales y otros detalles que revisaremos juntos. La cotización definitiva se confirmará cuando realices tu reserva.
+                                        </div>
                                     </div>
                                 `;
                                 window.currentDays = 1;
@@ -806,7 +961,13 @@
                         contenedor.innerHTML = `
                             <div class="message-wrapper incoming">
                                 <i class="fas fa-robot chat-avatar"></i>
-                                <div class="message-bubble">¡Hola! Soy tu asistente de PRO AUDIO. Puedo ayudarte a estimar una cotización con base en nuestros servicios. Elige opciones del catálogo para comenzar.</div>
+                                <div class="message-bubble">
+                                    ¡Hola! 👋 Soy tu asistente de PRO AUDIO. Estoy aquí para ayudarte a crear la cotización perfecta para tu evento. 
+                                    <br><br>
+                                    Puedes explorar nuestro catálogo de servicios y seleccionar lo que necesites. Te guiaré paso a paso para que encuentres exactamente lo que buscas.
+                                    <br><br>
+                                    <span style="color: #dc2626; font-weight: 600;">💡 Recuerda:</span> Las cotizaciones que te muestro son aproximaciones iniciales. El precio final puede ajustarse según factores como la ubicación del evento, el número de asistentes, condiciones especiales y otros detalles que revisaremos juntos. La cotización definitiva se confirmará cuando realices tu reserva.
+                                </div>
                             </div>
                         `;
                         window.currentDays = 1;

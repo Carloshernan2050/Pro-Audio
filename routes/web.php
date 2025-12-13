@@ -128,3 +128,6 @@ Route::post('/historial', [HistorialController::class, 'store'])->name('historia
 Route::put('/historial/{historial}', [HistorialController::class, 'update'])->name('historial.update')->middleware('role:Superadmin,Admin');
 Route::get('/historial/pdf/reservas', [HistorialController::class, 'exportPdfReservas'])->name('historial.pdf.reservas')->middleware('role:Superadmin,Admin,Usuario');
 Route::get('/historial/pdf/cotizaciones', [HistorialController::class, 'exportPdfCotizaciones'])->name('historial.pdf.cotizaciones')->middleware('role:Superadmin,Admin,Usuario');
+
+// Términos y Condiciones
+Route::get('/terminos-y-condiciones', [UsuarioController::class, 'terminosYCondiciones'])->name('terminos.condiciones')->middleware('role:Superadmin,Admin,Usuario,Invitado,Cliente');

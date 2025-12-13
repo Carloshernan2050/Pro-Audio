@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1765250436">
-  <project timestamp="1765250436" name="Clover Coverage">
+<coverage generated="1765634449">
+  <project timestamp="1765634449" name="Clover Coverage">
     <package name="App\Exceptions">
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Exceptions\ImageStorageException.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Exceptions\ImageStorageException.php">
         <class name="App\Exceptions\ImageStorageException" namespace="App\Exceptions">
           <metrics complexity="1" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
         </class>
         <metrics loc="20" ncloc="15" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Exceptions\InventarioNotFoundException.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Exceptions\InventarioNotFoundException.php">
         <class name="App\Exceptions\InventarioNotFoundException" namespace="App\Exceptions">
           <metrics complexity="1" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
         </class>
         <metrics loc="17" ncloc="14" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Exceptions\ServiceCreationException.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Exceptions\ServiceCreationException.php">
         <class name="App\Exceptions\ServiceCreationException" namespace="App\Exceptions">
           <metrics complexity="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
         </class>
         <metrics loc="11" ncloc="8" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Exceptions\StockInsuficienteException.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Exceptions\StockInsuficienteException.php">
         <class name="App\Exceptions\StockInsuficienteException" namespace="App\Exceptions">
           <metrics complexity="1" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
         </class>
@@ -28,7 +28,7 @@
       </file>
     </package>
     <package name="App\Http\Controllers">
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\AjustesController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\AjustesController.php">
         <class name="App\Http\Controllers\AjustesController" namespace="App\Http\Controllers">
           <metrics complexity="14" methods="7" coveredmethods="7" conditionals="0" coveredconditionals="0" statements="78" coveredstatements="78" elements="85" coveredelements="85"/>
         </class>
@@ -119,7 +119,7 @@
         <line num="176" type="stmt" count="19"/>
         <metrics loc="179" ncloc="150" classes="1" methods="7" coveredmethods="7" conditionals="0" coveredconditionals="0" statements="78" coveredstatements="78" elements="85" coveredelements="85"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\BusquedaController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\BusquedaController.php">
         <class name="App\Http\Controllers\BusquedaController" namespace="App\Http\Controllers">
           <metrics complexity="6" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="25" coveredstatements="25" elements="28" coveredelements="28"/>
         </class>
@@ -153,7 +153,7 @@
         <line num="66" type="stmt" count="14"/>
         <metrics loc="69" ncloc="58" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="25" coveredstatements="25" elements="28" coveredelements="28"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\CalendarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\CalendarioController.php">
         <class name="App\Http\Controllers\CalendarioController" namespace="App\Http\Controllers">
           <metrics complexity="44" methods="16" coveredmethods="16" conditionals="0" coveredconditionals="0" statements="192" coveredstatements="192" elements="208" coveredelements="208"/>
         </class>
@@ -367,7 +367,7 @@
         <line num="388" type="stmt" count="2"/>
         <metrics loc="391" ncloc="347" classes="1" methods="16" coveredmethods="16" conditionals="0" coveredconditionals="0" statements="192" coveredstatements="192" elements="208" coveredelements="208"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\ChatbotController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\ChatbotController.php">
         <class name="App\Http\Controllers\ChatbotController" namespace="App\Http\Controllers">
           <metrics complexity="53" methods="17" coveredmethods="17" conditionals="0" coveredconditionals="0" statements="170" coveredstatements="170" elements="187" coveredelements="187"/>
         </class>
@@ -560,13 +560,13 @@
         <line num="345" type="stmt" count="1"/>
         <metrics loc="348" ncloc="328" classes="1" methods="17" coveredmethods="17" conditionals="0" coveredconditionals="0" statements="170" coveredstatements="170" elements="187" coveredelements="187"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\Controller.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\Controller.php">
         <class name="App\Http\Controllers\Controller" namespace="App\Http\Controllers">
           <metrics complexity="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
         </class>
         <metrics loc="9" ncloc="8" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\CotizacionController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\CotizacionController.php">
         <class name="App\Http\Controllers\CotizacionController" namespace="App\Http\Controllers">
           <metrics complexity="5" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="18" coveredstatements="18" elements="20" coveredelements="20"/>
         </class>
@@ -592,7 +592,7 @@
         <line num="45" type="stmt" count="1"/>
         <metrics loc="50" ncloc="47" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="18" coveredstatements="18" elements="20" coveredelements="20"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\HistorialController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\HistorialController.php">
         <class name="App\Http\Controllers\HistorialController" namespace="App\Http\Controllers">
           <metrics complexity="17" methods="6" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="79" coveredstatements="79" elements="85" coveredelements="85"/>
         </class>
@@ -683,7 +683,7 @@
         <line num="151" type="stmt" count="6"/>
         <metrics loc="154" ncloc="143" classes="1" methods="6" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="79" coveredstatements="79" elements="85" coveredelements="85"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\InventarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\InventarioController.php">
         <class name="App\Http\Controllers\InventarioController" namespace="App\Http\Controllers">
           <metrics complexity="5" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="31" coveredstatements="31" elements="36" coveredelements="36"/>
         </class>
@@ -725,7 +725,7 @@
         <line num="82" type="stmt" count="1"/>
         <metrics loc="85" ncloc="69" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="31" coveredstatements="31" elements="36" coveredelements="36"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\MovimientosInventarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\MovimientosInventarioController.php">
         <class name="App\Http\Controllers\MovimientosInventarioController" namespace="App\Http\Controllers">
           <metrics complexity="11" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="75" coveredstatements="75" elements="80" coveredelements="80"/>
         </class>
@@ -811,7 +811,7 @@
         <line num="153" type="stmt" count="2"/>
         <metrics loc="156" ncloc="134" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="75" coveredstatements="75" elements="80" coveredelements="80"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\ReservaController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\ReservaController.php">
         <class name="App\Http\Controllers\ReservaController" namespace="App\Http\Controllers">
           <metrics complexity="34" methods="10" coveredmethods="10" conditionals="0" coveredconditionals="0" statements="156" coveredstatements="156" elements="166" coveredelements="166"/>
         </class>
@@ -983,7 +983,7 @@
         <line num="306" type="stmt" count="1"/>
         <metrics loc="310" ncloc="296" classes="1" methods="10" coveredmethods="10" conditionals="0" coveredconditionals="0" statements="156" coveredstatements="156" elements="166" coveredelements="166"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\RoleAdminController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\RoleAdminController.php">
         <class name="App\Http\Controllers\RoleAdminController" namespace="App\Http\Controllers">
           <metrics complexity="16" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="79" coveredstatements="79" elements="82" coveredelements="82"/>
         </class>
@@ -1071,7 +1071,7 @@
         <line num="134" type="stmt" count="2"/>
         <metrics loc="137" ncloc="126" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="79" coveredstatements="79" elements="82" coveredelements="82"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\RoleController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\RoleController.php">
         <class name="App\Http\Controllers\RoleController" namespace="App\Http\Controllers">
           <metrics complexity="14" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="38" coveredstatements="38" elements="43" coveredelements="43"/>
         </class>
@@ -1120,7 +1120,7 @@
         <line num="80" type="stmt" count="1"/>
         <metrics loc="83" ncloc="82" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="38" coveredstatements="38" elements="43" coveredelements="43"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\ServiciosController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\ServiciosController.php">
         <class name="App\Http\Controllers\ServiciosController" namespace="App\Http\Controllers">
           <metrics complexity="21" methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="84" coveredstatements="84" elements="92" coveredelements="92"/>
         </class>
@@ -1218,7 +1218,7 @@
         <line num="218" type="stmt" count="2"/>
         <metrics loc="223" ncloc="183" classes="1" methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="84" coveredstatements="84" elements="92" coveredelements="92"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\ServiciosViewController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\ServiciosViewController.php">
         <class name="App\Http\Controllers\ServiciosViewController" namespace="App\Http\Controllers">
           <metrics complexity="10" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="22" coveredstatements="22" elements="27" coveredelements="27"/>
         </class>
@@ -1251,7 +1251,7 @@
         <line num="75" type="stmt" count="1"/>
         <metrics loc="78" ncloc="61" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="22" coveredstatements="22" elements="27" coveredelements="27"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\SubServiciosController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\SubServiciosController.php">
         <class name="App\Http\Controllers\SubServiciosController" namespace="App\Http\Controllers">
           <metrics complexity="49" methods="11" coveredmethods="11" conditionals="0" coveredconditionals="0" statements="128" coveredstatements="128" elements="139" coveredelements="139"/>
         </class>
@@ -1396,9 +1396,9 @@
         <line num="294" type="stmt" count="1"/>
         <metrics loc="298" ncloc="246" classes="1" methods="11" coveredmethods="11" conditionals="0" coveredconditionals="0" statements="128" coveredstatements="128" elements="139" coveredelements="139"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Controllers\UsuarioController.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Controllers\UsuarioController.php">
         <class name="App\Http\Controllers\UsuarioController" namespace="App\Http\Controllers">
-          <metrics complexity="32" methods="9" coveredmethods="9" conditionals="0" coveredconditionals="0" statements="145" coveredstatements="145" elements="154" coveredelements="154"/>
+          <metrics complexity="33" methods="10" coveredmethods="9" conditionals="0" coveredconditionals="0" statements="146" coveredstatements="145" elements="156" coveredelements="154"/>
         </class>
         <line num="16" type="method" name="__construct" visibility="public" complexity="1" crap="1" count="139"/>
         <line num="18" type="stmt" count="139"/>
@@ -1554,11 +1554,13 @@
         <line num="277" type="stmt" count="24"/>
         <line num="278" type="stmt" count="24"/>
         <line num="279" type="stmt" count="24"/>
-        <metrics loc="282" ncloc="251" classes="1" methods="9" coveredmethods="9" conditionals="0" coveredconditionals="0" statements="145" coveredstatements="145" elements="154" coveredelements="154"/>
+        <line num="282" type="method" name="terminosYCondiciones" visibility="public" complexity="1" crap="2" count="0"/>
+        <line num="284" type="stmt" count="0"/>
+        <metrics loc="287" ncloc="256" classes="1" methods="10" coveredmethods="9" conditionals="0" coveredconditionals="0" statements="146" coveredstatements="145" elements="156" coveredelements="154"/>
       </file>
     </package>
     <package name="App\Http\Middleware">
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Http\Middleware\RoleMiddleware.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Http\Middleware\RoleMiddleware.php">
         <class name="App\Http\Middleware\RoleMiddleware" namespace="App\Http\Middleware">
           <metrics complexity="5" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="31" coveredstatements="31" elements="32" coveredelements="32"/>
         </class>
@@ -1598,7 +1600,7 @@
       </file>
     </package>
     <package name="App\Models">
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\Calendario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Calendario.php">
         <class name="App\Models\Calendario" namespace="App\Models">
           <metrics complexity="3" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="3" elements="6" coveredelements="6"/>
         </class>
@@ -1610,7 +1612,7 @@
         <line num="39" type="stmt" count="32"/>
         <metrics loc="42" ncloc="42" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="3" elements="6" coveredelements="6"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\CalendarioItem.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\CalendarioItem.php">
         <class name="App\Models\CalendarioItem" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
         </class>
@@ -1620,7 +1622,7 @@
         <line num="27" type="stmt" count="16"/>
         <metrics loc="30" ncloc="30" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\Cotizacion.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Cotizacion.php">
         <class name="App\Models\Cotizacion" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
         </class>
@@ -1630,7 +1632,7 @@
         <line num="41" type="stmt" count="17"/>
         <metrics loc="44" ncloc="38" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\Historial.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Historial.php">
         <class name="App\Models\Historial" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
         </class>
@@ -1638,7 +1640,7 @@
         <line num="27" type="stmt" count="18"/>
         <metrics loc="30" ncloc="30" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\Inventario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Inventario.php">
         <class name="App\Models\Inventario" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
         </class>
@@ -1646,7 +1648,7 @@
         <line num="24" type="stmt" count="3"/>
         <metrics loc="27" ncloc="25" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\MovimientosInventario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\MovimientosInventario.php">
         <class name="App\Models\MovimientosInventario" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
         </class>
@@ -1654,7 +1656,7 @@
         <line num="27" type="stmt" count="1"/>
         <metrics loc="30" ncloc="28" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\Reserva.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Reserva.php">
         <class name="App\Models\Reserva" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
         </class>
@@ -1664,7 +1666,7 @@
         <line num="39" type="stmt" count="18"/>
         <metrics loc="42" ncloc="42" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\ReservaItem.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\ReservaItem.php">
         <class name="App\Models\ReservaItem" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
         </class>
@@ -1674,7 +1676,7 @@
         <line num="27" type="stmt" count="9"/>
         <metrics loc="30" ncloc="30" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\Servicios.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Servicios.php">
         <class name="App\Models\Servicios" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
         </class>
@@ -1684,7 +1686,7 @@
         <line num="46" type="stmt" count="3"/>
         <metrics loc="49" ncloc="32" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\SubServicios.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\SubServicios.php">
         <class name="App\Models\SubServicios" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
         </class>
@@ -1692,7 +1694,7 @@
         <line num="27" type="stmt" count="36"/>
         <metrics loc="30" ncloc="28" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\User.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\User.php">
         <class name="App\Models\User" namespace="App\Models">
           <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="5" coveredstatements="5" elements="7" coveredelements="7"/>
         </class>
@@ -1705,7 +1707,7 @@
         <line num="59" type="stmt" count="9"/>
         <metrics loc="62" ncloc="40" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="5" coveredstatements="5" elements="7" coveredelements="7"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Models\Usuario.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Models\Usuario.php">
         <class name="App\Models\Usuario" namespace="App\Models">
           <metrics complexity="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
         </class>
@@ -1715,7 +1717,7 @@
       </file>
     </package>
     <package name="App\Repositories">
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\CalendarioItemRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\CalendarioItemRepository.php">
         <class name="App\Repositories\CalendarioItemRepository" namespace="App\Repositories">
           <metrics complexity="3" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="3" elements="6" coveredelements="6"/>
         </class>
@@ -1727,7 +1729,7 @@
         <line num="23" type="stmt" count="2"/>
         <metrics loc="27" ncloc="27" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="3" elements="6" coveredelements="6"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\CalendarioRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\CalendarioRepository.php">
         <class name="App\Repositories\CalendarioRepository" namespace="App\Repositories">
           <metrics complexity="6" methods="6" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="11" elements="17" coveredelements="17"/>
         </class>
@@ -1750,7 +1752,7 @@
         <line num="45" type="stmt" count="7"/>
         <metrics loc="49" ncloc="49" classes="1" methods="6" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="11" elements="17" coveredelements="17"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\CotizacionRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\CotizacionRepository.php">
         <class name="App\Repositories\CotizacionRepository" namespace="App\Repositories">
           <metrics complexity="3" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="5" coveredstatements="5" elements="8" coveredelements="8"/>
         </class>
@@ -1764,7 +1766,7 @@
         <line num="41" type="stmt" count="2"/>
         <metrics loc="45" ncloc="28" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="5" coveredstatements="5" elements="8" coveredelements="8"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\HistorialRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\HistorialRepository.php">
         <class name="App\Repositories\HistorialRepository" namespace="App\Repositories">
           <metrics complexity="4" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="10" coveredstatements="10" elements="14" coveredelements="14"/>
         </class>
@@ -1784,7 +1786,7 @@
         <line num="35" type="stmt" count="3"/>
         <metrics loc="39" ncloc="39" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="10" coveredstatements="10" elements="14" coveredelements="14"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\InventarioRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\InventarioRepository.php">
         <class name="App\Repositories\InventarioRepository" namespace="App\Repositories">
           <metrics complexity="7" methods="7" coveredmethods="7" conditionals="0" coveredconditionals="0" statements="9" coveredstatements="9" elements="16" coveredelements="16"/>
         </class>
@@ -1806,7 +1808,7 @@
         <line num="47" type="stmt" count="16"/>
         <metrics loc="51" ncloc="51" classes="1" methods="7" coveredmethods="7" conditionals="0" coveredconditionals="0" statements="9" coveredstatements="9" elements="16" coveredelements="16"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\MovimientoInventarioRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\MovimientoInventarioRepository.php">
         <class name="App\Repositories\MovimientoInventarioRepository" namespace="App\Repositories">
           <metrics complexity="4" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="6" coveredstatements="6" elements="10" coveredelements="10"/>
         </class>
@@ -1822,7 +1824,7 @@
         <line num="31" type="stmt" count="2"/>
         <metrics loc="35" ncloc="35" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="6" coveredstatements="6" elements="10" coveredelements="10"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\ReservaItemRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\ReservaItemRepository.php">
         <class name="App\Repositories\ReservaItemRepository" namespace="App\Repositories">
           <metrics complexity="3" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="3" elements="6" coveredelements="6"/>
         </class>
@@ -1834,7 +1836,7 @@
         <line num="23" type="stmt" count="2"/>
         <metrics loc="27" ncloc="27" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="3" elements="6" coveredelements="6"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\ReservaRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\ReservaRepository.php">
         <class name="App\Repositories\ReservaRepository" namespace="App\Repositories">
           <metrics complexity="8" methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="16" coveredstatements="16" elements="24" coveredelements="24"/>
         </class>
@@ -1864,7 +1866,7 @@
         <line num="58" type="stmt" count="3"/>
         <metrics loc="62" ncloc="62" classes="1" methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="16" coveredstatements="16" elements="24" coveredelements="24"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\ServicioRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\ServicioRepository.php">
         <class name="App\Repositories\ServicioRepository" namespace="App\Repositories">
           <metrics complexity="8" methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="10" coveredstatements="10" elements="18" coveredelements="18"/>
         </class>
@@ -1888,7 +1890,7 @@
         <line num="52" type="stmt" count="94"/>
         <metrics loc="56" ncloc="56" classes="1" methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="10" coveredstatements="10" elements="18" coveredelements="18"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\SubServicioRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\SubServicioRepository.php">
         <class name="App\Repositories\SubServicioRepository" namespace="App\Repositories">
           <metrics complexity="20" methods="14" coveredmethods="14" conditionals="0" coveredconditionals="0" statements="58" coveredstatements="58" elements="72" coveredelements="72"/>
         </class>
@@ -1966,7 +1968,7 @@
         <line num="155" type="stmt" count="30"/>
         <metrics loc="159" ncloc="138" classes="1" methods="14" coveredmethods="14" conditionals="0" coveredconditionals="0" statements="58" coveredstatements="58" elements="72" coveredelements="72"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\UsuarioRepository.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\UsuarioRepository.php">
         <class name="App\Repositories\UsuarioRepository" namespace="App\Repositories">
           <metrics complexity="5" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="11" coveredelements="11"/>
         </class>
@@ -1981,44 +1983,44 @@
         <line num="28" type="stmt" count="2"/>
         <line num="29" type="stmt" count="1"/>
         <line num="32" type="stmt" count="1"/>
-        <metrics loc="37" ncloc="37" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="11" coveredelements="11"/>
+        <metrics loc="38" ncloc="38" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="11" coveredelements="11"/>
       </file>
     </package>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\CalendarioItemRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\CalendarioItemRepositoryInterface.php">
       <metrics loc="35" ncloc="17" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\CalendarioRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\CalendarioRepositoryInterface.php">
       <metrics loc="61" ncloc="23" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\CotizacionRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\CotizacionRepositoryInterface.php">
       <metrics loc="34" ncloc="17" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\HistorialRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\HistorialRepositoryInterface.php">
       <metrics loc="42" ncloc="19" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\InventarioRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\InventarioRepositoryInterface.php">
       <metrics loc="70" ncloc="25" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\MovimientoInventarioRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\MovimientoInventarioRepositoryInterface.php">
       <metrics loc="45" ncloc="19" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\ReservaItemRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\ReservaItemRepositoryInterface.php">
       <metrics loc="35" ncloc="17" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\ReservaRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\ReservaRepositoryInterface.php">
       <metrics loc="76" ncloc="27" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\ServicioRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\ServicioRepositoryInterface.php">
       <metrics loc="76" ncloc="27" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\SubServicioRepositoryInterface.php">
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\SubServicioRepositoryInterface.php">
       <metrics loc="127" ncloc="39" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
-    <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Repositories\Interfaces\UsuarioRepositoryInterface.php">
-      <metrics loc="44" ncloc="19" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    <file name="C:\laragon\www\Pro_Audio_Y\app\Repositories\Interfaces\UsuarioRepositoryInterface.php">
+      <metrics loc="45" ncloc="20" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
     <package name="App\Services">
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\BladeGeneratorService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\BladeGeneratorService.php">
         <class name="App\Services\BladeGeneratorService" namespace="App\Services">
           <metrics complexity="8" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="37" coveredstatements="37" elements="41" coveredelements="41"/>
         </class>
@@ -2065,7 +2067,7 @@
         <line num="166" type="stmt" count="3"/>
         <metrics loc="170" ncloc="132" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="37" coveredstatements="37" elements="41" coveredelements="41"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\CalendarioDataService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioDataService.php">
         <class name="App\Services\CalendarioDataService" namespace="App\Services">
           <metrics complexity="19" methods="9" coveredmethods="9" conditionals="0" coveredconditionals="0" statements="60" coveredstatements="60" elements="69" coveredelements="69"/>
         </class>
@@ -2140,7 +2142,7 @@
         <line num="153" type="stmt" count="8"/>
         <metrics loc="156" ncloc="131" classes="1" methods="9" coveredmethods="9" conditionals="0" coveredconditionals="0" statements="60" coveredstatements="60" elements="69" coveredelements="69"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\CalendarioDependencies.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioDependencies.php">
         <class name="App\Services\CalendarioDependencies" namespace="App\Services">
           <metrics complexity="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
         </class>
@@ -2148,7 +2150,7 @@
         <line num="31" type="stmt" count="53"/>
         <metrics loc="34" ncloc="30" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\CalendarioEventService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioEventService.php">
         <class name="App\Services\CalendarioEventService" namespace="App\Services">
           <metrics complexity="18" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="73" coveredstatements="73" elements="78" coveredelements="78"/>
         </class>
@@ -2232,7 +2234,7 @@
         <line num="149" type="stmt" count="6"/>
         <metrics loc="152" ncloc="137" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="73" coveredstatements="73" elements="78" coveredelements="78"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\CalendarioItemService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioItemService.php">
         <class name="App\Services\CalendarioItemService" namespace="App\Services">
           <metrics complexity="8" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="48" coveredstatements="48" elements="52" coveredelements="52"/>
         </class>
@@ -2290,7 +2292,7 @@
         <line num="110" type="stmt" count="3"/>
         <metrics loc="113" ncloc="98" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="48" coveredstatements="48" elements="52" coveredelements="52"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\CalendarioValidationService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\CalendarioValidationService.php">
         <class name="App\Services\CalendarioValidationService" namespace="App\Services">
           <metrics complexity="18" methods="12" coveredmethods="12" conditionals="0" coveredconditionals="0" statements="108" coveredstatements="108" elements="120" coveredelements="120"/>
         </class>
@@ -2416,7 +2418,7 @@
         <line num="247" type="stmt" count="13"/>
         <metrics loc="250" ncloc="208" classes="1" methods="12" coveredmethods="12" conditionals="0" coveredconditionals="0" statements="108" coveredstatements="108" elements="120" coveredelements="120"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ChatbotIntentionDetector.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotIntentionDetector.php">
         <class name="App\Services\ChatbotIntentionDetector" namespace="App\Services">
           <metrics complexity="57" methods="16" coveredmethods="16" conditionals="0" coveredconditionals="0" statements="169" coveredstatements="169" elements="185" coveredelements="185"/>
         </class>
@@ -2607,7 +2609,7 @@
         <line num="327" type="stmt" count="25"/>
         <metrics loc="330" ncloc="323" classes="1" methods="16" coveredmethods="16" conditionals="0" coveredconditionals="0" statements="169" coveredstatements="169" elements="185" coveredelements="185"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ChatbotMessageProcessor.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotMessageProcessor.php">
         <class name="App\Services\ChatbotMessageProcessor" namespace="App\Services">
           <metrics complexity="74" methods="17" coveredmethods="17" conditionals="0" coveredconditionals="0" statements="178" coveredstatements="178" elements="195" coveredelements="195"/>
         </class>
@@ -2808,7 +2810,7 @@
         <line num="331" type="stmt" count="11"/>
         <metrics loc="334" ncloc="333" classes="1" methods="17" coveredmethods="17" conditionals="0" coveredconditionals="0" statements="178" coveredstatements="178" elements="195" coveredelements="195"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ChatbotResponseBuilder.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotResponseBuilder.php">
         <class name="App\Services\ChatbotResponseBuilder" namespace="App\Services">
           <metrics complexity="27" methods="11" coveredmethods="11" conditionals="0" coveredconditionals="0" statements="101" coveredstatements="101" elements="112" coveredelements="112"/>
         </class>
@@ -2926,7 +2928,7 @@
         <line num="161" type="stmt" count="32"/>
         <metrics loc="164" ncloc="163" classes="1" methods="11" coveredmethods="11" conditionals="0" coveredconditionals="0" statements="101" coveredstatements="101" elements="112" coveredelements="112"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ChatbotSessionManager.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotSessionManager.php">
         <class name="App\Services\ChatbotSessionManager" namespace="App\Services">
           <metrics complexity="17" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="37" coveredstatements="37" elements="42" coveredelements="42"/>
         </class>
@@ -2974,7 +2976,7 @@
         <line num="86" type="stmt" count="25"/>
         <metrics loc="89" ncloc="87" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="37" coveredstatements="37" elements="42" coveredelements="42"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ChatbotSubServicioService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotSubServicioService.php">
         <class name="App\Services\ChatbotSubServicioService" namespace="App\Services">
           <metrics complexity="10" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="36" coveredstatements="36" elements="40" coveredelements="40"/>
         </class>
@@ -3020,7 +3022,7 @@
         <line num="88" type="stmt" count="12"/>
         <metrics loc="91" ncloc="83" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="36" coveredstatements="36" elements="40" coveredelements="40"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ChatbotSuggestionGenerator.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotSuggestionGenerator.php">
         <class name="App\Services\ChatbotSuggestionGenerator" namespace="App\Services">
           <metrics complexity="95" methods="20" coveredmethods="20" conditionals="0" coveredconditionals="0" statements="204" coveredstatements="204" elements="224" coveredelements="224"/>
         </class>
@@ -3250,7 +3252,7 @@
         <line num="389" type="stmt" count="64"/>
         <metrics loc="392" ncloc="388" classes="1" methods="20" coveredmethods="20" conditionals="0" coveredconditionals="0" statements="204" coveredstatements="204" elements="224" coveredelements="224"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ChatbotTextProcessor.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ChatbotTextProcessor.php">
         <class name="App\Services\ChatbotTextProcessor" namespace="App\Services">
           <metrics complexity="50" methods="14" coveredmethods="14" conditionals="0" coveredconditionals="0" statements="151" coveredstatements="151" elements="165" coveredelements="165"/>
         </class>
@@ -3421,7 +3423,7 @@
         <line num="275" type="stmt" count="52"/>
         <metrics loc="278" ncloc="275" classes="1" methods="14" coveredmethods="14" conditionals="0" coveredconditionals="0" statements="151" coveredstatements="151" elements="165" coveredelements="165"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\RagService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\RagService.php">
         <class name="App\Services\RagService" namespace="App\Services">
           <metrics complexity="5" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="12" coveredstatements="12" elements="14" coveredelements="14"/>
         </class>
@@ -3441,7 +3443,7 @@
         <line num="41" type="stmt" count="4"/>
         <metrics loc="44" ncloc="37" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="12" coveredstatements="12" elements="14" coveredelements="14"/>
       </file>
-      <file name="C:\Users\ASUS\Desktop\SENA\Nueva carpeta\app\Services\ReservaService.php">
+      <file name="C:\laragon\www\Pro_Audio_Y\app\Services\ReservaService.php">
         <class name="App\Services\ReservaService" namespace="App\Services">
           <metrics complexity="8" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="38" coveredstatements="38" elements="41" coveredelements="41"/>
         </class>
@@ -3489,6 +3491,6 @@
         <metrics loc="93" ncloc="80" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="38" coveredstatements="38" elements="41" coveredelements="41"/>
       </file>
     </package>
-    <metrics files="70" loc="7360" ncloc="6343" classes="54" methods="324" coveredmethods="324" conditionals="0" coveredconditionals="0" statements="2765" coveredstatements="2765" elements="3089" coveredelements="3089"/>
+    <metrics files="70" loc="7367" ncloc="6350" classes="54" methods="325" coveredmethods="324" conditionals="0" coveredconditionals="0" statements="2766" coveredstatements="2765" elements="3091" coveredelements="3089"/>
   </project>
 </coverage>

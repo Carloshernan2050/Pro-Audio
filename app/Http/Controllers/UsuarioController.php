@@ -278,4 +278,9 @@ class UsuarioController extends Controller
             'usuario' => $usuario,
         ];
     }
+
+    public function terminosYCondiciones()
+    {
+        return view('usuarios.terminosCondiciones');
+    }
 }
