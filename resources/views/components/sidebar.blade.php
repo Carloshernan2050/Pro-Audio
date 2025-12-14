@@ -121,6 +121,15 @@
                     }
                 @endphp
                 <a href="{{ $rutaCalendario }}" class="sidebar-btn"><i class="fas fa-calendar-alt"></i> Calendario</a>
+                
+                @php
+                    try {
+                        $rutaHistorial = route('cotizaciones.historial');
+                    } catch (\Exception $e) {
+                        $rutaHistorial = '#';
+                    }
+                @endphp
+                <a href="{{ $rutaHistorial }}" class="sidebar-btn"><i class="fas fa-history"></i> Historial</a>
             @endif
 
             {{-- Ajustes: Admin o Superadmin --}}

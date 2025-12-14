@@ -3,9 +3,13 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\CotizacionController;
+use App\Models\Cotizacion;
+use App\Repositories\Interfaces\CotizacionRepositoryInterface;
 use App\Services\ChatbotSessionManager;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
@@ -18,15 +22,20 @@ class CotizacionControllerUnitTest extends TestCase
 
     private const ROUTE_COTIZACION = '/cotizacion';
 
+    private const ROUTE_HISTORIAL = '/cotizaciones/historial';
+
     protected $controller;
 
     protected $sessionManager;
+
+    protected $cotizacionRepository;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->sessionManager = \Mockery::mock(ChatbotSessionManager::class);
-        $this->controller = new CotizacionController($this->sessionManager);
+        $this->cotizacionRepository = \Mockery::mock(CotizacionRepositoryInterface::class);
+        $this->controller = new CotizacionController($this->sessionManager, $this->cotizacionRepository);
     }
 
     public function test_controller_instancia_correctamente(): void
@@ -135,6 +144,151 @@ class CotizacionControllerUnitTest extends TestCase
         $this->assertEquals(500, $response->getStatusCode());
         $this->assertArrayHasKey('error', $responseData);
         $this->assertEquals('Error al guardar la cotización.', $responseData['error']);
+    }
+
+    public function test_historial_redirige_sin_autenticacion(): void
+    {
+        session()->forget('usuario_id');
+
+        $request = Request::create(self::ROUTE_HISTORIAL, 'GET');
+
+        $response = $this->controller->historial($request);
+
+        $this->assertTrue($response->isRedirect());
+        $this->assertEquals(route('usuarios.inicioSesion'), $response->getTargetUrl());
+        $this->assertTrue(session()->has('error'));
+    }
+
+    public function test_historial_muestra_cotizaciones_sin_agrupacion(): void
+    {
+        session(['usuario_id' => 1]);
+
+        $cotizacion = new Cotizacion();
+        $cotizacion->id = 1;
+        $cotizacion->personas_id = 1;
+        $cotizacion->sub_servicios_id = 1;
+        $cotizacion->monto = 100000;
+        $cotizacion->fecha_cotizacion = now();
+
+        $cotizaciones = new EloquentCollection([$cotizacion]);
+
+        $this->cotizacionRepository
+            ->shouldReceive('getByPersonasId')
+            ->once()
+            ->with(1)
+            ->andReturn($cotizaciones);
+
+        $request = Request::create(self::ROUTE_HISTORIAL, 'GET');
+
+        $response = $this->controller->historial($request);
+
+        $this->assertNotNull($response);
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $this->assertEquals('usuarios.historial_cotizaciones', $response->getName());
+        $this->assertArrayHasKey('cotizaciones', $response->getData());
+        $this->assertArrayHasKey('groupBy', $response->getData());
+        $this->assertNull($response->getData()['groupBy']);
+    }
+
+    public function test_historial_agrupa_por_dia(): void
+    {
+        session(['usuario_id' => 1]);
+
+        $fecha = now()->setDate(2025, 12, 13)->setTime(10, 0, 0);
+
+        $cotizacion1 = new Cotizacion();
+        $cotizacion1->id = 1;
+        $cotizacion1->personas_id = 1;
+        $cotizacion1->sub_servicios_id = 1;
+        $cotizacion1->monto = 100000;
+        $cotizacion1->fecha_cotizacion = $fecha;
+
+        $cotizacion2 = new Cotizacion();
+        $cotizacion2->id = 2;
+        $cotizacion2->personas_id = 1;
+        $cotizacion2->sub_servicios_id = 2;
+        $cotizacion2->monto = 200000;
+        $cotizacion2->fecha_cotizacion = $fecha;
+
+        $cotizaciones = new EloquentCollection([$cotizacion1, $cotizacion2]);
+
+        $this->cotizacionRepository
+            ->shouldReceive('getByPersonasId')
+            ->once()
+            ->with(1)
+            ->andReturn($cotizaciones);
+
+        $request = Request::create(self::ROUTE_HISTORIAL, 'GET', ['group_by' => 'dia']);
+
+        $response = $this->controller->historial($request);
+
+        $this->assertNotNull($response);
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $this->assertEquals('usuarios.historial_cotizaciones', $response->getName());
+        $data = $response->getData();
+        $this->assertEquals('dia', $data['groupBy']);
+        $this->assertNotNull($data['groupedCotizaciones']);
+    }
+
+    public function test_historial_agrupa_por_consulta(): void
+    {
+        session(['usuario_id' => 1]);
+
+        $fecha = now()->setTime(23, 6, 7);
+
+        $cotizacion1 = new Cotizacion();
+        $cotizacion1->id = 1;
+        $cotizacion1->personas_id = 1;
+        $cotizacion1->sub_servicios_id = 1;
+        $cotizacion1->monto = 100000;
+        $cotizacion1->fecha_cotizacion = $fecha;
+
+        $cotizaciones = new EloquentCollection([$cotizacion1]);
+
+        $this->cotizacionRepository
+            ->shouldReceive('getByPersonasId')
+            ->once()
+            ->with(1)
+            ->andReturn($cotizaciones);
+
+        $request = Request::create(self::ROUTE_HISTORIAL, 'GET', ['group_by' => 'consulta']);
+
+        $response = $this->controller->historial($request);
+
+        $this->assertNotNull($response);
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $this->assertEquals('usuarios.historial_cotizaciones', $response->getName());
+        $data = $response->getData();
+        $this->assertEquals('consulta', $data['groupBy']);
+        $this->assertNotNull($data['groupedCotizaciones']);
+    }
+
+    public function test_historial_catch_exception(): void
+    {
+        session(['usuario_id' => 1]);
+
+        Log::shouldReceive('error')
+            ->once()
+            ->with(\Mockery::pattern('/Error al obtener historial de cotizaciones/'));
+
+        $this->cotizacionRepository
+            ->shouldReceive('getByPersonasId')
+            ->once()
+            ->with(1)
+            ->andThrow(new \Exception('Database error'));
+
+        $request = Request::create(self::ROUTE_HISTORIAL, 'GET');
+
+        $response = $this->controller->historial($request);
+
+        $this->assertNotNull($response);
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $this->assertEquals('usuarios.historial_cotizaciones', $response->getName());
+        $data = $response->getData();
+        $this->assertInstanceOf(Collection::class, $data['cotizaciones']);
+        $this->assertTrue($data['cotizaciones']->isEmpty());
+        $this->assertNull($data['groupBy']);
+        $this->assertNull($data['groupedCotizaciones']);
     }
 }
 

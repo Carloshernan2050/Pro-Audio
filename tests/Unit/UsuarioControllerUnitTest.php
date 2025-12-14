@@ -1419,4 +1419,13 @@ class UsuarioControllerUnitTest extends TestCase
         $this->assertCount(1, $roles);
         $this->assertContains(self::ROL_CLIENTE, $roles);
     }
+
+    public function test_terminos_y_condiciones_retorna_vista(): void
+    {
+        $response = $this->controller->terminosYCondiciones();
+
+        $this->assertNotNull($response);
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $this->assertEquals('usuarios.terminosCondiciones', $response->getName());
+    }
 }

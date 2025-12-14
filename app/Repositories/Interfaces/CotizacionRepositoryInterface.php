@@ -29,5 +29,13 @@ interface CotizacionRepositoryInterface
      * @return bool
      */
     public function deleteBySubServicioIds(array $subServicioIds): bool;
+
+    /**
+     * Obtiene todas las cotizaciones de un cliente específico con sus relaciones.
+     *
+     * @param  int  $personasId
+     * @return Collection
+     */
+    public function getByPersonasId(int $personasId): Collection;
 }
 

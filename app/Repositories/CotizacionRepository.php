@@ -40,5 +40,19 @@ class CotizacionRepository implements CotizacionRepositoryInterface
     {
         return Cotizacion::whereIn('sub_servicios_id', $subServicioIds)->delete() > 0;
     }
+
+    /**
+     * Obtiene todas las cotizaciones de un cliente específico con sus relaciones.
+     *
+     * @param  int  $personasId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getByPersonasId(int $personasId): \Illuminate\Database\Eloquent\Collection
+    {
+        return Cotizacion::with(['persona', 'subServicio.servicio'])
+            ->where('personas_id', $personasId)
+            ->orderBy('fecha_cotizacion', 'desc')
+            ->get();
+    }
 }
 

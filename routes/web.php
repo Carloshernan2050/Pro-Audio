@@ -121,6 +121,7 @@ Route::post('/admin/roles', [RoleAdminController::class, 'update'])->name('admin
 
 // Cotizaciones
 Route::post('/cotizaciones', [CotizacionController::class, 'store'])->name('cotizaciones.store')->middleware('role:Superadmin,Admin,Usuario');
+Route::get('/cotizaciones/historial', [CotizacionController::class, 'historial'])->name('cotizaciones.historial')->middleware('role:Superadmin,Admin,Usuario,Cliente');
 
 // Historial
 Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index')->middleware('role:Superadmin,Admin,Usuario');

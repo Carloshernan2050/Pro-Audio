@@ -1,0 +1,327 @@
+/* ======================================= */
+/* Estilos para Historial de Cotizaciones */
+/* ======================================= */
+
+/* Variables de colores y estilos comunes */
+:root {
+    --color-primary-red: #e91c1c;
+    --color-primary-red-dark: #c62828;
+    --color-primary-red-light: #ff5252;
+    --gradient-red: linear-gradient(135deg, #e91c1c 0%, #c62828 100%);
+    --color-white: #ffffff;
+    --color-text-primary: rgba(255, 255, 255, 0.9);
+    --color-text-secondary: rgba(255, 255, 255, 0.7);
+    --color-text-tertiary: rgba(255, 255, 255, 0.8);
+    --bg-dark: rgba(0, 0, 0, 0.6);
+    --bg-dark-hover: rgba(0, 0, 0, 0.7);
+    --bg-red-light: rgba(233, 28, 28, 0.3);
+    --bg-red-medium: rgba(233, 28, 28, 0.25);
+    --bg-red-hover: rgba(233, 28, 28, 0.15);
+    --border-red-light: rgba(233, 28, 28, 0.2);
+    --border-red-medium: rgba(233, 28, 28, 0.4);
+    --border-red-strong: rgba(233, 28, 28, 0.5);
+    --border-red-hover: rgba(233, 28, 28, 0.7);
+    --border-white-light: rgba(255, 255, 255, 0.1);
+    --shadow-red: 0 4px 15px rgba(233, 28, 28, 0.4);
+    --shadow-red-light: 0 4px 15px rgba(233, 28, 28, 0.3);
+}
+
+.historial-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.historial-header {
+    margin-bottom: 25px;
+}
+
+.historial-title {
+    font-size: 1.3rem;
+    color: var(--color-white);
+    margin: 0;
+    padding: 15px 20px;
+    background: var(--gradient-red);
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow-red);
+}
+
+.cotizaciones-table-wrapper {
+    overflow-x: auto;
+}
+
+.cotizaciones-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-red-light);
+    border: 1px solid var(--border-red-light);
+}
+
+.cotizaciones-table thead {
+    background: var(--gradient-red);
+    color: var(--color-white);
+}
+
+.cotizaciones-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.cotizaciones-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-white-light);
+    color: var(--color-text-primary);
+}
+
+/* Reducir padding en vista agrupada por consulta */
+.cotizaciones-table tbody tr:not(.group-header) td {
+    padding: 8px 12px;
+}
+
+.cotizaciones-table tbody tr:hover {
+    background-color: var(--bg-red-hover);
+}
+
+.cotizaciones-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.no-cotizaciones {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-text-secondary);
+}
+
+.no-cotizaciones i {
+    font-size: 4rem;
+    color: rgba(233, 28, 28, 0.5);
+    margin-bottom: 20px;
+}
+
+.no-cotizaciones p {
+    font-size: 1.1rem;
+    margin: 10px 0;
+}
+
+.monto {
+    font-weight: 600;
+    color: #e8f4e8;
+    font-size: 1.1rem;
+}
+
+.fecha {
+    color: var(--color-text-secondary);
+}
+
+.servicio-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: var(--bg-red-light);
+    color: var(--color-white);
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--border-red-strong);
+}
+
+.subservicio-name {
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.error-message {
+    background: var(--bg-red-light);
+    color: var(--color-white);
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--color-primary-red);
+}
+
+.error-message i {
+    margin-right: 8px;
+}
+
+/* Filtro de agrupación */
+.historial-filter-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.historial-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.historial-filter-form label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+}
+
+.historial-filter-form select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-red-medium);
+    border-radius: 5px;
+    background: var(--bg-dark);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.historial-filter-form select:hover,
+.historial-filter-form select:focus {
+    border-color: var(--border-red-hover);
+    background: var(--bg-dark-hover);
+}
+
+.historial-filter-form select:focus {
+    outline: none;
+    border-color: var(--color-primary-red);
+    box-shadow: 0 0 0 3px rgba(233, 28, 28, 0.2);
+}
+
+/* Estilos para vistas agrupadas */
+.group-header {
+    background-color: var(--bg-red-medium) !important;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.group-header td {
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--border-red-medium);
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.ul-compact {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ul-compact li {
+    padding: 3px 0;
+    border-bottom: 1px solid var(--border-white-light);
+    color: var(--color-text-tertiary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.ul-compact li:last-child {
+    border-bottom: none;
+}
+
+/* Botón de volver mejorado para historial */
+.historial-container .btn-volver {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    min-height: 45px;
+    padding: 0;
+    margin: 0;
+    border-radius: 10px;
+    background: var(--gradient-red);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: var(--color-white);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(233, 28, 28, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+}
+
+.historial-container .btn-volver::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.historial-container .btn-volver:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.historial-container .btn-volver:hover {
+    background: linear-gradient(135deg, var(--color-primary-red-light) 0%, var(--color-primary-red) 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 5px 15px rgba(233, 28, 28, 0.6);
+    transform: translateY(-2px);
+}
+
+.historial-container .btn-volver:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(233, 28, 28, 0.4);
+}
+
+.historial-container .btn-volver i {
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
+    color: var(--color-white);
+    display: block;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    text-align: center;
+}
+
+.historial-container .btn-volver-container {
+    margin-top: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-cotizaciones .btn-volver {
+    margin-top: 20px;
+    display: inline-flex;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .historial-container {
+        padding: 15px;
+    }
+    
+    .historial-title {
+        font-size: 1.5rem;
+    }
+    
+    .cotizaciones-table th,
+    .cotizaciones-table td {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+    
+    .servicio-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+}
+
